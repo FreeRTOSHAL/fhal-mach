@@ -1,0 +1,22 @@
+comment "VF610 Settings"
+config MAX_SYSCALL_INTERRUPT_PRIORITY
+	hex
+	default 0x280
+config KERNEL_INTERRUPT_PRIORITY 
+	hex
+	default 0xf80
+config BOARD_LD_SCRIPT
+	string 
+	default "mach/vf610/vf610.ld"
+if UART=y
+config VF610_UART
+	bool
+	default y
+	select UART_GENERIC_STRING
+endif
+config MACH_HAS_UART
+	bool
+	default y
+config MACH_HAS_GPIO
+	bool
+	default y

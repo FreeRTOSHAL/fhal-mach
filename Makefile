@@ -1,0 +1,1 @@
+obj-$(CONFIG_MACH_VF610)+=vf610/
