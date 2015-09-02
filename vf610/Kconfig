@@ -13,6 +13,7 @@ config VF610_UART
 	bool
 	default y
 	select UART_GENERIC_STRING
+	select UART_GENERIC_BYTE
 endif
 config MACH_HAS_UART
 	bool
