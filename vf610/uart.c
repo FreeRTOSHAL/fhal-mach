@@ -94,12 +94,12 @@ int32_t uart_deinit(struct uart *uart) {
 	(void) uart;
 	return 0;
 }
-char uart_read(struct uart *uart, TickType_t waittime) {
+char uart_getc(struct uart *uart, TickType_t waittime) {
 	(void) uart;
 	(void) waittime;
 	return 0;
 }
-int32_t uart_write(struct uart *uart, char c, TickType_t waittime) {
+int32_t uart_putc(struct uart *uart, char c, TickType_t waittime) {
 	int ret;
 	volatile register struct lpuart_fsl *base = uart->base;
 	ret = uart_lock(uart, waittime);
