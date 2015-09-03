@@ -4,7 +4,7 @@ choice
 	config MACH_VF610
 		bool "VF610-M4"
 		depends on ARCH_ARM
-		depends on ARCH_ARM_CORTEX_M4
+		depends on ARCH_ARM_CORTEX_M4F || ARCH_ARM_CORTEX_M3
 		help 
 			vF610 M4 Mach
 endchoice

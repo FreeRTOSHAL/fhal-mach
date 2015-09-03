@@ -186,9 +186,47 @@ void NAKED reset_handler() {
 	);
 	/* Set Vector Table Offset to our memory based vector table */
 	SCB->VTOR = (uint32_t) &vector_table;
+#ifdef CONFIG_ARCH_ARM_CORTEX_M4F
 	/* Enable access to Floating-Point coprocessor. */
 	SCB->CPACR |= SCB_CPACR_CP10(SCB_CPACR_FULL);
 	SCB->CPACR |= SCB_CPACR_CP11(SCB_CPACR_FULL);
+
+	asm volatile(
+		"mov r0, #0" "\n"
+		"vmov s0, r0" "\n"
+		"vmov s1, r0" "\n"
+		"vmov s2, r0" "\n"
+		"vmov s3, r0" "\n"
+		"vmov s4, r0" "\n"
+		"vmov s5, r0" "\n"
+		"vmov s6, r0" "\n"
+		"vmov s7, r0" "\n"
+		"vmov s8, r0" "\n"
+		"vmov s9, r0" "\n"
+		"vmov s10, r0" "\n"
+		"vmov s11, r0" "\n"
+		"vmov s12, r0" "\n"
+		"vmov s13, r0" "\n"
+		"vmov s14, r0" "\n"
+		"vmov s15, r0" "\n"
+		"vmov s16, r0" "\n"
+		"vmov s17, r0" "\n"
+		"vmov s18, r0" "\n"
+		"vmov s19, r0" "\n"
+		"vmov s20, r0" "\n"
+		"vmov s21, r0" "\n"
+		"vmov s22, r0" "\n"
+		"vmov s23, r0" "\n"
+		"vmov s24, r0" "\n"
+		"vmov s25, r0" "\n"
+		"vmov s26, r0" "\n"
+		"vmov s27, r0" "\n"
+		"vmov s28, r0" "\n"
+		"vmov s29, r0" "\n"
+		"vmov s30, r0" "\n"
+		"vmov s31, r0" "\n"
+	);
+#endif
 		
 	
 	tableaddr = &_data_table;
