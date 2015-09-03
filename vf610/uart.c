@@ -75,6 +75,12 @@ struct uart *uart_init(uint8_t port, uint32_t bautrate) {
 	if (ret < 0) {
 		return NULL;
 	}
+	/*
+	 * Already Init
+	 */
+	if (ret > 0) {
+		return uart;
+	}
 	{
 		volatile uint8_t register ctrl;
 		volatile register struct lpuart_fsl *base = uart->base;
