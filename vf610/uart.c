@@ -36,7 +36,7 @@ struct lpuart_fsl {
 #define UC2_TE          (1 << 3)
 #define UC2_RE          (1 << 2)
 struct uart {
-	struct uart_generic *generic;
+	struct uart_generic generic;
 	volatile struct lpuart_fsl *base;
 };
 #define VF610_UART0 0x40027000 
