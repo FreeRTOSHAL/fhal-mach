@@ -5,9 +5,12 @@ config MAX_SYSCALL_INTERRUPT_PRIORITY
 config KERNEL_INTERRUPT_PRIORITY 
 	hex
 	default 0xf80
-config BOARD_LD_SCRIPT
+config MACH_LD_SCRIPT
 	string 
 	default "mach/vf610/vf610.ld"
+config MACH_INCLUDE
+	string
+	default "-Imach/vf610/include"
 if UART=y
 config VF610_UART
 	bool
