@@ -3,7 +3,7 @@ ENTRY(reset_handler)
 MEMORY
 {
     flash   :   ORIGIN = 0x3f000000, LENGTH = 0x3FFFF 
-    sram    :   ORIGIN = 0x3F040000, LENGTH = (0x3FFFF - (150 * 4))
+    sram    :   ORIGIN = 0x3F040000, LENGTH = 0x3FFFF
 }
 
 _end_stack = 0x3F07FFFF;
@@ -52,10 +52,24 @@ SECTIONS {
 	__bss_end__ = .;
     } >sram
 
-    . = ALIGN(4);
+    .heap :
+    {
+	. = ALIGN(4);
 
-    _start_stack = .;
+	_heap_end = .;
 
+	. = ((ORIGIN(sram) + LENGTH(sram)) - (4 * 150));
+	. = ALIGN(4);
+	_heap_top = . - 4;
+    } >sram
+
+    .stackArea :
+    {
+	    . = ALIGN(4);
+	    _start_stack = .;
+
+	    _end_stack = (ORIGIN(sram) + LENGTH(sram));
+    } >sram
 }
 
 _end = .;

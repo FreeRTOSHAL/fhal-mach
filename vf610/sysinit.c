@@ -3,6 +3,7 @@
 #include "vector.h"
 #include <core_cm4.h>
 #include <system.h>
+#include "cache.h"
 
 #define SCB_CPACR_FULL  (BIT(0) | BIT(1))
 #define SCB_CPACR_CP10(x) (x << (20))
@@ -297,6 +298,9 @@ void NAKED reset_handler() {
 		: "r5", "r6"
 		
 	);
+#endif
+#ifdef CONFIG_VF610_CACHE
+	cache_init();
 #endif
 	main();
 	for(;;); /* Main shoud not return */

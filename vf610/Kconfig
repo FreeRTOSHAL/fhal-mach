@@ -18,9 +18,15 @@ config VF610_UART
 	select UART_GENERIC_STRING
 	select UART_GENERIC_BYTE
 endif
+config MACH_DEFINE_HEAP
+	bool
+	default y
 config MACH_HAS_UART
 	bool
 	default y
 config MACH_HAS_GPIO
 	bool
 	default y
+config VF610_CACHE
+	bool "Activate VF610 M4 Cache"
+	default n
