@@ -7,8 +7,16 @@ choice
 		depends on ARCH_ARM_CORTEX_M4F || ARCH_ARM_CORTEX_M3
 		help 
 			vF610 M4 Mach
+	config MACH_LINUX
+		bool "Linux Emulator"
+		depends on ARCH_X86
+		depends on ARCH_X86_LINUX
+		select INCLUDE_xTaskGetCurrentTaskHandle
 endchoice
 if MACH_VF610=y
 source mach/vf610/Kconfig
+endif
+if MACH_LINUX=y
+source mach/linux/Kconfig
 endif
 endmenu

@@ -1,0 +1,28 @@
+comment "VF610 Settings"
+config MACH_DEFINE_HEAP
+	bool
+	default y
+config MACH_LIBS
+	string
+	default "-lrt"
+config EXTRA_MACH_LINKFLAGS
+	string
+	default "-pthread"
+config MACH_HAS_UART
+	bool
+	default y
+config MACH_HAS_GPIO
+	bool
+	default y
+config MACH_INCLUDE
+	string
+	default "-Imach/linux/include"
+#config MACH_HAS_UART
+#	bool
+#	default y
+#config MACH_HAS_GPIO
+#	bool
+#	default y
+#config VF610_CACHE
+#	bool "Activate VF610 M4 Cache"
+#	default n
