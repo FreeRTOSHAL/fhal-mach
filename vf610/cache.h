@@ -22,7 +22,7 @@
 #define CLCR_IS_VALID(x) ((x >> 20) & 0x1)
 #define CLCR_IS_MODIFIED ((x >> 21) & 0x1)
 #define CLCR_GET_WAY ((x >> 22) & 0x1)
-#define CLCR_LINE_CMD(x) ((x 0x3) << 24)
+#define CLCR_LINE_CMD(x) ((x & 0x3) << 24)
 #define CLCR_CMD_SEARCH CLCR_LINE_CMD(0)
 #define CLCR_CMD_INVAID CLCR_LINE_CMD(1)
 #define CLCR_CMD_PUSH CLCR_LINE_CMD(2)
@@ -36,7 +36,11 @@
 
 #define CSAR_LGO BIT(0)
 #define CSAR_IS_LGO(x) ((x >> 0) & 0x1)
-#define CSAR_PYS_ADDRESS(x) ((x & 0x1FFFFFFF) << 2)
+#define CSAR_PYS_ADDRESS(x) ((((uint32_t) x) & 0x1FFFFFFFU) << 2)
 
 int32_t cache_init();
+int32_t cache_flushDataAll();
+int32_t cache_flushData(uint32_t *addr, uint32_t size);
+int32_t cache_invalidDataAll();
+int32_t cache_invalidData(uint32_t *addr, uint32_t size);
 #endif

@@ -3,10 +3,10 @@ ENTRY(reset_handler)
 MEMORY
 {
     flash   :   ORIGIN = 0x3f000000, LENGTH = 0x3FFFF 
+    flash2   :   ORIGIN = 0x1F800000, LENGTH = 0x7FFF
     sram    :   ORIGIN = 0x3F040000, LENGTH = 0x3FFFF
+    sram2    :   ORIGIN = 0x3F800000, LENGTH = 0x7FFF
 }
-
-_end_stack = 0x3F07FFFF;
 
 SECTIONS {
     . = ORIGIN(flash);
@@ -16,7 +16,13 @@ SECTIONS {
 	*(.loader)
 	. = ALIGN(128);
         *(.vectors)
-    } >flash
+    } >flash2
+
+    .text.freertos : 
+    {
+	. = ALIGN(4);
+	*(.text.freertos)
+    } > flash2
 
     .text :
     {
@@ -25,12 +31,20 @@ SECTIONS {
         LONG(LOADADDR(.data));
         LONG(    ADDR(.data));
         LONG(  SIZEOF(.data));
+        LONG(LOADADDR(.data.freertos));
+        LONG(    ADDR(.data.freertos));
+        LONG(  SIZEOF(.data.freertos));
         _data_table_end = .;
         *(.text)
         *(.rodata)
         *(.rodata*)
         _end_text = .;
     } >flash
+
+    .data.freertos :
+    {
+	*(.data.freertos)
+    } > sram2 AT >flash2
 
     .data :
     {

@@ -88,7 +88,7 @@ int32_t gpio_setDirection(struct gpio_pin *pin, enum gpio_direction dir) {
 }
 struct gpio_pin *gpio_getPin(struct gpio *gpio, uint8_t pin, enum gpio_direction dir) {
 	int32_t ret;
-	struct gpio_pin *gpio_pin= pvPortMalloc(sizeof(struct gpio));
+	struct gpio_pin *gpio_pin= pvPortMalloc(sizeof(struct gpio_pin));
 	if (gpio_pin == NULL) {
 		goto gpio_getPin_error0;
 	}
@@ -105,20 +105,9 @@ gpio_getPin_error0:
 	return NULL;
 }
 int32_t gpio_setPinValue(struct gpio_pin *pin, bool value) {
-	/*volatile uint32_t tmp;*/
 	if (pin->dir != GPIO_OUTPUT) {
 		return -1;
 	}
-	/*
-	if (value) {
-		tmp = pin->gpio->base->PDOR;
-		pin->gpio->base->PDOR = tmp | (1 << pin->pin);
-	} else {
-		tmp = pin->gpio->base->PDOR;
-		pin->gpio->base->PDOR = tmp & ~(1 << pin->pin);
-	}
-	pin->oldvalue = value;
-	return 0;*/
 	if (value) {
 		return gpio_setPin(pin);
 	} else {

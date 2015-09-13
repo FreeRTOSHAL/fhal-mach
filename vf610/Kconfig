@@ -5,9 +5,37 @@ config MAX_SYSCALL_INTERRUPT_PRIORITY
 config KERNEL_INTERRUPT_PRIORITY 
 	hex
 	default 0xf80
+choice
+	prompt "Memmory Location"
+	config VF610_LOCATION_BOTH
+		bool "TCM + SRAM"
+		help
+			FreeRTOS Located in fast TCM and Apllication located at SRAM(max 256K + 32K)
+	config VF610_LOCATION_SRAM
+		bool "SRAM"
+		help
+			FreeRTOS + Application in SRAM(max 256K)
+	config VF610_LOCATION_TCM
+		bool "TCM"
+		help
+			FreeRTOS + Application in TCM(max 32K)
+endchoice
+
+if VF610_LOCATION_BOTH
 config MACH_LD_SCRIPT
 	string 
-	default "mach/vf610/vf610.ld"
+	default "mach/vf610/vf610_both.ld"
+endif
+if VF610_LOCATION_SRAM
+config MACH_LD_SCRIPT
+	string 
+	default "mach/vf610/vf610_sram.ld"
+endif
+if VF610_LOCATION_TCM
+config MACH_LD_SCRIPT
+	string 
+	default "mach/vf610/vf610_tcm.ld"
+endif
 config MACH_INCLUDE
 	string
 	default "-Imach/vf610/include"
@@ -17,6 +45,7 @@ config VF610_UART
 	default y
 	select UART_GENERIC_STRING
 	select UART_GENERIC_BYTE
+	
 endif
 config MACH_DEFINE_HEAP
 	bool
@@ -25,6 +54,9 @@ config MACH_HAS_UART
 	bool
 	default y
 config MACH_HAS_GPIO
+	bool
+	default y
+config MACH_HAS_NEWLIB
 	bool
 	default y
 config VF610_CACHE
