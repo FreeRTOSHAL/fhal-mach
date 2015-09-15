@@ -55,6 +55,14 @@ SECTIONS {
         _end_data = .;
     } >sram AT >flash
 
+    .bss.freertos : 
+    {
+	. = ALIGN(4);
+        _start_bss_freertos = .;
+        *(.bss.freertos)
+        _end_bss_freertos = .;
+    } >sram2
+
     .bss :
     {
 	. = ALIGN(4);
@@ -65,6 +73,7 @@ SECTIONS {
         _end_bss = .;
 	__bss_end__ = .;
     } >sram
+
 
     .heap :
     {
