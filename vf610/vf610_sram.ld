@@ -2,7 +2,7 @@ ENTRY(_loader)
 
 MEMORY
 {
-    flash   :   ORIGIN = 0x3f000000, LENGTH = 0x3FFFF 
+    flash   :   ORIGIN = 0x1F000000, LENGTH = 0x3FFFF 
     sram    :   ORIGIN = 0x3F040000, LENGTH = 0x3FFFF
 }
 
