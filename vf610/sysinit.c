@@ -28,6 +28,10 @@ extern uint32_t _end_bss;
 extern uint32_t _data_table;
 extern uint32_t _data_table_end;
 extern uint32_t _start_stack;
+#ifdef CONFIG_VF610_LOCATION_BOTH
+extern uint32_t _start_bss_freertos;
+extern uint32_t _end_bss_freertos;
+#endif
 
 extern int main(void);
 
@@ -159,6 +163,23 @@ struct vector_table vector_table SECTION(".vectors") = {
 	}
 };
 
+static void clearBss(volatile uint32_t *dst, volatile uint32_t *src) {
+	asm volatile(
+			"mov r5, #0" "\n"
+			"b reset_handler_clear_bss_cmp" "\n"
+		"reset_handler_clear_bss:" 
+			"str r5, [%0, #0]" "\n"
+			"add %0, #4" "\n"
+		"reset_handler_clear_bss_cmp:" 
+			"cmp %0, %1" "\n"
+			"bcc reset_handler_clear_bss"
+		:
+		: "r" (dst), "r" (src)
+		: "r5"
+		
+	);
+}
+
 void NAKED reset_handler() {
 	volatile uint32_t *dst, *src, *tableaddr;
 	volatile uint32_t len;
@@ -259,20 +280,14 @@ void NAKED reset_handler() {
 	dst = &_start_bss;
 	src = &_end_bss;
 	// Clear the bss section
-	asm volatile(
-			"mov r5, #0" "\n"
-			"b reset_handler_clear_bss_cmp" "\n"
-		"reset_handler_clear_bss:" 
-			"str r5, [%0, #0]" "\n"
-			"add %0, #4" "\n"
-		"reset_handler_clear_bss_cmp:" 
-			"cmp %0, %1" "\n"
-			"bcc reset_handler_clear_bss"
-		:
-		: "r" (dst), "r" (src)
-		: "r5"
-		
-	);
+	clearBss(dst, src);
+
+#ifdef CONFIG_VF610_LOCATION_BOTH
+	dst = &_start_bss_freertos;
+	src = &_end_bss_freertos;
+	// Clear the bss section
+	clearBss(dst, src);
+#endif
 #ifdef CONFIG_CHECK_FOR_STACK_OVERFLOW
 	dst = &_start_stack;
 	/* Load pattern in Main Stack for stack overflow detection */

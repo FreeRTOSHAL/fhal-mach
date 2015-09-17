@@ -5,12 +5,12 @@ config MAX_SYSCALL_INTERRUPT_PRIORITY
 config KERNEL_INTERRUPT_PRIORITY 
 	hex
 	default 0xf80
+comment "WARNING: Load Address is 0x3F000000"
+	depends on VF610_LOCATION_SRAM
+comment "WARNING: ELF Loader is needed!"
+	depends on VF610_LOCATION_BOTH
 choice
 	prompt "Memmory Location"
-	config VF610_LOCATION_BOTH
-		bool "TCM + SRAM"
-		help
-			FreeRTOS Located in fast TCM and Apllication located at SRAM(max 256K + 32K)
 	config VF610_LOCATION_SRAM
 		bool "SRAM"
 		help
@@ -19,6 +19,12 @@ choice
 		bool "TCM"
 		help
 			FreeRTOS + Application in TCM(max 32K)
+	config VF610_LOCATION_BOTH
+		bool "TCM + SRAM"
+		help
+			FreeRTOS Located in fast TCM and Apllication located at SRAM(max 256K + 32K)
+
+			WARNING Start out of A5 without Elf Loader imposible!
 endchoice
 
 if VF610_LOCATION_BOTH
@@ -59,6 +65,10 @@ config MACH_HAS_GPIO
 config MACH_HAS_NEWLIB
 	bool
 	default y
+config MACH_HAS_BUFFER
+	bool
+	default y
 config VF610_CACHE
 	bool "Activate VF610 M4 Cache"
 	default n
+	select CACHE

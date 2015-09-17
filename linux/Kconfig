@@ -23,6 +23,9 @@ config MACH_INCLUDE
 #config MACH_HAS_GPIO
 #	bool
 #	default y
+config MACH_HAS_BUFFER
+	bool
+	default y
 #config VF610_CACHE
 #	bool "Activate VF610 M4 Cache"
 #	default n
