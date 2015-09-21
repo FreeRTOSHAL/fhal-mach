@@ -9,6 +9,120 @@
 #define SCB_CPACR_CP10(x) (x << (20))
 #define SCB_CPACR_CP11(x) (x << (22))
 
+void dummy_handler();
+void WEAK ALIAS(dummy_handler) cpu2cpu_int0_isr(void);
+void WEAK ALIAS(dummy_handler) cpu2cpu_int1_isr(void);
+void WEAK ALIAS(dummy_handler) cpu2cpu_int2_isr(void);
+void WEAK ALIAS(dummy_handler) cpu2cpu_int3_isr(void);
+void WEAK ALIAS(dummy_handler) directed0_sema4_isr(void);
+void WEAK ALIAS(dummy_handler) directed1_mcm_isr(void);
+void WEAK ALIAS(dummy_handler) directed2_isr(void);
+void WEAK ALIAS(dummy_handler) directed3_isr(void);
+void WEAK ALIAS(dummy_handler) dma0_isr(void);
+void WEAK ALIAS(dummy_handler) dma0_error_isr(void);
+void WEAK ALIAS(dummy_handler) dma1_isr(void);
+void WEAK ALIAS(dummy_handler) dma1_error_isr(void);
+void WEAK ALIAS(dummy_handler) reserved0_isr(void);
+void WEAK ALIAS(dummy_handler) reserved1_isr(void);
+void WEAK ALIAS(dummy_handler) mscm_ecc0_isr(void);
+void WEAK ALIAS(dummy_handler) mscm_ecc1_isr(void);
+void WEAK ALIAS(dummy_handler) csu_alarm_isr(void);
+void WEAK ALIAS(dummy_handler) reserved2_isr(void);
+void WEAK ALIAS(dummy_handler) mscm_actzs_isr(void);
+void WEAK ALIAS(dummy_handler) reserved3_isr(void);
+void WEAK ALIAS(dummy_handler) wdog_a5_isr(void);
+void WEAK ALIAS(dummy_handler) wdog_m4_isr(void);
+void WEAK ALIAS(dummy_handler) wdog_snvs_isr(void);
+void WEAK ALIAS(dummy_handler) cp1_boot_fail_isr(void);
+void WEAK ALIAS(dummy_handler) qspi0_isr(void);
+void WEAK ALIAS(dummy_handler) qspi1_isr(void);
+void WEAK ALIAS(dummy_handler) ddrmc_isr(void);
+void WEAK ALIAS(dummy_handler) sdhc0_isr(void);
+void WEAK ALIAS(dummy_handler) sdhc1_isr(void);
+void WEAK ALIAS(dummy_handler) reserved4_isr(void);
+void WEAK ALIAS(dummy_handler) dcu0_isr(void);
+void WEAK ALIAS(dummy_handler) dcu1_isr(void);
+void WEAK ALIAS(dummy_handler) viu_isr(void);
+void WEAK ALIAS(dummy_handler) reserved5_isr(void);
+void WEAK ALIAS(dummy_handler) reserved6_isr(void);
+void WEAK ALIAS(dummy_handler) rle_isr(void);
+void WEAK ALIAS(dummy_handler) seg_lcd_isr(void);
+void WEAK ALIAS(dummy_handler) reserved7_isr(void);
+void WEAK ALIAS(dummy_handler) reserved8_isr(void);
+void WEAK ALIAS(dummy_handler) pit_isr(void);
+void WEAK ALIAS(dummy_handler) lptimer0_isr(void);
+void WEAK ALIAS(dummy_handler) reserved9_isr(void);
+void WEAK ALIAS(dummy_handler) flextimer0_isr(void);
+void WEAK ALIAS(dummy_handler) flextimer1_isr(void);
+void WEAK ALIAS(dummy_handler) flextimer2_isr(void);
+void WEAK ALIAS(dummy_handler) flextimer3_isr(void);
+void WEAK ALIAS(dummy_handler) reserved10_isr(void);
+void WEAK ALIAS(dummy_handler) reserved11_isr(void);
+void WEAK ALIAS(dummy_handler) reserved12_isr(void);
+void WEAK ALIAS(dummy_handler) reserved13_isr(void);
+void WEAK ALIAS(dummy_handler) usbphy0_isr(void);
+void WEAK ALIAS(dummy_handler) usbphy1_isr(void);
+void WEAK ALIAS(dummy_handler) reserved14_isr(void);
+void WEAK ALIAS(dummy_handler) adc0_isr(void);
+void WEAK ALIAS(dummy_handler) adc1_isr(void);
+void WEAK ALIAS(dummy_handler) dac0_isr(void);
+void WEAK ALIAS(dummy_handler) dac1_isr(void);
+void WEAK ALIAS(dummy_handler) reserved15_isr(void);
+void WEAK ALIAS(dummy_handler) flexcan0_isr(void);
+void WEAK ALIAS(dummy_handler) flexcan1_isr(void);
+void WEAK ALIAS(dummy_handler) reserved16_isr(void);
+void WEAK ALIAS(dummy_handler) uart0_isr(void);
+void WEAK ALIAS(dummy_handler) uart1_isr(void);
+void WEAK ALIAS(dummy_handler) uart2_isr(void);
+void WEAK ALIAS(dummy_handler) uart3_isr(void);
+void WEAK ALIAS(dummy_handler) uart4_isr(void);
+void WEAK ALIAS(dummy_handler) uart5_isr(void);
+void WEAK ALIAS(dummy_handler) spi0_isr(void);
+void WEAK ALIAS(dummy_handler) spi1_isr(void);
+void WEAK ALIAS(dummy_handler) spi2_isr(void);
+void WEAK ALIAS(dummy_handler) spi3_isr(void);
+void WEAK ALIAS(dummy_handler) i2c0_isr(void);
+void WEAK ALIAS(dummy_handler) i2c1_isr(void);
+void WEAK ALIAS(dummy_handler) i2c2_isr(void);
+void WEAK ALIAS(dummy_handler) i2c3_isr(void);
+void WEAK ALIAS(dummy_handler) usbc0_isr(void);
+void WEAK ALIAS(dummy_handler) usbc1_isr(void);
+void WEAK ALIAS(dummy_handler) reserved17_isr(void);
+void WEAK ALIAS(dummy_handler) enet0_isr(void);
+void WEAK ALIAS(dummy_handler) enet1_isr(void);
+void WEAK ALIAS(dummy_handler) enet0_1588_isr(void);
+void WEAK ALIAS(dummy_handler) enet1_1588_isr(void);
+void WEAK ALIAS(dummy_handler) enet_switch_isr(void);
+void WEAK ALIAS(dummy_handler) nfc_isr(void);
+void WEAK ALIAS(dummy_handler) sai0_isr(void);
+void WEAK ALIAS(dummy_handler) sai1_isr(void);
+void WEAK ALIAS(dummy_handler) sai2_isr(void);
+void WEAK ALIAS(dummy_handler) sai3_isr(void);
+void WEAK ALIAS(dummy_handler) esai_bififo_isr(void);
+void WEAK ALIAS(dummy_handler) spdif_isr(void);
+void WEAK ALIAS(dummy_handler) asrc_isr(void);
+void WEAK ALIAS(dummy_handler) vreg_isr(void);
+void WEAK ALIAS(dummy_handler) wkpu0_isr(void);
+void WEAK ALIAS(dummy_handler) reserved18_isr(void);
+void WEAK ALIAS(dummy_handler) ccm_fxosc_isr(void);
+void WEAK ALIAS(dummy_handler) ccm_isr(void);
+void WEAK ALIAS(dummy_handler) src_isr(void);
+void WEAK ALIAS(dummy_handler) pdb_isr(void);
+void WEAK ALIAS(dummy_handler) ewm_isr(void);
+void WEAK ALIAS(dummy_handler) reserved19_isr(void);
+void WEAK ALIAS(dummy_handler) reserved20_isr(void);
+void WEAK ALIAS(dummy_handler) reserved21_isr(void);
+void WEAK ALIAS(dummy_handler) reserved22_isr(void);
+void WEAK ALIAS(dummy_handler) reserved23_isr(void);
+void WEAK ALIAS(dummy_handler) reserved24_isr(void);
+void WEAK ALIAS(dummy_handler) reserved25_isr(void);
+void WEAK ALIAS(dummy_handler) reserved26_isr(void);
+void WEAK ALIAS(dummy_handler) gpio0_isr(void);
+void WEAK ALIAS(dummy_handler) gpio1_isr(void);
+void WEAK ALIAS(dummy_handler) gpio2_isr(void);
+void WEAK ALIAS(dummy_handler) gpio3_isr(void);
+void WEAK ALIAS(dummy_handler) gpio4_isr(void);
+
 void NAKED reset_handler();
 void nmi_handler();
 void hard_fault_handler();
@@ -323,8 +437,86 @@ void NAKED reset_handler() {
 void nmi_handler() {
 	CONFIG_ASSERT(0);
 }
-void hard_fault_handler() {
+
+__attribute__((naked)) void hard_fault_handler(void) {
+        /*
+         * Get the appropriate stack pointer, depending on our mode,
+         * and use it as the parameter to the C handler. This function
+         * will never return
+         */
+
+        __asm(  
+                        "MOVS   R0, #4  \n"
+                        "MOV    R1, LR  \n"
+                        "TST    R0, R1  \n"
+                        "BEQ    _MSP    \n"
+                        "MRS    R0, PSP \n"
+                        "B      hard_fault_handlerC      \n"
+                "_MSP:  \n"
+                        "MRS    R0, MSP \n"
+                        "B      hard_fault_handlerC      \n"
+	) ;
+}
+
+void hard_fault_handlerC(unsigned long *hardfault_args) {
+	volatile unsigned long stacked_r0 ;
+	volatile unsigned long stacked_r1 ;
+	volatile unsigned long stacked_r2 ;
+	volatile unsigned long stacked_r3 ;
+	volatile unsigned long stacked_r12 ;
+	volatile unsigned long stacked_lr ;
+	volatile unsigned long stacked_pc ;
+	volatile unsigned long stacked_psr ;
+	volatile unsigned long _CFSR ;
+	volatile unsigned long _HFSR ;
+	volatile unsigned long _DFSR ;
+	volatile unsigned long _AFSR ;
+	volatile unsigned long _BFAR ;
+	volatile unsigned long _MMAR ;
+
+	stacked_r0 = ((unsigned long)hardfault_args[0]) ;
+	stacked_r1 = ((unsigned long)hardfault_args[1]) ;
+	stacked_r2 = ((unsigned long)hardfault_args[2]) ;
+	stacked_r3 = ((unsigned long)hardfault_args[3]) ;
+	stacked_r12 = ((unsigned long)hardfault_args[4]) ;
+	stacked_lr = ((unsigned long)hardfault_args[5]) ;
+	stacked_pc = ((unsigned long)hardfault_args[6]) ;
+	stacked_psr = ((unsigned long)hardfault_args[7]) ;
+
+	// Configurable Fault Status Register
+	// Consists of MMSR, BFSR and UFSR
+	_CFSR = (*((volatile unsigned long *)(0xE000ED28))) ;   
+
+	// Hard Fault Status Register
+	_HFSR = (*((volatile unsigned long *)(0xE000ED2C))) ;
+
+	// Debug Fault Status Register
+	_DFSR = (*((volatile unsigned long *)(0xE000ED30))) ;
+
+	// Auxiliary Fault Status Register
+	_AFSR = (*((volatile unsigned long *)(0xE000ED3C))) ;
+
+	// Read the Fault Address Registers. These may not contain valid values.
+	// Check BFARVALID/MMARVALID to see if they are valid values
+	// MemManage Fault Address Register
+	_MMAR = (*((volatile unsigned long *)(0xE000ED34))) ;
+	// Bus Fault Address Register
+	_BFAR = (*((volatile unsigned long *)(0xE000ED38))) ;
 	CONFIG_ASSERT(0);
+	(void) stacked_r0 ;
+	(void) stacked_r1 ;
+	(void) stacked_r2 ;
+	(void) stacked_r3 ;
+	(void) stacked_r12 ;
+	(void) stacked_lr ;
+	(void) stacked_pc ;
+	(void) stacked_psr ;
+	(void) _CFSR ;
+	(void) _HFSR ;
+	(void) _DFSR ;
+	(void) _AFSR ;
+	(void) _BFAR ;
+	(void) _MMAR ;
 }
 void bus_fault_handler() {
 	CONFIG_ASSERT(0);

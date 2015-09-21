@@ -1,10 +1,10 @@
 comment "VF610 Settings"
 config MAX_SYSCALL_INTERRUPT_PRIORITY
 	hex
-	default 0x280
+	default 0x20
 config KERNEL_INTERRUPT_PRIORITY 
 	hex
-	default 0xf80
+	default 0xf0
 comment "WARNING: Load Address is 0x3F000000"
 	depends on VF610_LOCATION_SRAM
 comment "WARNING: ELF Loader is needed!"
@@ -47,11 +47,19 @@ config MACH_INCLUDE
 	default "-Imach/vf610/include"
 if UART=y
 config VF610_UART
-	bool
+	bool "VF610 UART"
 	default y
 	select UART_GENERIC_STRING
 	select UART_GENERIC_BYTE
-	
+config VF610_LPUART
+	bool "LPUart Driver"
+	depends on VF610_UART
+	default y
+config BUFFER_UART
+	bool "Buffer Driver"
+	default n
+	depends on VF610_UART
+	depends on BUFFER
 endif
 config MACH_DEFINE_HEAP
 	bool
@@ -68,6 +76,9 @@ config MACH_HAS_NEWLIB
 config MACH_HAS_BUFFER
 	bool
 	default y
+#config MACH_HAS_NVIC
+#	bool
+#	default y
 config VF610_CACHE
 	bool "Activate VF610 M4 Cache"
 	default n

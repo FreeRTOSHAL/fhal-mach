@@ -36,7 +36,7 @@
 
 #define CSAR_LGO BIT(0)
 #define CSAR_IS_LGO(x) ((x >> 0) & 0x1)
-#define CSAR_PYS_ADDRESS(x) ((((uint32_t) x) & 0x1FFFFFFFU) << 2)
+#define CSAR_PYS_ADDRESS(x) (((uint32_t) x) & 0xFFFFFFFCU)
 
 int32_t cache_init();
 int32_t cache_flushDataAll();
