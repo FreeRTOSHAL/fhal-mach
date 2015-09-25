@@ -41,8 +41,5 @@ char buffer_uart_getc(struct uart *uart, TickType_t waittime) {
 int32_t buffer_uart_putc(struct uart *uart, char c, TickType_t waittime) {
 	int32_t ret;
 	ret = buffer_write(uart->tx, (uint8_t *) &c, 1);
-	if (ret < 0) {
-		for(;;);
-	}
 	return ret;
 }

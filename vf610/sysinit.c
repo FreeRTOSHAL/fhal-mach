@@ -4,12 +4,13 @@
 #include <core_cm4.h>
 #include <system.h>
 #include "cache.h"
+#include <clock.h>
 
 #define SCB_CPACR_FULL  (BIT(0) | BIT(1))
 #define SCB_CPACR_CP10(x) (x << (20))
 #define SCB_CPACR_CP11(x) (x << (22))
 
-void dummy_handler();
+void NAKED dummy_handler();
 void WEAK ALIAS(dummy_handler) cpu2cpu_int0_isr(void);
 void WEAK ALIAS(dummy_handler) cpu2cpu_int1_isr(void);
 void WEAK ALIAS(dummy_handler) cpu2cpu_int2_isr(void);
@@ -149,7 +150,7 @@ extern uint32_t _end_bss_freertos;
 
 extern int main(void);
 
-struct vector_table vector_table SECTION(".vectors") = {
+const struct vector_table vector_table SECTION(".vectors") = {
 	.initial_sp_value = (unsigned int *) &_end_stack,
 	.reset = reset_handler,
 	.nmi = nmi_handler,
@@ -428,6 +429,7 @@ void NAKED reset_handler() {
 		
 	);
 #endif
+	clock_init();
 #ifdef CONFIG_VF610_CACHE
 	cache_init();
 #endif
@@ -527,7 +529,18 @@ void usage_fault_handler() {
 void debug_monitor_handler() {
 	CONFIG_ASSERT(0);
 }
-void dummy_handler() {
+void NAKED dummy_handler() {
+	asm volatile(
+		"mov r0, pc \n"
+		"subs r0, r0, #3 \n"
+		"ldr r1, =vector_table \n"
+		"mrs r2, ipsr \n"
+		"ldr r2, [r1, r2, LSL #2] \n"
+		"cmp r0, r2 \n"
+		"it ne \n"
+		"movne pc, r2 \n"
+		:::"r0", "r1", "r2"
+	);
 	CONFIG_ASSERT(0);
 }
 

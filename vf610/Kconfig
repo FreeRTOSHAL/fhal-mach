@@ -83,3 +83,6 @@ config VF610_CACHE
 	bool "Activate VF610 M4 Cache"
 	default n
 	select CACHE
+config FLEXTIMER
+	bool "Active Flextimer"
+	default n
