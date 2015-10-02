@@ -76,6 +76,9 @@ config MACH_HAS_NEWLIB
 config MACH_HAS_BUFFER
 	bool
 	default y
+config MACH_HAS_SPI
+	bool
+	default y
 #config MACH_HAS_NVIC
 #	bool
 #	default y

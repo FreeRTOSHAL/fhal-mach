@@ -215,6 +215,10 @@ struct anadig_reg {
 #define CCM_REG_CTRL_MASK			0xffffffff
 #define CCM_CCGR0_UART0_CTRL_MASK               (0x3 << 14)
 #define CCM_CCGR0_UART1_CTRL_MASK		(0x3 << 16)
+#define CCM_CCGR0_UART2_CTRL_MASK		(0x3 << 18)
+#define CCM_CCGR0_UART3_CTRL_MASK		(0x3 << 20)
+#define CCM_CCGR0_SPI0_CTRL_MASK		(0x3 << 24)
+#define CCM_CCGR0_SPI1_CTRL_MASK		(0x3 << 26)
 #define CCM_CCGR1_PIT_CTRL_MASK			(0x3 << 14)
 #define CCM_CCGR1_FTM_0_CTRL_MASK		(0x3 << 16)
 #define CCM_CCGR1_FTM_1_CTRL_MASK		(0x3 << 18)
@@ -235,6 +239,8 @@ struct anadig_reg {
 #define CCM_CCGR4_GPC_CTRL_MASK			(0x3 << 24)
 #define CCM_CCGR4_I2C0_CTRL_MASK		(0x3 << 12)
 #define CCM_CCGR6_OCOTP_CTRL_MASK		(0x3 << 10)
+#define CCM_CCGR6_SPI2_CTRL_MASK		(0x3 << 24)
+#define CCM_CCGR6_SPI3_CTRL_MASK		(0x3 << 26)
 #define CCM_CCGR6_DDRMC_CTRL_MASK		(0x3 << 28)
 #define CCM_CCGR7_SDHC0_CTRL_MASK		(0x3 << 2)
 #define CCM_CCGR7_SDHC1_CTRL_MASK		(0x3 << 4)
@@ -289,7 +295,9 @@ struct clock *clock_init() {
 #define CCM_CSCMR2_FTM_2_FIX_128K		(1 << 14)
 #define CCM_CSCMR2_FTM_3_FIX_128K		(1 << 14)
 	clk.ccm->cscdr1 |= CCM_CSCDR1_FTM_0_EN | CCM_CSCDR1_FTM_1_EN | CCM_CSCDR1_FTM_2_EN | CCM_CSCDR1_FTM_3_EN;
+	clk.ccm->ccgr0 |= CCM_CCGR0_SPI0_CTRL_MASK | CCM_CCGR0_SPI1_CTRL_MASK;
 	clk.ccm->ccgr1 |= CCM_CCGR1_FTM_0_CTRL_MASK | CCM_CCGR1_FTM_1_CTRL_MASK;
+	clk.ccm->ccgr6 |= CCM_CCGR6_SPI2_CTRL_MASK | CCM_CCGR6_SPI3_CTRL_MASK;
 	clk.ccm->ccgr7 |= CCM_CCGR7_FTM_2_CTRL_MASK | CCM_CCGR7_FTM_3_CTRL_MASK;
 	clk.ccm->cscmr2 |= CCM_CSCMR2_FTM_0_FIX_128K | CCM_CSCMR2_FTM_1_FIX_128K | CCM_CSCMR2_FTM_2_FIX_128K | CCM_CSCMR2_FTM_3_FIX_128K;
 	clk.ccm->ccgr3 |= CCM_CCGR3_SCSC_CTRL_MASK;

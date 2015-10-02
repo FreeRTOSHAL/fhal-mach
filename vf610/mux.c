@@ -3,8 +3,8 @@
 #include "iomux.h"
 
 struct imx_mux  {
-	uint32_t pad[135];
-	/* TODO Special Settings */
+	/* 135 Pads + 50 DDR Pads + 49 */
+	uint32_t pad[135 + 50 + 49];
 };
 struct mux {
 	struct imx_mux *base;

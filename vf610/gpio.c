@@ -47,7 +47,7 @@ int32_t gpio_deinit(struct gpio *gpio) {
 		PAD_CTL_DSE_25ohm)
 int32_t gpio_setDirection(struct gpio_pin *pin, enum gpio_direction dir) {
 	struct mux *mux = mux_init();
-	int32_t ret;
+	int32_t ret = 0;
 	switch (dir) {
 		case GPIO_INPUT:
 			ret = mux_pinctl(mux, pin->pin + (pin->bank * 32), (PAD_CTL_MODE(MODE0) | HMI2015_GPIO_GENERAL_CTRL |  PAD_CTL_IBE_ENABLE));

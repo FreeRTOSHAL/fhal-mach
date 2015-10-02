@@ -168,6 +168,6 @@ enum pins{
 	PTE26,
 	PTE27,
 	PTE28,
-	PTA7
+	PTA7,
 };
 #endif
