@@ -89,3 +89,7 @@ config VF610_CACHE
 config FLEXTIMER
 	bool "Active Flextimer"
 	default n
+config SPIDEBUG
+	bool "SPI Debug Mode"
+	depends on SPI
+	default n

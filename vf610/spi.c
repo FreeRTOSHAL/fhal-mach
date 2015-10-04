@@ -15,6 +15,13 @@
 #include <vector.h>
 #include <core_cm4.h>
 #include <core_cmInstr.h>
+#include <alloca.h>
+
+#ifdef CONFIG_SPIDEBUG
+#define SPI_PRINTF(ftm, ...) printf(ftm, ##__VA_ARGS__)
+#else
+#define SPI_PRINTF(ftm, ...)
+#endif
 
 #define IPG_CLK 66000000ULL
 
@@ -637,10 +644,10 @@ static int32_t spi_setup(struct spi_slave *slave) {
 			return -1;
 		}
 		if (slave->options.csLowInactive) {
-			printf("Clear Pin: %d\n", slave->options.gpio);
+			SPI_PRINTF("Clear Pin: %d\n", slave->options.gpio);
 			ret = gpio_clearPin(slave->pin);
 		} else {
-			printf("Set Pin: %d\n", slave->options.gpio);
+			SPI_PRINTF("Set Pin: %d\n", slave->options.gpio);
 			ret = gpio_setPin(slave->pin);
 		}
 		if (ret < 0) {
@@ -691,7 +698,7 @@ static uint32_t prepareFrame(struct spi_slave *slave, uint16_t data) {
 		/* 
 		 * Sheaed CTAS
 		 */
-		printf("Shead Pin: setup CTAR: 0x%08lx\n", slave->ctar);
+		SPI_PRINTF("Shead Pin: setup CTAR: 0x%08lx\n", slave->ctar);
 		pushr |= SPI_PUSHR_CTAS(0);
 		slave->spi->base->ctar[0] = slave->ctar;
 		__ISB();
@@ -724,10 +731,10 @@ static void spi_recvData(struct spi_slave *slave, uint16_t *data, uint32_t len) 
 static void spi_gpioSet(struct spi_slave *slave) {
 	if (slave->pin != NULL) {
 		if (slave->options.csLowInactive) {
-			printf("Set Pin %d\n", slave->options.gpio);
+			SPI_PRINTF("Set Pin %d\n", slave->options.gpio);
 			gpio_setPin(slave->pin);
 		} else {
-			printf("Clear Pin %d\n", slave->options.gpio);
+			SPI_PRINTF("Clear Pin %d\n", slave->options.gpio);
 			gpio_clearPin(slave->pin);
 		}
 	}
@@ -736,10 +743,10 @@ static void spi_gpioSet(struct spi_slave *slave) {
 static void spi_gpioClear(struct spi_slave *slave) {
 	if (slave->pin != NULL) {
 		if (slave->options.csLowInactive) {
-			printf("Clear Pin %d\n", slave->options.gpio);
+			SPI_PRINTF("Clear Pin %d\n", slave->options.gpio);
 			gpio_clearPin(slave->pin);
 		} else {
-			printf("Set Pin %d\n", slave->options.gpio);
+			SPI_PRINTF("Set Pin %d\n", slave->options.gpio);
 			gpio_setPin(slave->pin);
 		}
 	}
@@ -791,7 +798,7 @@ int32_t spi_sendRecv(struct spi_slave *slave, uint16_t *sendData, uint16_t *recv
 			 */
 			pushr |= SPI_PUSHR_EOQ;
 		}
-		printf("pushr: 0x%08lx\n", pushr);
+		SPI_PRINTF("pushr: 0x%08lx\n", pushr);
 
 		/* 
 		 * Send Data
@@ -820,7 +827,7 @@ int32_t spi_sendRecv(struct spi_slave *slave, uint16_t *sendData, uint16_t *recv
 			 */
 			spi_recvData(slave, recvData, j);
 			recvData+=j;
-			j = 1;
+			j = 0;
 		}
 		/* 
 		 * Next Frame
@@ -841,28 +848,14 @@ spi_sendRecv_error0:
 	return -1;
 }
 int32_t spi_send(struct spi_slave *slave, uint16_t *data, uint32_t len, TickType_t waittime) {
-	int lret = spi_lock(slave->spi, waittime);
-	if (lret != 1) {
-		return -1;
-	}
-
-	lret = spi_unlock(slave->spi);
-	if (lret != 1) {
-		return -1;
-	}
-	return 0;
+	uint16_t *rdata = alloca(sizeof(uint16_t) * len);
+	/* TODO Do not use spi_sendRecv optimace Stack usage*/
+	return spi_sendRecv(slave, data, rdata, len, waittime);
 }
 int32_t spi_recv(struct spi_slave *slave, uint16_t *data, uint32_t len, TickType_t waittime) {
-	int lret = spi_lock(slave->spi, waittime);
-	if (lret != 1) {
-		return -1;
-	}
-
-	lret = spi_unlock(slave->spi);
-	if (lret != 1) {
-		return -1;
-	}
-	return 0;
+	uint16_t *wdata = alloca(sizeof(uint16_t) * len);
+	memset(wdata, 0xFF, sizeof(uint16_t) * len);
+	return spi_sendRecv(slave, wdata, data, len, waittime);
 }
 static void spi_handleISR(struct spi *spi) {
 	uint32_t sr = spi->base->sr;
