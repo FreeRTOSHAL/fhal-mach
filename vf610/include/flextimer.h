@@ -65,10 +65,7 @@ struct ftm_reg {
 typedef enum {
 	NOT_CONFIG,
 	PERIODIC,
-	ONESHOT,
-	PWM, 
-	PERIODIC_CAPTURE,
-	ONESHOT_CAPTURE
+	ONESHOT
 } ftm_mode_t;
 
 struct ftm {
@@ -79,22 +76,23 @@ struct ftm {
 	void (*irqhandle)(struct ftm *ftm, void *data);
 	void (*captureHandle)(struct ftm *ftm, void *data, uint32_t channel);
 	bool isConfig;
-	void *data;
+	void *overflowData;
+	void *captureData;
 	int32_t ftmid;
 	uint64_t basetime;
 	int64_t adjust;
 };
-int32_t ftm_start(struct ftm *ftm, bool intEn);
+int32_t ftm_start(struct ftm *ftm);
 int32_t ftm_stop(struct ftm *ftm);
 int32_t ftm_oneshot(struct ftm *ftm, uint64_t us);
 int32_t ftm_periodic(struct ftm *ftm, uint64_t us);
 uint64_t ftm_getTime(struct ftm *ftm);
-int32_t ftm_pwm(struct ftm *ftm, uint64_t period);
 int32_t ftm_setupPWM(struct ftm *ftm, uint32_t channel);
 int32_t ftm_setPWMDutyCycle(struct ftm *ftm, uint32_t channel, uint64_t us);
-int32_t ftm_oneshot_capture(struct ftm *ftm, void (*irqhandle)(struct ftm *ftm, void *data, uint32_t channel));
-int32_t ftm_periodic_capture(struct ftm *ftm, void (*irqhandle)(struct ftm *ftm, void *data, uint32_t channel));
+int32_t ftm_setOverflowHandler(struct ftm *ftm, void (*irqhandle)(struct ftm *ftm, void *data), void *data);
+int32_t ftm_setCaptureHandler(struct ftm *ftm, void (*irqhandle)(struct ftm *ftm, void *data, uint32_t channel), void *data);
 int32_t ftm_setupCapture(struct ftm *ftm, uint32_t channel);
 int64_t ftm_getChannelTime(struct ftm *ftm, uint32_t channel);
-struct ftm *ftm_init(uint32_t index, uint32_t prescaler, void (*irqhandle)(struct ftm *ftm, void *data), void *data, uint64_t basetime, int64_t adjust);
+struct ftm *ftm_init(uint32_t index, uint32_t prescaler, uint64_t basetime, int64_t adjust);
+int32_t ftm_deinit(struct ftm *ftm);
 #endif

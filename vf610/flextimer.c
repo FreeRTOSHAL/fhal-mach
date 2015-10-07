@@ -166,37 +166,32 @@ static void inline handleIRQ(struct ftm *ftm) {
 	int i;
 	switch (ftm->mode) {
 		case ONESHOT:
-		case ONESHOT_CAPTURE:
 			ftm->mode = NOT_CONFIG;
 			ftm_stop(ftm);
 			break;
 		default:
 			break;
 	}
-	switch (ftm->mode) {
-		case ONESHOT_CAPTURE:
-		case PERIODIC_CAPTURE:
-			for (i = 0; i < 8; i++) {
-				uint32_t csc = ftm->base->ch[i].csc;
-				if ((csc & FTM_CNSC_CHIE) != 0 && FTM_CNSC_IS_CHF(csc)) {
-					if (ftm->captureHandle) {
-						ftm->captureHandle(ftm, ftm->data, i);
-					}
-					/* 
-					 * Clear Interrupt Flag
-					 */
-					while(FTM_CNSC_IS_CHF(ftm->base->ch[i].csc)) {
-						ftm->base->ch[i].csc &= ~FTM_CNSC_CHF;
-					}
+	if (ftm->captureHandle) {
+		uint32_t status = ftm->base->status;
+		if (status != 0) {
+			for (i = 0; i < 8 && status != 0; i++) {
+				if (status & 0x1) {
+					ftm->captureHandle(ftm, ftm->captureData, i);
 				}
+				status >>= 1;
 			}
-			break;
-		default:
-			break;
+			/* 
+			 * Clear Interrupt Flag
+			 */
+			while(ftm->base->status != 0) {
+				ftm->base->status = 0;
+			}
+		}
 	}
 	if (FTM_IS_OVERFLOWED(ftm->base->sc)) {
 		if (ftm->irqhandle) {
-			ftm->irqhandle(ftm, ftm->data);
+			ftm->irqhandle(ftm, ftm->overflowData);
 		}
 		clearIRQBit(ftm);
 	}
@@ -231,15 +226,12 @@ static inline void ftm_writeProtecDisable(struct ftm *ftm) {
 		ftm->base->mode |= FTM_MODE_WR_PROTECT_DIS;
 	} while(FTM_FMS_WR_PROTECT_IS_EN(ftm->base->fms));
 }
-int32_t ftm_start(struct ftm *ftm, bool intEn) {
+int32_t ftm_start(struct ftm *ftm) {
 	/* Start Only if mode is setup */
 	if (ftm->mode != NOT_CONFIG) {
 		ftm_writeProtecDisable(ftm);
 		/* Select System Clock as Clock base and enable clock */
 		ftm->base->sc |= FTM_SELECT_CLK(FTM_CLK_SYSTEM);
-		if (intEn) {
-			ftm->base->sc |= FTM_INTERRUPT_EN;
-		}
 		ftm_writeProtecEnable(ftm);
 	}
 	return 0;
@@ -247,7 +239,6 @@ int32_t ftm_start(struct ftm *ftm, bool intEn) {
 
 int32_t ftm_stop(struct ftm *ftm) {
 	ftm_writeProtecDisable(ftm);
-	ftm->base->sc &= ~FTM_INTERRUPT_EN;
 	/* Clear Clock Selection and disable clock */
 	ftm->base->sc &= ~FTM_SELECT_CLK_MASK;
 	/* 
@@ -260,7 +251,7 @@ int32_t ftm_stop(struct ftm *ftm) {
 	clearIRQBit(ftm);
 	return 0;
 }
-static int32_t configureFtm(struct ftm *ftm, uint64_t us, bool intEn) {
+static int32_t configureFtm(struct ftm *ftm, uint64_t us) {
 	uint64_t counterValue;
 	if (us != UINT64_MAX) {
 		us = (us * (ftm->basetime + ftm->adjust)) / ftm->basetime;
@@ -284,19 +275,19 @@ static int32_t configureFtm(struct ftm *ftm, uint64_t us, bool intEn) {
 	ftm->base->mod = counterValue;
 	ftm_writeProtecEnable(ftm);
 
-	ftm_start(ftm, intEn);
+	ftm_start(ftm);
 	return 0;
 }
 
 int32_t ftm_oneshot(struct ftm *ftm, uint64_t us) {
 	ftm->mode = ONESHOT;
-	return configureFtm(ftm, us, true);
+	return configureFtm(ftm, us);
 }
 
 
 int32_t ftm_periodic(struct ftm *ftm, uint64_t us) {
 	ftm->mode = PERIODIC;
-	return configureFtm(ftm, us, true);
+	return configureFtm(ftm, us);
 }
 
 uint64_t ftm_getTime(struct ftm *ftm) {
@@ -309,11 +300,6 @@ uint64_t ftm_getTime(struct ftm *ftm) {
 	us = (us * ftm->basetime) / (ftm->basetime + ftm->adjust);
 
 	return us;
-}
-
-int32_t ftm_pwm(struct ftm *ftm, uint64_t period) {
-	ftm->mode = PWM;
-	return configureFtm(ftm, period, false);
 }
 
 static int32_t setupChannelPin(struct ftm *ftm, uint32_t channel) {
@@ -332,9 +318,6 @@ static int32_t setupChannelPin(struct ftm *ftm, uint32_t channel) {
 
 int32_t ftm_setupPWM(struct ftm *ftm, uint32_t channel) {
 	int32_t ret;
-	if (ftm->mode != PWM) {
-		return -1;
-	}
 	ret = setupChannelPin(ftm, channel);
 	if (ret < 0) {
 		return -1;
@@ -358,28 +341,14 @@ int32_t ftm_setPWMDutyCycle(struct ftm *ftm, uint32_t channel, uint64_t us) {
 		/* Duty Cycle biger then period */
 		return -1;
 	}
-	ftm_writeProtecDisable(ftm);
 	ftm->base->ch[channel].cv = counterValue;
 	__ISB();
 	__DSB();
-	ftm_writeProtecEnable(ftm);
 	return 0;
 }
 
-int32_t ftm_oneshot_capture(struct ftm *ftm, void (*irqhandle)(struct ftm *ftm, void *data, uint32_t channel)) {
-	ftm->mode = ONESHOT_CAPTURE;
-	return configureFtm(ftm, UINT64_MAX, true);
-}
-int32_t ftm_periodic_capture(struct ftm *ftm, void (* irqhandle)(struct ftm *ftm, void *data, uint32_t channel)) {
-	ftm->mode = PERIODIC_CAPTURE;
-	ftm->captureHandle = irqhandle;
-	return configureFtm(ftm, UINT64_MAX, true);
-}
 int32_t ftm_setupCapture(struct ftm *ftm, uint32_t channel) {
 	int32_t ret;
-	if (ftm->mode != PERIODIC_CAPTURE && ftm->mode != ONESHOT_CAPTURE) {
-		return -1;
-	}
 	ret = setupChannelPin(ftm, channel);
 	if (ret < 0) {
 		return -1;
@@ -400,7 +369,7 @@ int64_t ftm_getChannelTime(struct ftm *ftm, uint32_t channel) {
 	return us;
 }
 
-struct ftm *ftm_init(uint32_t index, uint32_t prescaler, void (*irqhandle)(struct ftm *ftm, void *data), void *data, uint64_t basetime, int64_t adjust) {
+struct ftm *ftm_init(uint32_t index, uint32_t prescaler, uint64_t basetime, int64_t adjust) {
 	int i; 
 	struct ftm *ftm;;
 	if (index > 3) {
@@ -411,8 +380,10 @@ struct ftm *ftm_init(uint32_t index, uint32_t prescaler, void (*irqhandle)(struc
 		return ftm;
 	}
 	ftm->ftmid = index;
-	ftm->irqhandle = irqhandle;
-	ftm->data = data;
+	ftm->irqhandle = NULL;
+	ftm->overflowData = NULL;
+	ftm->captureHandle = NULL;
+	ftm->captureData = NULL;
 	ftm->prescaler = prescaler;
 	ftm->isConfig = true;
 	ftm->basetime = basetime;
@@ -464,4 +435,19 @@ struct ftm *ftm_init(uint32_t index, uint32_t prescaler, void (*irqhandle)(struc
 	irq_setPrio(ftm->irqnr, 0xFF);
 	irq_enable(ftm->irqnr);
 	return ftm;
+}
+int32_t ftm_setOverflowHandler(struct ftm *ftm, void (*irqhandle)(struct ftm *ftm, void *data), void *data) {
+	ftm->irqhandle = irqhandle;
+	ftm->overflowData = data;
+	ftm->base->sc |= FTM_INTERRUPT_EN;
+	return 0;
+}
+int32_t ftm_setCaptureHandler(struct ftm *ftm, void (*irqhandle)(struct ftm *ftm, void *data, uint32_t channel), void *data) {
+	ftm->captureHandle = irqhandle;
+	ftm->captureData = data;
+	return 0;
+}
+int32_t ftm_deinit(struct ftm *ftm) {
+	ftm_stop(ftm);
+	return 0;
 }
