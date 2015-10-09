@@ -79,6 +79,10 @@ config MACH_HAS_BUFFER
 config MACH_HAS_SPI
 	bool
 	default y
+config MACH_HAS_ADC
+	bool
+	default y
+# VF610 has NVIC but Interrupt Router must set befor NVIC
 #config MACH_HAS_NVIC
 #	bool
 #	default y

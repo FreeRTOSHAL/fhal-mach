@@ -5,6 +5,7 @@ obj-$(CONFIG_VF610_LPUART)+=lpuart.o
 obj-$(CONFIG_BUFFER_UART)+=buffer_uart.o
 obj-$(CONFIG_FLEXTIMER)+=flextimer.o
 obj-$(CONFIG_SPI)+=spi.o
+obj-$(CONFIG_ADC)+=adc.o
 
 obj-y+=clock.o
 obj-y+=sysinit.o loader.o gpio.o mux.o mscm_ir.o 
