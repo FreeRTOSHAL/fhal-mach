@@ -184,9 +184,7 @@ static void inline handleIRQ(struct ftm *ftm) {
 			/* 
 			 * Clear Interrupt Flag
 			 */
-			while(ftm->base->status != 0) {
-				ftm->base->status = 0;
-			}
+			ftm->base->status = 0;
 		}
 	}
 	if (FTM_IS_OVERFLOWED(ftm->base->sc)) {
