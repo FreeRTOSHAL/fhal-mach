@@ -147,7 +147,7 @@ struct spi_pin {
 };
 
 struct spi {
-	struct spi_prv prv;
+	struct spi_generic generic;
 	struct dspi *base;
 	bool shareCTAR;
 	uint8_t irqnr;
