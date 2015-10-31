@@ -1,0 +1,29 @@
+comment "M0 DesignStart Settings"
+config MACH_LD_SCRIPT
+	string 
+	default "mach/m0/m0.ld"
+config MACH_INCLUDE
+	string
+	default "-Imach/m0/include"
+config MACH_DEFINE_HEAP
+	bool
+	default y
+config MACH_HAS_UART
+	bool
+	default y
+config MACH_HAS_GPIO
+	bool
+	default y
+config MACH_HAS_NEWLIB
+	bool
+	default y
+#config MACH_HAS_SPI
+#	bool
+#	default y
+#config MACH_HAS_ADC
+#	bool
+#	default y
+# VF610 has NVIC but Interrupt Router must set befor NVIC
+config MACH_HAS_NVIC
+	bool
+	default y

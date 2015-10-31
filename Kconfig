@@ -12,11 +12,20 @@ choice
 		depends on ARCH_X86
 		depends on ARCH_X86_LINUX
 		select INCLUDE_xTaskGetCurrentTaskHandle
+	config MACH_M0
+		bool "M0 DesignStart"
+		depends on ARCH_ARM
+		depends on ARCH_ARM_CORTEX_M0
+		help
+			M0 DesignStart Prozessor
 endchoice
 if MACH_VF610=y
 source mach/vf610/Kconfig
 endif
 if MACH_LINUX=y
 source mach/linux/Kconfig
+endif
+if MACH_M0
+source mach/m0/Kconfig
 endif
 endmenu
