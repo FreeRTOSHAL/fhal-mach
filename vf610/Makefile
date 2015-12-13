@@ -9,3 +9,4 @@ obj-$(CONFIG_ADC)+=adc.o
 
 obj-y+=clock.o
 obj-y+=sysinit.o loader.o gpio.o mux.o mscm_ir.o 
+extra-y+=vf610.lds

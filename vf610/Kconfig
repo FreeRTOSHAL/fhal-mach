@@ -27,21 +27,16 @@ choice
 			WARNING Start out of A5 without Elf Loader imposible!
 endchoice
 
-if VF610_LOCATION_BOTH
+config MACH_INIT_STACK_SIZE
+	int "Init Stack Size"
+	default 600
+	help
+		Stack Size of Init Prozess. Stack size used by Interrupt and Init Prozess
+
 config MACH_LD_SCRIPT
 	string 
-	default "mach/vf610/vf610_both.ld"
-endif
-if VF610_LOCATION_SRAM
-config MACH_LD_SCRIPT
-	string 
-	default "mach/vf610/vf610_sram.ld"
-endif
-if VF610_LOCATION_TCM
-config MACH_LD_SCRIPT
-	string 
-	default "mach/vf610/vf610_tcm.ld"
-endif
+	default "mach/vf610/vf610.lds"
+
 config MACH_INCLUDE
 	string
 	default "-Imach/vf610/include"
