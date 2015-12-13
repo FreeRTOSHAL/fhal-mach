@@ -160,12 +160,12 @@ initial begin
   $display("%t: All Rights Reserved", $time);
   $display("%t: ----------------------------------------------\n", $time);
   $display("%t: Loading initial memory content...", $time);
-  fd = $fopen("ram.bin","rb");
+  fd = $fopen("test.bin","rb");
   for (i = 0; (i < (2**ram_log2)) && ($fread(data,fd) != -1); i = i + 1)
     ram[i] = {data[7:0],data[15:8],data[23:16],data[31:24]};
   $display("%t: ...complete\n", $time);
-  //$dumpfile("a.out.vcd");
-  //$dumpvars(0, cortexm0ds_tb );
+  $dumpfile("a.out.vcd");
+  $dumpvars(0, cortexm0ds_tb );
 end
 
 // Record transaction information from last accepted address phase

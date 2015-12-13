@@ -138,8 +138,8 @@ extern void _end_stack(void);
 extern uint32_t _end_text;
 extern uint32_t _start_data;
 extern uint32_t _end_data;
-extern uint32_t _start_bss;
-extern uint32_t _end_bss;
+extern uint32_t __bss_start__;
+extern uint32_t __bss_end__;
 extern uint32_t _data_table;
 extern uint32_t _data_table_end;
 extern uint32_t _start_stack;
@@ -392,8 +392,8 @@ void NAKED reset_handler() {
 		);
 	}
 	
-	dst = &_start_bss;
-	src = &_end_bss;
+	dst = &__bss_start__;
+	src = &__bss_end__;
 	// Clear the bss section
 	clearBss(dst, src);
 

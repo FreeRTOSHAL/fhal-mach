@@ -22,15 +22,11 @@ extern void _end_stack(void);
 extern uint32_t _end_text;
 extern uint32_t _start_data;
 extern uint32_t _end_data;
-extern uint32_t _start_bss;
-extern uint32_t _end_bss;
+extern uint32_t __bss_start__;
+extern uint32_t __bss_end__;
 extern uint32_t _data_table;
 extern uint32_t _data_table_end;
 extern uint32_t _start_stack;
-#ifdef CONFIG_VF610_LOCATION_BOTH
-extern uint32_t _start_bss_freertos;
-extern uint32_t _end_bss_freertos;
-#endif
 
 extern int main(void);
 
@@ -122,17 +118,11 @@ void NAKED reset_handler() {
 		);
 	}
 	
-	dst = &_start_bss;
-	src = &_end_bss;
+	dst = &__bss_start__;
+	src = &__bss_end__;
 	// Clear the bss section
 	clearBss(dst, src);
 
-#ifdef CONFIG_VF610_LOCATION_BOTH
-	dst = &_start_bss_freertos;
-	src = &_end_bss_freertos;
-	// Clear the bss section
-	clearBss(dst, src);
-#endif
 #ifdef CONFIG_CHECK_FOR_STACK_OVERFLOW
 	dst = &_start_stack;
 	/* Load pattern in Main Stack for stack overflow detection */

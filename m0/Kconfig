@@ -1,13 +1,18 @@
 comment "M0 DesignStart Settings"
 config MACH_LD_SCRIPT
 	string 
-	default "mach/m0/m0.ld"
+	default "mach/m0/m0.lds"
 config MACH_INCLUDE
 	string
 	default "-Imach/m0/include"
 config MACH_DEFINE_HEAP
 	bool
 	default y
+config MACH_INIT_STACK_SIZE
+	int "Init Stack Size"
+	default 600
+	help
+		Stack Size of Init Prozess. Stack size used by Interrupt and Init Prozess
 config MACH_HAS_UART
 	bool
 	default y

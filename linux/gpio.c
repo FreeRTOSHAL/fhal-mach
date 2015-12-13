@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <gpio.h>
 struct gpio {
-	uint32_t bank;
+	int32_t dummy;
 };
 struct gpio_pin {
 	struct gpio *gpio;
@@ -12,7 +12,7 @@ struct gpio_pin {
 	enum gpio_direction dir;
 };
 
-struct gpio *gpio_init(uint8_t bank, struct mux *mux) {
+struct gpio *gpio_init() {
 	struct gpio *gpio = calloc(1, sizeof(struct gpio));
 	if (gpio == NULL) {
 		goto gpio_init_error_0;
@@ -51,7 +51,7 @@ gpio_getPin_error0:
 	return NULL;
 }
 static void printStatus(struct gpio_pin *pin) {
-	printf("Bank: %d Pin: %d Value: %d Dir: %d\n", pin->gpio->bank, pin->pin, pin->oldvalue, pin->dir);
+	printf("Pin: %d Value: %d Dir: %d\n", pin->pin, pin->oldvalue, pin->dir);
 }
 int32_t gpio_setPinValue(struct gpio_pin *pin, bool value) {
 	if (pin->dir != GPIO_OUTPUT) {
