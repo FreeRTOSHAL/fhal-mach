@@ -3,7 +3,7 @@
 #define UART_PRV
 #include <uart_prv.h>
 
-#define M0_UART 0x40000000U
+#define M0_UART 0x40001000U
 
 
 struct m0uart {
@@ -23,13 +23,13 @@ struct uart {
 #ifdef CONFIG_UART_MULTI
 static struct uart_ops ops;
 #endif
-struct uart  uart_data01 = {
+struct uart  uart_data02 = {
 #ifdef CONFIG_UART_MULTI
 	.ops = &ops,
 #endif
 	.console = (volatile unsigned char *) M0_UART,
 };
-UART_INIT(m0, port, bautrate) {
+UART_INIT(m0_2, port, bautrate) {
 	int32_t ret;
 	if (port > 6) {
 		return NULL;
@@ -48,20 +48,20 @@ UART_INIT(m0, port, bautrate) {
 	return uart;
 }
 
-UART_DEINIT(m0, uart) {
+UART_DEINIT(m0_2, uart) {
 	return 0;
 }
-UART_GETC(m0, uart, waittime) {
+UART_GETC(m0_2, uart, waittime) {
 	return -1;
 }
-UART_PUTC(m0, uart, c, waittime) {
+UART_PUTC(m0_2, uart, c, waittime) {
 	uart_lock(uart, waittime, -1);
 	*uart->console = c;
 	uart_unlock(uart, -1);
 	return 0;
 }
 
-UART_ADDDEV(m0, uart_data01);
+UART_ADDDEV(m0_2, uart_data02);
 #ifdef CONFIG_UART_MULTI
-UART_OPS(m0);
+UART_OPS(m0_2);
 #endif

@@ -3,9 +3,29 @@
 
 #define UART_PRV
 #include <uart_prv.h>
-#include "vf610_uart.h"
 #include <buffer.h>
-struct uart *buffer_uart_init(struct uart *uart, uint8_t port, uint32_t bautrate) {
+
+struct uart {
+	struct uart_generic gen;
+	struct buffer *rx;
+	struct buffer *tx;
+};
+#define BUFFER_UART_RX ((struct buffer_base *) 0x3f07fbff)
+#define BUFFER_UART_TX ((struct buffer_base *) 0x3f07fd17)
+#define BUFFER_CPU2CPU_INTNR 1
+UART_INIT(buffer, port, bautrate) {
+	struct uart *uart =(struct uart *) uarts[port];
+	int32_t ret;
+	ret = uart_generic_init(uart);
+	if (ret < 0) {
+		return NULL;
+	}
+	/*
+	 * Already Init
+	 */
+	if (ret > 0) {
+		return uart;
+	}
 	uart->rx = buffer_init(BUFFER_UART_RX, 256, sizeof(char), true, 1);
 	if (uart->rx == NULL) {
 		return NULL;
@@ -16,7 +36,7 @@ struct uart *buffer_uart_init(struct uart *uart, uint8_t port, uint32_t bautrate
 	}
 	return uart;
 }
-int32_t buffer_uart_deinit(struct uart *uart) {
+UART_DEINIT(buffer, uart) {
 	int32_t ret;
 	ret = buffer_deinit(uart->rx);
 	if (ret < 0) {
@@ -29,17 +49,34 @@ int32_t buffer_uart_deinit(struct uart *uart) {
 	return 0;
 	
 }
-char buffer_uart_getc(struct uart *uart, TickType_t waittime) {
+UART_GETC(buffer, uart, waittime) {
 	char c;
 	int32_t ret;
+	uart_lock(uart, waittime, -1);
 	ret = buffer_read(uart->rx, (uint8_t *) &c, 1, waittime);
 	if (ret < 0) {
-		return ret;
+		goto buffer_uart_getc_error0;
 	}
+	uart_unlock(uart, -1);
 	return c;
-}
-int32_t buffer_uart_putc(struct uart *uart, char c, TickType_t waittime) {
-	int32_t ret;
-	ret = buffer_write(uart->tx, (uint8_t *) &c, 1);
+buffer_uart_getc_error0:
+	uart_unlock(uart, -1);
 	return ret;
 }
+UART_PUTC(buffer, uart, c, waittime) {
+	int32_t ret;
+	uart_lock(uart, waittime, -1);
+	ret = buffer_write(uart->tx, (uint8_t *) &c, 1);
+	uart_unlock(uart, -1);
+	return ret;
+}
+
+UART_OPS(buffer);
+
+static struct uart uart_data00 = {
+	.gen.ops = &ops,
+	.rx = NULL,
+	.tx = NULL,
+};
+
+UART_ADDDEV(buffer, uart_data00);

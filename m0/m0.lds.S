@@ -1,4 +1,5 @@
 #include <linker.h>
+#include <driver.h>
 
 ENTRY(reset_handler)
 
@@ -19,6 +20,8 @@ SECTIONS_START
 		DATA_TABLE_STOP
 		TEXT_DEFAULT
 	TEXT_STOP(flash)
+
+	DEV(uart, flash)
 
 	RODATA_START
 		RODATA_DEFAULT

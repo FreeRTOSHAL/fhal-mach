@@ -34,6 +34,7 @@ localparam clk_period = 2;            // Simulation cycles per clock period
 localparam por_delay  = 1001;           // Simulation cycles of power-on-reset
 localparam ram_log2   = 18;             // Power of two of RAM words
 localparam addr_tty   = 32'h40000000;   // Address of output console
+localparam addr_tty2  = 32'h40001000;   // Address of output console
 
 //------------------------------------------------------------------------------
 // Define registers for clock, reset and memory
@@ -227,6 +228,18 @@ wire hsel_tty = (haddr_last == addr_tty);
 
 always @(posedge HCLK)
   if(HRESETn & HREADY & hwrite_last & hsel_tty & htrans_last[1]) begin
+    if(HWDATA[7:0] != 8'hFF)
+      $write("%c", HWDATA[7:0]);
+    else begin
+      $display("%t: Simulation stop requested by CPU\n", $time);
+      $finish(2);
+    end
+  end
+
+wire hsel_tty2 = (haddr_last == addr_tty2);
+
+always @(posedge HCLK)
+  if(HRESETn & HREADY & hwrite_last & hsel_tty2 & htrans_last[1]) begin
     if(HWDATA[7:0] != 8'hFF)
       $write("%c", HWDATA[7:0]);
     else begin
