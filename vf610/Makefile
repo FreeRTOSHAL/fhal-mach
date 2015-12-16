@@ -1,6 +1,5 @@
 obj-$(CONFIG_VF610_CACHE)+=cache.o
 obj-$(CONFIG_BUFFER)+=buffer.o
-obj-$(CONFIG_VF610_UART)+=uart.o
 obj-$(CONFIG_VF610_LPUART)+=lpuart.o
 obj-$(CONFIG_BUFFER_UART)+=buffer_uart.o
 obj-$(CONFIG_FLEXTIMER)+=flextimer.o
