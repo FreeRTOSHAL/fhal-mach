@@ -11,23 +11,8 @@ struct m0uart {
 };
 
 struct uart {
-	bool init;
-#ifdef CONFIG_UART_THREAD_SAVE
-	SemaphoreHandle_t lock;	
-#endif
-#ifdef CONFIG_UART_MULTI
-	struct uart_ops *ops;
-#endif
+	struct uart_generic gen;
 	volatile unsigned char *console;
-};
-#ifdef CONFIG_UART_MULTI
-static struct uart_ops ops;
-#endif
-struct uart  uart_data01 = {
-#ifdef CONFIG_UART_MULTI
-	.ops = &ops,
-#endif
-	.console = (volatile unsigned char *) M0_UART,
 };
 UART_INIT(m0, port, bautrate) {
 	int32_t ret;
@@ -60,8 +45,17 @@ UART_PUTC(m0, uart, c, waittime) {
 	uart_unlock(uart, -1);
 	return 0;
 }
+UART_GETC_ISR(m0, uart) {
+	return -1;
+}
+UART_PUTC_ISR(m0, uart, c) {
+	*uart->console = c;
+	return 0;
+}
 
-UART_ADDDEV(m0, uart_data01);
-#ifdef CONFIG_UART_MULTI
 UART_OPS(m0);
-#endif
+struct uart  uart_data01 = {
+	UART_INIT_DEV(m0)
+	.console = (volatile unsigned char *) M0_UART,
+};
+UART_ADDDEV(m0, uart_data01);

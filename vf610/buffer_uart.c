@@ -14,7 +14,7 @@ struct uart {
 #define BUFFER_UART_TX ((struct buffer_base *) 0x3f07fd17)
 #define BUFFER_CPU2CPU_INTNR 1
 UART_INIT(buffer, port, bautrate) {
-	struct uart *uart =(struct uart *) uarts[port];
+	struct uart *uart = (struct uart *) uarts[port];
 	int32_t ret;
 	ret = uart_generic_init(uart);
 	if (ret < 0) {
@@ -89,7 +89,7 @@ UART_PUTC_ISR(buffer, uart, c) {
 UART_OPS(buffer);
 
 static struct uart uart_data00 = {
-	.gen.ops = &ops,
+	UART_INIT_DEV(buffer) 
 	.rx = NULL,
 	.tx = NULL,
 };
