@@ -98,36 +98,58 @@ UART_PUTC(lp, uart, c, waittime) {
 	return 0;
 }
 
+UART_GETC_ISR(lp, uart) {
+	(void) uart;
+	return 0;
+}
+UART_PUTC_ISR(lp, uart, c) {
+	volatile register struct lpuart_fsl *base = uart->base;
+	while (!(uart->base->us1 & US1_TDRE));
+	base->ud = c;
+	return 0;
+}
+
 UART_OPS(lp);
 
+#ifdef CONFIG_VF610_LPUART00
 static struct uart uart_data00 = {
 	.base = (volatile struct lpuart_fsl *) VF610_UART0,
 	.ops = &ops,
 };
+UART_ADDDEV(lp, uart_data00);
+#endif
+#ifdef CONFIG_VF610_LPUART01
 static struct uart uart_data01 = {
 	.base = (volatile struct lpuart_fsl *) VF610_UART1,
 	.ops = &ops,
 };
+UART_ADDDEV(lp, uart_data01);
+#endif
+#ifdef CONFIG_VF610_LPUART02
 static struct uart uart_data02 = {
 	.base = (volatile struct lpuart_fsl *) VF610_UART2,
 	.ops = &ops,
 };
+UART_ADDDEV(lp, uart_data02);
+#endif
+#ifdef CONFIG_VF610_LPUART03
 static struct uart uart_data03 = {
 	.base = (volatile struct lpuart_fsl *) VF610_UART3,
 	.ops = &ops,
 };
+UART_ADDDEV(lp, uart_data03);
+#endif
+#ifdef CONFIG_VF610_LPUART04
 static struct uart uart_data04 = {
 	.base = (volatile struct lpuart_fsl *) VF610_UART4,
 	.ops = &ops,
 };
+UART_ADDDEV(lp, uart_data04);
+#endif
+#ifdef CONFIG_VF610_LPUART05
 static struct uart uart_data05 = {
 	.base = (volatile struct lpuart_fsl *) VF610_UART5,
 	.ops = &ops,
 };
-
-UART_ADDDEV(lp, uart_data00);
-UART_ADDDEV(lp, uart_data01);
-UART_ADDDEV(lp, uart_data02);
-UART_ADDDEV(lp, uart_data03);
-UART_ADDDEV(lp, uart_data04);
 UART_ADDDEV(lp, uart_data05);
+#endif

@@ -71,6 +71,21 @@ UART_PUTC(buffer, uart, c, waittime) {
 	return ret;
 }
 
+UART_GETC_ISR(buffer, uart) {
+	char c;
+	int32_t ret;
+	ret = buffer_read(uart->rx, (uint8_t *) &c, 1, 0); /* TODO ISR Method */
+	if (ret < 0) {
+		return ret;
+	}
+	return c;
+}
+UART_PUTC_ISR(buffer, uart, c) {
+	int32_t ret;
+	ret = buffer_write(uart->tx, (uint8_t *) &c, 1);
+	return ret;
+}
+
 UART_OPS(buffer);
 
 static struct uart uart_data00 = {
