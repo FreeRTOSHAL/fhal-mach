@@ -41,13 +41,7 @@ struct lpuart_fsl {
 #define VF610_UART4 0x400A9000 
 #define VF610_UART5 0x400AA000 
 struct uart {
-	bool init;
-#ifdef CONFIG_UART_THREAD_SAVE
-	SemaphoreHandle_t lock;	
-#endif
-#ifdef CONFIG_UART_MULTI
-	struct uart_ops *ops;
-#endif
+	struct uart_generic gen;
 	volatile struct lpuart_fsl *base;
 };
 
@@ -113,43 +107,44 @@ UART_OPS(lp);
 
 #ifdef CONFIG_VF610_LPUART00
 static struct uart uart_data00 = {
+	UART_INIT_DEV(lp)
 	.base = (volatile struct lpuart_fsl *) VF610_UART0,
-	.ops = &ops,
 };
 UART_ADDDEV(lp, uart_data00);
 #endif
 #ifdef CONFIG_VF610_LPUART01
 static struct uart uart_data01 = {
+	UART_INIT_DEV(lp)
 	.base = (volatile struct lpuart_fsl *) VF610_UART1,
-	.ops = &ops,
 };
 UART_ADDDEV(lp, uart_data01);
 #endif
 #ifdef CONFIG_VF610_LPUART02
 static struct uart uart_data02 = {
+	UART_INIT_DEV(lp)
 	.base = (volatile struct lpuart_fsl *) VF610_UART2,
-	.ops = &ops,
 };
 UART_ADDDEV(lp, uart_data02);
 #endif
 #ifdef CONFIG_VF610_LPUART03
 static struct uart uart_data03 = {
+	UART_INIT_DEV(lp)
 	.base = (volatile struct lpuart_fsl *) VF610_UART3,
-	.ops = &ops,
+};
 };
 UART_ADDDEV(lp, uart_data03);
 #endif
 #ifdef CONFIG_VF610_LPUART04
 static struct uart uart_data04 = {
+	UART_INIT_DEV(lp)
 	.base = (volatile struct lpuart_fsl *) VF610_UART4,
-	.ops = &ops,
 };
 UART_ADDDEV(lp, uart_data04);
 #endif
 #ifdef CONFIG_VF610_LPUART05
 static struct uart uart_data05 = {
+	UART_INIT_DEV(lp)
 	.base = (volatile struct lpuart_fsl *) VF610_UART5,
-	.ops = &ops,
 };
 UART_ADDDEV(lp, uart_data05);
 #endif
