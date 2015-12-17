@@ -46,9 +46,33 @@ config VF610_UART
 	default y
 	select UART_GENERIC_STRING
 	select UART_GENERIC_BYTE
-config VF610_LPUART
+menuconfig VF610_LPUART
 	bool "LPUart Driver"
 	depends on VF610_UART
+	default y
+config VF610_LPUART00
+	bool "LPUART Device 0"
+	depends on VF610_LPUART
+	default y
+config VF610_LPUART01
+	bool "LPUART Device 1"
+	depends on VF610_LPUART
+	default y
+config VF610_LPUART02
+	bool "LPUART Device 2"
+	depends on VF610_LPUART
+	default y
+config VF610_LPUART03
+	bool "LPUART Device 3"
+	depends on VF610_LPUART
+	default y
+config VF610_LPUART04
+	bool "LPUART Device 4"
+	depends on VF610_LPUART
+	default y
+config VF610_LPUART05
+	bool "LPUART Device 5"
+	depends on VF610_LPUART
 	default y
 config BUFFER_UART
 	bool "Buffer Driver"
