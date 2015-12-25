@@ -65,6 +65,10 @@ SECTIONS
   PROVIDE (__etext = .);
   PROVIDE (_etext = .);
   PROVIDE (etext = .);
+
+  /* DEV(uart, falsh) Linux Linker Script has no location */
+  .rodata.dev.uart : { _dev_uart = .; KEEP(*(.rodata.dev.uart)) }
+
   .rodata         : { *(.rodata .rodata.* .gnu.linkonce.r.*) }
   .rodata1        : { *(.rodata1) }
   .eh_frame_hdr : { *(.eh_frame_hdr) }
