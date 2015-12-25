@@ -31,7 +31,7 @@ int32_t gpio_setDirection(struct gpio_pin *pin, enum gpio_direction dir) {
 	pin->dir = dir;
 	return 0;
 }
-struct gpio_pin *gpio_getPin(struct gpio *gpio, uint8_t pin, enum gpio_direction dir) {
+struct gpio_pin *gpioPin_init(struct gpio *gpio, uint8_t pin, enum gpio_direction dir, enum gpio_setting setting) {
 	int32_t ret;
 	struct gpio_pin *gpio_pin= calloc(1, sizeof(struct gpio_pin));
 	if (gpio_pin == NULL) {
@@ -53,17 +53,17 @@ gpio_getPin_error0:
 static void printStatus(struct gpio_pin *pin) {
 	printf("Pin: %d Value: %d Dir: %d\n", pin->pin, pin->oldvalue, pin->dir);
 }
-int32_t gpio_setPinValue(struct gpio_pin *pin, bool value) {
+int32_t gpioPin_setValue(struct gpio_pin *pin, bool value) {
 	if (pin->dir != GPIO_OUTPUT) {
 		return -1;
 	}
 	if (value) {
-		return gpio_setPin(pin);
+		return gpioPin_setPin(pin);
 	} else {
-		return gpio_clearPin(pin);
+		return gpioPin_clearPin(pin);
 	}
 }
-int32_t gpio_setPin(struct gpio_pin *pin) {
+int32_t gpioPin_setPin(struct gpio_pin *pin) {
 	if (pin->dir != GPIO_OUTPUT) {
 		return -1;
 	}
@@ -71,7 +71,7 @@ int32_t gpio_setPin(struct gpio_pin *pin) {
 	printStatus(pin);
 	return 0;
 }
-int32_t gpio_clearPin(struct gpio_pin *pin) {
+int32_t gpioPin_clearPin(struct gpio_pin *pin) {
 	if (pin->dir != GPIO_OUTPUT) {
 		return -1;
 	}
@@ -79,9 +79,9 @@ int32_t gpio_clearPin(struct gpio_pin *pin) {
 	printStatus(pin);
 	return 0;
 }
-int32_t gpio_togglePin(struct gpio_pin *pin) {
-	return gpio_setPinValue(pin, !pin->oldvalue);
+int32_t gpioPin_togglePin(struct gpio_pin *pin) {
+	return gpioPin_setValue(pin, !pin->oldvalue);
 }
-bool gpio_getPinValue(struct gpio_pin *pin) {
+bool gpioPin_getValue(struct gpio_pin *pin) {
 	return pin->oldvalue;
 }

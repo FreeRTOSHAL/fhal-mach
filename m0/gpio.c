@@ -25,7 +25,7 @@ int32_t gpio_deinit(struct gpio *gpio) {
 int32_t gpio_setDirection(struct gpio_pin *pin, enum gpio_direction dir) {
 	return 0;
 }
-struct gpio_pin *gpio_getPin(struct gpio *gpio, uint8_t pin, enum gpio_direction dir) {
+struct gpio_pin *gpioPin_init(struct gpio *gpio, uint8_t pin, enum gpio_direction dir, enum gpio_setting setting) {
 	struct gpio_pin *gpio_pin= pvPortMalloc(sizeof(struct gpio_pin));
 	if (gpio_pin == NULL) {
 		goto gpio_getPin_error0;
@@ -37,18 +37,40 @@ struct gpio_pin *gpio_getPin(struct gpio *gpio, uint8_t pin, enum gpio_direction
 gpio_getPin_error0:
 	return NULL;
 }
-int32_t gpio_setPinValue(struct gpio_pin *pin, bool value) {
+int32_t gpioPin_deinit(struct gpio_pin *pin) {
+	vPortFree(pin);
 	return 0;
 }
-int32_t gpio_setPin(struct gpio_pin *pin) {
+int32_t gpioPin_setValue(struct gpio_pin *pin, bool value) {
 	return 0;
 }
-int32_t gpio_clearPin(struct gpio_pin *pin) {
+int32_t gpioPin_setPin(struct gpio_pin *pin) {
 	return 0;
 }
-int32_t gpio_togglePin(struct gpio_pin *pin) {
+int32_t gpioPin_clearPin(struct gpio_pin *pin) {
 	return 0;
 }
-bool gpio_getPinValue(struct gpio_pin *pin) {
+int32_t gpioPin_togglePin(struct gpio_pin *pin) {
+	return 0;
+}
+bool gpioPin_getValue(struct gpio_pin *pin) {
 	return true;
+}
+int32_t gpioPin_enableInterrupt(struct gpio_pin *pin) {
+	return 0;
+}
+int32_t gpioPin_disableInterrupt(struct gpio_pin *pin) {
+	return 0;
+}
+int32_t gpioPin_setCallback(struct gpio_pin *pin, bool (*calback)(struct gpio_pin *pin, void *data), void *data, enum gpio_interrupt inter) {
+	return 0;
+}
+int32_t gpioPin_setDirection(struct gpio_pin *pin, enum gpio_direction dir) {
+	return 0;
+}
+int32_t gpioPin_setSetting(struct gpio_pin *pin, enum gpio_setting setting) {
+	return 0;
+}
+int32_t gpioPin_SchmittTrigger(struct gpio_pin *pin, bool schmit) {
+	return 0;
 }
