@@ -15,6 +15,6 @@ int32_t mux_deinit(struct mux *mux) {
 	(void) mux;
 	return 0;
 }
-int32_t mux_pinctl(struct mux *mux, uint32_t pin, uint32_t ctl) {
+int32_t mux_pinctl(struct mux *mux, uint32_t pin, uint32_t ctl, uint32_t extra) {
 	return 0;
 }

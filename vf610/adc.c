@@ -396,7 +396,7 @@ int32_t adc_channel(struct adc *adc, uint32_t channel) {
 	if (channel < 8) {
 		struct mux *mux = mux_init();
 		struct adc_pin *pin = &pins[adc->index][channel];
-		return mux_pinctl(mux, pin->pin, PAD_CTL_MODE(pin->mode) | ADC_PIN_CTRL);
+		return mux_pinctl(mux, pin->pin, MUX_CTL_MODE(pin->mode), ADC_PIN_CTRL);
 	}
 	return 0;
 }

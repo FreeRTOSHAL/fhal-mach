@@ -121,7 +121,7 @@
 #define SPI_CTAR_MAX 2
 
 
-#define SPI_BASE_PAD_CTRL (PAD_CTL_SPEED_HIGH | PAD_CTL_HYS | PAD_CTL_DSE_20ohm | PAD_CTL_PUS_100K_UP)
+#define SPI_BASE_PAD_CTRL (PAD_CTL_SPEED_HIGH | PAD_CTL_DSE_20ohm | PAD_CTL_PUS_100K_UP)
 #define SPI_OUT_PAD_CTRL (SPI_BASE_PAD_CTRL)
 #define SPI_IN_PAD_CTRL (SPI_BASE_PAD_CTRL | PAD_CTL_IBE_ENABLE)
 
@@ -387,31 +387,31 @@ static const struct spi_pin pins[4][9] = {
 static void setupPin(const struct spi_pin *pin) {
 	struct mux *mux = mux_init();
 	if (pin->out) {
-		mux_pinctl(mux, pin->pin, PAD_CTL_MODE(pin->mode) | SPI_OUT_PAD_CTRL);
+		mux_pinctl(mux, pin->pin, MUX_CTL_MODE(pin->mode) | MUX_CTL_SCHMITT, SPI_OUT_PAD_CTRL);
 	} else {
-		mux_pinctl(mux, pin->pin, PAD_CTL_MODE(pin->mode) | SPI_IN_PAD_CTRL);
+		mux_pinctl(mux, pin->pin, MUX_CTL_MODE(pin->mode) | MUX_CTL_SCHMITT, SPI_IN_PAD_CTRL);
 	}
 	/*
 	 * Config Daisy Chain Pins
 	 */
 	switch (pin->pin) {
 		case PTC8:
-			mux_pinctl(mux, 0x2F8 / 4, 0);
+			mux_pinctl(mux, 0x2F8 / 4, 0, 0);
 			break;
 		case PTC6:
-			mux_pinctl(mux, 0x2FC / 4, 0);
+			mux_pinctl(mux, 0x2FC / 4, 0, 0);
 			break;
 		case PTC5:
-			mux_pinctl(mux, 0x300 / 4, 0);
+			mux_pinctl(mux, 0x300 / 4, 0 ,0);
 			break;
 		case PTD8:
-			mux_pinctl(mux, 0x2F8 / 4, 1);
+			mux_pinctl(mux, 0x2F8 / 4, 0, 1);
 			break;
 		case PTD6:
-			mux_pinctl(mux, 0x2FC / 4, 1);
+			mux_pinctl(mux, 0x2FC / 4, 0, 1);
 			break;
 		case PTD5:
-			mux_pinctl(mux, 0x300 / 4, 1);
+			mux_pinctl(mux, 0x300 / 4, 0, 1);
 			break;
 		default:
 			break;
@@ -639,16 +639,16 @@ static int32_t spi_setup(struct spi_slave *slave) {
 		if (gpio == NULL) {
 			return -1;
 		}
-		slave->pin = gpio_getPin(gpio, slave->options.gpio, GPIO_OUTPUT);
+		slave->pin = gpioPin_init(gpio, slave->options.gpio, GPIO_OUTPUT, GPIO_PULL_UP);
 		if (slave->pin == NULL) {
 			return -1;
 		}
 		if (slave->options.csLowInactive) {
 			SPI_PRINTF("Clear Pin: %d\n", slave->options.gpio);
-			ret = gpio_clearPin(slave->pin);
+			ret = gpioPin_clearPin(slave->pin);
 		} else {
 			SPI_PRINTF("Set Pin: %d\n", slave->options.gpio);
-			ret = gpio_setPin(slave->pin);
+			ret = gpioPin_setPin(slave->pin);
 		}
 		if (ret < 0) {
 			return -1;
@@ -732,10 +732,10 @@ static void spi_gpioSet(struct spi_slave *slave) {
 	if (slave->pin != NULL) {
 		if (slave->options.csLowInactive) {
 			SPI_PRINTF("Set Pin %d\n", slave->options.gpio);
-			gpio_setPin(slave->pin);
+			gpioPin_setPin(slave->pin);
 		} else {
 			SPI_PRINTF("Clear Pin %d\n", slave->options.gpio);
-			gpio_clearPin(slave->pin);
+			gpioPin_clearPin(slave->pin);
 		}
 	}
 }
@@ -744,10 +744,10 @@ static void spi_gpioClear(struct spi_slave *slave) {
 	if (slave->pin != NULL) {
 		if (slave->options.csLowInactive) {
 			SPI_PRINTF("Clear Pin %d\n", slave->options.gpio);
-			gpio_clearPin(slave->pin);
+			gpioPin_clearPin(slave->pin);
 		} else {
 			SPI_PRINTF("Set Pin %d\n", slave->options.gpio);
-			gpio_setPin(slave->pin);
+			gpioPin_setPin(slave->pin);
 		}
 	}
 }

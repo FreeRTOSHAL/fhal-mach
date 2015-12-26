@@ -307,7 +307,7 @@ static int32_t setupChannelPin(struct ftm *ftm, uint32_t channel) {
 	if (pin->pin == 0) {
 		return -1;
 	}
-	ret = mux_pinctl(mux, pin->pin, PAD_CTL_MODE(pin->mode) | VF610_PWM_GENERAL_CTRL);
+	ret = mux_pinctl(mux, pin->pin, MUX_CTL_MODE(pin->mode), VF610_PWM_GENERAL_CTRL);
 	if (ret < 0) {
 		return -1;
 	}
