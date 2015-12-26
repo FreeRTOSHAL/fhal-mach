@@ -22,14 +22,14 @@ int32_t mux_deinit(struct mux *mux) {
 }
 int32_t mux_pinctl(struct mux*mux, uint32_t pin, uint32_t ctl, uint32_t extra) {
 	mux->base->pad[pin] = 0;
-	if (ctl | MUX_CTL_OPEN) {
+	if (ctl & MUX_CTL_OPEN) {
 		mux->base->pad[pin] |= PAD_CTL_ODE;
-	} else if (ctl | MUX_CTL_PULL_DOWN) {
+	} else if (ctl & MUX_CTL_PULL_DOWN) {
 		mux->base->pad[pin] |= PAD_CTL_PUS_100K_DOWN;
-	} else if (ctl | MUX_CTL_PULL_UP) {
+	} else if (ctl & MUX_CTL_PULL_UP) {
 		mux->base->pad[pin] |= PAD_CTL_PUS_47K_UP;
 	}
-	if (ctl | MUX_CTL_SCHMITT) {
+	if (ctl & MUX_CTL_SCHMITT) {
 		mux->base->pad[pin] |= PAD_CTL_HYS;
 	}
 	if ((ctl >> 8 ) & 0xF) {
