@@ -8,7 +8,7 @@
 #define MODE5 0x5
 #define MODE6 0x6
 #define MODE7 0x7
-#define PAD_CTL_MODE(mode) 		(mode << 20)
+#define PAD_CTL_MODE(mode) 		((mode) << 20)
 #define PAD_CTL_SPEED_LOW               (1 << 12)
 #define PAD_CTL_SPEED_MED               (2 << 12)
 #define PAD_CTL_SPEED_HIGH              (3 << 12)
