@@ -70,32 +70,33 @@ int32_t gpio_deinit(struct gpio *gpio) {
 #define HMI2015_GPIO_GENERAL_CTRL (PAD_CTL_PKE | PAD_CTL_PUE | PAD_CTL_SPEED_MED)
 static int32_t gpioPin_setup(struct gpio_pin *pin) {
 	struct mux *mux = mux_init();
-	uint32_t ctl = PAD_CTL_MODE(MODE0) | HMI2015_GPIO_GENERAL_CTRL;
+	uint32_t ctl = PAD_CTL_MODE(MODE0);
+	uint32_t extra = HMI2015_GPIO_GENERAL_CTRL;
 	int32_t ret;
 	switch (pin->dir) {
 		case GPIO_INPUT:
-			ctl |= PAD_CTL_IBE_ENABLE;
+			extra |= PAD_CTL_IBE_ENABLE;
 			if (pin->schmittTrigger) {
-				ctl |= PAD_CTL_HYS;
+				ctl |= MUX_CTL_SCHMITT;
 			}
 			break;
 		case GPIO_OUTPUT:
-			ctl |= PAD_CTL_OBE_ENABLE | PAD_CTL_DSE_25ohm;
+			extra |= PAD_CTL_OBE_ENABLE | PAD_CTL_DSE_25ohm;
 			break;
 			
 	}
 	switch (pin->setting) {
 		case GPIO_OPEN:
-			ctl |= PAD_CTL_ODE;
+			ctl |= MUX_CTL_OPEN;
 			break;
 		case GPIO_PULL_DOWN:
-			ctl |= PAD_CTL_PUS_100K_DOWN;
+			ctl |= MUX_CTL_PULL_DOWN;
 			break;
 		case GPIO_PULL_UP:
-			ctl |= PAD_CTL_PUS_47K_UP;
+			ctl |= MUX_CTL_PULL_UP;
 			break;
 	}
-	ret = mux_pinctl(mux, pin->pin + (pin->bank * 32), ctl);
+	ret = mux_pinctl(mux, pin->pin + (pin->bank * 32), ctl, extra);
 	return ret;
 }
 int32_t gpioPin_setDirection(struct gpio_pin *pin, enum gpio_direction dir) {
@@ -138,7 +139,7 @@ struct gpio_pin *gpioPin_init(struct gpio *gpio, uint8_t pin, enum gpio_directio
 	if (ret < 0) {
 		goto gpio_getPin_error1;
 	}
-	ret = gpioPin_setSetting(setting);
+	ret = gpioPin_setSetting(gpio_pin, setting);
 	if (ret < 0) {
 		goto gpio_getPin_error1;
  	}
