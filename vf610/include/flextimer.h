@@ -2,6 +2,7 @@
 #define FLEXTIMER_H_
 #include <stdint.h>
 #include <stdbool.h>
+#include <timer.h>
 
 
 int32_t ftm_setupPWM(struct timer *ftm, uint32_t channel);
