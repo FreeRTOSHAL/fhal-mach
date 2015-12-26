@@ -101,6 +101,9 @@ config MACH_HAS_SPI
 config MACH_HAS_ADC
 	bool
 	default y
+config MACH_HAS_TIMER
+	bool
+	default y
 # VF610 has NVIC but Interrupt Router must set befor NVIC
 #config MACH_HAS_NVIC
 #	bool
@@ -110,6 +113,7 @@ config VF610_CACHE
 	default n
 	select CACHE
 config FLEXTIMER
+	depends on TIMER
 	bool "Active Flextimer"
 	default n
 config SPIDEBUG

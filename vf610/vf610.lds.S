@@ -46,6 +46,7 @@ SECTIONS_START
 	TEXT_STOP(flash)
 
 	DEV(uart, flash)
+	DEV(timer, flash)
 
 	RODATA_START
 		RODATA_DEFAULT
