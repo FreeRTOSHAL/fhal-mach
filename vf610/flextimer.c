@@ -84,7 +84,7 @@ struct timer {
 	uint32_t prescaler;
 	int32_t irqnr;
 	bool (*irqhandle)(struct timer *ftm, void *data);
-	void (*captureHandle)(struct timer *ftm, void *data, uint32_t channel);
+	bool (*captureHandle)(struct timer *ftm, void *data, uint32_t channel);
 	bool isConfig;
 	void *overflowData;
 	void *captureData;
@@ -226,6 +226,7 @@ static void clearIRQBit(struct timer *ftm) {
 
 static void inline handleIRQ(struct timer *ftm) {
 	int i;
+	bool ret = 0;
 	switch (ftm->mode) {
 		case ONESHOT:
 			ftm->mode = NOT_CONFIG;
@@ -239,7 +240,7 @@ static void inline handleIRQ(struct timer *ftm) {
 		if (status != 0) {
 			for (i = 0; i < 8 && status != 0; i++) {
 				if (status & 0x1) {
-					ftm->captureHandle(ftm, ftm->captureData, i);
+					ret |= ftm->captureHandle(ftm, ftm->captureData, i);
 				}
 				status >>= 1;
 			}
@@ -251,10 +252,11 @@ static void inline handleIRQ(struct timer *ftm) {
 	}
 	if (FTM_IS_OVERFLOWED(ftm->base->sc)) {
 		if (ftm->irqhandle) {
-			ftm->irqhandle(ftm, ftm->overflowData); /* TODO Handle bool;) */
+			ret |= ftm->irqhandle(ftm, ftm->overflowData); /* TODO Handle bool;) */
 		}
 		clearIRQBit(ftm);
 	}
+	portYIELD_FROM_ISR(ret);
 }
 
 
@@ -486,7 +488,7 @@ TIMER_SET_OVERFLOW_CALLBACK(ftm, ftm, irqhandle, data) {
 	ftm->base->sc |= FTM_INTERRUPT_EN;
 	return 0;
 }
-int32_t ftm_setCaptureHandler(struct timer *ftm, void (*irqhandle)(struct timer *ftm, void *data, uint32_t channel), void *data) {
+int32_t ftm_setCaptureHandler(struct timer *ftm, bool (*irqhandle)(struct timer *ftm, void *data, uint32_t channel), void *data) {
 	ftm->captureHandle = irqhandle;
 	ftm->captureData = data;
 	return 0;
