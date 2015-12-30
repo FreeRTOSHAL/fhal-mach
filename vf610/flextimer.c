@@ -2,6 +2,9 @@
 #include <timer.h>
 #define TIMER_PRV
 #include <timer_prv.h>
+#include <pwm.h>
+#define PWM_PRV
+#include <pwm_prv.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -93,6 +96,7 @@ struct timer {
 	int64_t adjust;
 };
 
+
 #define IPG_FREQ 66ULL /* 66Mhz */
 
 #define VF610_PWM_GENERAL_CTRL (PAD_CTL_SPEED_HIGH | PAD_CTL_DSE_20ohm | PAD_CTL_IBE_ENABLE | PAD_CTL_PUS_100K_UP)
@@ -105,6 +109,13 @@ struct timer {
 struct pwm_pin {
 	uint32_t pin;
 	uint32_t mode;
+};
+
+struct pwm {
+	struct pwm_generic gen;
+	struct timer *timer;
+	uint32_t channel;
+	struct pwm_pin pin;
 };
 
 struct pwm_pin pins[4][8] = {
@@ -348,10 +359,9 @@ TIMER_GET_TIME(ftm, ftm) {
 	return us;
 }
 
-static int32_t setupChannelPin(struct timer *ftm, uint32_t channel) {
+static int32_t setupChannelPin(struct timer *ftm, struct pwm_pin *pin) {
 	int32_t ret;
 	struct mux *mux = mux_init();
-	struct pwm_pin *pin = &pins[ftm->ftmid][channel];
 	if (pin->pin == 0) {
 		return -1;
 	}
@@ -361,21 +371,33 @@ static int32_t setupChannelPin(struct timer *ftm, uint32_t channel) {
 	}
 	return 0;
 }
+#ifdef CONFIG_FLEXTIMER_PWM
 
-int32_t ftm_setupPWM(struct timer *ftm, uint32_t channel) {
+PWM_INIT(ftm, index, settings) {
 	int32_t ret;
-	ret = setupChannelPin(ftm, channel);
+	struct pwm *pwm = pwms[index];
+	struct timer *ftm = pwm->timer;
+	ret = setupChannelPin(ftm, &pwm->pin);
 	if (ret < 0) {
-		return -1;
+		return NULL;
 	}
 	ftm_writeProtecDisable(ftm);
-	ftm->base->ch[channel].csc = FTM_CNSC_ELSB | FTM_CNSC_MSB;
-	ftm->base->ch[channel].cv = 0;
+	ftm->base->ch[pwm->channel].csc = FTM_CNSC_ELSB | FTM_CNSC_MSB;
+	ftm->base->ch[pwm->channel].cv = 0;
 	ftm_writeProtecEnable(ftm);
 
-	return 0;	
+	return pwm;	
 }
-int32_t ftm_setPWMDutyCycle(struct timer *ftm, uint32_t channel, uint64_t us) {
+PWM_DEINIT(ftm, pwm) {
+	return 0;
+}
+PWM_SET_PERIOD(ftm, pwm, us) {
+	struct timer *ftm = pwm->timer;
+	/* Period shared with all channel on the same timer */
+	return timer_periodic(ftm, us);
+}
+PWM_SET_DUTY_CYCLE(ftm, pwm, us) {
+	struct timer *ftm = pwm->timer;
 	uint64_t counterValue;
 	us = (us * (ftm->basetime + ftm->adjust)) / ftm->basetime;
 	counterValue = (uint64_t) (IPG_FREQ * us) / ((ftm->prescaler + 1));
@@ -387,15 +409,17 @@ int32_t ftm_setPWMDutyCycle(struct timer *ftm, uint32_t channel, uint64_t us) {
 		/* Duty Cycle biger then period */
 		return -1;
 	}
-	ftm->base->ch[channel].cv = counterValue;
+	ftm->base->ch[pwm->channel].cv = counterValue;
 	__ISB();
 	__DSB();
 	return 0;
 }
 
+#endif
+
 int32_t ftm_setupCapture(struct timer *ftm, uint32_t channel) {
 	int32_t ret;
-	ret = setupChannelPin(ftm, channel);
+	ret = setupChannelPin(ftm, &pins[ftm->ftmid][channel]);
 	if (ret < 0) {
 		return -1;
 	}
@@ -499,49 +523,300 @@ TIMER_DEINIT(ftm, ftm) {
 }
 
 TIMER_OPS(ftm);
-
-struct timer ftm_timer_0 =  {
+#ifdef CONFIG_FLEXTIMER_0
+static struct timer ftm_timer_0 =  {
 	TIMER_INIT_DEV(ftm)
 	.base = VF610_FLEXTIMER_0,
 	.isConfig = false,
 	.irqnr = 42,
 };
 TIMER_ADDDEV(ftm, ftm_timer_0);
-struct timer ftm_timer_1 = {
+void flextimer0_isr() {
+	struct timer *ftm = &ftm_timer_0;
+	handleIRQ(ftm);
+}
+#endif
+#ifdef CONFIG_FLEXTIMER_1
+static struct timer ftm_timer_1 = {
 	TIMER_INIT_DEV(ftm)
 	.base = VF610_FLEXTIMER_1,
 	.isConfig = false,
 	.irqnr = 43,
 };
 TIMER_ADDDEV(ftm, ftm_timer_1);
-struct timer ftm_timer_2 = {
+void flextimer1_isr() {
+	struct timer *ftm = &ftm_timer_1;
+	handleIRQ(ftm);
+}
+#endif
+#ifdef CONFIG_FLEXTIMER_2
+static struct timer ftm_timer_2 = {
 	TIMER_INIT_DEV(ftm)
 	.base = VF610_FLEXTIMER_2,
 	.isConfig = false,
 	.irqnr = 44,
 };
 TIMER_ADDDEV(ftm, ftm_timer_2);
-struct timer ftm_timer_3 = {
+void flextimer2_isr() {
+	struct timer *ftm = &ftm_timer_2;
+	handleIRQ(ftm);
+}
+#endif
+#ifdef CONFIG_FLEXTIMER_3
+static struct timer ftm_timer_3 = {
 	TIMER_INIT_DEV(ftm)
 	.base = VF610_FLEXTIMER_3,
 	.isConfig = false,
 	.irqnr = 45,
 };
 TIMER_ADDDEV(ftm, ftm_timer_3);
-
-void flextimer0_isr() {
-	struct timer *ftm = &ftm_timer_0;
-	handleIRQ(ftm);
-}
-void flextimer1_isr() {
-	struct timer *ftm = &ftm_timer_1;
-	handleIRQ(ftm);
-}
-void flextimer2_isr() {
-	struct timer *ftm = &ftm_timer_2;
-	handleIRQ(ftm);
-}
 void flextimer3_isr() {
 	struct timer *ftm = &ftm_timer_3;
 	handleIRQ(ftm);
 }
+#endif
+
+
+#ifdef CONFIG_FLEXTIMER_PWM
+PWM_OPS(ftm);
+# ifdef CONFIG_FLEXTIMER_PWM_0_0
+static struct pwm pwm_0_0 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 0,
+	.pin = {
+		.pin = PTB0,
+		.mode = MODE1
+	}
+};
+PWM_ADDDEV(ftm, pwm_0_0);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_0_1
+static struct pwm pwm_0_1 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 1,
+	.pin = {
+		.pin = PTB1,
+		.mode = MODE1
+	}
+};
+PWM_ADDDEV(ftm, pwm_0_1);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_0_2
+static struct pwm pwm_0_2 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 2,
+	.pin = {
+		.pin = PTB2,
+		.mode = MODE1
+	}
+};
+PWM_ADDDEV(ftm, pwm_0_2);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_0_3
+static struct pwm pwm_0_3 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 3,
+	.pin = {
+		.pin = PTB3,
+		.mode = MODE1
+	}
+};
+PWM_ADDDEV(ftm, pwm_0_3);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_0_4
+static struct pwm pwm_0_4 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 4,
+	.pin = {
+		.pin = PTB4,
+		.mode = MODE1
+	}
+};
+PWM_ADDDEV(ftm, pwm_0_4);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_0_5
+static struct pwm pwm_0_5 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 5,
+	.pin = {
+		.pin = PTB5,
+		.mode = MODE1
+	}
+};
+PWM_ADDDEV(ftm, pwm_0_5);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_0_6
+static struct pwm pwm_0_6 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 6,
+	.pin = {
+		.pin = PTB6,
+		.mode = MODE1
+	}
+};
+PWM_ADDDEV(ftm, pwm_0_6);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_0_7
+static struct pwm pwm_0_7 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 7,
+	.pin = {
+		.pin = PTB7,
+		.mode = MODE1
+	}
+};
+PWM_ADDDEV(ftm, pwm_0_7);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_1_0
+static struct pwm pwm_1_0 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_1,
+	.channel = 0,
+	.pin = {
+		.pin = PTB8,
+		.mode = MODE1
+	}
+};
+PWM_ADDDEV(ftm, pwm_1_0);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_1_1
+static struct pwm pwm_1_1 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_1,
+	.channel = 1,
+	.pin = {
+		.pin = PTB9,
+		.mode = MODE1
+	}
+};
+PWM_ADDDEV(ftm, pwm_1_1);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_2_0
+static struct pwm pwm_2_0 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_2,
+	.channel = 0,
+	.pin = {
+		.pin = PTD23,
+		.mode = MODE3
+	}
+};
+PWM_ADDDEV(ftm, pwm_2_0);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_2_1
+static struct pwm pwm_2_1 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_2,
+	.channel = 1,
+	.pin = {
+		.pin = PTD22,
+		.mode = MODE3
+	}
+};
+PWM_ADDDEV(ftm, pwm_2_1);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_3_0
+static struct pwm pwm_3_0 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 0,
+	.pin = {
+		.pin = PTD31,
+		.mode = MODE4
+	}
+};
+PWM_ADDDEV(ftm, pwm_3_0);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_3_1
+static struct pwm pwm_3_1 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 1,
+	.pin = {
+		.pin = PTD30,
+		.mode = MODE4
+	}
+};
+PWM_ADDDEV(ftm, pwm_3_1);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_3_2
+static struct pwm pwm_3_2 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 2,
+	.pin = {
+		.pin = PTD29,
+		.mode = MODE4
+	}
+};
+PWM_ADDDEV(ftm, pwm_3_2);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_3_3
+static struct pwm pwm_3_3 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 3,
+	.pin = {
+		.pin = PTD28,
+		.mode = MODE4
+	}
+};
+PWM_ADDDEV(ftm, pwm_3_3);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_3_4
+static struct pwm pwm_3_4 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 4,
+	.pin = {
+		.pin = PTD27,
+		.mode = MODE4
+	}
+};
+PWM_ADDDEV(ftm, pwm_3_4);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_3_5
+static struct pwm pwm_3_5 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 5,
+	.pin = {
+		.pin = PTD26,
+		.mode = MODE4
+	}
+};
+PWM_ADDDEV(ftm, pwm_3_5);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_3_6
+static struct pwm pwm_3_6 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 6,
+	.pin = {
+		.pin = PTD25,
+		.mode = MODE4
+	}
+};
+PWM_ADDDEV(ftm, pwm_3_6);
+# endif
+# ifdef CONFIG_FLEXTIMER_PWM_3_7
+static struct pwm pwm_3_7 = {
+	PWM_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 7,
+	.pin = {
+		.pin = PTD24,
+		.mode = MODE4
+	}
+};
+PWM_ADDDEV(ftm, pwm_3_7);
+# endif
+#endif
