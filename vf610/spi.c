@@ -147,17 +147,18 @@ struct spi_pin {
 };
 
 struct spi {
-	struct spi_generic generic;
+	struct spi_generic gen;
 	struct dspi *base;
 	bool shareCTAR;
 	uint8_t irqnr;
 	uint8_t index;
 	SemaphoreHandle_t irqLock;
+	const struct spi_pin pin[];
 };
 
 struct spi_slave {
 	struct spi *spi;
-	struct spi_ops options;
+	struct spi_opt options;
 	uint8_t cs;
 	uint32_t ctar;
 	struct gpio_pin *pin;
@@ -167,222 +168,6 @@ struct spi_slave {
 #define VF610_SPI1 0x4002D000
 #define VF610_SPI2 0x400AC000 
 #define VF610_SPI3 0x400AD000
-
-struct spi spis[] = {
-	{
-		.base = (struct dspi *) VF610_SPI0,
-		.irqnr = 67,
-		.index = 0,
-	},
-	{
-		.base = (struct dspi *) VF610_SPI1,
-		.irqnr = 68,
-		.index = 1,
-	},
-	{
-		.base = (struct dspi *) VF610_SPI2,
-		.irqnr = 69,
-		.index = 2,
-	},
-	{
-		.base = (struct dspi *) VF610_SPI3,
-		.irqnr = 70,
-		.index = 3,
-	},
-};
-
-
-static const struct spi_pin pins[4][9] = {
-	{
-		{
-			.pin = PTB22, /* SCK */
-			.mode= MODE1,
-			.out = true,
-		},
-		{
-			.pin = PTB21, /* SOUT */
-			.mode= MODE1,
-			.out = true,
-		},
-		{
-			.pin = PTB20, /* SIN */
-			.mode= MODE1,
-			.out = false,
-		},
-		{
-			.pin = PTB19, /* CS0 */
-			.mode= MODE1,
-			.out = true,
-		},
-		{
-			.pin = PTB18, /* CS1 */
-			.mode= MODE1,
-			.out = true,
-		},
-		{
-			.pin = PTC1, /* CS2 */
-			.mode= MODE3,
-			.out = true,
-		},
-		{
-			.pin = PTC0, /* CS3 */
-			.mode= MODE3,
-			.out = true,
-		},
-		{
-			.pin = PTB13, /* CS4 */ 
-			.mode = MODE3,
-			.out = true, 
-		},
-		{
-			.pin = PTB12, /* CS5 */ 
-			.mode = MODE3,
-			.out = true,
-		},
-	},
-#if 0 /* SPI1 Alternativ */
-	{
-		{
-			.pin = PTC8, /* SCK */
-			.mode= MODE3,
-			.out = true,
-		},
-		{
-			.pin = PTC7, /* SOUT */
-			.mode= MODE3,
-			.out = true,
-		},
-		{
-			.pin = PTC6, /* SIN */
-			.mode= MODE3,
-			.out = false,
-		},
-		{
-			.pin = PTC5, /* CS0 */
-			.mode= MODE3,
-			.out = true,
-		},
-		{
-			.pin = PTC4, /* CS1 */
-			.mode= MODE3,
-			.out = true,
-		},
-		{
-			.pin = PTC30, /* CS2 */
-			.mode= MODE2,
-			.out = true,
-		},
-		{
-			.pin = PTE12, /* CS3 */
-			.mode= MODE2,
-			.out = true,
-		},
-		{0,0,true},
-		{0,0,true},
-	},
-#endif
-	{
-		{
-			.pin = PTD8, /* SCK */
-			.mode= MODE3,
-			.out = true,
-		},
-		{
-			.pin = PTD7, /* SOUT */
-			.mode= MODE3,
-			.out = true,
-		},
-		{
-			.pin = PTD6, /* SIN */
-			.mode= MODE3,
-			.out = false,
-		},
-		{
-			.pin = PTD5, /* CS0 */
-			.mode= MODE3,
-			.out = true,
-		},
-		{
-			.pin = PTD4, /* CS1 */
-			.mode= MODE3,
-			.out = true,
-		},
-		{
-			.pin = PTD3, /* CS2 */
-			.mode= MODE3,
-			.out = true,
-		},
-		{
-			.pin = PTD2, /* CS3 */
-			.mode= MODE3,
-			.out = true,
-		},
-		{0,0,true},
-		{0,0,true},
-	},
-	{
-		{
-			.pin = PTD27, /* SCK */
-			.mode= MODE5,
-			.out = true,
-		},
-		{
-			.pin = PTD28, /* SOUT */
-			.mode= MODE5,
-			.out = true,
-		},
-		{
-			.pin = PTD29, /* SIN */
-			.mode= MODE5,
-			.out = false,
-		},
-		{
-			.pin = PTD30, /* CS0 */
-			.mode= MODE5,
-			.out = true,
-		},
-		{
-			.pin = PTD31, /* CS1 */
-			.mode= MODE5,
-			.out = true,
-		},
-		{0,0,true},
-		{0,0,true},
-		{0,0,true},
-		{0,0,true},
-	},
-	{
-		{
-			.pin = PTD13, /* SCK */
-			.mode= MODE2,
-			.out = true,
-		},
-		{
-			.pin = PTD12, /* SOUT */
-			.mode= MODE2,
-			.out = true,
-		},
-		{
-			.pin = PTD11, /* SIN */
-			.mode= MODE2,
-			.out = false,
-		},
-		{
-			.pin = PTD10, /* CS0 */
-			.mode= MODE2,
-			.out = true,
-		},
-		{
-			.pin = PTD9, /* CS1 */
-			.mode= MODE2,
-			.out = true,
-		},
-		{0,0,true},
-		{0,0,true},
-		{0,0,true},
-		{0,0,true},
-	}
-};
 
 static void setupPin(const struct spi_pin *pin) {
 	struct mux *mux = mux_init();
@@ -418,10 +203,11 @@ static void setupPin(const struct spi_pin *pin) {
 	}
 }
 
-struct spi *spi_init(uint32_t index) {
+SPI_INIT(dspi, index, mode, opt) {
 	int i;
-	struct spi *spi = &spis[index];
+	struct spi *spi = spis[index];
 	int32_t ret = spi_genericInit(spi);
+	/* TODO Mode */
 	if (ret < 0) {
 		return NULL;
 	}
@@ -454,7 +240,7 @@ struct spi *spi_init(uint32_t index) {
 	 * Mux Pins
 	 */
 	for (i = 0; i < 3; i++) {
-		const struct spi_pin *pin = &pins[index][i];
+		const struct spi_pin *pin = &spi->pin[i];
 		setupPin(pin);
 	}
 	/* 
@@ -470,12 +256,17 @@ struct spi *spi_init(uint32_t index) {
 	 * Activate End Of Frame Interrupt
 	 */
 	spi->base->rser = SPI_RSER_EOQF_RE;
-
+	/* TODO clock init */
 	return spi;
 }
-int32_t spi_deinit(struct spi *spi) {
+SPI_DEINIT(dspi, spi) {
 	(void) spi;
+	/* TODO shutdown */
 	return 0;
+}
+SPI_SET_CALLBACK(dspi, spi, callback, data) {
+	/* TODO */
+	return -1;
 }
 static int32_t hz_to_spi_baud(uint8_t *pbr, uint8_t *br, uint64_t speed_hz) {
 	/* Valid baud rate pre-scaler values */
@@ -621,7 +412,7 @@ static int32_t spi_setup(struct spi_slave *slave) {
 		}
 
 		{
-			const struct spi_pin *pin = &pins[slave->spi->index][3 + slave->options.cs];
+			const struct spi_pin *pin = &slave->spi->pin[3 + slave->options.cs];
 			setupPin(pin);
 		}
 
@@ -660,15 +451,14 @@ static int32_t spi_setup(struct spi_slave *slave) {
 
 	return 0;
 }
-
-struct spi_slave *spi_slave(struct spi *spi, struct spi_ops *options) {
+SPI_SLAVE_INIT(dspi, spi, options) {
 	int32_t ret;
 	struct spi_slave *slave = pvPortMalloc(sizeof(struct spi_slave));
 	if (slave == NULL) {
 		return NULL;
 	}
 	slave->spi = spi;
-	memcpy(&slave->options, options, sizeof(struct spi_ops));
+	memcpy(&slave->options, options, sizeof(struct spi_opt));
 	slave->cs = slave->options.cs;
 	slave->pin = NULL;
 	ret = spi_setup(slave);
@@ -676,6 +466,10 @@ struct spi_slave *spi_slave(struct spi *spi, struct spi_ops *options) {
 		return NULL;
 	}
 	return slave;
+}
+SPI_SLAVE_DEINIT(dspi, slave) {
+	/* TODO */
+	return 0;
 }
 
 static uint32_t prepareFrame(struct spi_slave *slave, uint16_t data) {
@@ -751,15 +545,12 @@ static void spi_gpioClear(struct spi_slave *slave) {
 		}
 	}
 }
-
-int32_t spi_sendRecv(struct spi_slave *slave, uint16_t *sendData, uint16_t *recvData, uint32_t len, TickType_t waittime) {
+SPI_SLAVE_TRANSVER(dspi, slave, sendData, recvData, len, waittime) {
 	struct spi *spi = slave->spi;
 	uint32_t i;
 	uint32_t j;
-	int lret = spi_lock(slave->spi, waittime);
-	if (lret != 1) {
-		goto spi_sendRecv_error0;
-	}
+	int lret;
+	spi_lock(slave->spi, waittime, -1);
 	/* 
 	 * Reset FIFOs
 	 */
@@ -836,26 +627,34 @@ int32_t spi_sendRecv(struct spi_slave *slave, uint16_t *sendData, uint16_t *recv
 	}
 	spi_gpioClear(slave);
 
-	lret = spi_unlock(slave->spi);
-	if (lret != 1) {
-		return -1;
-	}
+	spi_unlock(slave->spi, -1);
 	return 0;
 spi_sendRecv_error1:
 	spi_gpioClear(slave);
-	lret = spi_unlock(slave->spi);
-spi_sendRecv_error0:
+	spi_unlock(slave->spi, -1);
 	return -1;
 }
-int32_t spi_send(struct spi_slave *slave, uint16_t *data, uint32_t len, TickType_t waittime) {
+SPI_SLAVE_SEND(dspi, slave, data, len, waittime) {
 	uint16_t *rdata = alloca(sizeof(uint16_t) * len);
 	/* TODO Do not use spi_sendRecv optimace Stack usage*/
-	return spi_sendRecv(slave, data, rdata, len, waittime);
+	return spiSlave_transver(slave, data, rdata, len, waittime);
 }
-int32_t spi_recv(struct spi_slave *slave, uint16_t *data, uint32_t len, TickType_t waittime) {
+SPI_SLAVE_RECV(dspi, slave, data, len, waittime) {
 	uint16_t *wdata = alloca(sizeof(uint16_t) * len);
 	memset(wdata, 0xFF, sizeof(uint16_t) * len);
-	return spi_sendRecv(slave, wdata, data, len, waittime);
+	return spiSlave_transver(slave, wdata, data, len, waittime);
+}
+SPI_SLAVE_TRANSVER_ISR(dspi, slave, sendData, recvData, len) {
+	/* TODO */
+	return -1;
+}
+SPI_SLAVE_SEND_ISR(dspi, salve, data, len) {
+	/* TODO */
+	return -1;
+}
+SPI_SLAVE_RECV_ISR(dspi, salve, data, len) {
+	/* TODO */
+	return -1;
 }
 static void spi_handleISR(struct spi *spi) {
 	uint32_t sr = spi->base->sr;
@@ -869,19 +668,260 @@ static void spi_handleISR(struct spi *spi) {
 	 */
 	spi->base->sr |= SPI_SR_CLR_IRQ;
 }
+
+SPI_OPS(dspi);
+
+#ifdef CONFIG_DSPI_0
+struct spi spi_0 = {
+	SPI_INIT_DEV(dspi)
+	.base = (struct dspi *) VF610_SPI0,
+	.irqnr = 67,
+	.index = 0,
+	.pin = {
+		{
+			.pin = PTB22, /* SCK */
+			.mode= MODE1,
+			.out = true,
+		},
+		{
+			.pin = PTB21, /* SOUT */
+			.mode= MODE1,
+			.out = true,
+		},
+		{
+			.pin = PTB20, /* SIN */
+			.mode= MODE1,
+			.out = false,
+		},
+		{
+			.pin = PTB19, /* CS0 */
+			.mode= MODE1,
+			.out = true,
+		},
+		{
+			.pin = PTB18, /* CS1 */
+			.mode= MODE1,
+			.out = true,
+		},
+		{
+			.pin = PTC1, /* CS2 */
+			.mode= MODE3,
+			.out = true,
+		},
+		{
+			.pin = PTC0, /* CS3 */
+			.mode= MODE3,
+			.out = true,
+		},
+		{
+			.pin = PTB13, /* CS4 */ 
+			.mode = MODE3,
+			.out = true, 
+		},
+		{
+			.pin = PTB12, /* CS5 */ 
+			.mode = MODE3,
+			.out = true,
+		},
+	},
+};
+SPI_ADDDEV(dspi, spi_0);
 void spi0_isr(void) {
-	struct spi *spi = &spis[0];
+	struct spi *spi = &spi_0;
 	spi_handleISR(spi);
 }
+#endif
+#ifdef CONFIG_DSPI_1
+struct spi spi_1 = {
+	SPI_INIT_DEV(dspi)
+	.base = (struct dspi *) VF610_SPI1,
+	.irqnr = 68,
+	.index = 1,
+	.pin = 
+	{
+# ifdef CONFIG_DSPI_1_PTD8
+		{
+			.pin = PTD8, /* SCK */
+			.mode= MODE3,
+			.out = true,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTC8
+		{
+			.pin = PTC8, /* SCK */
+			.mode= MODE3,
+			.out = true,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTD7
+		{
+			.pin = PTD7, /* SOUT */
+			.mode= MODE3,
+			.out = true,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTC7
+		{
+			.pin = PTC7, /* SOUT */
+			.mode= MODE3,
+			.out = true,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTD6
+		{
+			.pin = PTD6, /* SIN */
+			.mode= MODE3,
+			.out = false,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTC6
+		{
+			.pin = PTC6, /* SIN */
+			.mode= MODE3,
+			.out = false,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTD5
+		{
+			.pin = PTD5, /* CS0 */
+			.mode= MODE3,
+			.out = true,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTC5
+		{
+			.pin = PTC5, /* CS0 */
+			.mode= MODE3,
+			.out = true,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTD4
+		{
+			.pin = PTD4, /* CS1 */
+			.mode= MODE3,
+			.out = true,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTC4
+		{
+			.pin = PTC4, /* CS1 */
+			.mode= MODE3,
+			.out = true,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTD3
+		{
+			.pin = PTD3, /* CS2 */
+			.mode= MODE3,
+			.out = true,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTC30
+		{
+			.pin = PTC30, /* CS2 */
+			.mode= MODE2,
+			.out = true,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTD2
+		{
+			.pin = PTD2, /* CS3 */
+			.mode= MODE3,
+			.out = true,
+		},
+# endif
+# ifdef CONFIG_DSPI_1_PTE12
+		{
+			.pin = PTE12, /* CS3 */
+			.mode= MODE2,
+			.out = true,
+		},
+# endif
+	},
+};
+SPI_ADDDEV(dspi, spi_1);
 void spi1_isr(void) {
-	struct spi *spi = &spis[1];
+	struct spi *spi = &spi_1;
 	spi_handleISR(spi);
 }
+#endif
+#ifdef CONFIG_DSPI_2
+struct spi spi_2 = {
+	SPI_INIT_DEV(dspi)
+	.base = (struct dspi *) VF610_SPI2,
+	.irqnr = 69,
+	.index = 2,
+	.pin = {
+		{
+			.pin = PTD27, /* SCK */
+			.mode= MODE5,
+			.out = true,
+		},
+		{
+			.pin = PTD28, /* SOUT */
+			.mode= MODE5,
+			.out = true,
+		},
+		{
+			.pin = PTD29, /* SIN */
+			.mode= MODE5,
+			.out = false,
+		},
+		{
+			.pin = PTD30, /* CS0 */
+			.mode= MODE5,
+			.out = true,
+		},
+		{
+			.pin = PTD31, /* CS1 */
+			.mode= MODE5,
+			.out = true,
+		},
+	},
+};
+SPI_ADDDEV(dspi, spi_2);
 void spi2_isr(void) {
-	struct spi *spi = &spis[2];
+	struct spi *spi = &spi_2;
 	spi_handleISR(spi);
 }
+#endif
+#ifdef CONFIG_DSPI_3
+struct spi spi_3 = {
+	SPI_INIT_DEV(dspi)
+	.base = (struct dspi *) VF610_SPI3,
+	.irqnr = 70,
+	.index = 3,
+	.pin = {
+		{
+			.pin = PTD13, /* SCK */
+			.mode= MODE2,
+			.out = true,
+		},
+		{
+			.pin = PTD12, /* SOUT */
+			.mode= MODE2,
+			.out = true,
+		},
+		{
+			.pin = PTD11, /* SIN */
+			.mode= MODE2,
+			.out = false,
+		},
+		{
+			.pin = PTD10, /* CS0 */
+			.mode= MODE2,
+			.out = true,
+		},
+		{
+			.pin = PTD9, /* CS1 */
+			.mode= MODE2,
+			.out = true,
+		},
+	}
+};
+SPI_ADDDEV(dspi, spi_3);
 void spi3_isr(void) {
-	struct spi *spi = &spis[3];
+	struct spi *spi = &spi_3;
 	spi_handleISR(spi);
 }
+#endif
