@@ -48,6 +48,7 @@ SECTIONS_START
 	DEV(uart, flash)
 	DEV(timer, flash)
 	DEV(pwm, flash)
+	DEV(capture, flash)
 
 	RODATA_START
 		RODATA_DEFAULT

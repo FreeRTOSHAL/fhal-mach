@@ -107,6 +107,9 @@ config MACH_HAS_TIMER
 config MACH_HAS_PWM
 	bool
 	default y
+config MACH_HAS_CAPTURE
+	bool
+	default y
 # VF610 has NVIC but Interrupt Router must set befor NVIC
 #config MACH_HAS_NVIC
 #	bool
@@ -219,6 +222,91 @@ config FLEXTIMER_PWM_3_7
 	depends on FLEXTIMER_PWM && FLEXTIMER_3
 	bool "PWM on PTD24"
 	default n
+menuconfig FLEXTIMER_CAPTURE
+	depends on FLEXTIMER && CAPTURE
+	bool "Activate Flextimer CAPTURE "
+	default n
+config FLEXTIMER_CAPTURE_0_0
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+	bool "CAPTURE on PTB0"
+	default n
+config FLEXTIMER_CAPTURE_0_1
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+	bool "CAPTURE on PTB1"
+	default n
+config FLEXTIMER_CAPTURE_0_2
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+	bool "CAPTURE on PTB2"
+	default n
+config FLEXTIMER_CAPTURE_0_3
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+	bool "CAPTURE on PTB3"
+	default n
+config FLEXTIMER_CAPTURE_0_4
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+	bool "CAPTURE on PTB4"
+	default n
+config FLEXTIMER_CAPTURE_0_5
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+	bool "CAPTURE on PTB5"
+	default n
+config FLEXTIMER_CAPTURE_0_6
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+	bool "CAPTURE on PTB6"
+	default n
+config FLEXTIMER_CAPTURE_0_7
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+	bool "CAPTURE on PTB7"
+	default n
+config FLEXTIMER_CAPTURE_1_0
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_1
+	bool "CAPTURE on PTB8"
+	default n
+config FLEXTIMER_CAPTURE_1_1
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_1
+	bool "CAPTURE on PTB9"
+	default n
+config FLEXTIMER_CAPTURE_2_0
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_2
+	bool "CAPTURE on PTD23"
+	default n
+config FLEXTIMER_CAPTURE_2_1
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_2
+	bool "CAPTURE on PTD22"
+	default n
+config FLEXTIMER_CAPTURE_3_0
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+	bool "CAPTURE on PTD22"
+	default n
+config FLEXTIMER_CAPTURE_3_1
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+	bool "CAPTURE on PTD31"
+	default n
+config FLEXTIMER_CAPTURE_3_2
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+	bool "CAPTURE on PTD30"
+	default n
+config FLEXTIMER_CAPTURE_3_3
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+	bool "CAPTURE on PTD29"
+	default n
+config FLEXTIMER_CAPTURE_3_4
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+	bool "CAPTURE on PTD28"
+	default n
+config FLEXTIMER_CAPTURE_3_5
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+	bool "CAPTURE on PTD26"
+	default n
+config FLEXTIMER_CAPTURE_3_6
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+	bool "CAPTURE on PTD25"
+	default n
+config FLEXTIMER_CAPTURE_3_7
+	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+	bool "CAPTURE on PTD24"
+	default n
+
 config SPIDEBUG
 	bool "SPI Debug Mode"
 	depends on SPI
