@@ -5,6 +5,9 @@
 #include <pwm.h>
 #define PWM_PRV
 #include <pwm_prv.h>
+#include <capture.h>
+#define CAPTURE_PRV
+#include <capture_prv.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -87,13 +90,11 @@ struct timer {
 	uint32_t prescaler;
 	int32_t irqnr;
 	bool (*irqhandle)(struct timer *ftm, void *data);
-	bool (*captureHandle)(struct timer *ftm, void *data, uint32_t channel);
-	bool isConfig;
-	void *overflowData;
-	void *captureData;
+	void *data;
 	int32_t ftmid;
 	uint64_t basetime;
 	int64_t adjust;
+	struct capture const **capture;
 };
 
 
@@ -118,107 +119,13 @@ struct pwm {
 	struct pwm_pin pin;
 };
 
-struct pwm_pin pins[4][8] = {
-	{
-		{
-			.pin = PTB0,
-			.mode = MODE1
-		},
-		{
-			.pin = PTB1,
-			.mode = MODE1
-		},
-		{
-			.pin = PTB2,
-			.mode = MODE1
-		},
-		{
-			.pin = PTB3,
-			.mode = MODE1
-		},
-		{
-			.pin = PTB4,
-			.mode = MODE1
-		},
-		{
-			.pin = PTB5,
-			.mode = MODE1
-		},
-		{
-			.pin = PTB6,
-			.mode = MODE1
-		},
-		{
-			.pin = PTB7,
-			.mode = MODE1
-		},
-	}, 
-	{
-		{
-			.pin = PTB8,
-			.mode = MODE1
-		},
-		{
-			.pin = PTB9,
-			.mode = MODE1
-		},
-		{},
-		{},
-		{},
-		{},
-		{},
-		{},
-	},
-	{
-		{
-			.pin = PTD23,
-			.mode = MODE3
-		},
-		{
-			.pin = PTD22,
-			.mode = MODE3
-		},
-		{},
-		{},
-		{},
-		{},
-		{},
-		{}
-	},
-	{
-		{
-			.pin = PTD31,
-			.mode = MODE4
-		},
-		{
-			.pin = PTD30,
-			.mode = MODE4
-		},
-		{
-			.pin = PTD29,
-			.mode = MODE4
-		},
-		{
-			.pin = PTD28,
-			.mode = MODE4
-		},
-		{
-			.pin = PTD27,
-			.mode = MODE4
-		},
-		{
-			.pin = PTD26,
-			.mode = MODE4
-		},
-		{
-			.pin = PTD25,
-			.mode = MODE4
-		},
-		{
-			.pin = PTD24,
-			.mode = MODE4
-		},
-	}
+struct capture {
+	struct capture_generic gen;
+	struct timer *timer;
+	bool (*callback)(struct capture *capture, uint32_t index, uint64_t time, void *data);
+	void *data;
+	uint32_t channel;
+	struct pwm_pin pin;
 };
 
 static void clearIRQBit(struct timer *ftm) {
@@ -246,12 +153,16 @@ static void inline handleIRQ(struct timer *ftm) {
 		default:
 			break;
 	}
-	if (ftm->captureHandle) {
+	{
 		uint32_t status = ftm->base->status;
 		if (status != 0) {
 			for (i = 0; i < 8 && status != 0; i++) {
 				if (status & 0x1) {
-					ret |= ftm->captureHandle(ftm, ftm->captureData, i);
+					struct capture *capture = (struct capture *) ftm->capture[i];
+					if (capture != NULL && capture->callback != NULL) {
+						uint64_t time = capture_getChannelTime(capture);
+						ret |= capture->callback(capture, i, time, capture->data);
+					}
 				}
 				status >>= 1;
 			}
@@ -263,7 +174,7 @@ static void inline handleIRQ(struct timer *ftm) {
 	}
 	if (FTM_IS_OVERFLOWED(ftm->base->sc)) {
 		if (ftm->irqhandle) {
-			ret |= ftm->irqhandle(ftm, ftm->overflowData); /* TODO Handle bool;) */
+			ret |= ftm->irqhandle(ftm, ftm->data); /* TODO Handle bool;) */
 		}
 		clearIRQBit(ftm);
 	}
@@ -377,6 +288,11 @@ PWM_INIT(ftm, index, settings) {
 	int32_t ret;
 	struct pwm *pwm = pwms[index];
 	struct timer *ftm = pwm->timer;
+
+	ret = pwm_generic_init(pwm);
+	if (ret < 0) {
+		return pwm;
+	}
 	ret = setupChannelPin(ftm, &pwm->pin);
 	if (ret < 0) {
 		return NULL;
@@ -417,45 +333,71 @@ PWM_SET_DUTY_CYCLE(ftm, pwm, us) {
 
 #endif
 
-int32_t ftm_setupCapture(struct timer *ftm, uint32_t channel) {
+CAPTURE_INIT(ftm, index, settings) {
+	struct capture *capture = captures[index];
+	struct timer *ftm = capture->timer;
 	int32_t ret;
-	ret = setupChannelPin(ftm, &pins[ftm->ftmid][channel]);
+	ret = capture_generic_init(capture);
 	if (ret < 0) {
-		return -1;
+		return capture;
+	}
+	ret = setupChannelPin(ftm, &capture->pin);
+	if (ret < 0) {
+		return NULL;
 	}
 	ftm_writeProtecDisable(ftm);
-	ftm->base->ch[channel].cv = 0;
-	ftm->base->ch[channel].csc = FTM_CNSC_ELSB | FTM_CNSC_ELSA | FTM_CNSC_CHIE;
+	ftm->base->ch[capture->channel].cv = 0;
+	ftm->base->ch[capture->channel].csc = FTM_CNSC_ELSB | FTM_CNSC_ELSA | FTM_CNSC_CHIE;
 	//ftm->base->ch[channel].csc = FTM_CNSC_ELSA | FTM_CNSC_CHIE;
 	ftm_writeProtecEnable(ftm);
 
+	return capture;
+}
+
+CAPTURE_DEINIT(ftm, capture) {
 	return 0;
 }
-int64_t ftm_getChannelTime(struct timer *ftm, uint32_t channel) {
-	uint64_t value = ftm->base->ch[channel].cv;
-	uint64_t us = (value / ((uint64_t)IPG_FREQ / ftm->prescaler));
+CAPTURE_SET_PERIOD(ftm, capture, us) {
+	/* Period is contolled by timer period */
+	return timer_periodic(capture->timer, us);
+}
+
+CAPTURE_GET_TIME(ftm, capture) {
+	/* Base Time is timer time */
+	return timer_getTime(capture->timer);
+}
+
+CAPTURE_GET_CHANNEL_TIME(ftm, capture) {
+	struct timer *ftm = capture->timer;
+	uint64_t value = ftm->base->ch[capture->channel].cv;
+	uint64_t us = (value / ((uint64_t)IPG_FREQ / ftm->prescaler)); /* TODO get IGP FREQ from clock interface */
 	/* Time Adjust */ 
 	us = (us * ftm->basetime) / (ftm->basetime + ftm->adjust);
 	return us;
 }
 
+CAPTURE_SET_CALLBACK(ftm, capture, callback, data) {
+	capture->callback = callback;
+	capture->data = data;
+	return 0;
+}
+
 TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
+	int32_t ret;
 	int i; 
 	struct timer *ftm;;
 	if (index > 3) {
 		return NULL;
 	}
 	ftm = timers[index];
-	if (hal_isInit(ftm)) {
+	ret = timer_generic_init(ftm);
+	if (ret < 0) {
 		return ftm;
 	}
 	ftm->ftmid = index;
 	ftm->irqhandle = NULL;
-	ftm->overflowData = NULL;
-	ftm->captureHandle = NULL;
-	ftm->captureData = NULL;
+	ftm->data = NULL;
 	ftm->prescaler = prescaler;
-	ftm->isConfig = true;
 	ftm->basetime = basetime;
 	ftm->adjust = adjust;
 	
@@ -508,13 +450,8 @@ TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
 }
 TIMER_SET_OVERFLOW_CALLBACK(ftm, ftm, irqhandle, data) {
 	ftm->irqhandle = irqhandle;
-	ftm->overflowData = data;
+	ftm->data = data;
 	ftm->base->sc |= FTM_INTERRUPT_EN;
-	return 0;
-}
-int32_t ftm_setCaptureHandler(struct timer *ftm, bool (*irqhandle)(struct timer *ftm, void *data, uint32_t channel), void *data) {
-	ftm->captureHandle = irqhandle;
-	ftm->captureData = data;
 	return 0;
 }
 TIMER_DEINIT(ftm, ftm) {
@@ -522,13 +459,28 @@ TIMER_DEINIT(ftm, ftm) {
 	return 0;
 }
 
+#ifdef CONFIG_FLEXTIMER_CAPTURE
+# ifdef CONFIG_FLEXTIMER_0
+static struct capture const *ftm_captures_0[8];
+# endif
+# ifdef CONFIG_FLEXTIMER_1
+static struct capture const *ftm_captures_1[2];
+# endif
+# ifdef CONFIG_FLEXTIMER_2
+static struct capture const *ftm_captures_2[2];
+# endif
+# ifdef CONFIG_FLEXTIMER_3
+static struct capture const *ftm_captures_3[8];
+# endif
+#endif
+
 TIMER_OPS(ftm);
 #ifdef CONFIG_FLEXTIMER_0
 static struct timer ftm_timer_0 =  {
 	TIMER_INIT_DEV(ftm)
 	.base = VF610_FLEXTIMER_0,
-	.isConfig = false,
 	.irqnr = 42,
+	.capture = (struct capture const **) &ftm_captures_0,
 };
 TIMER_ADDDEV(ftm, ftm_timer_0);
 void flextimer0_isr() {
@@ -540,8 +492,8 @@ void flextimer0_isr() {
 static struct timer ftm_timer_1 = {
 	TIMER_INIT_DEV(ftm)
 	.base = VF610_FLEXTIMER_1,
-	.isConfig = false,
 	.irqnr = 43,
+	.capture = (struct capture const **) &ftm_captures_1,
 };
 TIMER_ADDDEV(ftm, ftm_timer_1);
 void flextimer1_isr() {
@@ -553,8 +505,8 @@ void flextimer1_isr() {
 static struct timer ftm_timer_2 = {
 	TIMER_INIT_DEV(ftm)
 	.base = VF610_FLEXTIMER_2,
-	.isConfig = false,
 	.irqnr = 44,
+	.capture = (struct capture const **) &ftm_captures_2,
 };
 TIMER_ADDDEV(ftm, ftm_timer_2);
 void flextimer2_isr() {
@@ -566,8 +518,8 @@ void flextimer2_isr() {
 static struct timer ftm_timer_3 = {
 	TIMER_INIT_DEV(ftm)
 	.base = VF610_FLEXTIMER_3,
-	.isConfig = false,
 	.irqnr = 45,
+	.capture = (struct capture const **) &ftm_captures_3,
 };
 TIMER_ADDDEV(ftm, ftm_timer_3);
 void flextimer3_isr() {
@@ -820,3 +772,365 @@ static struct pwm pwm_3_7 = {
 PWM_ADDDEV(ftm, pwm_3_7);
 # endif
 #endif
+
+#ifdef CONFIG_FLEXTIMER_CAPTURE
+CAPTURE_OPS(ftm);
+# ifdef CONFIG_FLEXTIMER_CAPTURE_0_0
+static struct capture capture_0_0 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 0,
+	.pin = {
+		.pin = PTB0,
+		.mode = MODE1
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_0_0);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_0_1
+static struct capture capture_0_1 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 1,
+	.pin = {
+		.pin = PTB1,
+		.mode = MODE1
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_0_1);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_0_2
+static struct capture capture_0_2 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 2,
+	.pin = {
+		.pin = PTB2,
+		.mode = MODE1
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_0_2);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_0_3
+static struct capture capture_0_3 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 3,
+	.pin = {
+		.pin = PTB3,
+		.mode = MODE1
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_0_3);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_0_4
+static struct capture capture_0_4 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 4,
+	.pin = {
+		.pin = PTB4,
+		.mode = MODE1
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_0_4);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_0_5
+static struct capture capture_0_5 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 5,
+	.pin = {
+		.pin = PTB5,
+		.mode = MODE1
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_0_5);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_0_6
+static struct capture capture_0_6 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 6,
+	.pin = {
+		.pin = PTB6,
+		.mode = MODE1
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_0_6);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_0_7
+static struct capture capture_0_7 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_0,
+	.channel = 7,
+	.pin = {
+		.pin = PTB7,
+		.mode = MODE1
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_0_7);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_1_0
+static struct capture capture_1_0 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_1,
+	.channel = 0,
+	.pin = {
+		.pin = PTB8,
+		.mode = MODE1
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_1_0);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_1_1
+static struct capture capture_1_1 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_1,
+	.channel = 1,
+	.pin = {
+		.pin = PTB9,
+		.mode = MODE1
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_1_1);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_2_0
+static struct capture capture_2_0 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_2,
+	.channel = 0,
+	.pin = {
+		.pin = PTD23,
+		.mode = MODE3
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_2_0);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_2_1
+static struct capture capture_2_1 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_2,
+	.channel = 1,
+	.pin = {
+		.pin = PTD22,
+		.mode = MODE3
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_2_1);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_3_0
+static struct capture capture_3_0 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 0,
+	.pin = {
+		.pin = PTD31,
+		.mode = MODE4
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_3_0);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_3_1
+static struct capture capture_3_1 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 1,
+	.pin = {
+		.pin = PTD30,
+		.mode = MODE4
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_3_1);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_3_2
+static struct capture capture_3_2 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 2,
+	.pin = {
+		.pin = PTD29,
+		.mode = MODE4
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_3_2);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_3_3
+static struct capture capture_3_3 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 3,
+	.pin = {
+		.pin = PTD28,
+		.mode = MODE4
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_3_3);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_3_4
+static struct capture capture_3_4 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 4,
+	.pin = {
+		.pin = PTD27,
+		.mode = MODE4
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_3_4);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_3_5
+static struct capture capture_3_5 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 5,
+	.pin = {
+		.pin = PTD26,
+		.mode = MODE4
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_3_5);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_3_6
+static struct capture capture_3_6 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 6,
+	.pin = {
+		.pin = PTD25,
+		.mode = MODE4
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_3_6);
+# endif
+# ifdef CONFIG_FLEXTIMER_CAPTURE_3_7
+static struct capture capture_3_7 = {
+	CAPTURE_INIT_DEV(ftm)
+	.timer = &ftm_timer_3,
+	.channel = 7,
+	.pin = {
+		.pin = PTD24,
+		.mode = MODE4
+	}
+};
+CAPTURE_ADDDEV(ftm, capture_3_7);
+# endif
+
+# ifdef CONFIG_FLTEXTIME_0
+static struct capture const *ftm_captures_0[8] = {
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_0
+	&capture_0_0,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_1
+	&capture_0_1,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_2
+	&capture_0_2,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_3
+	&capture_0_3,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_4
+ 	&capture_0_4,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_5
+	&capture_0_5,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_6
+	&capture_0_6,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_7
+	&capture_0_7,
+#  else
+	NULL,
+#  endif
+};
+# endif
+# ifdef CONFIG_FLEXTIMER_1
+static struct capture const *ftm_captures_1[2] = {
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_1_0
+	&capture_1_0,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_1_1
+	&capture_1_1,
+#  else
+	NULL,
+#  endif
+};
+# endif
+# ifdef CONFIG_FLEXTIMER_2
+static struct capture const *ftm_captures_2[2] = {
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_2_0
+	&capture_1_0,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_2_1
+	&capture_1_1,
+#  else
+	NULL,
+#  endif
+};
+# endif
+# ifdef CONFIG_FLEXTIMER_3
+static struct capture const *ftm_captures_3[8] = {
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_0
+	&capture_3_0,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_1
+	&capture_3_1,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_2
+	&capture_3_2,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_3
+	&capture_3_3,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_4
+	&capture_3_4,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_5
+	&capture_3_5,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_6
+	&capture_3_6,
+#  else
+	NULL,
+#  endif
+#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_7
+	&capture_3_7,
+#  else
+	NULL,
+#  endif
+};
+# endif
+#endif
+
