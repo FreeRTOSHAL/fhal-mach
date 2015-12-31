@@ -98,3 +98,9 @@ int32_t irq_getPrio(int32_t irqnr) {
 	return NVIC_GetPriority(irqnr);
 }
 
+int32_t irq_mask(int32_t irqnr) {
+	return -1;
+}
+int32_t irq_unmask(int32_t irqnr) {
+	return -1;
+}
