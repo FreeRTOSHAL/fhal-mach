@@ -284,7 +284,7 @@ static int32_t setupChannelPin(struct timer *ftm, struct pwm_pin *pin) {
 }
 #ifdef CONFIG_FLEXTIMER_PWM
 
-PWM_INIT(ftm, index, settings) {
+PWM_INIT(ftm, index) {
 	int32_t ret;
 	struct pwm *pwm = pwms[index];
 	struct timer *ftm = pwm->timer;
@@ -333,7 +333,7 @@ PWM_SET_DUTY_CYCLE(ftm, pwm, us) {
 
 #endif
 
-CAPTURE_INIT(ftm, index, settings) {
+CAPTURE_INIT(ftm, index) {
 	struct capture *capture = captures[index];
 	struct timer *ftm = capture->timer;
 	int32_t ret;
