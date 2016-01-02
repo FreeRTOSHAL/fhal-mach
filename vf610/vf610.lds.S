@@ -45,11 +45,13 @@ SECTIONS_START
 		TEXT_DEFAULT
 	TEXT_STOP(flash)
 
+	DEV(hal, flash)
 	DEV(uart, flash)
 	DEV(timer, flash)
 	DEV(pwm, flash)
 	DEV(capture, flash)
 	DEV(spi, flash)
+	DEV(accel, flash)
 
 	RODATA_START
 		RODATA_DEFAULT
