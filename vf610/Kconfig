@@ -122,267 +122,397 @@ menuconfig FLEXTIMER
 	depends on TIMER
 	bool "Activate Flextimer"
 	default n
-config FLEXTIMER_0
-	depends on FLEXTIMER
-	bool "Activate Flextimer 0"
-	default n
-config FLEXTIMER_1
-	depends on FLEXTIMER
-	bool "Activate Flextimer 1"
-	default n
-config FLEXTIMER_2
-	depends on FLEXTIMER
-	bool "Activate Flextimer 2"
-	default n
-config FLEXTIMER_3
-	depends on FLEXTIMER
-	bool "Activate Flextimer 3"
-	default n
-menuconfig FLEXTIMER_PWM
-	depends on FLEXTIMER && PWM
-	bool "Activate Flextimer PWM "
-	default n
-config FLEXTIMER_PWM_0_0
-	depends on FLEXTIMER_PWM && FLEXTIMER_0
-	bool "PWM on PTB0"
-	default n
-config FLEXTIMER_PWM_0_1
-	depends on FLEXTIMER_PWM && FLEXTIMER_0
-	bool "PWM on PTB1"
-	default n
-config FLEXTIMER_PWM_0_2
-	depends on FLEXTIMER_PWM && FLEXTIMER_0
-	bool "PWM on PTB2"
-	default n
-config FLEXTIMER_PWM_0_3
-	depends on FLEXTIMER_PWM && FLEXTIMER_0
-	bool "PWM on PTB3"
-	default n
-config FLEXTIMER_PWM_0_4
-	depends on FLEXTIMER_PWM && FLEXTIMER_0
-	bool "PWM on PTB4"
-	default n
-config FLEXTIMER_PWM_0_5
-	depends on FLEXTIMER_PWM && FLEXTIMER_0
-	bool "PWM on PTB5"
-	default n
-config FLEXTIMER_PWM_0_6
-	depends on FLEXTIMER_PWM && FLEXTIMER_0
-	bool "PWM on PTB6"
-	default n
-config FLEXTIMER_PWM_0_7
-	depends on FLEXTIMER_PWM && FLEXTIMER_0
-	bool "PWM on PTB7"
-	default n
-config FLEXTIMER_PWM_1_0
-	depends on FLEXTIMER_PWM && FLEXTIMER_1
-	bool "PWM on PTB8"
-	default n
-config FLEXTIMER_PWM_1_1
-	depends on FLEXTIMER_PWM && FLEXTIMER_1
-	bool "PWM on PTB9"
-	default n
-config FLEXTIMER_PWM_2_0
-	depends on FLEXTIMER_PWM && FLEXTIMER_2
-	bool "PWM on PTD23"
-	default n
-config FLEXTIMER_PWM_2_1
-	depends on FLEXTIMER_PWM && FLEXTIMER_2
-	bool "PWM on PTD22"
-	default n
-config FLEXTIMER_PWM_3_0
-	depends on FLEXTIMER_PWM && FLEXTIMER_3
-	bool "PWM on PTD22"
-	default n
-config FLEXTIMER_PWM_3_1
-	depends on FLEXTIMER_PWM && FLEXTIMER_3
-	bool "PWM on PTD31"
-	default n
-config FLEXTIMER_PWM_3_2
-	depends on FLEXTIMER_PWM && FLEXTIMER_3
-	bool "PWM on PTD30"
-	default n
-config FLEXTIMER_PWM_3_3
-	depends on FLEXTIMER_PWM && FLEXTIMER_3
-	bool "PWM on PTD29"
-	default n
-config FLEXTIMER_PWM_3_4
-	depends on FLEXTIMER_PWM && FLEXTIMER_3
-	bool "PWM on PTD28"
-	default n
-config FLEXTIMER_PWM_3_5
-	depends on FLEXTIMER_PWM && FLEXTIMER_3
-	bool "PWM on PTD26"
-	default n
-config FLEXTIMER_PWM_3_6
-	depends on FLEXTIMER_PWM && FLEXTIMER_3
-	bool "PWM on PTD25"
-	default n
-config FLEXTIMER_PWM_3_7
-	depends on FLEXTIMER_PWM && FLEXTIMER_3
-	bool "PWM on PTD24"
-	default n
-menuconfig FLEXTIMER_CAPTURE
-	depends on FLEXTIMER && CAPTURE
-	bool "Activate Flextimer CAPTURE "
-	default n
-config FLEXTIMER_CAPTURE_0_0
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
-	bool "CAPTURE on PTB0"
-	default n
-config FLEXTIMER_CAPTURE_0_1
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
-	bool "CAPTURE on PTB1"
-	default n
-config FLEXTIMER_CAPTURE_0_2
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
-	bool "CAPTURE on PTB2"
-	default n
-config FLEXTIMER_CAPTURE_0_3
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
-	bool "CAPTURE on PTB3"
-	default n
-config FLEXTIMER_CAPTURE_0_4
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
-	bool "CAPTURE on PTB4"
-	default n
-config FLEXTIMER_CAPTURE_0_5
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
-	bool "CAPTURE on PTB5"
-	default n
-config FLEXTIMER_CAPTURE_0_6
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
-	bool "CAPTURE on PTB6"
-	default n
-config FLEXTIMER_CAPTURE_0_7
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
-	bool "CAPTURE on PTB7"
-	default n
-config FLEXTIMER_CAPTURE_1_0
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_1
-	bool "CAPTURE on PTB8"
-	default n
-config FLEXTIMER_CAPTURE_1_1
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_1
-	bool "CAPTURE on PTB9"
-	default n
-config FLEXTIMER_CAPTURE_2_0
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_2
-	bool "CAPTURE on PTD23"
-	default n
-config FLEXTIMER_CAPTURE_2_1
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_2
-	bool "CAPTURE on PTD22"
-	default n
-config FLEXTIMER_CAPTURE_3_0
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
-	bool "CAPTURE on PTD22"
-	default n
-config FLEXTIMER_CAPTURE_3_1
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
-	bool "CAPTURE on PTD31"
-	default n
-config FLEXTIMER_CAPTURE_3_2
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
-	bool "CAPTURE on PTD30"
-	default n
-config FLEXTIMER_CAPTURE_3_3
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
-	bool "CAPTURE on PTD29"
-	default n
-config FLEXTIMER_CAPTURE_3_4
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
-	bool "CAPTURE on PTD28"
-	default n
-config FLEXTIMER_CAPTURE_3_5
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
-	bool "CAPTURE on PTD26"
-	default n
-config FLEXTIMER_CAPTURE_3_6
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
-	bool "CAPTURE on PTD25"
-	default n
-config FLEXTIMER_CAPTURE_3_7
-	depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
-	bool "CAPTURE on PTD24"
-	default n
+	config FLEXTIMER_0
+		depends on FLEXTIMER
+		bool "Activate Flextimer 0"
+		default n
+	config FLEXTIMER_1
+		depends on FLEXTIMER
+		bool "Activate Flextimer 1"
+		default n
+	config FLEXTIMER_2
+		depends on FLEXTIMER
+		bool "Activate Flextimer 2"
+		default n
+	config FLEXTIMER_3
+		depends on FLEXTIMER
+		bool "Activate Flextimer 3"
+		default n
+	menuconfig FLEXTIMER_PWM
+		depends on FLEXTIMER && PWM
+		bool "Activate Flextimer PWM "
+		default n
+		config FLEXTIMER_PWM_0_0
+			depends on FLEXTIMER_PWM && FLEXTIMER_0
+			bool "PWM on PTB0"
+			default n
+		config FLEXTIMER_PWM_0_1
+			depends on FLEXTIMER_PWM && FLEXTIMER_0
+			bool "PWM on PTB1"
+			default n
+		config FLEXTIMER_PWM_0_2
+			depends on FLEXTIMER_PWM && FLEXTIMER_0
+			bool "PWM on PTB2"
+			default n
+		config FLEXTIMER_PWM_0_3
+			depends on FLEXTIMER_PWM && FLEXTIMER_0
+			bool "PWM on PTB3"
+			default n
+		config FLEXTIMER_PWM_0_4
+			depends on FLEXTIMER_PWM && FLEXTIMER_0
+			bool "PWM on PTB4"
+			default n
+		config FLEXTIMER_PWM_0_5
+			depends on FLEXTIMER_PWM && FLEXTIMER_0
+			bool "PWM on PTB5"
+			default n
+		config FLEXTIMER_PWM_0_6
+			depends on FLEXTIMER_PWM && FLEXTIMER_0
+			bool "PWM on PTB6"
+			default n
+		config FLEXTIMER_PWM_0_7
+			depends on FLEXTIMER_PWM && FLEXTIMER_0
+			bool "PWM on PTB7"
+			default n
+		config FLEXTIMER_PWM_1_0
+			depends on FLEXTIMER_PWM && FLEXTIMER_1
+			bool "PWM on PTB8"
+			default n
+		config FLEXTIMER_PWM_1_1
+			depends on FLEXTIMER_PWM && FLEXTIMER_1
+			bool "PWM on PTB9"
+			default n
+		config FLEXTIMER_PWM_2_0
+			depends on FLEXTIMER_PWM && FLEXTIMER_2
+			bool "PWM on PTD23"
+			default n
+		config FLEXTIMER_PWM_2_1
+			depends on FLEXTIMER_PWM && FLEXTIMER_2
+			bool "PWM on PTD22"
+			default n
+		config FLEXTIMER_PWM_3_0
+			depends on FLEXTIMER_PWM && FLEXTIMER_3
+			bool "PWM on PTD22"
+			default n
+		config FLEXTIMER_PWM_3_1
+			depends on FLEXTIMER_PWM && FLEXTIMER_3
+			bool "PWM on PTD31"
+			default n
+		config FLEXTIMER_PWM_3_2
+			depends on FLEXTIMER_PWM && FLEXTIMER_3
+			bool "PWM on PTD30"
+			default n
+		config FLEXTIMER_PWM_3_3
+			depends on FLEXTIMER_PWM && FLEXTIMER_3
+			bool "PWM on PTD29"
+			default n
+		config FLEXTIMER_PWM_3_4
+			depends on FLEXTIMER_PWM && FLEXTIMER_3
+			bool "PWM on PTD28"
+			default n
+		config FLEXTIMER_PWM_3_5
+			depends on FLEXTIMER_PWM && FLEXTIMER_3
+			bool "PWM on PTD26"
+			default n
+		config FLEXTIMER_PWM_3_6
+			depends on FLEXTIMER_PWM && FLEXTIMER_3
+			bool "PWM on PTD25"
+			default n
+		config FLEXTIMER_PWM_3_7
+			depends on FLEXTIMER_PWM && FLEXTIMER_3
+			bool "PWM on PTD24"
+			default n
+	menuconfig FLEXTIMER_CAPTURE
+		depends on FLEXTIMER && CAPTURE
+		bool "Activate Flextimer CAPTURE "
+		default n
+		config FLEXTIMER_CAPTURE_0_0
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+			bool "CAPTURE on PTB0"
+			default n
+		config FLEXTIMER_CAPTURE_0_1
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+			bool "CAPTURE on PTB1"
+			default n
+		config FLEXTIMER_CAPTURE_0_2
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+			bool "CAPTURE on PTB2"
+			default n
+		config FLEXTIMER_CAPTURE_0_3
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+			bool "CAPTURE on PTB3"
+			default n
+		config FLEXTIMER_CAPTURE_0_4
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+			bool "CAPTURE on PTB4"
+			default n
+		config FLEXTIMER_CAPTURE_0_5
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+			bool "CAPTURE on PTB5"
+			default n
+		config FLEXTIMER_CAPTURE_0_6
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+			bool "CAPTURE on PTB6"
+			default n
+		config FLEXTIMER_CAPTURE_0_7
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_0
+			bool "CAPTURE on PTB7"
+			default n
+		config FLEXTIMER_CAPTURE_1_0
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_1
+			bool "CAPTURE on PTB8"
+			default n
+		config FLEXTIMER_CAPTURE_1_1
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_1
+			bool "CAPTURE on PTB9"
+			default n
+		config FLEXTIMER_CAPTURE_2_0
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_2
+			bool "CAPTURE on PTD23"
+			default n
+		config FLEXTIMER_CAPTURE_2_1
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_2
+			bool "CAPTURE on PTD22"
+			default n
+		config FLEXTIMER_CAPTURE_3_0
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+			bool "CAPTURE on PTD22"
+			default n
+		config FLEXTIMER_CAPTURE_3_1
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+			bool "CAPTURE on PTD31"
+			default n
+		config FLEXTIMER_CAPTURE_3_2
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+			bool "CAPTURE on PTD30"
+			default n
+		config FLEXTIMER_CAPTURE_3_3
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+			bool "CAPTURE on PTD29"
+			default n
+		config FLEXTIMER_CAPTURE_3_4
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+			bool "CAPTURE on PTD28"
+			default n
+		config FLEXTIMER_CAPTURE_3_5
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+			bool "CAPTURE on PTD26"
+			default n
+		config FLEXTIMER_CAPTURE_3_6
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+			bool "CAPTURE on PTD25"
+			default n
+		config FLEXTIMER_CAPTURE_3_7
+			depends on FLEXTIMER_CAPTURE && FLEXTIMER_3
+			bool "CAPTURE on PTD24"
+			default n
 
-config DSPI
+menuconfig DSPI
 	depends on SPI
 	bool "Activate DSPI"
-config SPIDEBUG
-	bool "SPI Debug Mode"
-	depends on DSPI
-	default n
-config DSPI_0
-	bool "Activate DSPI 0"
-	depends on DSPI
-	default n
-menuconfig DSPI_1
-	bool "Activate DSPI 1"
-	depends on DSPI
-	default n
-config DSPI_1_PTD8
-	bool "SCLK on PTD8"
-	depends on DSPI_1
+	config SPIDEBUG
+		bool "SPI Debug Mode"
+		depends on DSPI
+		default n
+	config DSPI_0
+		bool "Activate DSPI 0"
+		depends on DSPI
+		default n
+	menuconfig DSPI_1
+		bool "Activate DSPI 1"
+		depends on DSPI
+		default n
+		config DSPI_1_PTD8
+			bool "SCLK on PTD8"
+			depends on DSPI_1
+			default y
+		config DSPI_1_PTC8
+			bool "SCLK on PTC8"
+			depends on DSPI_1
+			default n
+		config DSPI_1_PTD7
+			bool "MOSI on PTD7"
+			depends on DSPI_1
+			default y
+		config DSPI_1_PTC7
+			bool "MOSI on PTC7"
+			depends on DSPI_1
+			default n
+		config DSPI_1_PTD6
+			bool "MISO on PTD6"
+			depends on DSPI_1
+			default y
+		config DSPI_1_PTC6
+			bool "MISO on PTC6"
+			depends on DSPI_1
+			default n
+		config DSPI_1_PTD5
+			bool "CS0 on PTD5"
+			depends on DSPI_1
+			default y
+		config DSPI_1_PTC5
+			bool "CS0 on PTC5"
+			depends on DSPI_1
+			default n
+		config DSPI_1_PTD4
+			bool "CS1 on PTD4"
+			depends on DSPI_1
+			default y
+		config DSPI_1_PTC4
+			bool "CS1 on PTC4"
+			depends on DSPI_1
+			default n
+		config DSPI_1_PTD3
+			bool "CS2 on PTD3"
+			depends on DSPI_1
+			default y
+		config DSPI_1_PTC30
+			bool "CS2 on PTC30"
+			depends on DSPI_1
+			default n
+		config DSPI_1_PTD2
+			bool "CS3 on PTD2"
+			depends on DSPI_1
+			default y
+		config DSPI_1_PTE12
+			bool "CS3 on PTE12"
+			depends on DSPI_1
+			default n
+	config DSPI_2
+		bool "Activate DSPI 2"
+		depends on DSPI
+		default n
+	config DSPI_3
+		bool "Activate DSPI 3"
+		depends on DSPI
+		default n
+menuconfig VF610_ADC
+	bool "Activate ADC Driver"
+	depends on ADC
 	default y
-config DSPI_1_PTC8
-	bool "SCLK on PTC8"
-	depends on DSPI_1
-	default n
-config DSPI_1_PTD7
-	bool "MOSI on PTD7"
-	depends on DSPI_1
-	default y
-config DSPI_1_PTC7
-	bool "MOSI on PTC7"
-	depends on DSPI_1
-	default n
-config DSPI_1_PTD6
-	bool "MISO on PTD6"
-	depends on DSPI_1
-	default y
-config DSPI_1_PTC6
-	bool "MISO on PTC6"
-	depends on DSPI_1
-	default n
-config DSPI_1_PTD5
-	bool "CS0 on PTD5"
-	depends on DSPI_1
-	default y
-config DSPI_1_PTC5
-	bool "CS0 on PTC5"
-	depends on DSPI_1
-	default n
-config DSPI_1_PTD4
-	bool "CS1 on PTD4"
-	depends on DSPI_1
-	default y
-config DSPI_1_PTC4
-	bool "CS1 on PTC4"
-	depends on DSPI_1
-	default n
-config DSPI_1_PTD3
-	bool "CS2 on PTD3"
-	depends on DSPI_1
-	default y
-config DSPI_1_PTC30
-	bool "CS2 on PTC30"
-	depends on DSPI_1
-	default n
-config DSPI_1_PTD2
-	bool "CS3 on PTD2"
-	depends on DSPI_1
-	default y
-config DSPI_1_PTE12
-	bool "CS3 on PTE12"
-	depends on DSPI_1
-	default n
-config DSPI_2
-	bool "Activate DSPI 2"
-	depends on DSPI
-	default n
-config DSPI_3
-	bool "Activate DSPI 3"
-	depends on DSPI
-	default n
+	menuconfig VF610_ADC_0
+		bool "Activate ADC 0"
+		depends on VF610_ADC
+		default n
+		config VF610_ADC_0_PTA18
+			bool "Activate ADC on PTA18"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_PTA19
+			bool "Activate ADC on PTA19"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_PTB0
+			bool "Activate ADC on PTB0"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_PTB1
+			bool "Activate ADC on PTB1"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_PTB4
+			bool "Activate ADC on PTB4"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_PTC30
+			bool "Activate ADC on PTC30"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_PTC14
+			bool "Activate ADC on PTC14"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_PTC15
+			bool "Activate ADC on PTC15"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_ADC0SE8
+			bool "Activate ADC on ADC0SE8"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_ADC0SE9
+			bool "Activate ADC on ADC0SE9"
+			depends on VF610_ADC_0
+		config VF610_ADC_0_DAC0
+			bool "Activate ADC on DAC0"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_VSS33
+			bool "Activate ADC on VSS33"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_VREF
+			bool "Activate ADC on VREF"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_Temp
+			bool "Activate Tempatur Sensor"
+			depends on VF610_ADC_0
+			default n
+		config VF610_ADC_0_VREF_PMU
+			bool "Activate ADC on VREF at PMU"
+			depends on VF610_ADC_0
+			default n
+	menuconfig VF610_ADC_1
+		bool "Activate ADC 1"
+		depends on VF610_ADC
+		default n
+		config VF610_ADC_1_PTA16
+			bool "Activate ADC on PTA16"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_PTA17
+			bool "Activate ADC on PTA17"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_PTB2
+			bool "Activate ADC on PTB2"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_PTB3
+			bool "Activate ADC on PTB3"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_PTB5
+			bool "Activate ADC on PTB5"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_PTC31
+			bool "Activate ADC on PTC31"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_PTC16
+			bool "Activate ADC on PTC16"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_PTC17
+			bool "Activate ADC on PTC17"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_ADC1SE8
+			bool "Activate ADC on ADC1SE8"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_ADC1SE9
+			bool "Activate ADC on ADC1SE9"
+			depends on VF610_ADC_1
+		config VF610_ADC_1_DAC1
+			bool "Activate ADC on DAC1"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_VSS33
+			bool "Activate ADC on VSS33"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_VREF
+			bool "Activate ADC on VREF"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_Temp
+			bool "Activate Tempatur Sensor"
+			depends on VF610_ADC_1
+			default n
+		config VF610_ADC_1_VREF_PMU
+			bool "Activate ADC on VREF at PMU"
+			depends on VF610_ADC_1
+			default n

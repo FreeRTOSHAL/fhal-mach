@@ -53,6 +53,7 @@ SECTIONS_START
 	DEV(spi, flash)
 	DEV(accel, flash)
 	DEV(gyro, flash)
+	DEV(adc, flash)
 
 	RODATA_START
 		RODATA_DEFAULT

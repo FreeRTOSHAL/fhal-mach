@@ -64,16 +64,15 @@ struct vf610_adc {
 	uint32_t pctl;
 };
 
-struct adc {
-	struct adc_generic generic;
+struct adc_base {
+	struct adc_generic gen;
 	struct vf610_adc *base;
 	uint32_t irq;
 	SemaphoreHandle_t sem;
-	SemaphoreHandle_t mutex;
 	uint8_t bits;
 	uint32_t hz;
-	uint32_t index;
 	uint32_t val;
+	struct adc *adcs[];
 };
 
 struct adc_pin {
@@ -81,92 +80,14 @@ struct adc_pin {
 	uint32_t mode;
 };
 
-
-static struct adc adcs[2] = {
-	{
-		.base = (struct vf610_adc *) VF610_ADC0,
-		.irq = 53,
-		.index = 0,
-	},
-	{
-		.base = (struct vf610_adc *) VF610_ADC1,
-		.irq = 54,
-		.index = 1,
-	},
+struct adc {
+	struct adc_generic gen;
+	struct adc_base *base;
+	const struct adc_pin pin;
+	uint32_t channel;
 };
 
-static struct adc_pin pins[2][8] = {
-	{
-		{
-			.pin = PTA18,
-			.mode = MODE2,
-		},
-		{
-			.pin = PTA19,
-			.mode = MODE2,
-		},
-		{
-			.pin = PTB0,
-			.mode = MODE2,
-		},
-		{
-			.pin = PTB1,
-			.mode = MODE2,
-		},
-		{
-			.pin = PTB4,
-			.mode = MODE3,
-		},
-		{
-			.pin = PTC30,
-			.mode = MODE6,
-		},
-		{
-			.pin = PTC14,
-			.mode = MODE6,
-		},
-		{
-			.pin = PTC15,
-			.mode = MODE6,
-		}
-	},
-	{
-		{
-			.pin = PTA16,
-			.mode = MODE3,
-		},
-		{
-			.pin = PTA17,
-			.mode = MODE3,
-		},
-		{
-			.pin = PTB2,
-			.mode = MODE2,
-		},
-		{
-			.pin = PTB3,
-			.mode = MODE2,
-		},
-		{
-			.pin = PTB5,
-			.mode = MODE3,
-		},
-		{
-			.pin = PTC31,
-			.mode = MODE6,
-		},
-		{
-			.pin = PTC16,
-			.mode = MODE6,
-		},
-		{
-			.pin = PTC17,
-			.mode = MODE3,
-		}
-	}
-};
-
-void adc_IRQHandler(struct adc *adc) {
+void adc_IRQHandler(struct adc_base *adc) {
 	BaseType_t higherPriorityTaskWoken = pdFALSE;
 	uint32_t hs = adc->base->hs;
 	if (hs & 0x1) {
@@ -176,17 +97,9 @@ void adc_IRQHandler(struct adc *adc) {
 	portYIELD_FROM_ISR(higherPriorityTaskWoken);
 }
 
-void adc0_isr(void) {
-	struct adc *adc = &adcs[0];
-	adc_IRQHandler(adc);
-}
 
-void adc1_isr(void) {
-	struct adc *adc = &adcs[1];
-	adc_IRQHandler(adc);
-}
 
-static int32_t adc_setupADC(struct adc *adc, uint32_t hz, uint32_t resol, uint32_t average) {
+static int32_t adc_setupADC(struct adc_base *adc, uint32_t hz, uint32_t resol, uint32_t average) {
 	uint32_t cfg = adc->base->cfg;
 	uint32_t gc = 0;
 	uint32_t div = IPG_CLK / hz;
@@ -324,7 +237,7 @@ static int32_t adc_setupADC(struct adc *adc, uint32_t hz, uint32_t resol, uint32
 	return 0;
 }
 
-static int32_t adc_calibration(struct adc *adc, uint32_t hz, uint32_t resol, uint32_t average) {
+static int32_t adc_calibration(struct adc_base *adc, uint32_t hz, uint32_t resol, uint32_t average) {
 	int32_t ret = adc_setupADC(adc, hz, resol, average);
 	if (ret < 0) {
 		return -1;
@@ -344,92 +257,737 @@ static int32_t adc_calibration(struct adc *adc, uint32_t hz, uint32_t resol, uin
 	return 0;	
 }
 
-struct adc *adc_init(uint32_t index, uint8_t bits, uint32_t hz) {
-	struct adc *adc = &adcs[index];
-	int32_t ret = adc_genericInit(adc);
+static int32_t adc_channel(struct adc *adc) {
+	if (adc->channel < 8) {
+		struct mux *mux = mux_init();
+		return mux_pinctl(mux, adc->pin.pin, MUX_CTL_MODE(adc->pin.mode), ADC_PIN_CTRL);
+	}
+	return 0;
+}
+
+ADC_INIT(vf610, index, bits, hz) {
+	struct adc *adc = adcs[index];
+	struct adc_base *base = adc->base;
+	int32_t ret = adc_generic_init(adc);
 	if (ret < 0) {
 		return NULL;
 	}
 	if (ret > 0) {
 		return adc;
 	}
-	adc->sem = xSemaphoreCreateBinary();
-	xSemaphoreGive(adc->sem);
-	xSemaphoreTake(adc->sem, 0);
-
 	/* 
-	 * Disabling all Conversation
+	 * Base is also compatible to adc struct
 	 */
-	adc->base->hc[0] |= ADC_HC_ADCH(0x1F);
-	adc->base->hc[0] &= ~ADC_HC_AIEN;
-	adc->base->hc[1] |= ADC_HC_ADCH(0x1F);
-	adc->base->hc[1] &= ~ADC_HC_AIEN;
-
-	adc->bits = bits;
-	adc->hz = hz;
-
-	irq_enable(adc->irq);
-	irq_setPrio(adc->irq, 0xF);
-
-	ret = adc_calibration(adc, hz, bits, 1);
+	ret = adc_generic_init((struct adc *) adc->base);
 	if (ret < 0) {
 		return NULL;
 	}
-	/* 
-	 * Setup ADC without hw average
-	 */
-	ret = adc_setupADC(adc, hz, bits, 1);
+	if (ret == 0) {
+		base->sem = xSemaphoreCreateBinary();
+		xSemaphoreGive(base->sem);
+		xSemaphoreTake(base->sem, 0);
+		/* 
+		 * Disabling all Conversation
+		 */
+		base->base->hc[0] |= ADC_HC_ADCH(0x1F);
+		base->base->hc[0] &= ~ADC_HC_AIEN;
+		base->base->hc[1] |= ADC_HC_ADCH(0x1F);
+		base->base->hc[1] &= ~ADC_HC_AIEN;
+
+		base->bits = bits;
+		base->hz = hz;
+
+		irq_enable(base->irq);
+		irq_setPrio(base->irq, 0xF);
+
+		ret = adc_calibration(base, hz, bits, 1);
+		if (ret < 0) {
+			return NULL;
+		}
+		/* 
+		 * Setup ADC without hw average
+		 */
+		ret = adc_setupADC(base, hz, bits, 1);
+		if (ret < 0) {
+			return NULL;
+		}
+	}
+	
+	ret = adc_channel(adc);
 	if (ret < 0) {
 		return NULL;
 	}
+
 	return adc;
 }
 int32_t adc_average(struct adc *adc, uint32_t average) {
-	return  adc_setupADC(adc, adc->bits, adc->hz, average);
+	return adc_setupADC(adc->base, adc->base->bits, adc->base->hz, average);
 }
-int32_t adc_deinit(struct adc *adc) {
-	adc->base->gc = 0;
-	adc->base->cfg = 0;
+ADC_DEINIT(vf610, adc) {
+	/* TODO */
 	return 0;
 }
-int32_t adc_channel(struct adc *adc, uint32_t channel) {
-	if (channel < 8) {
-		struct mux *mux = mux_init();
-		struct adc_pin *pin = &pins[adc->index][channel];
-		return mux_pinctl(mux, pin->pin, MUX_CTL_MODE(pin->mode), ADC_PIN_CTRL);
-	}
-	return 0;
-}
-int32_t adc_get(struct adc *adc, uint32_t channel, TickType_t waittime) {
+ADC_GET(vf610, adc, waittime) {
+	struct adc_base *base = adc->base;
 	int32_t ret;
 	int32_t val;
 	uint32_t tmp;
-	ret = adc_lock(adc, waittime);
-	if (ret != 1) {
-		goto adc_get_error0;
-	}
+	adc_lock(adc, waittime, -1);
+	adc_lock(base, waittime, -1); /* TODO waring adc can unlock while base unlock !!*/
 	
-	tmp = adc->base->hc[0];
+	tmp = base->base->hc[0];
 	tmp &= ~ADC_HC_ADCH(0x1F);
-	tmp |= ADC_HC_ADCH(channel) | ADC_HC_AIEN;
-	adc->base->hc[0] = tmp;
-	ret = xSemaphoreTake(adc->sem, waittime);
+	tmp |= ADC_HC_ADCH(adc->channel) | ADC_HC_AIEN;
+	base->base->hc[0] = tmp;
+	ret = xSemaphoreTake(base->sem, waittime);
 	if (ret != 1) {
 		goto adc_get_error1;
 	}
-	val = adc->val;
-	adc->base->hc[0] |= ADC_HC_ADCH(0x1F);
-	adc->base->hc[0] &= ~(ADC_HC_AIEN);
-	ret = adc_unlock(adc);
-	if (ret != 1) {
-		goto adc_get_error0;
-	}
+	val = base->val;
+	base->base->hc[0] |= ADC_HC_ADCH(0x1F);
+	base->base->hc[0] &= ~(ADC_HC_AIEN);
+	adc_unlock(base, -1); 
+	adc_unlock(adc, -1);
 	return val;
 adc_get_error1:
-	(void) adc_unlock(adc);
-adc_get_error0:
+	adc_unlock(adc, -1);
 	return -1;
 	
 
 }
+ADC_GET_ISR(vf610, adc) {
+	return -1;
+}
+ADC_SET_CALLBACK(vf610, adc, callback, data) {
+	return -1;
+}
+ADC_START(vf610, adc) {
+	return -1;
+}
+ADC_STOP(vf610, adc) {
+	return -1;
+}
+ADC_OPS(vf610);
+#ifdef CONFIG_VF610_ADC_0
+# ifdef CONFIG_VF610_ADC_0_PTA18
+static struct adc adc0_0;
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTA19
+static struct adc adc0_1;
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTB0
+static struct adc adc0_2;
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTB1
+static struct adc adc0_3;
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTB4
+static struct adc adc0_4;
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTC30
+static struct adc adc0_5;
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTC14
+static struct adc adc0_6;
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTC15
+static struct adc adc0_7;
+# endif
+# ifdef CONFIG_VF610_ADC_0_ADC0SE8
+static struct adc adc0_8;
+# endif
+# ifdef CONFIG_VF610_ADC_0_ADC0SE9
+static struct adc adc0_9;
+# endif
+# ifdef CONFIG_VF610_ADC_0_DAC0
+static struct adc adc0_10;
+# endif
+# ifdef CONFIG_VF610_ADC_0_VSS33
+static struct adc adc0_11;
+# endif
+# ifdef CONFIG_VF610_ADC_0_VREF
+static struct adc adc0_25;
+# endif
+# ifdef CONFIG_VF610_ADC_0_Temp
+static struct adc adc0_26;
+# endif
+# ifdef CONFIG_VF610_ADC_0_VREF_PMU
+static struct adc adc0_27;
+# endif
 
+static struct adc_base adc0 = {
+	ADC_INIT_DEV(vf610)
+	.base = (struct vf610_adc *) VF610_ADC0,
+	.irq = 53,
+	.adcs = {
+# ifdef CONFIG_VF610_ADC_0_PTA18
+		&adc0_0,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTA19
+		&adc0_1,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTB0
+		&adc0_2,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTB1
+		&adc0_3,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTB4
+		&adc0_4,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTC30
+		&adc0_5,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTC14
+		&adc0_6,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTC15
+		&adc0_7,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_ADC0SE8
+		&adc0_8,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_ADC0SE9
+		&adc0_9,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_DAC0
+		&adc0_10,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_VSS33
+		&adc0_11,
+# else
+		NULL,
+# endif
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+# ifdef CONFIG_VF610_ADC_0_VREF
+		&adc0_25,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_Temp
+		&adc0_26,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_0_VREF_PMU
+		&adc0_27,
+# else
+		NULL,
+# endif
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+	},
+};
+void adc0_isr(void) {
+	struct adc_base *adc = &adc0;
+	adc_IRQHandler(adc);
+}
+# ifdef CONFIG_VF610_ADC_0_PTA18
+static struct adc adc0_0 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 0,
+	.base = &adc0,
+	.pin = {
+		.pin = PTA18,
+		.mode = MODE2,
+	},
+};
+ADC_ADDDEV(vf610, adc0_0);
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTA19
+static struct adc adc0_1 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 1,
+	.base = &adc0,
+	.pin = {
+		.pin = PTA19,
+		.mode = MODE2,
+	},
+};
+ADC_ADDDEV(vf610, adc0_1);
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTB0
+static struct adc adc0_2 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 2,
+	.base = &adc0,
+	.pin = {
+		.pin = PTB0,
+		.mode = MODE2,
+	},
+};
+ADC_ADDDEV(vf610, adc0_2);
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTB1
+static struct adc adc0_3 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 3,
+	.base = &adc0,
+	.pin = {
+		.pin = PTB1,
+		.mode = MODE2,
+	},
+};
+ADC_ADDDEV(vf610, adc0_3);
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTB4
+static struct adc adc0_4 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 4,
+	.base = &adc0,
+	.pin = {
+		.pin = PTB4,
+		.mode = MODE3,
+	},
+};
+ADC_ADDDEV(vf610, adc0_4);
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTC30
+static struct adc adc0_5 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 5,
+	.base = &adc0,
+	.pin = {
+		.pin = PTC30,
+		.mode = MODE6,
+	},
+};
+ADC_ADDDEV(vf610, adc0_5);
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTC14
+static struct adc adc0_6 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 6,
+	.base = &adc0,
+	.pin = {
+		.pin = PTC14,
+		.mode = MODE6,
+	},
+};
+ADC_ADDDEV(vf610, adc0_6);
+# endif
+# ifdef CONFIG_VF610_ADC_0_PTC15
+static struct adc adc0_7 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 7,
+	.base = &adc0,
+	.pin = {
+		.pin = PTC15,
+		.mode = MODE6,
+	},
+};
+ADC_ADDDEV(vf610, adc0_7);
+# endif
+# ifdef CONFIG_VF610_ADC_0_ADC0SE8
+static struct adc adc0_8 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 8,
+	.base = &adc0,
+	/* Dedicated PAD - ADC0SE8 */
+};
+ADC_ADDDEV(vf610, adc0_8);
+# endif
+# ifdef CONFIG_VF610_ADC_0_ADC0SE9
+static struct adc adc0_9 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 9,
+	.base = &adc0,
+	/* Dedicated PAD - ADC0SE9 */
+};
+ADC_ADDDEV(vf610, adc0_9);
+# endif
+# ifdef CONFIG_VF610_ADC_0_DAC0
+static struct adc adc0_10 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 10,
+	.base = &adc0,
+	/* DAC 0 */
+};
+ADC_ADDDEV(vf610, adc0_10);
+# endif
+# ifdef CONFIG_VF610_ADC_0_VSS33
+static struct adc adc0_11 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 11,
+	.base = &adc0,
+	/* VSS33 */
+};
+ADC_ADDDEV(vf610, adc0_11);
+# endif
+/* Channel 11 - 24 == VSS33 12 - 24 not avabile */
+# ifdef CONFIG_VF610_ADC_0_VREF
+static struct adc adc0_25 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 25,
+	.base = &adc0,
+	/* VREF */
+};
+ADC_ADDDEV(vf610, adc0_25);
+# endif
+# ifdef CONFIG_VF610_ADC_0_Temp
+static struct adc adc0_26 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 26,
+	.base = &adc0,
+	/* Temp Sensor */
+};
+ADC_ADDDEV(vf610, adc0_26);
+# endif
+# ifdef CONFIG_VF610_ADC_0_VREF_PMU
+static struct adc adc0_27 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 27,
+	.base = &adc0,
+	/* VFEF from PMU */
+};
+ADC_ADDDEV(vf610, adc0_27);
+# endif
+/* 28 - 31 not avaribale => HI-Z */
+#endif
+
+#ifdef CONFIG_VF610_ADC_1
+# ifdef CONFIG_VF610_ADC_1_PTA16
+static struct adc adc1_0;
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTA17
+static struct adc adc1_1;
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTB2
+static struct adc adc1_2;
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTB3
+static struct adc adc1_3;
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTB5
+static struct adc adc1_4;
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTC31
+static struct adc adc1_5;
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTC16
+static struct adc adc1_6;
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTC17
+static struct adc adc1_7;
+# endif
+# ifdef CONFIG_VF610_ADC_1_ADC1SE9
+static struct adc adc1_8;
+# endif
+# ifdef CONFIG_VF610_ADC_1_ADC1SE9
+static struct adc adc1_9;
+# endif
+# ifdef CONFIG_VF610_ADC_1_DAC1
+static struct adc adc1_10;
+# endif
+# ifdef CONFIG_VF610_ADC_1_VSS33
+static struct adc adc1_11;
+# endif
+# ifdef CONFIG_VF610_ADC_1_VREF
+static struct adc adc1_25;
+# endif
+# ifdef CONFIG_VF610_ADC_1_Temp
+static struct adc adc1_26;
+# endif
+# ifdef CONFIG_VF610_ADC_1_VREF_PMU
+static struct adc adc1_27;
+# endif
+
+static struct adc_base adc1 = {
+	ADC_INIT_DEV(vf610)
+	.base = (struct vf610_adc *) VF610_ADC1,
+	.irq = 54,
+	.adcs = {
+# ifdef CONFIG_VF610_ADC_1_PTA16
+		&adc1_0,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTA17
+		&adc1_1,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTB2
+		&adc1_2,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTB3
+		&adc1_3,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTB5
+		&adc1_4,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTC31
+		&adc1_5,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTC16
+		&adc1_6,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTC17
+		&adc1_7,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_ADC1SE8
+		&adc1_8,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_ADC1SE9
+		&adc1_9,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_DAC1
+		&adc1_10,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_VSS33
+		&adc1_11,
+# else
+		NULL,
+# endif
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+# ifdef CONFIG_VF610_ADC_1_VREF
+		&adc1_25,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_Temp
+		&adc1_26,
+# else
+		NULL,
+# endif
+# ifdef CONFIG_VF610_ADC_1_VREF_PMU
+		&adc1_27,
+# else
+		NULL,
+# endif
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+	},
+};
+void adc1_isr(void) {
+	struct adc_base *adc = &adc1;
+	adc_IRQHandler(adc);
+}
+# ifdef CONFIG_VF610_ADC_1_PTA16
+static struct adc adc1_0 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 0,
+	.base = &adc1,
+	.pin = {
+		.pin = PTA16,
+		.mode = MODE3,
+	},
+};
+ADC_ADDDEV(vf610, adc1_0);
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTA17
+static struct adc adc1_1 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 1,
+	.base = &adc1,
+	.pin = {
+		.pin = PTA17,
+		.mode = MODE3,
+	},
+};
+ADC_ADDDEV(vf610, adc1_1);
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTB2
+static struct adc adc1_2 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 2,
+	.base = &adc1,
+	.pin = {
+		.pin = PTB2,
+		.mode = MODE2,
+	},
+};
+ADC_ADDDEV(vf610, adc1_2);
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTB3
+static struct adc adc1_3 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 3,
+	.base = &adc1,
+	.pin = {
+		.pin = PTB3,
+		.mode = MODE2,
+	},
+};
+ADC_ADDDEV(vf610, adc1_3);
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTB5
+static struct adc adc1_4 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 4,
+	.base = &adc1,
+	.pin = {
+		.pin = PTB5,
+		.mode = MODE3,
+	},
+};
+ADC_ADDDEV(vf610, adc1_4);
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTC31
+static struct adc adc1_5 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 5,
+	.base = &adc1,
+	.pin = {
+		.pin = PTC31,
+		.mode = MODE6,
+	},
+};
+ADC_ADDDEV(vf610, adc1_5);
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTC16
+static struct adc adc1_6 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 6,
+	.base = &adc1,
+	.pin = {
+		.pin = PTC16,
+		.mode = MODE6,
+	},
+};
+ADC_ADDDEV(vf610, adc1_6);
+# endif
+# ifdef CONFIG_VF610_ADC_1_PTC17
+static struct adc adc1_7 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 7,
+	.base = &adc1,
+	.pin = {
+		.pin = PTC17,
+		.mode = MODE3,
+	},
+};
+ADC_ADDDEV(vf610, adc1_7);
+# endif
+# ifdef CONFIG_VF610_ADC_1_ADC1SE8
+static struct adc adc1_8 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 8,
+	.base = &adc1,
+	/* Dedicated PAD - ADC1SE8 */
+};
+ADC_ADDDEV(vf610, adc1_8);
+# endif
+# ifdef CONFIG_VF610_ADC_1_ADC1SE9
+static struct adc adc1_9 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 9,
+	.base = &adc1,
+	/* Dedicated PAD - ADC1SE9 */
+};
+ADC_ADDDEV(vf610, adc1_9);
+# endif
+# ifdef CONFIG_VF610_ADC_1_DAC1
+static struct adc adc1_10 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 10,
+	.base = &adc1,
+	/* DAC 0 */
+};
+ADC_ADDDEV(vf610, adc1_10);
+# endif
+# ifdef CONFIG_VF610_ADC_1_VSS33
+static struct adc adc1_11 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 11,
+	.base = &adc1,
+	/* VSS33 */
+};
+ADC_ADDDEV(vf610, adc1_11);
+# endif
+/* Channel 11 - 24 == VSS33 12 - 24 not avabile */
+# ifdef CONFIG_VF610_ADC_1_VREF
+static struct adc adc1_25 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 25,
+	.base = &adc1,
+	/* VREF */
+};
+ADC_ADDDEV(vf610, adc1_25);
+# endif
+# ifdef CONFIG_VF610_ADC_1_Temp
+static struct adc adc1_26 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 26,
+	.base = &adc1,
+	/* Temp Sensor */
+};
+ADC_ADDDEV(vf610, adc1_26);
+# endif
+# ifdef CONFIG_VF610_ADC_1_VREF_PMU
+static struct adc adc1_27 = {
+	ADC_INIT_DEV(vf610)
+	.channel = 27,
+	.base = &adc1,
+	/* VFEF from PMU */
+};
+ADC_ADDDEV(vf610, adc1_27);
+# endif
+/* 28 - 31 not avaribale => HI-Z */
+#endif
