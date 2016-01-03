@@ -143,7 +143,6 @@ static void clearIRQBit(struct timer *ftm) {
 }
 
 static void inline handleIRQ(struct timer *ftm) {
-	int i;
 	bool ret = 0;
 	switch (ftm->mode) {
 		case ONESHOT:
@@ -153,7 +152,9 @@ static void inline handleIRQ(struct timer *ftm) {
 		default:
 			break;
 	}
+#ifdef CONFIG_FLEXTIMER_CAPTURE
 	{
+		int i;
 		uint32_t status = ftm->base->status;
 		if (status != 0) {
 			for (i = 0; i < 8 && status != 0; i++) {
@@ -172,6 +173,7 @@ static void inline handleIRQ(struct timer *ftm) {
 			ftm->base->status = 0;
 		}
 	}
+#endif
 	if (FTM_IS_OVERFLOWED(ftm->base->sc)) {
 		if (ftm->irqhandle) {
 			ret |= ftm->irqhandle(ftm, ftm->data); /* TODO Handle bool;) */
@@ -333,6 +335,7 @@ PWM_SET_DUTY_CYCLE(ftm, pwm, us) {
 
 #endif
 
+#ifdef CONFIG_FLEXTIMER_CAPTURE
 CAPTURE_INIT(ftm, index) {
 	struct capture *capture = captures[index];
 	struct timer *ftm = capture->timer;
@@ -381,6 +384,7 @@ CAPTURE_SET_CALLBACK(ftm, capture, callback, data) {
 	capture->data = data;
 	return 0;
 }
+#endif
 
 TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
 	int32_t ret;
@@ -480,7 +484,9 @@ static struct timer ftm_timer_0 =  {
 	TIMER_INIT_DEV(ftm)
 	.base = VF610_FLEXTIMER_0,
 	.irqnr = 42,
+#ifdef CONFIG_FLEXTIMER_CAPTURE
 	.capture = (struct capture const **) &ftm_captures_0,
+#endif
 };
 TIMER_ADDDEV(ftm, ftm_timer_0);
 void flextimer0_isr() {
@@ -493,7 +499,9 @@ static struct timer ftm_timer_1 = {
 	TIMER_INIT_DEV(ftm)
 	.base = VF610_FLEXTIMER_1,
 	.irqnr = 43,
+#ifdef CONFIG_FLEXTIMER_CAPTURE
 	.capture = (struct capture const **) &ftm_captures_1,
+#endif
 };
 TIMER_ADDDEV(ftm, ftm_timer_1);
 void flextimer1_isr() {
@@ -506,7 +514,9 @@ static struct timer ftm_timer_2 = {
 	TIMER_INIT_DEV(ftm)
 	.base = VF610_FLEXTIMER_2,
 	.irqnr = 44,
+#ifdef CONFIG_FLEXTIMER_CAPTURE
 	.capture = (struct capture const **) &ftm_captures_2,
+#endif
 };
 TIMER_ADDDEV(ftm, ftm_timer_2);
 void flextimer2_isr() {
@@ -519,7 +529,9 @@ static struct timer ftm_timer_3 = {
 	TIMER_INIT_DEV(ftm)
 	.base = VF610_FLEXTIMER_3,
 	.irqnr = 45,
+#ifdef CONFIG_FLEXTIMER_CAPTURE
 	.capture = (struct capture const **) &ftm_captures_3,
+#endif
 };
 TIMER_ADDDEV(ftm, ftm_timer_3);
 void flextimer3_isr() {
