@@ -83,12 +83,12 @@ SECTIONS_START
 		BSS_DEFAULT
 	BSS_STOP(sram)
 
-	HEAP(sram, ((CONFIG_MACH_INIT_STACK_SIZE) + (1 * 1024)))
+	HEAP(sram, ((CONFIG_MACH_INIT_STACK_SIZE) + (10 * 1024)))
 
 	/*STACK();*/
 	SECTION_START(.stackArea)
 		. = ALIGN(4); \
 		SYMBOL(_start_stack); \
-		_end_stack = (ORIGIN(sram) + LENGTH(sram) - (1 * 1024)); /* the Back of the SRAM is uesd for Shead Memmory */
+		_end_stack = (ORIGIN(sram) + LENGTH(sram) - (10 * 1024)); /* the Back of the SRAM is uesd for Shead Memmory */
 	SECTION_STOP(sram)
 SECTIONS_STOP

@@ -10,8 +10,8 @@ struct uart {
 	struct buffer *rx;
 	struct buffer *tx;
 };
-#define BUFFER_UART_RX ((struct buffer_base *) 0x3f07fbff)
-#define BUFFER_UART_TX ((struct buffer_base *) 0x3f07fd17)
+#define BUFFER_UART_RX ((struct buffer_base *) 0x3f07d800)
+#define BUFFER_UART_TX ((struct buffer_base *) 0x3f07da1C)
 #define BUFFER_CPU2CPU_INTNR 1
 UART_INIT(buffer, port, bautrate) {
 	struct uart *uart = (struct uart *) uarts[port];

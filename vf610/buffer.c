@@ -21,24 +21,31 @@ static void handleISR(struct buffer_prv *prv, BaseType_t *xHigherPriorityTaskWok
 
 }
 
+#ifdef CONFIG_VF610_BUFFER_0
 void cpu2cpu_int0_isr() {
 	BaseType_t xHigherPriorityTaskWoken;
 	handleISR(&prv[0], &xHigherPriorityTaskWoken);
 	irq_clear(0);
 	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
+#endif
+#ifdef CONFIG_VF610_BUFFER_1
 void cpu2cpu_int1_isr() {
 	BaseType_t xHigherPriorityTaskWoken;
 	handleISR(&prv[1], &xHigherPriorityTaskWoken);
 	irq_clear(1);
 	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
+#endif
+#ifdef CONFIG_VF610_BUFFER_2
 void cpu2cpu_int2_isr() {
 	BaseType_t xHigherPriorityTaskWoken;
 	handleISR(&prv[2], &xHigherPriorityTaskWoken);
 	irq_clear(2);
 	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
+#endif
+#ifdef CONFIG_VF610_BUFFER_3
 void cpu2cpu_int3_isr() {
 	BaseType_t xHigherPriorityTaskWoken;
 	handleISR(&prv[3], &xHigherPriorityTaskWoken);
@@ -46,6 +53,7 @@ void cpu2cpu_int3_isr() {
 	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
 }
+#endif
 
 int32_t buffer_init_prv(struct buffer *buffer) {
 	if (buffer->readOnly) {
