@@ -5,7 +5,9 @@
 
 /*#define __CM3_REV                 0x0200 */
 #define __FPU_PRESENT             1
-#define __FPU_USED                1
+#ifdef __FPU_USED
+# define __FPU_USED                1
+#endif
 #define __MPU_PRESENT             0
 #define __NVIC_PRIO_BITS          4
 #define __Vendor_SysTickConfig    0
