@@ -12,9 +12,9 @@ struct buffer_prv {
 
 struct buffer_prv prv[4];
 
-static void handleISR(struct buffer_prv *prv, BaseType_t *xHigherPriorityTaskWoken) {
-	if (prv->sem != NULL) {
-		xSemaphoreGiveFromISR(prv->sem, xHigherPriorityTaskWoken);
+static void handleISR(struct buffer_prv *p, BaseType_t *xHigherPriorityTaskWoken) {
+	if (p->sem != NULL) {
+		xSemaphoreGiveFromISR(p->sem, xHigherPriorityTaskWoken);
 	} else {
 		*xHigherPriorityTaskWoken = false;
 	}
@@ -71,9 +71,9 @@ int32_t buffer_init_prv(struct buffer *buffer) {
 	return 0;
 }
 int32_t buffer_wfi(struct buffer *buffer, TickType_t waittime) {
-	struct buffer_prv *prv = buffer->prv;
+	struct buffer_prv *p = buffer->prv;
 	BaseType_t ret;
-	ret = xSemaphoreTake(prv->sem, waittime);
+	ret = xSemaphoreTake(p->sem, waittime);
 	return ret != 1;
 }
 void buffer_notify(struct buffer *buffer) {

@@ -60,8 +60,8 @@ UART_INIT(lp, port, bautrate) {
 		return uart;
 	}
 	{
-		volatile uint8_t register ctrl;
-		volatile register struct lpuart_fsl *base = uart->base;
+		register volatile uint8_t ctrl;
+		register volatile struct lpuart_fsl *base = uart->base;
 		ctrl = base->uc2;
 		ctrl &= ~UC2_RE;
 		ctrl &= ~UC2_TE;
