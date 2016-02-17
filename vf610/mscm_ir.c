@@ -73,11 +73,11 @@ int32_t irq_disable(int32_t irqnr) {
 	NVIC_DisableIRQ(irqnr);
 	return 0;
 }
-int32_t irq_notify(int32_t cpuid, int32_t irqnr) {
+int32_t irq_notify(int32_t c, int32_t irqnr) {
 	if (irqnr > 3) {
 		return -1;
 	}
-	mscm->ircpgir = IRCPGIR_INTID(irqnr) | IRCPGIR_CPUTL(cpuid) | IRCPGIR_TLF_CPUTL;
+	mscm->ircpgir = IRCPGIR_INTID(irqnr) | IRCPGIR_CPUTL(c) | IRCPGIR_TLF_CPUTL;
 	return 0;
 }
 int32_t irq_clear(int32_t irqnr) {

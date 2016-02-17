@@ -306,7 +306,7 @@ struct clock *clock_init() {
 	clk.scsc->sirc = (1 << 0) | (0 << 8);
 	return &clk;
 }
-int32_t clock_deinit(struct clock *clk) {
-	(void) clk;
+int32_t clock_deinit(struct clock *c) {
+	(void) c;
 	return 0;
 }

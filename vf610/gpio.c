@@ -64,7 +64,7 @@ struct gpio_pin {
 struct gpio *gpio_init() {
 	return &gpio;
 }
-int32_t gpio_deinit(struct gpio *gpio) {
+int32_t gpio_deinit(struct gpio *g) {
 	return 0;
 }
 #define HMI2015_GPIO_GENERAL_CTRL (PAD_CTL_PKE | PAD_CTL_PUE | PAD_CTL_SPEED_MED)
@@ -124,16 +124,16 @@ int32_t gpioPin_SchmittTrigger(struct gpio_pin *pin, bool schmit) {
 	pin->schmittTrigger = schmit;
 	return gpioPin_setup(pin);
 }
-struct gpio_pin *gpioPin_init(struct gpio *gpio, uint8_t pin, enum gpio_direction dir, enum gpio_setting setting) {
+struct gpio_pin *gpioPin_init(struct gpio *g, uint8_t pin, enum gpio_direction dir, enum gpio_setting setting) {
 	int32_t ret;
 	struct gpio_pin *gpio_pin= pvPortMalloc(sizeof(struct gpio_pin));
 	if (gpio_pin == NULL) {
 		goto gpio_getPin_error0;
 	}
-	gpio_pin->gpio = gpio;
+	gpio_pin->gpio = g;
 	gpio_pin->bank = pin / 32;
 	gpio_pin->pin = pin % 32;
-	gpio_pin->base = gpio->base[gpio_pin->bank];
+	gpio_pin->base = g->base[gpio_pin->bank];
 	gpio_pin->schmittTrigger = false;
 	ret = gpioPin_setDirection(gpio_pin, dir);
 	if (ret < 0) {
