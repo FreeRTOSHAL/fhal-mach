@@ -131,7 +131,6 @@ static struct uart uart_data03 = {
 	UART_INIT_DEV(lp)
 	.base = (volatile struct lpuart_fsl *) VF610_UART3,
 };
-};
 UART_ADDDEV(lp, uart_data03);
 #endif
 #ifdef CONFIG_VF610_LPUART04
