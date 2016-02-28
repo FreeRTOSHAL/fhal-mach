@@ -26,6 +26,9 @@ UART_INIT(buffer, port, bautrate) {
 	if (ret > 0) {
 		return uart;
 	}
+	if (bautrate == 0) {
+		return NULL;
+	}
 	uart->rx = buffer_init(BUFFER_UART_RX, 256, sizeof(char), true, 1);
 	if (uart->rx == NULL) {
 		return NULL;

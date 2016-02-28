@@ -398,6 +398,9 @@ TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
 	if (ret < 0) {
 		return ftm;
 	}
+	if (prescaler == 0) {
+		return NULL;
+	}
 	ftm->ftmid = index;
 	ftm->irqhandle = NULL;
 	ftm->data = NULL;

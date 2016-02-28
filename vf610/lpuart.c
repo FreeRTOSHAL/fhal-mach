@@ -59,6 +59,9 @@ UART_INIT(lp, port, bautrate) {
 	if (ret > 0) {
 		return uart;
 	}
+	if (bautrate == 0) {
+		return NULL;
+	}
 	{
 		register volatile uint8_t ctrl;
 		register volatile struct lpuart_fsl *base = uart->base;
