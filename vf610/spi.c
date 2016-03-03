@@ -16,6 +16,7 @@
 #include <core_cm4.h>
 #include <core_cmInstr.h>
 #include <alloca.h>
+#include <clock.h>
 
 #ifdef CONFIG_SPIDEBUG
 #define SPI_PRINTF(ftm, ...) printf(ftm, ##__VA_ARGS__)
@@ -23,7 +24,7 @@
 #define SPI_PRINTF(ftm, ...)
 #endif
 
-#define IPG_CLK 66000000ULL
+#define IPG_CLK clock_getPeripherySpeed(clock_init())
 
 #define SPI_MCR_MSTR BIT(31)
 #define SPI_MCR_CONT_SCKE BIT(30)
