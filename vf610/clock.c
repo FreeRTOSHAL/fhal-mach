@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <clock.h>
+#include <hal.h>
 
 
 struct scsc {
@@ -135,10 +136,12 @@ struct anadig_reg {
 #define CCM_CCSR_PLL1_PFD1_EN			(1 << 8)
 
 #define CCM_CCSR_DDRC_CLK_SEL(v)		((v) << 6)
+#define CCM_CCSR_FAST_CLK_SEL_OFFSET            5
+#define CCM_CCSR_FAST_CLK_SEL_MASK              0x1
 #define CCM_CCSR_FAST_CLK_SEL(v)		((v) << 5)
 
 #define CCM_CCSR_SYS_CLK_SEL_OFFSET		0
-#define CCM_CCSR_SYS_CLK_SEL_MASK		0x7
+#define CCM_CCSR_SYS_CLK_SEL_MASK		(0x7 << 0)
 #define CCM_CCSR_SYS_CLK_SEL(v)			((v) & 0x7)
 
 #define CCM_CACRR_IPG_CLK_DIV_OFFSET		11
@@ -275,9 +278,12 @@ struct anadig_reg {
 #define ANADIG_MISC0_OSC_XTALOK_EN              (1 << 17)
 
 struct clock {
+	struct clock_generic gen;
 	volatile struct ccm_reg *ccm;
 	volatile struct anadig_reg *anadig;
 	volatile struct scsc *scsc;
+	int64_t cpu;
+	int64_t periphery;
 };
 #define VF610_CCM ((volatile struct ccm_reg *) 0x4006B000)
 #define VF610_ANADIG ((volatile struct anadig_reg *) 0x40050010)
@@ -296,6 +302,10 @@ struct clock *clock_init() {
 #define CCM_CSCMR2_FTM_1_FIX_128K		(1 << 14)
 #define CCM_CSCMR2_FTM_2_FIX_128K		(1 << 14)
 #define CCM_CSCMR2_FTM_3_FIX_128K		(1 << 14)
+	if (hal_isInit(&clk)) {
+		return &clk;
+	}
+	clk.gen.init = true;
 	clk.ccm->cscdr1 |= CCM_CSCDR1_FTM_0_EN | CCM_CSCDR1_FTM_1_EN | CCM_CSCDR1_FTM_2_EN | CCM_CSCDR1_FTM_3_EN;
 	clk.ccm->ccgr0 |= CCM_CCGR0_SPI0_CTRL_MASK | CCM_CCGR0_SPI1_CTRL_MASK;
 	clk.ccm->ccgr1 |= CCM_CCGR1_FTM_0_CTRL_MASK | CCM_CCGR1_FTM_1_CTRL_MASK | CCM_CCGR1_ADC_0_CTRL_MASK;
@@ -305,6 +315,79 @@ struct clock *clock_init() {
 	clk.ccm->ccgr3 |= CCM_CCGR3_SCSC_CTRL_MASK;
 	clk.scsc->sirc = (1 << 0) | (0 << 8);
 	return &clk;
+}
+int64_t clock_getCPUSpeed(struct clock *clk) {
+	int64_t speed = 0;
+	uint32_t tmp;
+	/* only once Calculate Speed */
+	if (clk->cpu != 0) {
+		return clk->cpu;
+	}
+	tmp = (clk->ccm->ccsr & CCM_CCSR_SYS_CLK_SEL_MASK) >> CCM_CCSR_SYS_CLK_SEL_OFFSET;
+	switch (tmp) {
+		case 0: /* Fast clock */
+			speed = 24000000L;
+			break;
+		case 1: /* Slow clock */
+			speed = 32000;
+			break;
+		case 2: /* PLL2 PFD clock */
+			/* TODO */
+			return -1;
+		case 3: /* PLL2 main clock */
+			/* TODO */
+			return -1;
+		case 4: /* PLL1 PFD clock */
+			tmp = (clk->ccm->ccsr & CCM_CCSR_PLL1_PFD_CLK_SEL_MASK) >> CCM_CCSR_PLL1_PFD_CLK_SEL_OFFSET;
+			switch (tmp) {
+				case 0:
+					speed = 528000000L;
+					break;
+				case 1:
+					speed = 500210526L;
+					break;
+				case 2:
+					speed = 452000000L;
+					break;
+				case 3:
+					speed = 396000000L;
+					break;
+				case 4:
+					speed = 528000000L;
+					break;
+				default:
+					/* no possible */
+					return -1;
+			}
+			break;
+		case 5: /* PLL3 main clock */
+			/* TODO */
+			return -1;
+		default:
+			/* no possible */
+			return -1;
+	}
+	tmp = (clk->ccm->cacrr & CCM_CACRR_ARM_CLK_DIV_MASK) >> CCM_CACRR_ARM_CLK_DIV_OFFSET;
+	tmp++;
+	speed /= tmp;
+	tmp = (clk->ccm->cacrr & CCM_CACRR_BUS_CLK_DIV_MASK) >> CCM_CACRR_BUS_CLK_DIV_OFFSET;
+	tmp++;
+	speed /= tmp;
+	clk->cpu = speed;
+	return speed;
+}
+int64_t clock_getPeripherySpeed(struct clock *clk) {
+	/* only once Calculate Speed */
+	if (clk->periphery == 0) {
+		int64_t speed = clock_getCPUSpeed(clk);
+		int32_t tmp = (clk->ccm->cacrr & CCM_CACRR_IPG_CLK_DIV_MASK) >> CCM_CACRR_IPG_CLK_DIV_OFFSET;
+		tmp++;
+		speed /= tmp;
+		clk->periphery = speed;
+		return speed;
+	} else {
+		return clk->periphery;
+	}
 }
 int32_t clock_deinit(struct clock *c) {
 	(void) c;

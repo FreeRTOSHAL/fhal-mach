@@ -11,7 +11,7 @@
 #include <iomux.h>
 #include <irq.h>
 
-#define IPG_CLK 66000000
+#define IPG_CLK clock_getPeripherySpeed(clock_init())
 
 #define ADC_PIN_CTRL (PAD_CTL_IBE_ENABLE | PAD_CTL_DSE_75ohm)
 
