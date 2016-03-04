@@ -1,6 +1,8 @@
 #include <FreeRTOS.h>
 #include <stdint.h>
 #include <gpio.h>
+#define GPIO_PRV
+#include <gpio_prv.h>
 #include "iomux.h"
 
 struct gpio_imx {
@@ -21,6 +23,7 @@ struct gpio_imx_int {
 };
 
 struct gpio {
+	struct gpio_generic gen;
 	struct gpio_imx *base[5];
 	struct gpio_imx_int *interrupts[5];
 };
@@ -34,22 +37,6 @@ struct gpio {
 #define GPIO2_INT 0x4004B000
 #define GPIO3_INT 0x4004C000
 #define GPIO4_INT 0x4004D000
-struct gpio gpio = {
-	.base = {
-		(struct gpio_imx *) GPIO0_BASE,
-		(struct gpio_imx *) GPIO1_BASE,
-		(struct gpio_imx *) GPIO2_BASE,
-		(struct gpio_imx *) GPIO3_BASE,
-		(struct gpio_imx *) GPIO4_BASE,
-	},
-	.interrupts = {
-		(struct gpio_imx_int *) GPIO0_INT,
-		(struct gpio_imx_int *) GPIO1_INT,
-		(struct gpio_imx_int *) GPIO2_INT,
-		(struct gpio_imx_int *) GPIO3_INT,
-		(struct gpio_imx_int *) GPIO4_INT,
-	},
-};
 struct gpio_pin {
 	struct gpio *gpio;
 	struct gpio_imx *base;
@@ -61,10 +48,10 @@ struct gpio_pin {
 	bool schmittTrigger;
 };
 
-struct gpio *gpio_init() {
-	return &gpio;
+GPIO_INIT(vf, index) {
+	return gpios[index];
 }
-int32_t gpio_deinit(struct gpio *g) {
+GPIO_DEINIT(vf, g) {
 	return 0;
 }
 #define HMI2015_GPIO_GENERAL_CTRL (PAD_CTL_PKE | PAD_CTL_PUE | PAD_CTL_SPEED_MED)
@@ -99,7 +86,7 @@ static int32_t gpioPin_setup(struct gpio_pin *pin) {
 	ret = mux_pinctl(mux, pin->pin + (pin->bank * 32), ctl, extra);
 	return ret;
 }
-int32_t gpioPin_setDirection(struct gpio_pin *pin, enum gpio_direction dir) {
+GPIO_PIN_SET_DIRECTION(vf, pin, dir) {
 	int32_t ret = 0;
 	if (ret == 0) {
 		pin->dir = dir;
@@ -113,18 +100,18 @@ int32_t gpioPin_setDirection(struct gpio_pin *pin, enum gpio_direction dir) {
 	}
 	return ret;
 }
-int32_t gpioPin_setSetting(struct gpio_pin *pin, enum gpio_setting setting) {
+GPIO_PIN_SET_SETTING(vf, pin, setting) {
 	pin->setting = setting;
 	return gpioPin_setup(pin);
 }
-int32_t gpioPin_SchmittTrigger(struct gpio_pin *pin, bool schmit) {
+GPIO_PIN_SCHMITT_TRIGGER(vf, pin, schmitt) {
 	if (pin->dir == GPIO_OUTPUT) {
 		return -1;
 	}
-	pin->schmittTrigger = schmit;
+	pin->schmittTrigger = schmitt;
 	return gpioPin_setup(pin);
 }
-struct gpio_pin *gpioPin_init(struct gpio *g, uint8_t pin, enum gpio_direction dir, enum gpio_setting setting) {
+GPIO_PIN_INIT(vf, g, pin, dir, setting) {
 	int32_t ret;
 	struct gpio_pin *gpio_pin= pvPortMalloc(sizeof(struct gpio_pin));
 	if (gpio_pin == NULL) {
@@ -149,7 +136,11 @@ gpio_getPin_error1:
 gpio_getPin_error0:
 	return NULL;
 }
-int32_t gpioPin_setValue(struct gpio_pin *pin, bool value) {
+GPIO_PIN_DEINIT(vf, pin) {
+	vPortFree(pin);
+	return 0; /* TODO */
+}
+GPIO_PIN_SET_VALUE(vf, pin, value) {
 	if (pin->dir != GPIO_OUTPUT) {
 		return -1;
 	}
@@ -159,7 +150,7 @@ int32_t gpioPin_setValue(struct gpio_pin *pin, bool value) {
 		return gpioPin_clearPin(pin);
 	}
 }
-int32_t gpioPin_setPin(struct gpio_pin *pin) {
+GPIO_PIN_SET_PIN(vf, pin) {
 	if (pin->dir != GPIO_OUTPUT) {
 		return -1;
 	}
@@ -167,7 +158,7 @@ int32_t gpioPin_setPin(struct gpio_pin *pin) {
 	pin->oldvalue = true;
 	return 0;
 }
-int32_t gpioPin_clearPin(struct gpio_pin *pin) {
+GPIO_PIN_CLEAR_PIN(vf, pin) {
 	if (pin->dir != GPIO_OUTPUT) {
 		return -1;
 	}
@@ -175,23 +166,41 @@ int32_t gpioPin_clearPin(struct gpio_pin *pin) {
 	pin->oldvalue = false;
 	return 0;
 }
-int32_t gpioPin_togglePin(struct gpio_pin *pin) {
+GPIO_PIN_TOGGLE_PIN(vf, pin) {
 	return gpioPin_setValue(pin, !pin->oldvalue);
 }
-bool gpioPin_getValue(struct gpio_pin *pin) {
+GPIO_PIN_GET_VALUE(vf, pin) {
 	if ((pin->base->PDIR >> pin->pin) & 0x1) {
 		return true;
 	} else {
 		return false;
 	}
 }
-
-int32_t gpioPin_enableInterrupt(struct gpio_pin *pin) {
+GPIO_PIN_ENABLE_INTERRUPT(vf, pin) {
 	return -1; /* TODO */
 }
-int32_t gpioPin_disableInterrupt(struct gpio_pin *pin) {
+GPIO_PIN_DISABLE_INTERRUPT(vf, pin) {
 	return -1; /* TODO */
 }
-int32_t gpioPin_setCallback(struct gpio_pin *pin, bool (*calback)(struct gpio_pin *pin, void *data), void *data, enum gpio_interrupt inter) {
+GPIO_PIN_SET_CALLBACK(vf, pin, callback, data, inter) {
 	return -1; /* TODO */
 }
+GPIO_OPS(vf);
+static struct gpio gpio = {
+	GPIO_INIT_DEV(vf)
+	.base = {
+		(struct gpio_imx *) GPIO0_BASE,
+		(struct gpio_imx *) GPIO1_BASE,
+		(struct gpio_imx *) GPIO2_BASE,
+		(struct gpio_imx *) GPIO3_BASE,
+		(struct gpio_imx *) GPIO4_BASE,
+	},
+	.interrupts = {
+		(struct gpio_imx_int *) GPIO0_INT,
+		(struct gpio_imx_int *) GPIO1_INT,
+		(struct gpio_imx_int *) GPIO2_INT,
+		(struct gpio_imx_int *) GPIO3_INT,
+		(struct gpio_imx_int *) GPIO4_INT,
+	},
+};
+GPIO_ADDDEV(vf, gpio);

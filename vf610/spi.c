@@ -427,7 +427,7 @@ static int32_t spi_setup(struct spi_slave *slave) {
 			slave->spi->base->ctar[slave->options.cs] = slave->ctar;
 		}
 	} else if (slave->options.gpio != SPI_OPT_GPIO_DIS) {
-		struct gpio *gpio = gpio_init();
+		struct gpio *gpio = gpio_init(0);
 		if (gpio == NULL) {
 			return -1;
 		}
