@@ -268,7 +268,7 @@ always @(posedge HCLK)
   end
 
 always @(posedge HCLK)
-  if (HRESETn & HREADY & htrans_last[1] & ~(hsel_ram | hsel_tty))
+  if (HRESETn & HREADY & htrans_last[1] & ~(hsel_ram | hsel_tty | hsel_tty2))
     $display("%t: Warning, address %x selects neither RAM or console",
       $time, haddr_last);
 
