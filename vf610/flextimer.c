@@ -99,7 +99,6 @@ struct timer {
 };
 
 
-#define IPG_FREQ (clock_getPeripherySpeed(clock_init()) / 1000000ULL)
 
 #define VF610_PWM_GENERAL_CTRL (PAD_CTL_SPEED_HIGH | PAD_CTL_DSE_20ohm | PAD_CTL_IBE_ENABLE | PAD_CTL_PUS_100K_UP)
 #define VF610_FLEXTIMER_0 ((struct ftm_reg *) 0x40038000)
@@ -141,6 +140,20 @@ static void clearIRQBit(struct timer *ftm) {
 		/* write register */
 		ftm->base->sc = tmp;
 	}
+}
+
+static inline uint64_t counterToUS(struct timer *ftm, uint32_t value) {
+	uint64_t us = (((uint64_t) value) * ((uint64_t) ftm->prescaler)) / ftm->ipg_freq;
+	us = (us * ftm->basetime) / (ftm->basetime + ftm->adjust);
+
+	return us;
+} 
+
+static inline uint16_t USToCounter(struct timer *ftm, uint64_t u) {
+	uint64_t us = (u * (ftm->basetime + ftm->adjust)) / ftm->basetime;
+	uint64_t counterValue = (uint64_t) (ftm->ipg_freq * us) / ((uint64_t) (ftm->prescaler + 1));
+
+	return counterValue;
 }
 
 static void inline handleIRQ(struct timer *ftm) {
@@ -225,8 +238,7 @@ TIMER_STOP(ftm, ftm) {
 static int32_t configureFtm(struct timer *ftm, uint64_t us) {
 	uint64_t counterValue;
 	if (us != UINT64_MAX) {
-		us = (us * (ftm->basetime + ftm->adjust)) / ftm->basetime;
-		counterValue = (uint64_t) (ftm->ipg_freq * us) / ((ftm->prescaler + 1));
+		counterValue = USToCounter(ftm, us);
 	} else {
 		counterValue = ((1 << 16) - 1);
 	}
@@ -262,13 +274,11 @@ TIMER_PERIODIC(ftm, ftm, us) {
 }
 
 TIMER_GET_TIME(ftm, ftm) {
-	uint64_t value;
+	uint32_t value;
 
 	/* read the epit */
 	value = ftm->base->cnt;
-	uint64_t us = (value / ((uint64_t)ftm->ipg_freq / ftm->prescaler));
-	/* Time Adjust */ 
-	us = (us * ftm->basetime) / (ftm->basetime + ftm->adjust);
+	uint64_t us = counterToUS(ftm, value);
 
 	return us;
 }
@@ -318,8 +328,7 @@ PWM_SET_PERIOD(ftm, pwm, us) {
 PWM_SET_DUTY_CYCLE(ftm, pwm, us) {
 	struct timer *ftm = pwm->timer;
 	uint64_t counterValue;
-	us = (us * (ftm->basetime + ftm->adjust)) / ftm->basetime;
-	counterValue = (uint64_t) (ftm->ipg_freq * us) / ((ftm->prescaler + 1));
+	counterValue = USToCounter(ftm, us);
 	if (counterValue >= (1ULL << 16)) {
 		/* Conuter too large to be stored in 16 bits */
 		return -1;
@@ -370,13 +379,10 @@ CAPTURE_GET_TIME(ftm, capture) {
 	/* Base Time is timer time */
 	return timer_getTime(capture->timer);
 }
-
 CAPTURE_GET_CHANNEL_TIME(ftm, capture) {
 	struct timer *ftm = capture->timer;
-	uint64_t value = ftm->base->ch[capture->channel].cv;
-	uint64_t us = (value / ((uint64_t)ftm->ipg_freq / ftm->prescaler)); /* TODO get IGP FREQ from clock interface */
-	/* Time Adjust */ 
-	us = (us * ftm->basetime) / (ftm->basetime + ftm->adjust);
+	uint32_t value = ftm->base->ch[capture->channel].cv;
+	uint64_t us = counterToUS(ftm, value);	
 	return us;
 }
 
@@ -408,7 +414,12 @@ TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
 	ftm->prescaler = prescaler;
 	ftm->basetime = basetime;
 	ftm->adjust = adjust;
-	ftm->ipg_freq = IPG_FREQ;
+	{
+		struct clock *clock = clock_init();
+		int64_t speed = clock_getPeripherySpeed(clock);
+		speed /= 1000000ULL;
+		ftm->ipg_freq = speed;
+	}
 	
 	ftm_writeProtecDisable(ftm);
 	ftm->base->sc = 0;
