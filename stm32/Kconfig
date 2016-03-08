@@ -1,4 +1,34 @@
-comment "M0 DesignStart Settings"
+comment "Ti STM32 Settings"
+choice
+	prompt "Select Prozessor"
+	config STM32F40_41xxx
+		bool "STM32F40_41xxx"
+	config STM32F427_437xx
+		bool "STM32F427_437xx"
+	config STM32F429_439xx
+		bool "STM32F429_439xx"
+	config STM32F401xx
+		bool "STM32F401xx"
+	config STM32F410xx
+		bool "STM32F410xx"
+	config STM32F411xE
+		bool "STM32F411xE"
+	config STM32F446xx
+		bool "STM32F446xx"
+	config STM32F469_479xx
+		bool "STM32F469_479xx"
+endchoice
+config USE_HSE_BYPASS
+	bool "HSE Bypass"
+	depends on STM32F410xx || STM32F411xE
+	help
+		HSE Bypass
+config MAX_SYSCALL_INTERRUPT_PRIORITY
+	hex
+	default 0x20
+config KERNEL_INTERRUPT_PRIORITY 
+	hex
+	default 0xf0
 config MACH_LD_SCRIPT
 	string 
 	default "mach/stm32/stm32.lds"
@@ -13,6 +43,13 @@ config MACH_INIT_STACK_SIZE
 	default 600
 	help
 		Stack Size of Init Prozess. Stack size used by Interrupt and Init Prozess
+config UART
+	bool "UART Driver"
+	default y
+	select UART_GENERIC_STRING
+	select UART_GENERIC_BYTE
+	help
+		UART Driver
 config MACH_HAS_UART
 	bool
 	default y

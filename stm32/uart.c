@@ -2,19 +2,13 @@
 #include <stdint.h>
 #define UART_PRV
 #include <uart_prv.h>
-
-#define M0_UART 0x40000000U
-
-
-struct m0uart {
-	char tx;
-};
+#include <vector.h>
 
 struct uart {
 	struct uart_generic gen;
-	volatile unsigned char *console;
+	USART_TypeDef *base;
 };
-UART_INIT(m0, port, bautrate) {
+UART_INIT(stm32, port, bautrate) {
 	int32_t ret;
 	if (port > 6) {
 		return NULL;
@@ -33,29 +27,62 @@ UART_INIT(m0, port, bautrate) {
 	return uart;
 }
 
-UART_DEINIT(m0, uart) {
+UART_DEINIT(stm32, uart) {
 	return 0;
 }
-UART_GETC(m0, uart, waittime) {
+UART_GETC(stm32, uart, waittime) {
 	return -1;
 }
-UART_PUTC(m0, uart, c, waittime) {
+UART_PUTC(stm32, uart, c, waittime) {
 	uart_lock(uart, waittime, -1);
-	*uart->console = c;
 	uart_unlock(uart, -1);
 	return 0;
 }
-UART_GETC_ISR(m0, uart) {
+UART_GETC_ISR(stm32, uart) {
 	return -1;
 }
-UART_PUTC_ISR(m0, uart, c) {
-	*uart->console = c;
+UART_PUTC_ISR(stm32, uart, c) {
 	return 0;
 }
 
-UART_OPS(m0);
-struct uart  uart_data01 = {
-	UART_INIT_DEV(m0)
-	.console = (volatile unsigned char *) M0_UART,
+UART_OPS(stm32);
+struct uart uart1 = {
+	UART_INIT_DEV(stm32)
+	.base = USART1,
 };
-UART_ADDDEV(m0, uart_data01);
+UART_ADDDEV(stm32, uart1);
+struct uart uart2 = {
+	UART_INIT_DEV(stm32)
+	.base = USART2,
+};
+UART_ADDDEV(stm32, uart2);
+struct uart uart3 = {
+	UART_INIT_DEV(stm32)
+	.base = USART3,
+};
+UART_ADDDEV(stm32, uart3);
+struct uart uart4 = {
+	UART_INIT_DEV(stm32)
+	.base = UART4,
+};
+UART_ADDDEV(stm32, uart4);
+struct uart uart5 = {
+	UART_INIT_DEV(stm32)
+	.base = UART5,
+};
+UART_ADDDEV(stm32, uart5);
+struct uart uart6 = {
+	UART_INIT_DEV(stm32)
+	.base = USART6,
+};
+UART_ADDDEV(stm32, uart6);
+struct uart uart7 = {
+	UART_INIT_DEV(stm32)
+	.base = UART7,
+};
+UART_ADDDEV(stm32, uart7);
+struct uart uart8 = {
+	UART_INIT_DEV(stm32)
+	.base = UART8,
+};
+UART_ADDDEV(stm32, uart8);

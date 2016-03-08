@@ -1,6 +1,8 @@
 #include <FreeRTOS.h>
 #include <stdint.h>
 #include <gpio.h>
+#define GPIO_PRV
+#include <gpio_prv.h>
 #include "iomux.h"
 
 
@@ -15,9 +17,6 @@ GPIO_INIT(stm32, index) {
 	return gpios[index];
 }
 GPIO_DEINIT(stm32, g) {
-	return 0;
-}
-GPIO_PIN_SET_DIRECTION(stm32, pin, dir) {
 	return 0;
 }
 GPIO_PIN_INIT(stm32, g, pin, dir, setting) {

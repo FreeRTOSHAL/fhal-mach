@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <clock.h>
+#include <system_stm32f4xx.h>
 struct clock {
 	uint32_t dummy;
 };
@@ -10,10 +11,12 @@ struct clock clk = {
 };
 
 struct clock *clock_init() {
+	SystemInit();
+	SystemCoreClockUpdate();
 	return &clk;
 }
 int64_t clock_getCPUSpeed(struct clock *clk) {
-	return 84000000;
+	return SystemCoreClock;
 }
 int64_t clock_getPeripherySpeed(struct clock *clk) {
 	return 42000000;

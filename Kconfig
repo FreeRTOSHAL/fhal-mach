@@ -18,6 +18,12 @@ choice
 		depends on ARCH_ARM_CORTEX_M0
 		help
 			M0 DesignStart Prozessor
+	config MACH_STM32
+		bool "Ti STM32"
+		depends on ARCH_ARM
+		depends on ARCH_ARM_CORTEX_M4F || ARCH_ARM_CORTEX_M3
+		help
+			Ti STM32 Prozessor
 endchoice
 if MACH_VF610=y
 source mach/vf610/Kconfig
@@ -27,5 +33,8 @@ source mach/linux/Kconfig
 endif
 if MACH_M0
 source mach/m0/Kconfig
+endif
+if MACH_STM32
+source mach/stm32/Kconfig
 endif
 endmenu

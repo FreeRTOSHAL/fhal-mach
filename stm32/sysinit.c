@@ -29,6 +29,7 @@ extern uint32_t _data_table_end;
 extern uint32_t _start_stack;
 
 extern int main(void);
+extern void NAKED dummy_handler();
 
 const struct vector_table vector_table SECTION(".vectors") = {
 	.initial_sp_value = (unsigned int *) &_end_stack,
@@ -150,11 +151,8 @@ void NAKED reset_handler() {
 		
 	);
 #endif
+	clock_init();
 	irq_init();
-	{
-		struct uart *uart = uart_init(0, 0);
-		uart_puts(uart, "Data and BSS init finish, call main\n", 0);
-	}
 	
 	main();
 	for(;;); /* Main shoud not return */
