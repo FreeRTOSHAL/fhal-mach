@@ -317,8 +317,8 @@ static int32_t ns_delay_scale(uint8_t *psc, uint8_t *sc, uint64_t delay_ns)
 	int32_t scale_needed = INT32_MAX;
 	int32_t scale = INT32_MAX;
 	int32_t minscale = INT32_MAX;
-	int32_t i;
-	int32_t j;
+	uint32_t i;
+	uint32_t j;
 
 	scale_needed = (delay_ns * ((uint64_t) IPG_CLK)) / NSEC_PER_SEC;
 	if ((delay_ns * ((uint64_t) IPG_CLK)) % NSEC_PER_SEC)
@@ -514,7 +514,7 @@ static uint32_t prepareFrame(struct spi_slave *slave, uint16_t data) {
 
 static void spi_recvData(struct spi_slave *slave, uint16_t *data, uint32_t len) {
 	struct spi *spi = slave->spi;
-	int i;
+	uint32_t i;
 	uint32_t popr;
 	for (i = 0; i < len; i++) {
 		popr = spi->base->popr;

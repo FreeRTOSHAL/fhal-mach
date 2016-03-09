@@ -7,9 +7,9 @@ struct imx_mux  {
 	uint32_t pad[135 + 50 + 49];
 };
 struct mux {
-	struct imx_mux *base;
+	volatile struct imx_mux *base;
 };
-#define VF610_MUX_BASE ((struct imx_mux *) 0x40048000)
+#define VF610_MUX_BASE ((volatile struct imx_mux *) 0x40048000)
 struct mux mux_contoller = {
 	.base = VF610_MUX_BASE
 };

@@ -34,8 +34,8 @@ struct mscm_ir {
 	uint16_t irsprc[127];
 };
 
-struct mscm_cpu *mscm_cpu = (struct mscm_cpu *) 0x40001000;
-struct mscm_ir *mscm = (struct mscm_ir *) 0x40001800;
+volatile struct mscm_cpu *mscm_cpu = (volatile struct mscm_cpu *) 0x40001000;
+volatile struct mscm_ir *mscm = (volatile struct mscm_ir *) 0x40001800;
 uint32_t cpuid;
 uint32_t cpuid_mask;
 

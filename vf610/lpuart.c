@@ -87,7 +87,7 @@ UART_GETC(lp, uart, waittime) {
 	return 0;
 }
 UART_PUTC(lp, uart, c, waittime) {
-	volatile register struct lpuart_fsl *base = uart->base;
+	register volatile struct lpuart_fsl *base = uart->base;
 	uart_lock(uart, waittime, -1);
 	while (!(uart->base->us1 & US1_TDRE));
 	base->ud = c;
@@ -100,7 +100,7 @@ UART_GETC_ISR(lp, uart) {
 	return 0;
 }
 UART_PUTC_ISR(lp, uart, c) {
-	volatile register struct lpuart_fsl *base = uart->base;
+	register volatile struct lpuart_fsl *base = uart->base;
 	while (!(uart->base->us1 & US1_TDRE));
 	base->ud = c;
 	return 0;

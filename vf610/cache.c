@@ -46,16 +46,16 @@ struct vf610_cache {
 };
 
 struct vf610_caches {
-	struct vf610_cache *inst;
-	struct vf610_cache *data;
+	volatile struct vf610_cache *inst;
+	volatile struct vf610_cache *data;
 };
 
 #define VF610_INST_CACHE_CTL 0xE0082000
 #define VF610_DATA_CACHE_CTL 0xE0082800
 
 static volatile struct vf610_caches cache =  {
-	.inst = (struct vf610_cache *) 0xE0082000,
-	.data = (struct vf610_cache *) 0xE0082800
+	.inst = (volatile struct vf610_cache *) 0xE0082000,
+	.data = (volatile struct vf610_cache *) 0xE0082800
 };
 
 int32_t cache_init() {
