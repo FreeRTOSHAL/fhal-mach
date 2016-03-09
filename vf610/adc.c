@@ -66,7 +66,7 @@ struct vf610_adc {
 
 struct adc_base {
 	struct adc_generic gen;
-	struct vf610_adc *base;
+	volatile struct vf610_adc *base;
 	uint32_t irq;
 	SemaphoreHandle_t sem;
 	uint8_t bits;
@@ -417,7 +417,7 @@ static struct adc adc0_27;
 
 static struct adc_base adc0 = {
 	ADC_INIT_DEV(vf610)
-	.base = (struct vf610_adc *) VF610_ADC0,
+	.base = (volatile struct vf610_adc *) VF610_ADC0,
 	.irq = 53,
 	.adcs = {
 # ifdef CONFIG_VF610_ADC_0_PTA18
@@ -729,7 +729,7 @@ static struct adc adc1_27;
 
 static struct adc_base adc1 = {
 	ADC_INIT_DEV(vf610)
-	.base = (struct vf610_adc *) VF610_ADC1,
+	.base = (volatile struct vf610_adc *) VF610_ADC1,
 	.irq = 54,
 	.adcs = {
 # ifdef CONFIG_VF610_ADC_1_PTA16

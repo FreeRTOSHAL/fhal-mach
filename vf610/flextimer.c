@@ -85,13 +85,13 @@ typedef enum {
 
 struct timer {
 	struct timer_generic gen;
-	struct ftm_reg *base;
+	volatile struct ftm_reg *base;
 	ftm_mode_t mode;
 	uint32_t prescaler;
 	int32_t irqnr;
 	bool (*irqhandle)(struct timer *ftm, void *data);
 	void *data;
-	int32_t ftmid;
+	uint32_t ftmid;
 	uint64_t basetime;
 	int64_t adjust;
 	struct capture const **capture;
@@ -101,10 +101,10 @@ struct timer {
 
 
 #define VF610_PWM_GENERAL_CTRL (PAD_CTL_SPEED_HIGH | PAD_CTL_DSE_20ohm | PAD_CTL_IBE_ENABLE | PAD_CTL_PUS_100K_UP)
-#define VF610_FLEXTIMER_0 ((struct ftm_reg *) 0x40038000)
-#define VF610_FLEXTIMER_1 ((struct ftm_reg *) 0x40039000)
-#define VF610_FLEXTIMER_2 ((struct ftm_reg *) 0x400B8000)
-#define VF610_FLEXTIMER_3 ((struct ftm_reg *) 0x400B9000)
+#define VF610_FLEXTIMER_0 ((volatile struct ftm_reg *) 0x40038000)
+#define VF610_FLEXTIMER_1 ((volatile struct ftm_reg *) 0x40039000)
+#define VF610_FLEXTIMER_2 ((volatile struct ftm_reg *) 0x400B8000)
+#define VF610_FLEXTIMER_3 ((volatile struct ftm_reg *) 0x400B9000)
 
 
 struct pwm_pin {
@@ -143,20 +143,46 @@ static void clearIRQBit(struct timer *ftm) {
 }
 
 static inline uint64_t counterToUS(struct timer *ftm, uint32_t value) {
-	uint64_t us = (((uint64_t) value) * ((uint64_t) ftm->prescaler)) / ftm->ipg_freq;
-	us = (us * ftm->basetime) / (ftm->basetime + ftm->adjust);
+	/* Too Many Cast for Optimizer do it step by step */
+	uint64_t diff;
+	uint64_t us;
+	uint64_t v = value;
+	uint64_t p = ftm->prescaler;
+	uint64_t i = ftm->ipg_freq;
+	uint64_t b = ftm->basetime;
+	diff = ftm->basetime;
+	/* Fix basetime > UINT32_t ! */
+	if (ftm->adjust < 0) {
+		diff -= (uint64_t) ftm->adjust;
+	} else {
+		diff += (uint64_t) ftm->adjust;
+	}
+	
+	us = (v * p) / i;
+	us = (us * b) / diff;
 
 	return us;
 } 
 
-static inline uint16_t USToCounter(struct timer *ftm, uint64_t u) {
-	uint64_t us = (u * (ftm->basetime + ftm->adjust)) / ftm->basetime;
-	uint64_t counterValue = (uint64_t) (ftm->ipg_freq * us) / ((uint64_t) (ftm->prescaler + 1));
+static inline uint64_t USToCounter(struct timer *ftm, uint64_t value) {
+	uint64_t p = ftm->prescaler;
+	uint64_t i = ftm->ipg_freq;
+	uint64_t b = ftm->basetime;
+	uint64_t diff = ftm->basetime;
+	/* Fix basetime > UINT32_t ! */
+	if (ftm->adjust < 0) {
+		diff -= (uint64_t) ftm->adjust;
+	} else {
+		diff += (uint64_t) ftm->adjust;
+	}
+
+	uint64_t us = (value * diff) / b;
+	uint64_t counterValue = (i * us) / (p + 1ULL);
 
 	return counterValue;
 }
 
-static void inline handleIRQ(struct timer *ftm) {
+static inline void handleIRQ(struct timer *ftm) {
 	bool ret = 0;
 	switch (ftm->mode) {
 		case ONESHOT:
@@ -255,7 +281,7 @@ static int32_t configureFtm(struct timer *ftm, uint64_t us) {
 
 	ftm_writeProtecDisable(ftm);
 	ftm->base->cnt = 0;
-	ftm->base->mod = counterValue;
+	ftm->base->mod = (uint32_t) counterValue;
 	ftm_writeProtecEnable(ftm);
 
 	timer_start(ftm);
@@ -337,7 +363,7 @@ PWM_SET_DUTY_CYCLE(ftm, pwm, us) {
 		/* Duty Cycle biger then period */
 		return -1;
 	}
-	ftm->base->ch[pwm->channel].cv = counterValue;
+	ftm->base->ch[pwm->channel].cv = (uint32_t) counterValue;
 	__ISB();
 	__DSB();
 	return 0;
@@ -417,8 +443,8 @@ TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
 	{
 		struct clock *clock = clock_init();
 		int64_t speed = clock_getPeripherySpeed(clock);
-		speed /= 1000000ULL;
-		ftm->ipg_freq = speed;
+		speed /= 1000000LL;
+		ftm->ipg_freq = (uint32_t) speed;
 	}
 	
 	ftm_writeProtecDisable(ftm);

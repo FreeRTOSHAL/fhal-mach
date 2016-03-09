@@ -53,8 +53,8 @@ struct gpio_imx_int {
 
 struct gpio {
 	struct gpio_generic gen;
-	struct gpio_imx *base[5];
-	struct gpio_imx_int *interrupts[5];
+	volatile struct gpio_imx *base[5];
+	volatile struct gpio_imx_int *interrupts[5];
 	struct gpio_pin *pins[5][32];
 };
 #define GPIO0_BASE 0x400FF000
@@ -69,8 +69,8 @@ struct gpio {
 #define GPIO4_INT 0x4004D000
 struct gpio_pin {
 	struct gpio *gpio;
-	struct gpio_imx *base;
-	struct gpio_imx_int *interrupt;
+	volatile struct gpio_imx *base;
+	volatile struct gpio_imx_int *interrupt;
 	uint32_t bank;
 	uint32_t pin;
 	enum gpio_direction dir;
@@ -310,18 +310,18 @@ GPIO_OPS(vf);
 static struct gpio gpio = {
 	GPIO_INIT_DEV(vf)
 	.base = {
-		(struct gpio_imx *) GPIO0_BASE,
-		(struct gpio_imx *) GPIO1_BASE,
-		(struct gpio_imx *) GPIO2_BASE,
-		(struct gpio_imx *) GPIO3_BASE,
-		(struct gpio_imx *) GPIO4_BASE,
+		(volatile struct gpio_imx *) GPIO0_BASE,
+		(volatile struct gpio_imx *) GPIO1_BASE,
+		(volatile struct gpio_imx *) GPIO2_BASE,
+		(volatile struct gpio_imx *) GPIO3_BASE,
+		(volatile struct gpio_imx *) GPIO4_BASE,
 	},
 	.interrupts = {
-		(struct gpio_imx_int *) GPIO0_INT,
-		(struct gpio_imx_int *) GPIO1_INT,
-		(struct gpio_imx_int *) GPIO2_INT,
-		(struct gpio_imx_int *) GPIO3_INT,
-		(struct gpio_imx_int *) GPIO4_INT,
+		(volatile struct gpio_imx_int *) GPIO0_INT,
+		(volatile struct gpio_imx_int *) GPIO1_INT,
+		(volatile struct gpio_imx_int *) GPIO2_INT,
+		(volatile struct gpio_imx_int *) GPIO3_INT,
+		(volatile struct gpio_imx_int *) GPIO4_INT,
 	},
 };
 GPIO_ADDDEV(vf, gpio);
