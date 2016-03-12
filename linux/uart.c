@@ -6,10 +6,10 @@
 
 
 struct uart {
-	struct uart_generic generic;
+	struct uart_generic gen;
 };
 
-struct uart *uart_init(uint8_t port, uint32_t bautrate) {
+UART_INIT(linux_emu, port, bautrate) {
 	int32_t ret;
 	struct uart *uart = uarts[port];
 	ret = uart_generic_init(uart);
@@ -19,7 +19,7 @@ struct uart *uart_init(uint8_t port, uint32_t bautrate) {
 	return uart;
 }
 
-int32_t uart_deinit(struct uart *uart) {
+UART_DEINIT(linux_emu, uart) {
 	free(uart);
 	return 0;
 }
@@ -45,7 +45,7 @@ UART_PUTC_ISR(linux_emu, uart, c) {
 	putc(c, stdout);
 	return 0;
 }
-
+UART_OPS(linux_emu);
 static struct uart uart_data00 = {
 	UART_INIT_DEV(linux_emu)
 };
