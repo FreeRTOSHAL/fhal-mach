@@ -266,8 +266,12 @@ static int32_t adc_channel(struct adc *adc) {
 }
 
 ADC_INIT(vf610, index, bits, hz) {
-	struct adc *adc = adcs[index];
-	struct adc_base *base = adc->base;
+	struct adc *adc = (struct adc *) ADC_GET_DEV(index);
+	struct adc_base *base; 
+	if (adc == NULL) {
+		return NULL;
+	}
+	base = adc->base;
 	int32_t ret = adc_generic_init(adc);
 	if (ret < 0) {
 		return NULL;

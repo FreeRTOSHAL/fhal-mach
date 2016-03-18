@@ -11,7 +11,10 @@ struct uart {
 
 UART_INIT(linux_emu, port, bautrate) {
 	int32_t ret;
-	struct uart *uart = uarts[port];
+	struct uart *uart = UART_GET_DEV(index);
+	if (uart == NULL) {
+		return NULL;
+	}
 	ret = uart_generic_init(uart);
 	if (ret < 0) {
 		return NULL;
