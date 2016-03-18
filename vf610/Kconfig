@@ -343,62 +343,88 @@ menuconfig DSPI
 		bool "Activate DSPI 1"
 		depends on DSPI
 		default n
-		config DSPI_1_PTD8
-			bool "SCLK on PTD8"
+		choice
+			prompt "SCLK"
 			depends on DSPI_1
-			default y
-		config DSPI_1_PTC8
-			bool "SCLK on PTC8"
+			config DSPI_1_PTD8
+				bool "SCLK on PTD8"
+				depends on DSPI_1
+			config DSPI_1_PTC8
+				bool "SCLK on PTC8"
+				depends on DSPI_1
+		endchoice
+		choice
+			prompt "MOSI"
 			depends on DSPI_1
-			default n
-		config DSPI_1_PTD7
-			bool "MOSI on PTD7"
+			config DSPI_1_PTD7
+				bool "MOSI on PTD7"
+				depends on DSPI_1
+			config DSPI_1_PTC7
+				bool "MOSI on PTC7"
+				depends on DSPI_1
+		endchoice
+		choice
+			prompt "MISO"
 			depends on DSPI_1
-			default y
-		config DSPI_1_PTC7
-			bool "MOSI on PTC7"
+			config DSPI_1_PTD6
+				bool "MISO on PTD6"
+				depends on DSPI_1
+			config DSPI_1_PTC6
+				bool "MISO on PTC6"
+				depends on DSPI_1
+		endchoice
+		choice
+			prompt "CS0"
 			depends on DSPI_1
-			default n
-		config DSPI_1_PTD6
-			bool "MISO on PTD6"
+			config DSPI_1_NO_CS0
+				bool "No CS0"
+				depends on DSPI_1
+			config DSPI_1_PTD5
+				bool "CS0 on PTD5"
+				depends on DSPI_1
+			config DSPI_1_PTC5
+				bool "CS0 on PTC5"
+				depends on DSPI_1
+		endchoice
+		choice
+			prompt "CS1"
 			depends on DSPI_1
-			default y
-		config DSPI_1_PTC6
-			bool "MISO on PTC6"
+			config DSPI_1_NO_CS1
+				bool "No CS1"
+				depends on DSPI_1
+			config DSPI_1_PTD4
+				bool "CS1 on PTD4"
+				depends on DSPI_1
+			config DSPI_1_PTC4
+				bool "CS1 on PTC4"
+				depends on DSPI_1
+		endchoice
+		choice
+			prompt "CS2"
 			depends on DSPI_1
-			default n
-		config DSPI_1_PTD5
-			bool "CS0 on PTD5"
+			config DSPI_1_NO_CS2
+				bool "No CS2"
+				depends on DSPI_1
+			config DSPI_1_PTD3
+				bool "CS2 on PTD3"
+				depends on DSPI_1
+			config DSPI_1_PTC30
+				bool "CS2 on PTC30"
+				depends on DSPI_1
+		endchoice
+		choice
+			prompt "CS3"
 			depends on DSPI_1
-			default y
-		config DSPI_1_PTC5
-			bool "CS0 on PTC5"
-			depends on DSPI_1
-			default n
-		config DSPI_1_PTD4
-			bool "CS1 on PTD4"
-			depends on DSPI_1
-			default y
-		config DSPI_1_PTC4
-			bool "CS1 on PTC4"
-			depends on DSPI_1
-			default n
-		config DSPI_1_PTD3
-			bool "CS2 on PTD3"
-			depends on DSPI_1
-			default y
-		config DSPI_1_PTC30
-			bool "CS2 on PTC30"
-			depends on DSPI_1
-			default n
-		config DSPI_1_PTD2
-			bool "CS3 on PTD2"
-			depends on DSPI_1
-			default y
-		config DSPI_1_PTE12
-			bool "CS3 on PTE12"
-			depends on DSPI_1
-			default n
+			config DSPI_1_NO_CS3
+				bool "No CS3"
+				depends on DSPI_1
+			config DSPI_1_PTD2
+				bool "CS3 on PTD2"
+				depends on DSPI_1
+			config DSPI_1_PTE12
+				bool "CS3 on PTE12"
+				depends on DSPI_1
+		endchoice
 	config DSPI_2
 		bool "Activate DSPI 2"
 		depends on DSPI
