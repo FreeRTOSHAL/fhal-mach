@@ -149,7 +149,7 @@ struct spi_pin {
 
 struct spi {
 	struct spi_generic gen;
-	struct dspi *base;
+	volatile struct dspi *base;
 	bool shareCTAR;
 	uint8_t irqnr;
 	uint8_t index;
@@ -680,7 +680,7 @@ SPI_OPS(dspi);
 #ifdef CONFIG_DSPI_0
 struct spi spi_0 = {
 	SPI_INIT_DEV(dspi)
-	.base = (struct dspi *) VF610_SPI0,
+	.base = (volatile struct dspi *) VF610_SPI0,
 	.irqnr = 67,
 	.index = 0,
 	.pin = {
@@ -740,7 +740,7 @@ void spi0_isr(void) {
 #ifdef CONFIG_DSPI_1
 struct spi spi_1 = {
 	SPI_INIT_DEV(dspi)
-	.base = (struct dspi *) VF610_SPI1,
+	.base = (volatile struct dspi *) VF610_SPI1,
 	.irqnr = 68,
 	.index = 1,
 	.pin = 
@@ -854,7 +854,7 @@ void spi1_isr(void) {
 #ifdef CONFIG_DSPI_2
 struct spi spi_2 = {
 	SPI_INIT_DEV(dspi)
-	.base = (struct dspi *) VF610_SPI2,
+	.base = (volatile struct dspi *) VF610_SPI2,
 	.irqnr = 69,
 	.index = 2,
 	.pin = {
@@ -894,7 +894,7 @@ void spi2_isr(void) {
 #ifdef CONFIG_DSPI_3
 struct spi spi_3 = {
 	SPI_INIT_DEV(dspi)
-	.base = (struct dspi *) VF610_SPI3,
+	.base = (volatile struct dspi *) VF610_SPI3,
 	.irqnr = 70,
 	.index = 3,
 	.pin = {
