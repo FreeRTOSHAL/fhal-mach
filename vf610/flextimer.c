@@ -325,8 +325,12 @@ static int32_t setupChannelPin(struct timer *ftm, struct pwm_pin *pin) {
 
 PWM_INIT(ftm, index) {
 	int32_t ret;
-	struct pwm *pwm = pwms[index];
-	struct timer *ftm = pwm->timer;
+	struct pwm *pwm = PWM_GET_DEV(index);
+	struct timer *ftm;
+	if (pwm == NULL) {
+		return NULL;
+	}
+	ftm = pwm->timer;
 
 	ret = pwm_generic_init(pwm);
 	if (ret < 0) {
@@ -373,9 +377,13 @@ PWM_SET_DUTY_CYCLE(ftm, pwm, us) {
 
 #ifdef CONFIG_FLEXTIMER_CAPTURE
 CAPTURE_INIT(ftm, index) {
-	struct capture *capture = captures[index];
-	struct timer *ftm = capture->timer;
+	struct capture *capture = CAPUTRE_GET_DEV(index);
+	struct timer *ftm;
 	int32_t ret;
+	if (capture == NULL) {
+		return NULL;
+	}
+	ftm = capture->timer;
 	ret = capture_generic_init(capture);
 	if (ret < 0) {
 		return capture;
@@ -423,10 +431,10 @@ TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
 	int32_t ret;
 	int i; 
 	struct timer *ftm;;
-	if (index > 3) {
+	ftm = TIMER_GET_DEV(index);
+	if (ftm == NULL) {
 		return NULL;
 	}
-	ftm = timers[index];
 	ret = timer_generic_init(ftm);
 	if (ret < 0) {
 		return ftm;

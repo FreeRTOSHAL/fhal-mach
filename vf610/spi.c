@@ -206,8 +206,13 @@ static void setupPin(const struct spi_pin *pin) {
 
 SPI_INIT(dspi, index, mode, opt) {
 	int i;
-	struct spi *spi = spis[index];
-	int32_t ret = spi_genericInit(spi);
+	struct spi *spi = SPI_GET_DEV(index);
+	int32_t ret;
+	if (spi == NULL) {
+		return NULL;
+	}
+
+	ret = spi_genericInit(spi);
 	/* TODO Mode */
 	if (ret < 0) {
 		return NULL;

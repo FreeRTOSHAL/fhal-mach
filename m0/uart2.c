@@ -16,10 +16,10 @@ struct uart {
 };
 UART_INIT(m0_2, port, bautrate) {
 	int32_t ret;
-	if (port > 6) {
+	struct uart *uart = (struct uart *) UART_GET_DEV(index);
+	if (uart == NULL) {
 		return NULL;
 	}
-	struct uart *uart = (struct uart *) uarts[port];
 	ret = uart_generic_init(uart);
 	if (ret < 0) {
 		return NULL;

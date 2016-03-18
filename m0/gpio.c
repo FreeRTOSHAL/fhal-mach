@@ -15,7 +15,7 @@ struct gpio_pin {
 };
 
 GPIO_INIT(m0, index) {
-	return gpios[index];
+	return GPIO_GET_DEV(index);
 }
 GPIO_DEINIT(m0, g) {
 	return 0;

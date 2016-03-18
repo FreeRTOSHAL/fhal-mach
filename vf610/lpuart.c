@@ -47,8 +47,11 @@ struct uart {
 
 
 UART_INIT(lp, port, bautrate) {
-	struct uart *uart = (struct uart *) uarts[port];
+	struct uart *uart = (struct uart *) UART_GET_DEV(port);
 	int32_t ret;
+	if (uart == NULL) {
+		return NULL;
+	}
 	ret = uart_generic_init(uart);
 	if (ret < 0) {
 		return NULL;

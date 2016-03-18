@@ -104,9 +104,12 @@ static void gpio_handleInterrupt(struct gpio *gpio, uint8_t bank) {
 }
 
 GPIO_INIT(vf, index) {
-	struct gpio *gpio = gpios[index];
+	struct gpio *gpio = GPIO_GET_DEV(index);
 	uint32_t i;
 	uint32_t j;
+	if (gpio == NULL) {
+		return NULL;
+	}
 	/* TODO Mange GPIO Interrupt Assigned to Cortex - A5 and Cortex - M4 */
 	/* Clear all Interrupt Assignment  */
 	for (i = 0; i < 5; i++) {
@@ -135,7 +138,7 @@ GPIO_INIT(vf, index) {
 	irq_enable(NVIC_GPIO2_IRQ);
 	irq_enable(NVIC_GPIO3_IRQ);
 	irq_enable(NVIC_GPIO4_IRQ);
-	return gpios[index];
+	return gpio;
 }
 GPIO_DEINIT(vf, g) {
 	return 0;
