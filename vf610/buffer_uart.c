@@ -72,7 +72,25 @@ buffer_uart_getc_error0:
 UART_PUTC(buffer, uart, c, waittime) {
 	int32_t ret;
 	uart_lock(uart, waittime, -1);
+#ifdef CONFIG_BUFFER_UART_WAIT_TO_TX
+	{
+		uint32_t trys = 0;
+		volatile int i = 0;
+		do {
+			ret = buffer_write(uart->tx, (uint8_t *) &c, 1);
+			if (ret < 0) {
+				/* Give Linux Kerne some Time */
+				/* Linux Kernel need aprox 6us for get 255 Chars */
+				for(i = 0; i < 1000; i++) asm volatile ("nop");
+			}
+		} while(ret < 0 && trys++ < CONFIG_BUFFER_UART_MAX_TRYS);
+		if (trys > 0) {
+			i++;
+		}
+	}
+#else
 	ret = buffer_write(uart->tx, (uint8_t *) &c, 1);
+#endif
 	uart_unlock(uart, -1);
 	return ret;
 }
@@ -87,8 +105,21 @@ UART_GETC_ISR(buffer, uart) {
 	return c;
 }
 UART_PUTC_ISR(buffer, uart, c) {
-	int32_t ret;
+	uint32_t ret;
+#ifdef CONFIG_BUFFER_UART_WAIT_TO_TX
+	uint32_t trys = 0;
+	volatile int i = 0;
+	do {
+		ret = buffer_write(uart->tx, (uint8_t *) &c, 1);
+		if (ret < 0) {
+			/* Give Linux Kerne some Time */
+			/* Linux Kernel need aprox 6us for get 255 Chars */
+			for(i = 0; i < 1000; i++) asm volatile ("nop");
+		}
+	} while(ret < 0 && trys++ < CONFIG_BUFFER_UART_MAX_TRYS);
+#else
 	ret = buffer_write(uart->tx, (uint8_t *) &c, 1);
+#endif
 	return ret;
 }
 
@@ -96,6 +127,7 @@ UART_OPS(buffer);
 
 static struct uart uart_data00 = {
 	UART_INIT_DEV(buffer) 
+	HAL_NAME("Shared Memory UART")
 	.rx = NULL,
 	.tx = NULL,
 };

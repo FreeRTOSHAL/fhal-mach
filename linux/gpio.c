@@ -122,6 +122,7 @@ GPIO_PIN_SCHMITT_TRIGGER(linux_emu, pin, schmitt) {
 GPIO_OPS(linux_emu);
 static struct gpio gpio1 = {
 	GPIO_INIT_DEV(linux_emu)
+	HAL_NAME("Dummy GPIO 0")
 };
 GPIO_ADDDEV(linux_emu, gpio1);
 

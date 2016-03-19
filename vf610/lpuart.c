@@ -76,6 +76,7 @@ UART_INIT(lp, port, bautrate) {
 		base->uc1 = 0;
 		base->uc2 = UC2_RE | UC2_TE;
 		/* TODO setup Bautrate etc... */
+		/* TODO muxing!! */
 	}
 	return uart;
 }
@@ -114,6 +115,7 @@ UART_OPS(lp);
 #ifdef CONFIG_VF610_LPUART00
 static struct uart uart_data00 = {
 	UART_INIT_DEV(lp)
+	HAL_NAME("Uart 0: PTB10 and PTB11")
 	.base = (volatile struct lpuart_fsl *) VF610_UART0,
 };
 UART_ADDDEV(lp, uart_data00);
@@ -121,6 +123,7 @@ UART_ADDDEV(lp, uart_data00);
 #ifdef CONFIG_VF610_LPUART01
 static struct uart uart_data01 = {
 	UART_INIT_DEV(lp)
+	HAL_NAME("Uart 1: PTB4 and PTB5")
 	.base = (volatile struct lpuart_fsl *) VF610_UART1,
 };
 UART_ADDDEV(lp, uart_data01);
@@ -128,6 +131,7 @@ UART_ADDDEV(lp, uart_data01);
 #ifdef CONFIG_VF610_LPUART02
 static struct uart uart_data02 = {
 	UART_INIT_DEV(lp)
+	HAL_NAME("Uart 2: PTB6 and PTB7")
 	.base = (volatile struct lpuart_fsl *) VF610_UART2,
 };
 UART_ADDDEV(lp, uart_data02);
@@ -135,6 +139,7 @@ UART_ADDDEV(lp, uart_data02);
 #ifdef CONFIG_VF610_LPUART03
 static struct uart uart_data03 = {
 	UART_INIT_DEV(lp)
+	HAL_NAME("Uart 3: PTA30 and PTA31")
 	.base = (volatile struct lpuart_fsl *) VF610_UART3,
 };
 UART_ADDDEV(lp, uart_data03);
@@ -142,6 +147,7 @@ UART_ADDDEV(lp, uart_data03);
 #ifdef CONFIG_VF610_LPUART04
 static struct uart uart_data04 = {
 	UART_INIT_DEV(lp)
+	HAL_NAME("Uart 4: PTA28 and PTA29")
 	.base = (volatile struct lpuart_fsl *) VF610_UART4,
 };
 UART_ADDDEV(lp, uart_data04);
@@ -149,6 +155,7 @@ UART_ADDDEV(lp, uart_data04);
 #ifdef CONFIG_VF610_LPUART05
 static struct uart uart_data05 = {
 	UART_INIT_DEV(lp)
+	HAL_NAME("Uart 5: PTC14 and PTC15")
 	.base = (volatile struct lpuart_fsl *) VF610_UART5,
 };
 UART_ADDDEV(lp, uart_data05);
