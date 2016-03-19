@@ -51,9 +51,11 @@ UART_PUTC_ISR(linux_emu, uart, c) {
 UART_OPS(linux_emu);
 static struct uart uart_data00 = {
 	UART_INIT_DEV(linux_emu)
+	HAL_NAME("Dummy UART 0")
 };
 UART_ADDDEV(linux_emu, uart_data00);
 static struct uart uart_data01 = {
 	UART_INIT_DEV(linux_emu)
+	HAL_NAME("Dummy UART 1")
 };
 UART_ADDDEV(linux_emu, uart_data01);

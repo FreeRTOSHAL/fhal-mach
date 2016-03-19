@@ -73,6 +73,7 @@ GPIO_OPS(m0);
 
 struct gpio gpio = {
 	GPIO_INIT_DEV(m0)
+	HAL_NAME("Dummy GPIO 0")
 	.dummy = 0,
 };
 GPIO_ADDDEV(m0, gpio);

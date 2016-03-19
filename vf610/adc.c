@@ -524,6 +524,7 @@ void adc0_isr(void) {
 # ifdef CONFIG_VF610_ADC_0_PTA18
 static struct adc adc0_0 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTA18")
 	.channel = 0,
 	.base = &adc0,
 	.pin = {
@@ -536,6 +537,7 @@ ADC_ADDDEV(vf610, adc0_0);
 # ifdef CONFIG_VF610_ADC_0_PTA19
 static struct adc adc0_1 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTA19")
 	.channel = 1,
 	.base = &adc0,
 	.pin = {
@@ -548,6 +550,7 @@ ADC_ADDDEV(vf610, adc0_1);
 # ifdef CONFIG_VF610_ADC_0_PTB0
 static struct adc adc0_2 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTB0")
 	.channel = 2,
 	.base = &adc0,
 	.pin = {
@@ -560,6 +563,7 @@ ADC_ADDDEV(vf610, adc0_2);
 # ifdef CONFIG_VF610_ADC_0_PTB1
 static struct adc adc0_3 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTB1")
 	.channel = 3,
 	.base = &adc0,
 	.pin = {
@@ -572,6 +576,7 @@ ADC_ADDDEV(vf610, adc0_3);
 # ifdef CONFIG_VF610_ADC_0_PTB4
 static struct adc adc0_4 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTB4")
 	.channel = 4,
 	.base = &adc0,
 	.pin = {
@@ -584,6 +589,7 @@ ADC_ADDDEV(vf610, adc0_4);
 # ifdef CONFIG_VF610_ADC_0_PTC30
 static struct adc adc0_5 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTC30")
 	.channel = 5,
 	.base = &adc0,
 	.pin = {
@@ -596,6 +602,7 @@ ADC_ADDDEV(vf610, adc0_5);
 # ifdef CONFIG_VF610_ADC_0_PTC14
 static struct adc adc0_6 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTC14")
 	.channel = 6,
 	.base = &adc0,
 	.pin = {
@@ -608,6 +615,8 @@ ADC_ADDDEV(vf610, adc0_6);
 # ifdef CONFIG_VF610_ADC_0_PTC15
 static struct adc adc0_7 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTC15")
+	.channel = 6,
 	.channel = 7,
 	.base = &adc0,
 	.pin = {
@@ -620,6 +629,8 @@ ADC_ADDDEV(vf610, adc0_7);
 # ifdef CONFIG_VF610_ADC_0_ADC0SE8
 static struct adc adc0_8 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: ADC0SE8")
+	.channel = 6,
 	.channel = 8,
 	.base = &adc0,
 	/* Dedicated PAD - ADC0SE8 */
@@ -629,6 +640,7 @@ ADC_ADDDEV(vf610, adc0_8);
 # ifdef CONFIG_VF610_ADC_0_ADC0SE9
 static struct adc adc0_9 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: ADC0SE9")
 	.channel = 9,
 	.base = &adc0,
 	/* Dedicated PAD - ADC0SE9 */
@@ -638,6 +650,7 @@ ADC_ADDDEV(vf610, adc0_9);
 # ifdef CONFIG_VF610_ADC_0_DAC0
 static struct adc adc0_10 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: DAC0")
 	.channel = 10,
 	.base = &adc0,
 	/* DAC 0 */
@@ -647,6 +660,7 @@ ADC_ADDDEV(vf610, adc0_10);
 # ifdef CONFIG_VF610_ADC_0_VSS33
 static struct adc adc0_11 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: VSS33")
 	.channel = 11,
 	.base = &adc0,
 	/* VSS33 */
@@ -657,6 +671,7 @@ ADC_ADDDEV(vf610, adc0_11);
 # ifdef CONFIG_VF610_ADC_0_VREF
 static struct adc adc0_25 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: VREF")
 	.channel = 25,
 	.base = &adc0,
 	/* VREF */
@@ -666,6 +681,7 @@ ADC_ADDDEV(vf610, adc0_25);
 # ifdef CONFIG_VF610_ADC_0_Temp
 static struct adc adc0_26 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: Temp")
 	.channel = 26,
 	.base = &adc0,
 	/* Temp Sensor */
@@ -675,6 +691,7 @@ ADC_ADDDEV(vf610, adc0_26);
 # ifdef CONFIG_VF610_ADC_0_VREF_PMU
 static struct adc adc0_27 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PMU")
 	.channel = 27,
 	.base = &adc0,
 	/* VFEF from PMU */
@@ -836,6 +853,7 @@ void adc1_isr(void) {
 # ifdef CONFIG_VF610_ADC_1_PTA16
 static struct adc adc1_0 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTA16")
 	.channel = 0,
 	.base = &adc1,
 	.pin = {
@@ -848,6 +866,7 @@ ADC_ADDDEV(vf610, adc1_0);
 # ifdef CONFIG_VF610_ADC_1_PTA17
 static struct adc adc1_1 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTA17")
 	.channel = 1,
 	.base = &adc1,
 	.pin = {
@@ -860,6 +879,7 @@ ADC_ADDDEV(vf610, adc1_1);
 # ifdef CONFIG_VF610_ADC_1_PTB2
 static struct adc adc1_2 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTB2")
 	.channel = 2,
 	.base = &adc1,
 	.pin = {
@@ -872,6 +892,7 @@ ADC_ADDDEV(vf610, adc1_2);
 # ifdef CONFIG_VF610_ADC_1_PTB3
 static struct adc adc1_3 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTB3")
 	.channel = 3,
 	.base = &adc1,
 	.pin = {
@@ -884,6 +905,7 @@ ADC_ADDDEV(vf610, adc1_3);
 # ifdef CONFIG_VF610_ADC_1_PTB5
 static struct adc adc1_4 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTB5")
 	.channel = 4,
 	.base = &adc1,
 	.pin = {
@@ -896,6 +918,7 @@ ADC_ADDDEV(vf610, adc1_4);
 # ifdef CONFIG_VF610_ADC_1_PTC31
 static struct adc adc1_5 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTC31")
 	.channel = 5,
 	.base = &adc1,
 	.pin = {
@@ -908,6 +931,7 @@ ADC_ADDDEV(vf610, adc1_5);
 # ifdef CONFIG_VF610_ADC_1_PTC16
 static struct adc adc1_6 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTC6")
 	.channel = 6,
 	.base = &adc1,
 	.pin = {
@@ -920,6 +944,7 @@ ADC_ADDDEV(vf610, adc1_6);
 # ifdef CONFIG_VF610_ADC_1_PTC17
 static struct adc adc1_7 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTC17")
 	.channel = 7,
 	.base = &adc1,
 	.pin = {
@@ -932,6 +957,7 @@ ADC_ADDDEV(vf610, adc1_7);
 # ifdef CONFIG_VF610_ADC_1_ADC1SE8
 static struct adc adc1_8 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: ADC1SE8")
 	.channel = 8,
 	.base = &adc1,
 	/* Dedicated PAD - ADC1SE8 */
@@ -941,6 +967,8 @@ ADC_ADDDEV(vf610, adc1_8);
 # ifdef CONFIG_VF610_ADC_1_ADC1SE9
 static struct adc adc1_9 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: ADC1SE9")
+	.channel = 8,
 	.channel = 9,
 	.base = &adc1,
 	/* Dedicated PAD - ADC1SE9 */
@@ -950,6 +978,7 @@ ADC_ADDDEV(vf610, adc1_9);
 # ifdef CONFIG_VF610_ADC_1_DAC1
 static struct adc adc1_10 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: DAC1")
 	.channel = 10,
 	.base = &adc1,
 	/* DAC 0 */
@@ -959,6 +988,7 @@ ADC_ADDDEV(vf610, adc1_10);
 # ifdef CONFIG_VF610_ADC_1_VSS33
 static struct adc adc1_11 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: VSS33")
 	.channel = 11,
 	.base = &adc1,
 	/* VSS33 */
@@ -969,6 +999,7 @@ ADC_ADDDEV(vf610, adc1_11);
 # ifdef CONFIG_VF610_ADC_1_VREF
 static struct adc adc1_25 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: VREF")
 	.channel = 25,
 	.base = &adc1,
 	/* VREF */
@@ -978,6 +1009,7 @@ ADC_ADDDEV(vf610, adc1_25);
 # ifdef CONFIG_VF610_ADC_1_Temp
 static struct adc adc1_26 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: Temp")
 	.channel = 26,
 	.base = &adc1,
 	/* Temp Sensor */
@@ -987,6 +1019,7 @@ ADC_ADDDEV(vf610, adc1_26);
 # ifdef CONFIG_VF610_ADC_1_VREF_PMU
 static struct adc adc1_27 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PMU")
 	.channel = 27,
 	.base = &adc1,
 	/* VFEF from PMU */

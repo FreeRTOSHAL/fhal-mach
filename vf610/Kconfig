@@ -81,6 +81,20 @@ config BUFFER_UART
 	depends on BUFFER
 	depends on VF610_BUFFER
 	select VF610_BUFFER_1
+	config BUFFER_UART_WAIT_TO_TX
+		bool "Wait for Linux Kernel UART Buffer"
+		depends on BUFFER_UART
+		default n
+		help
+			Wait for linux Kernel
+		config BUFFER_UART_MAX_TRYS
+			depends on BUFFER_UART
+			depends on BUFFER_UART_WAIT_TO_TX
+			int "Max Try to send a Char to Linux Kernel"
+			default 50
+			help
+				Max Trys to send a Char to Linux Kernel
+
 menuconfig VF610_BUFFER
 	bool "Buffer Driver"
 	depends on BUFFER

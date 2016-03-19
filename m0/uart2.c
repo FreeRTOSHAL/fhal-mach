@@ -55,6 +55,7 @@ UART_PUTC_ISR(m0_2, uart, c) {
 UART_OPS(m0_2);
 struct uart  uart_data02 = {
 	UART_INIT_DEV(m0_2)
+	HAL_NAME("UART 1")
 	.console = (volatile unsigned char *) M0_UART,
 };
 UART_ADDDEV(m0_2, uart_data02);

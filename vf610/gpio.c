@@ -312,6 +312,7 @@ GPIO_PIN_SET_CALLBACK(vf, pin, callback, data, inter) {
 GPIO_OPS(vf);
 static struct gpio gpio = {
 	GPIO_INIT_DEV(vf)
+	HAL_NAME("Vybrid GPIO Contoller")
 	.base = {
 		(volatile struct gpio_imx *) GPIO0_BASE,
 		(volatile struct gpio_imx *) GPIO1_BASE,
