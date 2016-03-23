@@ -291,7 +291,7 @@ struct clock {
 
 
 
-struct clock clk = {
+struct clock clock = {
 	.ccm = VF610_CCM,
 	.anadig = VF610_ANADIG,
 	.scsc = VF610_SCSC,
@@ -302,19 +302,19 @@ struct clock *clock_init() {
 #define CCM_CSCMR2_FTM_1_FIX_128K		(1 << 14)
 #define CCM_CSCMR2_FTM_2_FIX_128K		(1 << 14)
 #define CCM_CSCMR2_FTM_3_FIX_128K		(1 << 14)
-	if (hal_isInit(&clk)) {
-		return &clk;
+	if (hal_isInit(&clock)) {
+		return &clock;
 	}
-	clk.gen.init = true;
-	clk.ccm->cscdr1 |= CCM_CSCDR1_FTM_0_EN | CCM_CSCDR1_FTM_1_EN | CCM_CSCDR1_FTM_2_EN | CCM_CSCDR1_FTM_3_EN;
-	clk.ccm->ccgr0 |= CCM_CCGR0_SPI0_CTRL_MASK | CCM_CCGR0_SPI1_CTRL_MASK;
-	clk.ccm->ccgr1 |= CCM_CCGR1_FTM_0_CTRL_MASK | CCM_CCGR1_FTM_1_CTRL_MASK | CCM_CCGR1_ADC_0_CTRL_MASK;
-	clk.ccm->ccgr6 |= CCM_CCGR6_SPI2_CTRL_MASK | CCM_CCGR6_SPI3_CTRL_MASK;
-	clk.ccm->ccgr7 |= CCM_CCGR7_FTM_2_CTRL_MASK | CCM_CCGR7_FTM_3_CTRL_MASK | CCM_CCGR7_ADC_1_CTRL_MASK;
-	clk.ccm->cscmr2 |= CCM_CSCMR2_FTM_0_FIX_128K | CCM_CSCMR2_FTM_1_FIX_128K | CCM_CSCMR2_FTM_2_FIX_128K | CCM_CSCMR2_FTM_3_FIX_128K;
-	clk.ccm->ccgr3 |= CCM_CCGR3_SCSC_CTRL_MASK;
-	clk.scsc->sirc = (1 << 0) | (0 << 8);
-	return &clk;
+	clock.gen.init = true;
+	clock.ccm->cscdr1 |= CCM_CSCDR1_FTM_0_EN | CCM_CSCDR1_FTM_1_EN | CCM_CSCDR1_FTM_2_EN | CCM_CSCDR1_FTM_3_EN;
+	clock.ccm->ccgr0 |= CCM_CCGR0_SPI0_CTRL_MASK | CCM_CCGR0_SPI1_CTRL_MASK;
+	clock.ccm->ccgr1 |= CCM_CCGR1_FTM_0_CTRL_MASK | CCM_CCGR1_FTM_1_CTRL_MASK | CCM_CCGR1_ADC_0_CTRL_MASK;
+	clock.ccm->ccgr6 |= CCM_CCGR6_SPI2_CTRL_MASK | CCM_CCGR6_SPI3_CTRL_MASK;
+	clock.ccm->ccgr7 |= CCM_CCGR7_FTM_2_CTRL_MASK | CCM_CCGR7_FTM_3_CTRL_MASK | CCM_CCGR7_ADC_1_CTRL_MASK;
+	clock.ccm->cscmr2 |= CCM_CSCMR2_FTM_0_FIX_128K | CCM_CSCMR2_FTM_1_FIX_128K | CCM_CSCMR2_FTM_2_FIX_128K | CCM_CSCMR2_FTM_3_FIX_128K;
+	clock.ccm->ccgr3 |= CCM_CCGR3_SCSC_CTRL_MASK;
+	clock.scsc->sirc = (1 << 0) | (0 << 8);
+	return &clock;
 }
 int64_t clock_getCPUSpeed(struct clock *clk) {
 	int64_t speed = 0;

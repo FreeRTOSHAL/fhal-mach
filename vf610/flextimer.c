@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2016 Andreas Werner <kernel@andy89.org>
+ * 
+ * Permission is hereby granted, free of charge, to any person 
+ * obtaining a copy of this software and associated documentation 
+ * files (the "Software"), to deal in the Software without restriction, 
+ * including without limitation the rights to use, copy, modify, merge, 
+ * publish, distribute, sublicense, and/or sell copies of the Software, 
+ * and to permit persons to whom the Software is furnished to do so, 
+ * subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included 
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ */
 #include <vector.h>
 #include <timer.h>
 #define TIMER_PRV
@@ -85,13 +107,13 @@ typedef enum {
 
 struct timer {
 	struct timer_generic gen;
-	struct ftm_reg *base;
+	volatile struct ftm_reg *base;
 	ftm_mode_t mode;
 	uint32_t prescaler;
 	int32_t irqnr;
 	bool (*irqhandle)(struct timer *ftm, void *data);
 	void *data;
-	int32_t ftmid;
+	uint32_t ftmid;
 	uint64_t basetime;
 	int64_t adjust;
 	struct capture const **capture;
@@ -101,10 +123,10 @@ struct timer {
 
 
 #define VF610_PWM_GENERAL_CTRL (PAD_CTL_SPEED_HIGH | PAD_CTL_DSE_20ohm | PAD_CTL_IBE_ENABLE | PAD_CTL_PUS_100K_UP)
-#define VF610_FLEXTIMER_0 ((struct ftm_reg *) 0x40038000)
-#define VF610_FLEXTIMER_1 ((struct ftm_reg *) 0x40039000)
-#define VF610_FLEXTIMER_2 ((struct ftm_reg *) 0x400B8000)
-#define VF610_FLEXTIMER_3 ((struct ftm_reg *) 0x400B9000)
+#define VF610_FLEXTIMER_0 ((volatile struct ftm_reg *) 0x40038000)
+#define VF610_FLEXTIMER_1 ((volatile struct ftm_reg *) 0x40039000)
+#define VF610_FLEXTIMER_2 ((volatile struct ftm_reg *) 0x400B8000)
+#define VF610_FLEXTIMER_3 ((volatile struct ftm_reg *) 0x400B9000)
 
 
 struct pwm_pin {
@@ -143,20 +165,46 @@ static void clearIRQBit(struct timer *ftm) {
 }
 
 static inline uint64_t counterToUS(struct timer *ftm, uint32_t value) {
-	uint64_t us = (((uint64_t) value) * ((uint64_t) ftm->prescaler)) / ftm->ipg_freq;
-	us = (us * ftm->basetime) / (ftm->basetime + ftm->adjust);
+	/* Too Many Cast for Optimizer do it step by step */
+	uint64_t diff;
+	uint64_t us;
+	uint64_t v = value;
+	uint64_t p = ftm->prescaler;
+	uint64_t i = ftm->ipg_freq;
+	uint64_t b = ftm->basetime;
+	diff = ftm->basetime;
+	/* Fix basetime > UINT32_t ! */
+	if (ftm->adjust < 0) {
+		diff -= (uint64_t) ftm->adjust;
+	} else {
+		diff += (uint64_t) ftm->adjust;
+	}
+	
+	us = (v * p) / i;
+	us = (us * b) / diff;
 
 	return us;
 } 
 
-static inline uint16_t USToCounter(struct timer *ftm, uint64_t u) {
-	uint64_t us = (u * (ftm->basetime + ftm->adjust)) / ftm->basetime;
-	uint64_t counterValue = (uint64_t) (ftm->ipg_freq * us) / ((uint64_t) (ftm->prescaler + 1));
+static inline uint64_t USToCounter(struct timer *ftm, uint64_t value) {
+	uint64_t p = ftm->prescaler;
+	uint64_t i = ftm->ipg_freq;
+	uint64_t b = ftm->basetime;
+	uint64_t diff = ftm->basetime;
+	/* Fix basetime > UINT32_t ! */
+	if (ftm->adjust < 0) {
+		diff -= (uint64_t) ftm->adjust;
+	} else {
+		diff += (uint64_t) ftm->adjust;
+	}
+
+	uint64_t us = (value * diff) / b;
+	uint64_t counterValue = (i * us) / (p + 1ULL);
 
 	return counterValue;
 }
 
-static void inline handleIRQ(struct timer *ftm) {
+static inline void handleIRQ(struct timer *ftm) {
 	bool ret = 0;
 	switch (ftm->mode) {
 		case ONESHOT:
@@ -255,7 +303,7 @@ static int32_t configureFtm(struct timer *ftm, uint64_t us) {
 
 	ftm_writeProtecDisable(ftm);
 	ftm->base->cnt = 0;
-	ftm->base->mod = counterValue;
+	ftm->base->mod = (uint32_t) counterValue;
 	ftm_writeProtecEnable(ftm);
 
 	timer_start(ftm);
@@ -299,8 +347,12 @@ static int32_t setupChannelPin(struct timer *ftm, struct pwm_pin *pin) {
 
 PWM_INIT(ftm, index) {
 	int32_t ret;
-	struct pwm *pwm = pwms[index];
-	struct timer *ftm = pwm->timer;
+	struct pwm *pwm = PWM_GET_DEV(index);
+	struct timer *ftm;
+	if (pwm == NULL) {
+		return NULL;
+	}
+	ftm = pwm->timer;
 
 	ret = pwm_generic_init(pwm);
 	if (ret < 0) {
@@ -337,7 +389,7 @@ PWM_SET_DUTY_CYCLE(ftm, pwm, us) {
 		/* Duty Cycle biger then period */
 		return -1;
 	}
-	ftm->base->ch[pwm->channel].cv = counterValue;
+	ftm->base->ch[pwm->channel].cv = (uint32_t) counterValue;
 	__ISB();
 	__DSB();
 	return 0;
@@ -347,9 +399,13 @@ PWM_SET_DUTY_CYCLE(ftm, pwm, us) {
 
 #ifdef CONFIG_FLEXTIMER_CAPTURE
 CAPTURE_INIT(ftm, index) {
-	struct capture *capture = captures[index];
-	struct timer *ftm = capture->timer;
+	struct capture *capture = CAPUTRE_GET_DEV(index);
+	struct timer *ftm;
 	int32_t ret;
+	if (capture == NULL) {
+		return NULL;
+	}
+	ftm = capture->timer;
 	ret = capture_generic_init(capture);
 	if (ret < 0) {
 		return capture;
@@ -397,10 +453,10 @@ TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
 	int32_t ret;
 	int i; 
 	struct timer *ftm;;
-	if (index > 3) {
+	ftm = TIMER_GET_DEV(index);
+	if (ftm == NULL) {
 		return NULL;
 	}
-	ftm = timers[index];
 	ret = timer_generic_init(ftm);
 	if (ret < 0) {
 		return ftm;
@@ -417,8 +473,8 @@ TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
 	{
 		struct clock *clock = clock_init();
 		int64_t speed = clock_getPeripherySpeed(clock);
-		speed /= 1000000ULL;
-		ftm->ipg_freq = speed;
+		speed /= 1000000LL;
+		ftm->ipg_freq = (uint32_t) speed;
 	}
 	
 	ftm_writeProtecDisable(ftm);
@@ -498,6 +554,7 @@ TIMER_OPS(ftm);
 #ifdef CONFIG_FLEXTIMER_0
 static struct timer ftm_timer_0 =  {
 	TIMER_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0")
 	.base = VF610_FLEXTIMER_0,
 	.irqnr = 42,
 #ifdef CONFIG_FLEXTIMER_CAPTURE
@@ -513,6 +570,7 @@ void flextimer0_isr() {
 #ifdef CONFIG_FLEXTIMER_1
 static struct timer ftm_timer_1 = {
 	TIMER_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 1")
 	.base = VF610_FLEXTIMER_1,
 	.irqnr = 43,
 #ifdef CONFIG_FLEXTIMER_CAPTURE
@@ -528,6 +586,7 @@ void flextimer1_isr() {
 #ifdef CONFIG_FLEXTIMER_2
 static struct timer ftm_timer_2 = {
 	TIMER_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 2")
 	.base = VF610_FLEXTIMER_2,
 	.irqnr = 44,
 #ifdef CONFIG_FLEXTIMER_CAPTURE
@@ -543,6 +602,7 @@ void flextimer2_isr() {
 #ifdef CONFIG_FLEXTIMER_3
 static struct timer ftm_timer_3 = {
 	TIMER_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3")
 	.base = VF610_FLEXTIMER_3,
 	.irqnr = 45,
 #ifdef CONFIG_FLEXTIMER_CAPTURE
@@ -562,6 +622,7 @@ PWM_OPS(ftm);
 # ifdef CONFIG_FLEXTIMER_PWM_0_0
 static struct pwm pwm_0_0 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 PWM: PTB0")
 	.timer = &ftm_timer_0,
 	.channel = 0,
 	.pin = {
@@ -574,6 +635,7 @@ PWM_ADDDEV(ftm, pwm_0_0);
 # ifdef CONFIG_FLEXTIMER_PWM_0_1
 static struct pwm pwm_0_1 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 PWM: PTB1")
 	.timer = &ftm_timer_0,
 	.channel = 1,
 	.pin = {
@@ -586,6 +648,7 @@ PWM_ADDDEV(ftm, pwm_0_1);
 # ifdef CONFIG_FLEXTIMER_PWM_0_2
 static struct pwm pwm_0_2 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 PWM: PTB2")
 	.timer = &ftm_timer_0,
 	.channel = 2,
 	.pin = {
@@ -598,6 +661,7 @@ PWM_ADDDEV(ftm, pwm_0_2);
 # ifdef CONFIG_FLEXTIMER_PWM_0_3
 static struct pwm pwm_0_3 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 PWM: PTB3")
 	.timer = &ftm_timer_0,
 	.channel = 3,
 	.pin = {
@@ -610,6 +674,7 @@ PWM_ADDDEV(ftm, pwm_0_3);
 # ifdef CONFIG_FLEXTIMER_PWM_0_4
 static struct pwm pwm_0_4 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 PWM: PTB4")
 	.timer = &ftm_timer_0,
 	.channel = 4,
 	.pin = {
@@ -622,6 +687,7 @@ PWM_ADDDEV(ftm, pwm_0_4);
 # ifdef CONFIG_FLEXTIMER_PWM_0_5
 static struct pwm pwm_0_5 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 PWM: PTB5")
 	.timer = &ftm_timer_0,
 	.channel = 5,
 	.pin = {
@@ -634,6 +700,7 @@ PWM_ADDDEV(ftm, pwm_0_5);
 # ifdef CONFIG_FLEXTIMER_PWM_0_6
 static struct pwm pwm_0_6 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 PWM: PTB6")
 	.timer = &ftm_timer_0,
 	.channel = 6,
 	.pin = {
@@ -646,6 +713,7 @@ PWM_ADDDEV(ftm, pwm_0_6);
 # ifdef CONFIG_FLEXTIMER_PWM_0_7
 static struct pwm pwm_0_7 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 PWM: PTB7")
 	.timer = &ftm_timer_0,
 	.channel = 7,
 	.pin = {
@@ -658,6 +726,7 @@ PWM_ADDDEV(ftm, pwm_0_7);
 # ifdef CONFIG_FLEXTIMER_PWM_1_0
 static struct pwm pwm_1_0 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 1 PWM: PTB8")
 	.timer = &ftm_timer_1,
 	.channel = 0,
 	.pin = {
@@ -670,6 +739,7 @@ PWM_ADDDEV(ftm, pwm_1_0);
 # ifdef CONFIG_FLEXTIMER_PWM_1_1
 static struct pwm pwm_1_1 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 1 PWM: PTB9")
 	.timer = &ftm_timer_1,
 	.channel = 1,
 	.pin = {
@@ -682,6 +752,7 @@ PWM_ADDDEV(ftm, pwm_1_1);
 # ifdef CONFIG_FLEXTIMER_PWM_2_0
 static struct pwm pwm_2_0 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 2 PWM: PTD23")
 	.timer = &ftm_timer_2,
 	.channel = 0,
 	.pin = {
@@ -694,6 +765,7 @@ PWM_ADDDEV(ftm, pwm_2_0);
 # ifdef CONFIG_FLEXTIMER_PWM_2_1
 static struct pwm pwm_2_1 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 2 PWM: PTD22")
 	.timer = &ftm_timer_2,
 	.channel = 1,
 	.pin = {
@@ -706,6 +778,7 @@ PWM_ADDDEV(ftm, pwm_2_1);
 # ifdef CONFIG_FLEXTIMER_PWM_3_0
 static struct pwm pwm_3_0 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 PWM: PTD31")
 	.timer = &ftm_timer_3,
 	.channel = 0,
 	.pin = {
@@ -718,6 +791,7 @@ PWM_ADDDEV(ftm, pwm_3_0);
 # ifdef CONFIG_FLEXTIMER_PWM_3_1
 static struct pwm pwm_3_1 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 PWM: PTD30")
 	.timer = &ftm_timer_3,
 	.channel = 1,
 	.pin = {
@@ -730,6 +804,7 @@ PWM_ADDDEV(ftm, pwm_3_1);
 # ifdef CONFIG_FLEXTIMER_PWM_3_2
 static struct pwm pwm_3_2 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 PWM: PTD29")
 	.timer = &ftm_timer_3,
 	.channel = 2,
 	.pin = {
@@ -742,6 +817,7 @@ PWM_ADDDEV(ftm, pwm_3_2);
 # ifdef CONFIG_FLEXTIMER_PWM_3_3
 static struct pwm pwm_3_3 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 PWM: PTD28")
 	.timer = &ftm_timer_3,
 	.channel = 3,
 	.pin = {
@@ -754,6 +830,7 @@ PWM_ADDDEV(ftm, pwm_3_3);
 # ifdef CONFIG_FLEXTIMER_PWM_3_4
 static struct pwm pwm_3_4 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 PWM: PTD27")
 	.timer = &ftm_timer_3,
 	.channel = 4,
 	.pin = {
@@ -766,6 +843,7 @@ PWM_ADDDEV(ftm, pwm_3_4);
 # ifdef CONFIG_FLEXTIMER_PWM_3_5
 static struct pwm pwm_3_5 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 PWM: PTD26")
 	.timer = &ftm_timer_3,
 	.channel = 5,
 	.pin = {
@@ -778,6 +856,7 @@ PWM_ADDDEV(ftm, pwm_3_5);
 # ifdef CONFIG_FLEXTIMER_PWM_3_6
 static struct pwm pwm_3_6 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 PWM: PTD25")
 	.timer = &ftm_timer_3,
 	.channel = 6,
 	.pin = {
@@ -790,6 +869,7 @@ PWM_ADDDEV(ftm, pwm_3_6);
 # ifdef CONFIG_FLEXTIMER_PWM_3_7
 static struct pwm pwm_3_7 = {
 	PWM_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 PWM: PTD24")
 	.timer = &ftm_timer_3,
 	.channel = 7,
 	.pin = {
@@ -806,6 +886,7 @@ CAPTURE_OPS(ftm);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_0_0
 static struct capture capture_0_0 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 Capture: PTB0")
 	.timer = &ftm_timer_0,
 	.channel = 0,
 	.pin = {
@@ -818,6 +899,7 @@ CAPTURE_ADDDEV(ftm, capture_0_0);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_0_1
 static struct capture capture_0_1 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 Capture: PTB1")
 	.timer = &ftm_timer_0,
 	.channel = 1,
 	.pin = {
@@ -830,6 +912,7 @@ CAPTURE_ADDDEV(ftm, capture_0_1);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_0_2
 static struct capture capture_0_2 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 Capture: PTB2")
 	.timer = &ftm_timer_0,
 	.channel = 2,
 	.pin = {
@@ -842,6 +925,7 @@ CAPTURE_ADDDEV(ftm, capture_0_2);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_0_3
 static struct capture capture_0_3 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 Capture: PTB3")
 	.timer = &ftm_timer_0,
 	.channel = 3,
 	.pin = {
@@ -854,6 +938,7 @@ CAPTURE_ADDDEV(ftm, capture_0_3);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_0_4
 static struct capture capture_0_4 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 Capture: PTB4")
 	.timer = &ftm_timer_0,
 	.channel = 4,
 	.pin = {
@@ -866,6 +951,7 @@ CAPTURE_ADDDEV(ftm, capture_0_4);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_0_5
 static struct capture capture_0_5 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 Capture: PTB5")
 	.timer = &ftm_timer_0,
 	.channel = 5,
 	.pin = {
@@ -878,6 +964,7 @@ CAPTURE_ADDDEV(ftm, capture_0_5);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_0_6
 static struct capture capture_0_6 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 Capture: PTB6")
 	.timer = &ftm_timer_0,
 	.channel = 6,
 	.pin = {
@@ -890,6 +977,7 @@ CAPTURE_ADDDEV(ftm, capture_0_6);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_0_7
 static struct capture capture_0_7 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 0 Capture: PTB7")
 	.timer = &ftm_timer_0,
 	.channel = 7,
 	.pin = {
@@ -902,6 +990,7 @@ CAPTURE_ADDDEV(ftm, capture_0_7);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_1_0
 static struct capture capture_1_0 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 1 Capture: PTB8")
 	.timer = &ftm_timer_1,
 	.channel = 0,
 	.pin = {
@@ -914,6 +1003,7 @@ CAPTURE_ADDDEV(ftm, capture_1_0);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_1_1
 static struct capture capture_1_1 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 1 Capture: PTB9")
 	.timer = &ftm_timer_1,
 	.channel = 1,
 	.pin = {
@@ -926,6 +1016,7 @@ CAPTURE_ADDDEV(ftm, capture_1_1);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_2_0
 static struct capture capture_2_0 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 2 Capture: PTD23")
 	.timer = &ftm_timer_2,
 	.channel = 0,
 	.pin = {
@@ -938,6 +1029,7 @@ CAPTURE_ADDDEV(ftm, capture_2_0);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_2_1
 static struct capture capture_2_1 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 2 Capture: PTD22")
 	.timer = &ftm_timer_2,
 	.channel = 1,
 	.pin = {
@@ -950,6 +1042,7 @@ CAPTURE_ADDDEV(ftm, capture_2_1);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_3_0
 static struct capture capture_3_0 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 Capture: PTD31")
 	.timer = &ftm_timer_3,
 	.channel = 0,
 	.pin = {
@@ -962,6 +1055,7 @@ CAPTURE_ADDDEV(ftm, capture_3_0);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_3_1
 static struct capture capture_3_1 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 Capture: PTD30")
 	.timer = &ftm_timer_3,
 	.channel = 1,
 	.pin = {
@@ -974,6 +1068,7 @@ CAPTURE_ADDDEV(ftm, capture_3_1);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_3_2
 static struct capture capture_3_2 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 Capture: PTD29")
 	.timer = &ftm_timer_3,
 	.channel = 2,
 	.pin = {
@@ -986,6 +1081,7 @@ CAPTURE_ADDDEV(ftm, capture_3_2);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_3_3
 static struct capture capture_3_3 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 Capture: PTD28")
 	.timer = &ftm_timer_3,
 	.channel = 3,
 	.pin = {
@@ -998,6 +1094,7 @@ CAPTURE_ADDDEV(ftm, capture_3_3);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_3_4
 static struct capture capture_3_4 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 Capture: PTD27")
 	.timer = &ftm_timer_3,
 	.channel = 4,
 	.pin = {
@@ -1010,6 +1107,7 @@ CAPTURE_ADDDEV(ftm, capture_3_4);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_3_5
 static struct capture capture_3_5 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 Capture: PTD26")
 	.timer = &ftm_timer_3,
 	.channel = 5,
 	.pin = {
@@ -1022,6 +1120,7 @@ CAPTURE_ADDDEV(ftm, capture_3_5);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_3_6
 static struct capture capture_3_6 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 Capture: PTD25")
 	.timer = &ftm_timer_3,
 	.channel = 6,
 	.pin = {
@@ -1034,6 +1133,7 @@ CAPTURE_ADDDEV(ftm, capture_3_6);
 # ifdef CONFIG_FLEXTIMER_CAPTURE_3_7
 static struct capture capture_3_7 = {
 	CAPTURE_INIT_DEV(ftm)
+	HAL_NAME("Flextimer 3 Capture: PTD24")
 	.timer = &ftm_timer_3,
 	.channel = 7,
 	.pin = {

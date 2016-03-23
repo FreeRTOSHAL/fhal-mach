@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2016 Andreas Werner <kernel@andy89.org>
+ * 
+ * Permission is hereby granted, free of charge, to any person 
+ * obtaining a copy of this software and associated documentation 
+ * files (the "Software"), to deal in the Software without restriction, 
+ * including without limitation the rights to use, copy, modify, merge, 
+ * publish, distribute, sublicense, and/or sell copies of the Software, 
+ * and to permit persons to whom the Software is furnished to do so, 
+ * subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included 
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ */
 #include <uart.h>
 #include <stdint.h>
 
@@ -14,8 +36,11 @@ struct uart {
 #define BUFFER_UART_TX ((struct buffer_base *) 0x3f07da1C)
 #define BUFFER_CPU2CPU_INTNR 1
 UART_INIT(buffer, port, bautrate) {
-	struct uart *uart = (struct uart *) uarts[port];
+	struct uart *uart = (struct uart *) UART_GET_DEV(port);
 	int32_t ret;
+	if (uart == NULL) {
+		return NULL;
+	}
 	ret = uart_generic_init(uart);
 	if (ret < 0) {
 		return NULL;
@@ -69,7 +94,25 @@ buffer_uart_getc_error0:
 UART_PUTC(buffer, uart, c, waittime) {
 	int32_t ret;
 	uart_lock(uart, waittime, -1);
+#ifdef CONFIG_BUFFER_UART_WAIT_TO_TX
+	{
+		uint32_t trys = 0;
+		volatile int i = 0;
+		do {
+			ret = buffer_write(uart->tx, (uint8_t *) &c, 1);
+			if (ret < 0) {
+				/* Give Linux Kerne some Time */
+				/* Linux Kernel need aprox 6us for get 255 Chars */
+				for(i = 0; i < 1000; i++) asm volatile ("nop");
+			}
+		} while(ret < 0 && trys++ < CONFIG_BUFFER_UART_MAX_TRYS);
+		if (trys > 0) {
+			i++;
+		}
+	}
+#else
 	ret = buffer_write(uart->tx, (uint8_t *) &c, 1);
+#endif
 	uart_unlock(uart, -1);
 	return ret;
 }
@@ -84,8 +127,21 @@ UART_GETC_ISR(buffer, uart) {
 	return c;
 }
 UART_PUTC_ISR(buffer, uart, c) {
-	int32_t ret;
+	uint32_t ret;
+#ifdef CONFIG_BUFFER_UART_WAIT_TO_TX
+	uint32_t trys = 0;
+	volatile int i = 0;
+	do {
+		ret = buffer_write(uart->tx, (uint8_t *) &c, 1);
+		if (ret < 0) {
+			/* Give Linux Kerne some Time */
+			/* Linux Kernel need aprox 6us for get 255 Chars */
+			for(i = 0; i < 1000; i++) asm volatile ("nop");
+		}
+	} while(ret < 0 && trys++ < CONFIG_BUFFER_UART_MAX_TRYS);
+#else
 	ret = buffer_write(uart->tx, (uint8_t *) &c, 1);
+#endif
 	return ret;
 }
 
@@ -93,6 +149,7 @@ UART_OPS(buffer);
 
 static struct uart uart_data00 = {
 	UART_INIT_DEV(buffer) 
+	HAL_NAME("Shared Memory UART")
 	.rx = NULL,
 	.tx = NULL,
 };

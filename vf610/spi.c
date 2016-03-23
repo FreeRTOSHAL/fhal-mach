@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2016 Andreas Werner <kernel@andy89.org>
+ * 
+ * Permission is hereby granted, free of charge, to any person 
+ * obtaining a copy of this software and associated documentation 
+ * files (the "Software"), to deal in the Software without restriction, 
+ * including without limitation the rights to use, copy, modify, merge, 
+ * publish, distribute, sublicense, and/or sell copies of the Software, 
+ * and to permit persons to whom the Software is furnished to do so, 
+ * subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included 
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ */
 #include <FreeRTOS.h>
 #include <semphr.h>
 #include <stdio.h>
@@ -149,7 +171,7 @@ struct spi_pin {
 
 struct spi {
 	struct spi_generic gen;
-	struct dspi *base;
+	volatile struct dspi *base;
 	bool shareCTAR;
 	uint8_t irqnr;
 	uint8_t index;
@@ -206,8 +228,13 @@ static void setupPin(const struct spi_pin *pin) {
 
 SPI_INIT(dspi, index, mode, opt) {
 	int i;
-	struct spi *spi = spis[index];
-	int32_t ret = spi_genericInit(spi);
+	struct spi *spi = SPI_GET_DEV(index);
+	int32_t ret;
+	if (spi == NULL) {
+		return NULL;
+	}
+
+	ret = spi_genericInit(spi);
 	/* TODO Mode */
 	if (ret < 0) {
 		return NULL;
@@ -317,8 +344,8 @@ static int32_t ns_delay_scale(uint8_t *psc, uint8_t *sc, uint64_t delay_ns)
 	int32_t scale_needed = INT32_MAX;
 	int32_t scale = INT32_MAX;
 	int32_t minscale = INT32_MAX;
-	int32_t i;
-	int32_t j;
+	uint32_t i;
+	uint32_t j;
 
 	scale_needed = (delay_ns * ((uint64_t) IPG_CLK)) / NSEC_PER_SEC;
 	if ((delay_ns * ((uint64_t) IPG_CLK)) % NSEC_PER_SEC)
@@ -514,7 +541,7 @@ static uint32_t prepareFrame(struct spi_slave *slave, uint16_t data) {
 
 static void spi_recvData(struct spi_slave *slave, uint16_t *data, uint32_t len) {
 	struct spi *spi = slave->spi;
-	int i;
+	uint32_t i;
 	uint32_t popr;
 	for (i = 0; i < len; i++) {
 		popr = spi->base->popr;
@@ -675,7 +702,8 @@ SPI_OPS(dspi);
 #ifdef CONFIG_DSPI_0
 struct spi spi_0 = {
 	SPI_INIT_DEV(dspi)
-	.base = (struct dspi *) VF610_SPI0,
+	HAL_NAME("DSPI 0")
+	.base = (volatile struct dspi *) VF610_SPI0,
 	.irqnr = 67,
 	.index = 0,
 	.pin = {
@@ -735,7 +763,8 @@ void spi0_isr(void) {
 #ifdef CONFIG_DSPI_1
 struct spi spi_1 = {
 	SPI_INIT_DEV(dspi)
-	.base = (struct dspi *) VF610_SPI1,
+	HAL_NAME("DSPI 1")
+	.base = (volatile struct dspi *) VF610_SPI1,
 	.irqnr = 68,
 	.index = 1,
 	.pin = 
@@ -849,7 +878,8 @@ void spi1_isr(void) {
 #ifdef CONFIG_DSPI_2
 struct spi spi_2 = {
 	SPI_INIT_DEV(dspi)
-	.base = (struct dspi *) VF610_SPI2,
+	HAL_NAME("DSPI 2")
+	.base = (volatile struct dspi *) VF610_SPI2,
 	.irqnr = 69,
 	.index = 2,
 	.pin = {
@@ -889,7 +919,8 @@ void spi2_isr(void) {
 #ifdef CONFIG_DSPI_3
 struct spi spi_3 = {
 	SPI_INIT_DEV(dspi)
-	.base = (struct dspi *) VF610_SPI3,
+	HAL_NAME("DSPI 3")
+	.base = (volatile struct dspi *) VF610_SPI3,
 	.irqnr = 70,
 	.index = 3,
 	.pin = {

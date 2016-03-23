@@ -169,5 +169,6 @@ enum pins{
 	PTE27,
 	PTE28,
 	PTA7,
+	MAX_GPIOS,
 };
 #endif

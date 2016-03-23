@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2016 Andreas Werner <kernel@andy89.org>
+ * 
+ * Permission is hereby granted, free of charge, to any person 
+ * obtaining a copy of this software and associated documentation 
+ * files (the "Software"), to deal in the Software without restriction, 
+ * including without limitation the rights to use, copy, modify, merge, 
+ * publish, distribute, sublicense, and/or sell copies of the Software, 
+ * and to permit persons to whom the Software is furnished to do so, 
+ * subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included 
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ */
 #include <stdint.h>
 #include <stdlib.h>
 #include <FreeRTOS.h>
@@ -66,7 +88,7 @@ struct vf610_adc {
 
 struct adc_base {
 	struct adc_generic gen;
-	struct vf610_adc *base;
+	volatile struct vf610_adc *base;
 	uint32_t irq;
 	SemaphoreHandle_t sem;
 	uint8_t bits;
@@ -266,8 +288,12 @@ static int32_t adc_channel(struct adc *adc) {
 }
 
 ADC_INIT(vf610, index, bits, hz) {
-	struct adc *adc = adcs[index];
-	struct adc_base *base = adc->base;
+	struct adc *adc = (struct adc *) ADC_GET_DEV(index);
+	struct adc_base *base; 
+	if (adc == NULL) {
+		return NULL;
+	}
+	base = adc->base;
 	int32_t ret = adc_generic_init(adc);
 	if (ret < 0) {
 		return NULL;
@@ -417,7 +443,7 @@ static struct adc adc0_27;
 
 static struct adc_base adc0 = {
 	ADC_INIT_DEV(vf610)
-	.base = (struct vf610_adc *) VF610_ADC0,
+	.base = (volatile struct vf610_adc *) VF610_ADC0,
 	.irq = 53,
 	.adcs = {
 # ifdef CONFIG_VF610_ADC_0_PTA18
@@ -520,6 +546,7 @@ void adc0_isr(void) {
 # ifdef CONFIG_VF610_ADC_0_PTA18
 static struct adc adc0_0 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTA18")
 	.channel = 0,
 	.base = &adc0,
 	.pin = {
@@ -532,6 +559,7 @@ ADC_ADDDEV(vf610, adc0_0);
 # ifdef CONFIG_VF610_ADC_0_PTA19
 static struct adc adc0_1 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTA19")
 	.channel = 1,
 	.base = &adc0,
 	.pin = {
@@ -544,6 +572,7 @@ ADC_ADDDEV(vf610, adc0_1);
 # ifdef CONFIG_VF610_ADC_0_PTB0
 static struct adc adc0_2 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTB0")
 	.channel = 2,
 	.base = &adc0,
 	.pin = {
@@ -556,6 +585,7 @@ ADC_ADDDEV(vf610, adc0_2);
 # ifdef CONFIG_VF610_ADC_0_PTB1
 static struct adc adc0_3 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTB1")
 	.channel = 3,
 	.base = &adc0,
 	.pin = {
@@ -568,6 +598,7 @@ ADC_ADDDEV(vf610, adc0_3);
 # ifdef CONFIG_VF610_ADC_0_PTB4
 static struct adc adc0_4 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTB4")
 	.channel = 4,
 	.base = &adc0,
 	.pin = {
@@ -580,6 +611,7 @@ ADC_ADDDEV(vf610, adc0_4);
 # ifdef CONFIG_VF610_ADC_0_PTC30
 static struct adc adc0_5 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTC30")
 	.channel = 5,
 	.base = &adc0,
 	.pin = {
@@ -592,6 +624,7 @@ ADC_ADDDEV(vf610, adc0_5);
 # ifdef CONFIG_VF610_ADC_0_PTC14
 static struct adc adc0_6 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTC14")
 	.channel = 6,
 	.base = &adc0,
 	.pin = {
@@ -604,6 +637,8 @@ ADC_ADDDEV(vf610, adc0_6);
 # ifdef CONFIG_VF610_ADC_0_PTC15
 static struct adc adc0_7 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PTC15")
+	.channel = 6,
 	.channel = 7,
 	.base = &adc0,
 	.pin = {
@@ -616,6 +651,8 @@ ADC_ADDDEV(vf610, adc0_7);
 # ifdef CONFIG_VF610_ADC_0_ADC0SE8
 static struct adc adc0_8 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: ADC0SE8")
+	.channel = 6,
 	.channel = 8,
 	.base = &adc0,
 	/* Dedicated PAD - ADC0SE8 */
@@ -625,6 +662,7 @@ ADC_ADDDEV(vf610, adc0_8);
 # ifdef CONFIG_VF610_ADC_0_ADC0SE9
 static struct adc adc0_9 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: ADC0SE9")
 	.channel = 9,
 	.base = &adc0,
 	/* Dedicated PAD - ADC0SE9 */
@@ -634,6 +672,7 @@ ADC_ADDDEV(vf610, adc0_9);
 # ifdef CONFIG_VF610_ADC_0_DAC0
 static struct adc adc0_10 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: DAC0")
 	.channel = 10,
 	.base = &adc0,
 	/* DAC 0 */
@@ -643,6 +682,7 @@ ADC_ADDDEV(vf610, adc0_10);
 # ifdef CONFIG_VF610_ADC_0_VSS33
 static struct adc adc0_11 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: VSS33")
 	.channel = 11,
 	.base = &adc0,
 	/* VSS33 */
@@ -653,6 +693,7 @@ ADC_ADDDEV(vf610, adc0_11);
 # ifdef CONFIG_VF610_ADC_0_VREF
 static struct adc adc0_25 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: VREF")
 	.channel = 25,
 	.base = &adc0,
 	/* VREF */
@@ -662,6 +703,7 @@ ADC_ADDDEV(vf610, adc0_25);
 # ifdef CONFIG_VF610_ADC_0_Temp
 static struct adc adc0_26 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: Temp")
 	.channel = 26,
 	.base = &adc0,
 	/* Temp Sensor */
@@ -671,6 +713,7 @@ ADC_ADDDEV(vf610, adc0_26);
 # ifdef CONFIG_VF610_ADC_0_VREF_PMU
 static struct adc adc0_27 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 0: PMU")
 	.channel = 27,
 	.base = &adc0,
 	/* VFEF from PMU */
@@ -729,7 +772,7 @@ static struct adc adc1_27;
 
 static struct adc_base adc1 = {
 	ADC_INIT_DEV(vf610)
-	.base = (struct vf610_adc *) VF610_ADC1,
+	.base = (volatile struct vf610_adc *) VF610_ADC1,
 	.irq = 54,
 	.adcs = {
 # ifdef CONFIG_VF610_ADC_1_PTA16
@@ -832,6 +875,7 @@ void adc1_isr(void) {
 # ifdef CONFIG_VF610_ADC_1_PTA16
 static struct adc adc1_0 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTA16")
 	.channel = 0,
 	.base = &adc1,
 	.pin = {
@@ -844,6 +888,7 @@ ADC_ADDDEV(vf610, adc1_0);
 # ifdef CONFIG_VF610_ADC_1_PTA17
 static struct adc adc1_1 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTA17")
 	.channel = 1,
 	.base = &adc1,
 	.pin = {
@@ -856,6 +901,7 @@ ADC_ADDDEV(vf610, adc1_1);
 # ifdef CONFIG_VF610_ADC_1_PTB2
 static struct adc adc1_2 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTB2")
 	.channel = 2,
 	.base = &adc1,
 	.pin = {
@@ -868,6 +914,7 @@ ADC_ADDDEV(vf610, adc1_2);
 # ifdef CONFIG_VF610_ADC_1_PTB3
 static struct adc adc1_3 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTB3")
 	.channel = 3,
 	.base = &adc1,
 	.pin = {
@@ -880,6 +927,7 @@ ADC_ADDDEV(vf610, adc1_3);
 # ifdef CONFIG_VF610_ADC_1_PTB5
 static struct adc adc1_4 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTB5")
 	.channel = 4,
 	.base = &adc1,
 	.pin = {
@@ -892,6 +940,7 @@ ADC_ADDDEV(vf610, adc1_4);
 # ifdef CONFIG_VF610_ADC_1_PTC31
 static struct adc adc1_5 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTC31")
 	.channel = 5,
 	.base = &adc1,
 	.pin = {
@@ -904,6 +953,7 @@ ADC_ADDDEV(vf610, adc1_5);
 # ifdef CONFIG_VF610_ADC_1_PTC16
 static struct adc adc1_6 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTC6")
 	.channel = 6,
 	.base = &adc1,
 	.pin = {
@@ -916,6 +966,7 @@ ADC_ADDDEV(vf610, adc1_6);
 # ifdef CONFIG_VF610_ADC_1_PTC17
 static struct adc adc1_7 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PTC17")
 	.channel = 7,
 	.base = &adc1,
 	.pin = {
@@ -928,6 +979,7 @@ ADC_ADDDEV(vf610, adc1_7);
 # ifdef CONFIG_VF610_ADC_1_ADC1SE8
 static struct adc adc1_8 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: ADC1SE8")
 	.channel = 8,
 	.base = &adc1,
 	/* Dedicated PAD - ADC1SE8 */
@@ -937,6 +989,8 @@ ADC_ADDDEV(vf610, adc1_8);
 # ifdef CONFIG_VF610_ADC_1_ADC1SE9
 static struct adc adc1_9 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: ADC1SE9")
+	.channel = 8,
 	.channel = 9,
 	.base = &adc1,
 	/* Dedicated PAD - ADC1SE9 */
@@ -946,6 +1000,7 @@ ADC_ADDDEV(vf610, adc1_9);
 # ifdef CONFIG_VF610_ADC_1_DAC1
 static struct adc adc1_10 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: DAC1")
 	.channel = 10,
 	.base = &adc1,
 	/* DAC 0 */
@@ -955,6 +1010,7 @@ ADC_ADDDEV(vf610, adc1_10);
 # ifdef CONFIG_VF610_ADC_1_VSS33
 static struct adc adc1_11 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: VSS33")
 	.channel = 11,
 	.base = &adc1,
 	/* VSS33 */
@@ -965,6 +1021,7 @@ ADC_ADDDEV(vf610, adc1_11);
 # ifdef CONFIG_VF610_ADC_1_VREF
 static struct adc adc1_25 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: VREF")
 	.channel = 25,
 	.base = &adc1,
 	/* VREF */
@@ -974,6 +1031,7 @@ ADC_ADDDEV(vf610, adc1_25);
 # ifdef CONFIG_VF610_ADC_1_Temp
 static struct adc adc1_26 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: Temp")
 	.channel = 26,
 	.base = &adc1,
 	/* Temp Sensor */
@@ -983,6 +1041,7 @@ ADC_ADDDEV(vf610, adc1_26);
 # ifdef CONFIG_VF610_ADC_1_VREF_PMU
 static struct adc adc1_27 = {
 	ADC_INIT_DEV(vf610)
+	HAL_NAME("ADC 1: PMU")
 	.channel = 27,
 	.base = &adc1,
 	/* VFEF from PMU */

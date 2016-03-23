@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2016 Andreas Werner <kernel@andy89.org>
+ * 
+ * Permission is hereby granted, free of charge, to any person 
+ * obtaining a copy of this software and associated documentation 
+ * files (the "Software"), to deal in the Software without restriction, 
+ * including without limitation the rights to use, copy, modify, merge, 
+ * publish, distribute, sublicense, and/or sell copies of the Software, 
+ * and to permit persons to whom the Software is furnished to do so, 
+ * subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included 
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ */
 #include <uart.h>
 #include <stdint.h>
 
@@ -47,8 +69,11 @@ struct uart {
 
 
 UART_INIT(lp, port, bautrate) {
-	struct uart *uart = (struct uart *) uarts[port];
+	struct uart *uart = (struct uart *) UART_GET_DEV(port);
 	int32_t ret;
+	if (uart == NULL) {
+		return NULL;
+	}
 	ret = uart_generic_init(uart);
 	if (ret < 0) {
 		return NULL;
@@ -73,6 +98,7 @@ UART_INIT(lp, port, bautrate) {
 		base->uc1 = 0;
 		base->uc2 = UC2_RE | UC2_TE;
 		/* TODO setup Bautrate etc... */
+		/* TODO muxing!! */
 	}
 	return uart;
 }
@@ -87,7 +113,7 @@ UART_GETC(lp, uart, waittime) {
 	return 0;
 }
 UART_PUTC(lp, uart, c, waittime) {
-	volatile register struct lpuart_fsl *base = uart->base;
+	register volatile struct lpuart_fsl *base = uart->base;
 	uart_lock(uart, waittime, -1);
 	while (!(uart->base->us1 & US1_TDRE));
 	base->ud = c;
@@ -100,7 +126,7 @@ UART_GETC_ISR(lp, uart) {
 	return 0;
 }
 UART_PUTC_ISR(lp, uart, c) {
-	volatile register struct lpuart_fsl *base = uart->base;
+	register volatile struct lpuart_fsl *base = uart->base;
 	while (!(uart->base->us1 & US1_TDRE));
 	base->ud = c;
 	return 0;
@@ -111,6 +137,7 @@ UART_OPS(lp);
 #ifdef CONFIG_VF610_LPUART00
 static struct uart uart_data00 = {
 	UART_INIT_DEV(lp)
+	HAL_NAME("Uart 0: PTB10 and PTB11")
 	.base = (volatile struct lpuart_fsl *) VF610_UART0,
 };
 UART_ADDDEV(lp, uart_data00);
@@ -118,6 +145,7 @@ UART_ADDDEV(lp, uart_data00);
 #ifdef CONFIG_VF610_LPUART01
 static struct uart uart_data01 = {
 	UART_INIT_DEV(lp)
+	HAL_NAME("Uart 1: PTB4 and PTB5")
 	.base = (volatile struct lpuart_fsl *) VF610_UART1,
 };
 UART_ADDDEV(lp, uart_data01);
@@ -125,6 +153,7 @@ UART_ADDDEV(lp, uart_data01);
 #ifdef CONFIG_VF610_LPUART02
 static struct uart uart_data02 = {
 	UART_INIT_DEV(lp)
+	HAL_NAME("Uart 2: PTB6 and PTB7")
 	.base = (volatile struct lpuart_fsl *) VF610_UART2,
 };
 UART_ADDDEV(lp, uart_data02);
@@ -132,6 +161,7 @@ UART_ADDDEV(lp, uart_data02);
 #ifdef CONFIG_VF610_LPUART03
 static struct uart uart_data03 = {
 	UART_INIT_DEV(lp)
+	HAL_NAME("Uart 3: PTA30 and PTA31")
 	.base = (volatile struct lpuart_fsl *) VF610_UART3,
 };
 UART_ADDDEV(lp, uart_data03);
@@ -139,6 +169,7 @@ UART_ADDDEV(lp, uart_data03);
 #ifdef CONFIG_VF610_LPUART04
 static struct uart uart_data04 = {
 	UART_INIT_DEV(lp)
+	HAL_NAME("Uart 4: PTA28 and PTA29")
 	.base = (volatile struct lpuart_fsl *) VF610_UART4,
 };
 UART_ADDDEV(lp, uart_data04);
@@ -146,6 +177,7 @@ UART_ADDDEV(lp, uart_data04);
 #ifdef CONFIG_VF610_LPUART05
 static struct uart uart_data05 = {
 	UART_INIT_DEV(lp)
+	HAL_NAME("Uart 5: PTC14 and PTC15")
 	.base = (volatile struct lpuart_fsl *) VF610_UART5,
 };
 UART_ADDDEV(lp, uart_data05);

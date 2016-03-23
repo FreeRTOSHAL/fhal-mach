@@ -67,7 +67,10 @@ SECTIONS
   PROVIDE (etext = .);
 
   /* DEV(uart, falsh) Linux Linker Script has no location */
+  .rodata.dev.hal : { _dev_hal = .; KEEP(*(.rodata.dev.hal)) }
   .rodata.dev.uart : { _dev_uart = .; KEEP(*(.rodata.dev.uart)) }
+  .rodata.dev.gpio : { _dev_gpio = .; KEEP(*(.rodata.dev.gpio)) }
+  .rodata.dev.example : { _dev_example = .; KEEP(*(.rodata.dev.example)) }
 
   .rodata         : { *(.rodata .rodata.* .gnu.linkonce.r.*) }
   .rodata1        : { *(.rodata1) }

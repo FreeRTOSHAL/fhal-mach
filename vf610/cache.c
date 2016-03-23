@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2016 Andreas Werner <kernel@andy89.org>
+ * 
+ * Permission is hereby granted, free of charge, to any person 
+ * obtaining a copy of this software and associated documentation 
+ * files (the "Software"), to deal in the Software without restriction, 
+ * including without limitation the rights to use, copy, modify, merge, 
+ * publish, distribute, sublicense, and/or sell copies of the Software, 
+ * and to permit persons to whom the Software is furnished to do so, 
+ * subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included 
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ */
 #include <stdint.h>
 #include <system.h>
 #include "cache.h"
@@ -36,7 +58,7 @@
 
 #define CSAR_LGO BIT(0)
 #define CSAR_IS_LGO(x) ((x >> 0) & 0x1)
-#define CSAR_PYS_ADDRESS(x) ((((uint32_t) x) & 0x1FFFFFFFU) << 2)
+#define CSAR_PYS_ADDRESS(x) (((uint32_t) x) & 0xFFFFFFFCU)
 
 struct vf610_cache {
 	uint32_t ccr;
@@ -46,16 +68,16 @@ struct vf610_cache {
 };
 
 struct vf610_caches {
-	struct vf610_cache *inst;
-	struct vf610_cache *data;
+	volatile struct vf610_cache *inst;
+	volatile struct vf610_cache *data;
 };
 
 #define VF610_INST_CACHE_CTL 0xE0082000
 #define VF610_DATA_CACHE_CTL 0xE0082800
 
 static volatile struct vf610_caches cache =  {
-	.inst = (struct vf610_cache *) 0xE0082000,
-	.data = (struct vf610_cache *) 0xE0082800
+	.inst = (volatile struct vf610_cache *) 0xE0082000,
+	.data = (volatile struct vf610_cache *) 0xE0082800
 };
 
 int32_t cache_init() {
