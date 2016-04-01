@@ -18,11 +18,44 @@ choice
 	config STM32F469_479xx
 		bool "STM32F469_479xx"
 endchoice
-config USE_HSE_BYPASS
-	bool "HSE Bypass"
-	depends on STM32F410xx || STM32F411xE
+config SYSTICK_USE_EXTERNAL
+	bool "Systick Use External Source"
+	default n
 	help
-		HSE Bypass
+		Systick use the External Source
+
+		The External Source is the CPU Clock deviated by 8
+
+		configSYSTICK_CLOCK_HZ is set Automatically 
+
+		FreeRTOS Docu:
+
+		When SysTick is clocked at the core speed...
+
+		Most Cortex-M microcontrollers clock the SysTick timer at the same frequency as the Cortex-M core. 
+		When this is the case, the combination of high clock speed and 24-bit resolution result in a sever 
+		limitation in the maximum tickless period that can be achieved. To achieve very high power saving 
+		gains it is necessary to override the built in tickless idle implementation with an implementation 
+		that uses an alternative time source.
+		If the SysTick timer frequency equals the core frequency then configSYSTICK_CLOCK_HZ must be 
+		defined to equal configCPU_CLOCK_HZ in FreeRTOSConfig.h. Alternatively, a definition for 
+		configSYSTICK_CLOCK_HZ can just be omitted, in which case it will default to equal 
+		configCPU_CLOCK_HZ.
+
+
+		When SysTick is clocked below the core speed...
+
+		The maximum tickless period that can be achieved increases dramatically when the frequency of the 
+		SysTick timer is less than the frequency of the core.
+		If the SysTick timer frequency does not equal the core frequency then configSYSTICK_CLOCK_HZ must 
+		be defined in FreeRTOSConfig.h to equal the SysTick frequency (in Hz).
+
+
+if SYSTICK_USE_EXTERNAL
+config SYSTICK_HZ_DIV
+	int 
+	default 8
+endif
 config MAX_SYSCALL_INTERRUPT_PRIORITY
 	hex
 	default 0x20
@@ -34,7 +67,7 @@ config MACH_LD_SCRIPT
 	default "mach/stm32/stm32.lds"
 config MACH_INCLUDE
 	string
-	default "-Imach/stm32/include"
+	default "-Imach/stm32/include -Imach/stm32/st_periph_driver/include/"
 config MACH_DEFINE_HEAP
 	bool
 	default y
@@ -43,13 +76,6 @@ config MACH_INIT_STACK_SIZE
 	default 600
 	help
 		Stack Size of Init Prozess. Stack size used by Interrupt and Init Prozess
-config UART
-	bool "UART Driver"
-	default y
-	select UART_GENERIC_STRING
-	select UART_GENERIC_BYTE
-	help
-		UART Driver
 config MACH_HAS_UART
 	bool
 	default y
@@ -62,3 +88,339 @@ config MACH_HAS_NEWLIB
 config MACH_HAS_NVIC
 	bool
 	default y
+config MACH_HAS_TIMER
+	bool
+	default y
+comment "PLL Settings"
+menuconfig EXTERNEL_OSCILLATOR
+	bool "Activate External Cristal Oscillator"
+	comment "PLL Settings"
+		depends on EXTERNEL_OSCILLATOR
+	comment "Waring: PLL Setting could damage Target" 
+		depends on EXTERNEL_OSCILLATOR
+	config HSE_HZ
+		int "Externel Oszilator Speed (Hz)"
+		depends on EXTERNEL_OSCILLATOR
+		default 25000000
+		help
+			Externel Oszilator Settings
+	config PLLM
+		int "PLLM"
+		depends on EXTERNEL_OSCILLATOR
+		default 25
+		help
+			PLLM Setting
+	config PLLN
+		int "PLLN"
+		depends on EXTERNEL_OSCILLATOR
+		default 336
+		help
+			PLLN Setting
+	config PLLP
+		int "PLLP"
+		depends on EXTERNEL_OSCILLATOR
+		default 4
+		help
+			PLLP Setting
+	config PLLQ
+		int "PLLQ"
+		depends on EXTERNEL_OSCILLATOR
+		default 7
+		help
+			PLLQ Setting
+	config PLLR
+		int "PLLR"
+		depends on EXTERNEL_OSCILLATOR
+		depends on STM32F410xx || STM32F446xx || STM32F469_479xx
+		default 1
+		help
+			PLLR Setting
+	choice
+		prompt "Select Main Regulator Mode"
+		depends on EXTERNEL_OSCILLATOR
+		config VOS_SCALE_2
+			bool "Regulator voltage output Scale 2 mode"
+		config VOS_SCALE_3
+			bool "Regulator voltage output Scale 3 mode"
+		config VOS_SCALE_1
+			bool "Regulator voltage output Scale 1 mode"
+	endchoice
+	choice
+		prompt "Select Flash Latency"
+		depends on EXTERNEL_OSCILLATOR
+		config FLASH_LATENCY_0
+			bool "Flash Latency 0"
+		config FLASH_LATENCY_1
+			bool "Flash Latency 1"
+		config FLASH_LATENCY_2
+			bool "Flash Latency 2"
+		config FLASH_LATENCY_3
+			bool "Flash Latency 3"
+		config FLASH_LATENCY_4
+			bool "Flash Latency 4"
+		config FLASH_LATENCY_5
+			bool "Flash Latency 5"
+		config FLASH_LATENCY_6
+			bool "Flash Latency 6"
+		config FLASH_LATENCY_7
+			bool "Flash Latency 7"
+		config FLASH_LATENCY_8
+			bool "Flash Latency 8"
+		config FLASH_LATENCY_9
+			bool "Flash Latency 9"
+		config FLASH_LATENCY_10
+			bool "Flash Latency 10"
+		config FLASH_LATENCY_10
+			bool "Flash Latency 10"
+		config FLASH_LATENCY_11
+			bool "Flash Latency 11"
+		config FLASH_LATENCY_12
+			bool "Flash Latency 12"
+		config FLASH_LATENCY_13
+			bool "Flash Latency 13"
+		config FLASH_LATENCY_14
+			bool "Flash Latency 14"
+		config FLASH_LATENCY_15
+			bool "Flash Latency 15"
+	endchoice
+	choice
+		prompt "Seect Sysclk Div"
+		depends on EXTERNEL_OSCILLATOR
+		config SYSCLK_DIV_1
+			bool "Sysclk div 1"
+		config SYSCLK_DIV_2
+			bool "Sysclk div 2"
+		config SYSCLK_DIV_4
+			bool "Sysclk div 4"
+		config SYSCLK_DIV_8
+			bool "Sysclk div 8"
+		config SYSCLK_DIV_16
+			bool "Sysclk div 16"
+		config SYSCLK_DIV_64
+			bool "Sysclk div 64"
+		config SYSCLK_DIV_128
+			bool "Sysclk div 128"
+		config SYSCLK_DIV_256
+			bool "Sysclk div 256"
+		config SYSCLK_DIV_512
+			bool "Sysclk div 512"
+	endchoice
+	choice
+		prompt "Low Speed APB clock (APB1 Clock) Div"
+		depends on EXTERNEL_OSCILLATOR
+		config PCLK1_DIV_2
+			bool "APB1 Clock Div 2"
+		config PCLK1_DIV_4
+			bool "APB1 Clock Div 4"
+		config PCLK1_DIV_8
+			bool "APB1 Clock Div 8"
+		config PCLK1_DIV_16
+			bool "APB1 Clock Div 16"
+		config PCLK1_DIV_1
+			bool "APB1 Clock Div 1 (Warring see max Speed)"
+	endchoice
+	choice
+		prompt "High Speed APB clock (APB2 Clock) Div"
+		depends on EXTERNEL_OSCILLATOR
+		config PCLK2_DIV_1
+			bool "APB2 Clock Div 1"
+		config PCLK2_DIV_2
+			bool "APB2 Clock Div 2"
+		config PCLK2_DIV_4
+			bool "APB2 Clock Div 4"
+		config PCLK2_DIV_8
+			bool "APB2 Clock Div 8"
+		config PCLK2_DIV_16
+			bool "APB2 Clock Div 16"
+	endchoice
+comment "Periphery Setting"
+config STM32_MUX
+	bool
+	default y
+	select GPIO
+	help
+		GPIO is needet for muxing
+menuconfig STM32_UART
+	bool "UART Driver"
+	default y
+	depends on UART
+	select UART_GENERIC_STRING
+	select UART_GENERIC_BYTE
+	help
+		UART Driver
+	config STM32_UART_1
+		bool "Activate UART 1"
+		depends on STM32_UART
+		help
+			Activate UART 1
+	menuconfig STM32_UART_2
+		bool "Activate UART 2"
+		depends on STM32_UART
+		help
+			Activate UART 2
+		choice
+			prompt "TX Pin"
+			depends on STM32_UART_2
+			config STM32_UART_2_PTA2
+				bool "TX on PTA2"
+				help
+					TX on PTA2
+			config STM32_UART_2_PTD5
+				bool "TX on PTD5"
+				help
+					TX on PTD5
+		endchoice
+		choice
+			prompt "RX Pin"
+			depends on STM32_UART_2
+			config STM32_UART_2_PTA3
+				bool "RX on PTA3"
+				help
+					RX on PTA3
+			config STM32_UART_2_PTD6
+				bool "RX on PTD6"
+				help
+					RX on PTD6
+		endchoice
+	config STM32_UART_3
+		bool "Activate UART 3"
+		depends on STM32_UART
+		depends on !STM32F401xx
+		help
+			Activate UART 3
+	config STM32_UART_4
+		bool "Activate UART 4"
+		depends on STM32_UART
+		depends on !STM32F401xx
+		help
+			Activate UART 4
+	config STM32_UART_5
+		bool "Activate UART 5"
+		depends on STM32_UART
+		depends on !STM32F401xx
+		help
+			Activate UART 5
+	config STM32_UART_6
+		bool "Activate UART 6"
+		depends on STM32_UART
+		help
+			Activate UART 6
+	config STM32_UART_7
+		bool "Activate UART 7"
+		depends on STM32_UART
+		depends on !STM32F401xx
+		help
+			Activate UART 7
+	config STM32_UART_8
+		bool "Activate UART 8"
+		depends on STM32_UART
+		depends on !STM32F401xx
+		help
+			Activate UART 8
+menuconfig STM32_TIMER
+	bool "Timer Driver"
+	default n
+	depends on TIMER
+	help
+		Timer Driver
+	config STM32_TIM1
+		bool "Activate TIM 1"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F446xx || STM32F469_479xx
+		help 
+			Activate TIM 1
+	config STM32_TIM2
+		bool "Activate TIM 2"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 2
+	config STM32_TIM3
+		bool "Activate TIM 3"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 3
+	config STM32_TIM4
+		bool "Activate TIM 4"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 4
+	config STM32_TIM5
+		bool "Activate TIM 5"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 5
+	config STM32_TIM6
+		bool "Activate TIM 6"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 6
+	config STM32_TIM7
+		bool "Activate TIM 7"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 7
+	config STM32_TIM8
+		bool "Activate TIM 8"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 8
+	config STM32_TIM9
+		bool "Activate TIM 9"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 9
+	config STM32_TIM10
+		bool "Activate TIM 10"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 10
+	config STM32_TIM11
+		bool "Activate TIM 11"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 11
+	config STM32_TIM12
+		bool "Activate TIM 12"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
+		help 
+		help 
+			Activate TIM 12
+	config STM32_TIM13
+		bool "Activate TIM 13"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
+		help 
+		help 
+			Activate TIM 13
+	config STM32_TIM14
+		bool "Activate TIM 14"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
+		help 
+		help 
+			Activate TIM 14

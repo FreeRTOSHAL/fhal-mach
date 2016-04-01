@@ -56,6 +56,38 @@
 #ifdef __cplusplus
  extern "C" {
 #endif /* __cplusplus */
+
+#ifdef CONFIG_STM32F40_41xxx 
+# define STM32F40_41xxx
+#endif
+#ifdef CONFIG_STM32F427_437xx
+# define STM32F427_437xx
+#endif
+#ifdef CONFIG_STM32F429_439xx
+# define STM32F429_439xx
+#endif
+#ifdef CONFIG_STM32F401xx
+# define STM32F401xx
+#endif
+#ifdef CONFIG_STM32F410xx
+# define STM32F410xx
+#endif
+#ifdef CONFIG_STM32F411xE
+# define STM32F411xE
+#endif
+#ifdef CONFIG_STM32F446xx
+# define STM32F446xx
+#endif
+#ifdef CONFIG_STM32F469_479xx
+# define STM32F469_479xx
+#endif
+#ifdef CONFIG_USE_HSE_BYPASS
+# define USE_HSE_BYPASS
+#endif
+#ifdef CONFIG_HSE_HZ
+# define HSE_VALUE    ((uint32_t) CONFIG_HSE_HZ)
+#endif
+#define assert_param(expr) ((void)0)
   
 /** @addtogroup Library_configuration_section
   * @{

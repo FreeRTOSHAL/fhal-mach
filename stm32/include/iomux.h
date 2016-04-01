@@ -1,61 +1,28 @@
 #ifndef IOMUX_H_
 #define IOMUX_H_
-#define MODE0 0x0
-#define MODE1 0x1
-#define MODE2 0x2
-#define MODE3 0x3
-#define MODE4 0x4
-#define MODE5 0x5
-#define MODE6 0x6
-#define MODE7 0x7
-#define PAD_CTL_MODE(mode) 		(mode << 20)
-#define PAD_CTL_SPEED_LOW               (1 << 12)
-#define PAD_CTL_SPEED_MED               (2 << 12)
-#define PAD_CTL_SPEED_HIGH              (3 << 12)
-#define PAD_CTL_SRE_FAST                (1 << 11)
-#define PAD_CTL_SRE_SLOW                (0 << 11)
-#define PAD_CTL_ODE                     (1 << 10)
-#define PAD_CTL_HYS                     (1 << 9)
-#define PAD_CTL_DSE_DISABLE             (0 << 6)
-#define PAD_CTL_DSE_150ohm              (1 << 6)
-#define PAD_CTL_DSE_75ohm               (2 << 6)
-#define PAD_CTL_DSE_50ohm               (3 << 6)
-#define PAD_CTL_DSE_37ohm               (4 << 6)
-#define PAD_CTL_DSE_30ohm               (5 << 6)
-#define PAD_CTL_DSE_25ohm               (6 << 6)
-#define PAD_CTL_DSE_20ohm               (7 << 6)
-#define PAD_CTL_PUS_100K_DOWN           (0 << 4)
-#define PAD_CTL_PUS_47K_UP              (1 << 4)
-#define PAD_CTL_PUS_100K_UP             (2 << 4)
-#define PAD_CTL_PUS_22K_UP              (3 << 4)
-#define PAD_CTL_PKE                     (1 << 3)
-#define PAD_CTL_PUE                     (1 << 2)
-#define PAD_CTL_OBE_ENABLE              (1 << 1)
-#define PAD_CTL_IBE_ENABLE              (1 << 0)
-#define PAD_CTL_OBE_IBE_ENABLE          (3 << 0)
+
+#define IO_IN_MODE BIT(0)
+#define IO_OUT_MODE BIT(1)
+#define IO_AF_MODE BIT(2)
+#define IO_AN_MODE BIT(3)
+
 enum pins{
+	PTA0,
+	PTA1,
+	PTA2,
+	PTA3,
+	PTA4,
+	PTA5,
 	PTA6,
+	PTA7,
 	PTA8,
 	PTA9,
 	PTA10,
 	PTA11,
 	PTA12,
-	PTA16,
-	PTA17,
-	PTA18,
-	PTA19,
-	PTA20,
-	PTA21,
-	PTA22,
-	PTA23,
-	PTA24,
-	PTA25,
-	PTA26,
-	PTA27,
-	PTA28,
-	PTA29,
-	PTA30,
-	PTA31,
+	PTA13,
+	PTA14,
+	PTA15,
 	PTB0,
 	PTB1,
 	PTB2,
@@ -72,13 +39,6 @@ enum pins{
 	PTB13,
 	PTB14,
 	PTB15,
-	PTB16,
-	PTB17,
-	PTB18,
-	PTB19,
-	PTB20,
-	PTB21,
-	PTB22,
 	PTC0,
 	PTC1,
 	PTC2,
@@ -95,24 +55,6 @@ enum pins{
 	PTC13,
 	PTC14,
 	PTC15,
-	PTC16,
-	PTC17,
-	PTD31,
-	PTD30,
-	PTD29,
-	PTD28,
-	PTD27,
-	PTD26,
-	PTD25,
-	PTD24,
-	PTD23,
-	PTD22,
-	PTD21,
-	PTD20,
-	PTD19,
-	PTD18,
-	PTD17,
-	PTD16,
 	PTD0,
 	PTD1,
 	PTD2,
@@ -127,18 +69,8 @@ enum pins{
 	PTD11,
 	PTD12,
 	PTD13,
-	PTB23,
-	PTB24,
-	PTB25,
-	PTB26,
-	PTB27,
-	PTB28,
-	PTC26,
-	PTC27,
-	PTC28,
-	PTC29,
-	PTC30,
-	PTC31,
+	PTD14,
+	PTD15,
 	PTE0,
 	PTE1,
 	PTE2,
@@ -155,19 +87,54 @@ enum pins{
 	PTE13,
 	PTE14,
 	PTE15,
-	PTE16,
-	PTE17,
-	PTE18,
-	PTE19,
-	PTE20,
-	PTE21,
-	PTE22,
-	PTE23,
-	PTE24,
-	PTE25,
-	PTE26,
-	PTE27,
-	PTE28,
-	PTA7,
+	PTF0,
+	PTF1,
+	PTF2,
+	PTF3,
+	PTF4,
+	PTF5,
+	PTF6,
+	PTF7,
+	PTF8,
+	PTF9,
+	PTF10,
+	PTF11,
+	PTF12,
+	PTF13,
+	PTF14,
+	PTF15,
+	PTG0,
+	PTG1,
+	PTG2,
+	PTG3,
+	PTG4,
+	PTG5,
+	PTG6,
+	PTG7,
+	PTG8,
+	PTG9,
+	PTG10,
+	PTG11,
+	PTG12,
+	PTG13,
+	PTG14,
+	PTG15,
+	PTH0,
+	PTH1,
+	PTH2,
+	PTH3,
+	PTH4,
+	PTH5,
+	PTH6,
+	PTH7,
+	PTH8,
+	PTH9,
+	PTH10,
+	PTH11,
+	PTH12,
+	PTH13,
+	PTH14,
+	PTH15,
+	GPIO_COUNT,
 };
 #endif
