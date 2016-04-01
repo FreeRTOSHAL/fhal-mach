@@ -80,7 +80,18 @@ GPIO_DEINIT(stm32, g) {
 GPIO_PIN_INIT(stm32, g, pin, dir, setting) {
 	struct gpio_pin *gpio_pin;
 	if (g->pins[pin >> 4][pin & 15] != NULL) {
-		return g->pins[pin >> 4][pin & 15];
+		/* Already exists */
+		gpio_pin = g->pins[pin >> 4][pin & 15];
+		/* Setup pin */
+		ret = gpioPin_setSetting(gpio_pin, setting);
+		if (ret < 0) {
+			return NULL;
+		}
+		ret = gpioPin_setDirection(gpio_pin, dir);
+		if (ret < 0) {
+			return NULL;
+		}
+		return gpio_pin;
 	}
 	gpio_pin = pvPortMalloc(sizeof(struct gpio_pin));
 	if (gpio_pin == NULL) {

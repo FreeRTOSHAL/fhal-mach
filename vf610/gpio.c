@@ -224,7 +224,22 @@ GPIO_PIN_SCHMITT_TRIGGER(vf, pin, schmitt) {
 }
 GPIO_PIN_INIT(vf, g, pin, dir, setting) {
 	int32_t ret;
-	struct gpio_pin *gpio_pin= pvPortMalloc(sizeof(struct gpio_pin));
+	struct gpio_pin *gpio_pin;
+	if (g->pins[pin >> 5][pin & 31]) {
+		/* Already exists */
+		gpio_pin = g->pins[pin >> 5][pin & 31];
+		/* Setup pin */
+		ret = gpioPin_setSetting(gpio_pin, setting);
+		if (ret < 0) {
+			return NULL;
+		}
+		ret = gpioPin_setDirection(gpio_pin, dir);
+		if (ret < 0) {
+			return NULL;
+		}
+		return gpio_pin;
+	}
+	gpio_pin = pvPortMalloc(sizeof(struct gpio_pin));
 	if (gpio_pin == NULL) {
 		goto gpio_getPin_error0;
 	}
@@ -260,6 +275,7 @@ GPIO_PIN_DEINIT(vf, pin) {
 		pin->callback = NULL;
 		pin->data = NULL;
 	}
+	g->pins[gpio_pin->bank][gpio_pin->pin] = NULL;
 	vPortFree(pin);
 	return 0; /* TODO */
 }
