@@ -90,7 +90,7 @@ UART_PUTC_ISR(stm32, uart, c) {
 
 UART_OPS(stm32);
 #ifdef CONFIG_STM32_UART_1
-struct uart uart1 = {
+struct uart stm32_uart1 = {
 	UART_INIT_DEV(stm32)
 	HAL_NAME("UART 1")
 	.base = USART1,
@@ -105,10 +105,10 @@ struct uart uart1 = {
 		.ctl = MUX_CTL_PULL_UP | MUX_CTL_MODE(7),
 	},
 };
-UART_ADDDEV(stm32, uart1);
+UART_ADDDEV(stm32, stm32_uart1);
 #endif
 #ifdef CONFIG_STM32_UART_2
-struct uart uart2 = {
+struct uart stm32_uart2 = {
 	UART_INIT_DEV(stm32)
 	HAL_NAME("UART 2")
 	.base = USART2,
@@ -141,10 +141,10 @@ struct uart uart2 = {
 #endif
 	},
 };
-UART_ADDDEV(stm32, uart2);
+UART_ADDDEV(stm32, stm32_uart2);
 #endif
 #ifdef CONFIG_STM32_UART_3
-struct uart uart3 = {
+struct uart stm32_uart3 = {
 	UART_INIT_DEV(stm32)
 	HAL_NAME("UART 3")
 	.base = USART3,
@@ -152,10 +152,10 @@ struct uart uart3 = {
 	.RCC_APBxPeriphClockCmd = RCC_APB1PeriphClockCmd,
 	/* TODO */
 };
-UART_ADDDEV(stm32, uart3);
+UART_ADDDEV(stm32, stm32_uart3);
 #endif
 #ifdef CONFIG_STM32_UART_4
-struct uart uart4 = {
+struct uart stm32_uart4 = {
 	UART_INIT_DEV(stm32)
 	HAL_NAME("UART 4")
 	.base = USART3,
@@ -163,20 +163,20 @@ struct uart uart4 = {
 	.clock = RCC_APB1Periph_UART4,
 	.RCC_APBxPeriphClockCmd = RCC_APB1PeriphClockCmd,
 };
-UART_ADDDEV(stm32, uart4);
+UART_ADDDEV(stm32, stm32_uart4);
 #endif
 #ifdef CONFIG_STM32_UART_5
-struct uart uart5 = {
+struct uart stm32_uart5 = {
 	UART_INIT_DEV(stm32)
 	HAL_NAME("UART 5")
 	.base = UART5,
 	.clock = RCC_APB1Periph_UART5,
 	.RCC_APBxPeriphClockCmd = RCC_APB1PeriphClockCmd,
 };
-UART_ADDDEV(stm32, uart5);
+UART_ADDDEV(stm32, stm32_uart5);
 #endif
 #ifdef CONFIG_STM32_UART_6
-struct uart uart6 = {
+struct uart stm32_uart6 = {
 	UART_INIT_DEV(stm32)
 	HAL_NAME("UART 6")
 	.base = USART6,
@@ -191,10 +191,10 @@ struct uart uart6 = {
 		.ctl = MUX_CTL_PULL_UP | MUX_CTL_MODE(8),
 	},
 };
-UART_ADDDEV(stm32, uart6);
+UART_ADDDEV(stm32, stm32_uart6);
 #endif
 #ifdef CONFIG_STM32_UART_7
-struct uart uart7 = {
+struct uart stm32_uart7 = {
 	UART_INIT_DEV(stm32)
 	HAL_NAME("UART 7")
 	.base = USART6,
@@ -202,15 +202,15 @@ struct uart uart7 = {
 	.clock = RCC_APB1Periph_UART7,
 	.RCC_APBxPeriphClockCmd = RCC_APB1PeriphClockCmd,
 };
-UART_ADDDEV(stm32, uart7);
+UART_ADDDEV(stm32, stm32_uart7);
 #endif
 #ifdef CONFIG_STM32_UART_8
-struct uart uart8 = {
+struct uart stm32_uart8 = {
 	UART_INIT_DEV(stm32)
 	HAL_NAME("UART 8")
 	.base = UART8,
 	.clock = RCC_APB1Periph_UART8,
 	.RCC_APBxPeriphClockCmd = RCC_APB1PeriphClockCmd,
 };
-UART_ADDDEV(stm32, uart8);
+UART_ADDDEV(stm32, stm32_uart8);
 #endif

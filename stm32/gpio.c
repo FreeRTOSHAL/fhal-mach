@@ -78,6 +78,7 @@ GPIO_DEINIT(stm32, g) {
 	return 0;
 }
 GPIO_PIN_INIT(stm32, g, pin, dir, setting) {
+	int32_t ret;
 	struct gpio_pin *gpio_pin;
 	if (g->pins[pin >> 4][pin & 15] != NULL) {
 		/* Already exists */

@@ -184,7 +184,7 @@ TIMER_GET_TIME(stm32, timer) {
 }
 TIMER_OPS(stm32);
 #ifdef CONFIG_STM32_TIM1
-static struct timer tim1 = {
+struct timer stm32_tim1 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 1")
 	.base = TIM1, 
@@ -196,11 +196,11 @@ static struct timer tim1 = {
 	.irqNr = TIM1_UP_TIM10_IRQn,
 # endif
 };
-TIMER_ADDDEV(stm32, tim1);
+TIMER_ADDDEV(stm32, stm32_tim1);
 /* Callback s. TIM10 */
 #endif
 #ifdef CONFIG_STM32_TIM2
-static struct timer tim2 = {
+struct timer stm32_tim2 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 2")
 	.base = TIM2,
@@ -209,13 +209,13 @@ static struct timer tim2 = {
 	.irqNr = TIM2_IRQn,
 	.maxCounter = UINT32_MAX,
 };
-TIMER_ADDDEV(stm32, tim2);
+TIMER_ADDDEV(stm32, stm32_tim2);
 void tim2_irqn(void) {
-	timer_interruptHandler(&tim2);
+	timer_interruptHandler(&stm32_tim2);
 }
 #endif
 #ifdef CONFIG_STM32_TIM3
-static struct timer tim3 = {
+struct timer stm32_tim3 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 3")
 	.base = TIM3,
@@ -224,13 +224,13 @@ static struct timer tim3 = {
 	.irqNr = TIM3_IRQn,
 	.maxCounter = UINT16_MAX,
 };
-TIMER_ADDDEV(stm32, tim3);
+TIMER_ADDDEV(stm32, stm32_tim3);
 void tim3_irqn(void) {
-	timer_interruptHandler(&tim3);
+	timer_interruptHandler(&stm32_tim3);
 }
 #endif
 #ifdef CONFIG_STM32_TIM4
-static struct timer tim4 = {
+struct timer stm32_tim4 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 4")
 	.base = TIM4,
@@ -239,13 +239,13 @@ static struct timer tim4 = {
 	.irqNr = TIM4_IRQn,
 	.maxCounter = UINT16_MAX,
 };
-TIMER_ADDDEV(stm32, tim4);
+TIMER_ADDDEV(stm32, stm32_tim4);
 void tim4_irqn(void) {
-	timer_interruptHandler(&tim4);
+	timer_interruptHandler(&stm32_tim4);
 }
 #endif
 #ifdef CONFIG_STM32_TIM3
-static struct timer tim5 = {
+struct timer stm32_tim5 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 5")
 	.base = TIM5,
@@ -254,13 +254,13 @@ static struct timer tim5 = {
 	.irqNr = TIM5_IRQn,
 	.maxCounter = UINT32_MAX,
 };
-TIMER_ADDDEV(stm32, tim5);
+TIMER_ADDDEV(stm32, stm32_tim5);
 void tim5_irqn(void) {
-	timer_interruptHandler(&tim5);
+	timer_interruptHandler(&stm32_tim5);
 }
 #endif
 #ifdef CONFIG_STM32_TIM6
-static struct timer tim6 = {
+struct timer stm32_tim6 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 6")
 	.base = TIM6,
@@ -269,13 +269,13 @@ static struct timer tim6 = {
 	.irqNr = TIM6_DAC_IRQn,
 	.maxCounter = UINT16_MAX,
 };
-TIMER_ADDDEV(stm32, tim6);
+TIMER_ADDDEV(stm32, stm32_tim6);
 void tim6_dac_irqn(void) {
-	timer_interruptHandler(&tim6);
+	timer_interruptHandler(&stm32_tim6);
 }
 #endif
 #ifdef CONFIG_STM32_TIM7
-static struct timer tim7 = {
+struct timer stm32_tim7 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 7")
 	.base = TIM7,
@@ -284,13 +284,13 @@ static struct timer tim7 = {
 	.irqNr = TIM7_IRQn,
 	.maxCounter = UINT16_MAX,
 };
-TIMER_ADDDEV(stm32, tim7);
+TIMER_ADDDEV(stm32, stm32_tim7);
 void tim7_irqn(void) {
-	timer_interruptHandler(&tim7);
+	timer_interruptHandler(&stm32_tim7);
 }
 #endif
 #ifdef CONFIG_STM32_TIM8
-static struct timer tim8 = {
+struct timer stm32_tim8 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 8")
 	.base = TIM8,
@@ -299,10 +299,10 @@ static struct timer tim8 = {
 	.irqNr = TIM8_UP_TIM13_IRQn
 	.maxCounter = UINT16_MAX,
 };
-TIMER_ADDDEV(stm32, tim8);
+TIMER_ADDDEV(stm32, stm32_tim8);
 #endif
 #ifdef CONFIG_STM32_TIM9
-static struct timer tim9 = {
+struct timer stm32_tim9 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 9")
 	.base = TIM9,
@@ -311,14 +311,14 @@ static struct timer tim9 = {
 	.irqNr = TIM1_BRK_TIM9_IRQn,
 	.maxCounter = UINT16_MAX,
 };
-TIMER_ADDDEV(stm32, tim9);
+TIMER_ADDDEV(stm32, stm32_tim9);
 /* shread with Timter 1 Break Interrupt(Break Interrupt not needet in this Driver and is disabled) */
 void tim1_brk_tim9_irqn(void) {
-	timer_interruptHandler(&tim9);
+	timer_interruptHandler(&stm32_tim9);
 }
 #endif
 #ifdef CONFIG_STM32_TIM10
-static struct timer tim10 = {
+struct timer stm32_tim10 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 10")
 	.base = TIM10,
@@ -327,7 +327,7 @@ static struct timer tim10 = {
 	.irqNr = TIM1_UP_TIM10_IRQn,
 	.maxCounter = UINT16_MAX,
 };
-TIMER_ADDDEV(stm32, tim10);
+TIMER_ADDDEV(stm32, stm32_tim10);
 #endif
 #if defined(CONFIG_STM32_TIM1) || defined(CONFIG_STM32_TIM10)
 /* Interrupt is shared between tim1 and tim10 */
@@ -337,15 +337,15 @@ void tim1_up_irqn(void) {
 void tim1_up_tim10_irqn(void) {
 #endif
 # ifdef CONFIG_STM32_TIM1
-	timer_interruptHandler(&tim1);
+	timer_interruptHandler(&stm32_tim1);
 # endif
 # ifdef CONFIG_STM32_TIM10
-	timer_interruptHandler(&tim10);
+	timer_interruptHandler(&stm32_tim10);
 # endif
 }
 #endif
 #ifdef CONFIG_STM32_TIM11
-static struct timer tim11 = {
+struct timer stm32_tim11 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 11")
 	.base = TIM11,
@@ -354,13 +354,13 @@ static struct timer tim11 = {
 	.irqNr = TIM1_TRG_COM_TIM11_IRQn ,
 	.maxCounter = UINT16_MAX,
 };
-TIMER_ADDDEV(stm32, tim11);
+TIMER_ADDDEV(stm32, stm32_tim11);
 void tim1_trg_com_tim11_irqn(void) {
-	timer_interruptHandler(&tim11);
+	timer_interruptHandler(&stm32_tim11);
 }
 #endif
 #ifdef CONFIG_STM32_TIM12
-static struct timer tim12 = {
+struct timer stm32_tim12 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 12")
 	.base = TIM12,
@@ -369,13 +369,13 @@ static struct timer tim12 = {
 	.irqNr = TIM8_BRK_TIM12_IRQn,
 	.maxCounter = UINT16_MAX,
 };
-TIMER_ADDDEV(stm32, tim12);
+TIMER_ADDDEV(stm32, stm32_tim12);
 void tim8_brk_tim12_irqn(void) {
-	timer_interruptHandler(&tim12);
+	timer_interruptHandler(&stm32_tim12);
 }
 #endif
 #ifdef CONFIG_STM32_TIM13
-static struct timer tim13 = {
+struct timer stm32_tim13 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 13")
 	.base = TIM13,
@@ -384,20 +384,20 @@ static struct timer tim13 = {
 	.irqNr = TIM8_UP_TIM13_IRQn,
 	.maxCounter = UINT16_MAX,
 };
-TIMER_ADDDEV(stm32, tim13);
+TIMER_ADDDEV(stm32, stm32_tim13);
 #endif
 #if defined(CONFIG_STM32_TIM8) || defined(CONFIG_STM32_TIM13)
 void tim8_up_tim13_irqn(void) {
 # ifdef CONFIG_STM32_TIM8
-	timer_interruptHandler(&tim8);
+	timer_interruptHandler(&stm32_tim8);
 # endif
 # ifdef CONFIG_STM32_TIM13
-	timer_interruptHandler(&tim13);
+	timer_interruptHandler(&stm32_tim13);
 # endif
 }
 #endif
 #ifdef CONFIG_STM32_TIM14
-static struct timer tim14 = {
+struct timer stm32_tim14 = {
 	TIMER_INIT_DEV(stm32)
 	HAL_NAME("Timer 14")
 	.base = TIM14,
@@ -406,8 +406,8 @@ static struct timer tim14 = {
 	.irqNr = TIM8_TRG_COM_TIM14_IRQn,
 	.maxCounter = UINT16_MAX,
 };
-TIMER_ADDDEV(stm32, tim14);
+TIMER_ADDDEV(stm32, stm32_tim14);
 void tim8_trg_com_tim14_irqn(void) {
-	timer_interruptHandler(&tim14);
+	timer_interruptHandler(&stm32_tim14);
 }
 #endif
