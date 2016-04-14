@@ -3,7 +3,7 @@
 #define GPIO_PRV
 #include <gpio_prv.h>
 #include <iomux.h>
-#include <stm32f4xx_gpio.h>
+#include <stm32fxxx.h>
 
 struct gpio {
 	struct gpio_generic gen;

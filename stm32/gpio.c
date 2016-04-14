@@ -4,11 +4,8 @@
 #define GPIO_PRV
 #include <gpio_prv.h>
 #include <irq.h>
-#include <stm32f4xx.h>
 #include "gpio_dev.h"
-#include <stm32f4xx_rcc.h>
-#include <stm32f4xx_exti.h>
-#include <stm32f4xx_syscfg.h>
+#include <stm32fxxx.h>
 
 struct gpio_pin {
 	struct gpio *gpio;
@@ -110,7 +107,7 @@ GPIO_PIN_INIT(stm32, g, pin, dir, setting) {
 
 	GPIO_StructInit(&gpio_pin->init);
 	gpio_pin->init.GPIO_Pin = gpio_pin->mask;
-	gpio_pin->init.GPIO_Speed = GPIO_High_Speed;
+	gpio_pin->init.GPIO_Speed = GPIO_Speed_100MHz;
 	gpio_pin->init.GPIO_OType = GPIO_OType_PP; 
 	switch(setting) {
 		case GPIO_OPEN:
@@ -302,8 +299,10 @@ struct gpio stm32_gpio = {
 		GPIOG,
 		GPIOH,
 		GPIOI,
+#ifdef CONFIG_STM32_F4
 		GPIOJ,
 		GPIOK,
+#endif
 	},
 	.exti = EXTI,
 };

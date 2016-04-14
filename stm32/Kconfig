@@ -1,23 +1,47 @@
 comment "Ti STM32 Settings"
-choice
-	prompt "Select Prozessor"
-	config STM32F40_41xxx
-		bool "STM32F40_41xxx"
-	config STM32F427_437xx
-		bool "STM32F427_437xx"
-	config STM32F429_439xx
-		bool "STM32F429_439xx"
-	config STM32F401xx
-		bool "STM32F401xx"
-	config STM32F410xx
-		bool "STM32F410xx"
-	config STM32F411xE
-		bool "STM32F411xE"
-	config STM32F446xx
-		bool "STM32F446xx"
-	config STM32F469_479xx
-		bool "STM32F469_479xx"
+choice 
+	prompt "Select Prozessor Type"
+	config STM32_F2
+		bool "STM32 F3xxxx"
+		depends on ARCH_ARM_CORTEX_M3
+	config STM32_F4
+		bool "STM32 F4xxxx"
+		depends on ARCH_ARM_CORTEX_M3 || ARCH_ARM_CORTEX_M4F
 endchoice
+if STM32_F2=y
+	choice
+		prompt "Select Prozessor"
+		config STM32F2XX
+			bool "STM32F2XX"
+	endchoice
+endif
+config SPARK_PHOTON
+	depends on STM32F2XX
+	bool "Spark Photon"
+	help
+		Spark Phton Support
+
+if STM32_F4=y
+	choice
+		prompt "Select Prozessor"
+		config STM32F40_41xxx
+			bool "STM32F40_41xxx"
+		config STM32F427_437xx
+			bool "STM32F427_437xx"
+		config STM32F429_439xx
+			bool "STM32F429_439xx"
+		config STM32F401xx
+			bool "STM32F401xx"
+		config STM32F410xx
+			bool "STM32F410xx"
+		config STM32F411xE
+			bool "STM32F411xE"
+		config STM32F446xx
+			bool "STM32F446xx"
+		config STM32F469_479xx
+			bool "STM32F469_479xx"
+	endchoice
+endif
 config SYSTICK_USE_EXTERNAL
 	bool "Systick Use External Source"
 	default n
@@ -65,9 +89,16 @@ config KERNEL_INTERRUPT_PRIORITY
 config MACH_LD_SCRIPT
 	string 
 	default "mach/stm32/stm32.lds"
-config MACH_INCLUDE
-	string
-	default "-Imach/stm32/include -Imach/stm32/st_periph_driver/include/"
+if STM32_F2=y
+	config MACH_INCLUDE
+		string
+		default "-Imach/stm32/include -Imach/stm32/st_periph_driver_f2/include/"
+endif
+if STM32_F4=y
+	config MACH_INCLUDE
+		string
+		default "-Imach/stm32/include -Imach/stm32/st_periph_driver_f4/include/"
+endif
 config MACH_DEFINE_HEAP
 	bool
 	default y
@@ -89,6 +120,12 @@ config MACH_HAS_NVIC
 	bool
 	default y
 config MACH_HAS_TIMER
+	bool
+	default y
+config MACH_HAS_SPI
+	bool
+	default y
+config MACH_HAS_SDIO
 	bool
 	default y
 comment "PLL Settings"
@@ -424,3 +461,15 @@ menuconfig STM32_TIMER
 		help 
 		help 
 			Activate TIM 14
+config STM32_DMA
+	bool 
+	default n
+	help
+		SDIO Driver
+config STM32_SDIO
+	bool "SDIO Driver"
+	default n
+	depends on SD
+	select STM32_DMA
+	help
+		SDIO Driver

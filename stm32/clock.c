@@ -2,11 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <clock.h>
-//#include <system_stm32f4xx.h>
-#include <stm32f4xx.h> 
-#include <stm32f4xx_flash.h>
-#include <stm32f4xx_rcc.h>
-#include <stm32f4xx_pwr.h>
+#include <stm32fxxx.h> 
 #ifdef CONFIG_EXTERNEL_OSCILLATOR
 # define PLL_HSE_PLLN CONFIG_PLLN
 # define PLL_HSE_PLLM CONFIG_PLLM
@@ -97,14 +93,16 @@
 # else
 #  error "Flash Latency not seleced"
 # endif
-# if defined(CONFIG_VOS_SCALE_1)
-#  define HSE_PWR_VOS PWR_Regulator_Voltage_Scale1
-# elif defined(CONFIG_VOS_SCALE_2)
-#  define HSE_PWR_VOS PWR_Regulator_Voltage_Scale2
-# elif defined(CONFIG_VOS_SCALE_3)
-#  define HSE_PWR_VOS PWR_Regulator_Voltage_Scale3
-# else
-#  error "No VOS Setting is Selected"
+# ifdef CONFIG_STM32_F4
+#  if defined(CONFIG_VOS_SCALE_1)
+#   define HSE_PWR_VOS PWR_Regulator_Voltage_Scale1
+#  elif defined(CONFIG_VOS_SCALE_2)
+#   define HSE_PWR_VOS PWR_Regulator_Voltage_Scale2
+#  elif defined(CONFIG_VOS_SCALE_3)
+#   define HSE_PWR_VOS PWR_Regulator_Voltage_Scale3
+#  else
+#   error "No VOS Setting is Selected"
+#  endif
 # endif
 #endif
 #if defined(STM32F401xx)
@@ -118,6 +116,16 @@
 #define PLL_HSI_PCLK2_DIV RCC_HCLK_Div1
 #define HSI_FLASH_LATENCY FLASH_Latency_2  
 #define HSI_PWR_VOS PWR_Regulator_Voltage_Scale2
+#elif defined(STM32F2XX)
+/* HSI Setting Max Freq 120 MHz input 16MHz */
+#define PLL_HSI_PLLN 120
+#define PLL_HSI_PLLM 8
+#define PLL_HSI_PLLP 2
+#define PLL_HSI_PLLQ 5
+#define PLL_HSI_HCLK_DIV RCC_SYSCLK_Div1
+#define PLL_HSI_PCLK1_DIV RCC_HCLK_Div2
+#define PLL_HSI_PCLK2_DIV RCC_HCLK_Div2
+#define HSI_FLASH_LATENCY FLASH_Latency_4  
 #else
 /* TODO */
 # error "No PLL Settings for this prozesssor"
@@ -147,7 +155,9 @@ struct clock *clock_init() {
 #if defined(STM32F410xx) || defined(STM32F446xx) || defined(STM32F469_479xx)
 	uint32_t pllr;
 #endif /* STM32F410xx || STM32F446xx || STM32F469_479xx */
+#ifdef CONFIG_STM32_F4
 	uint32_t vos;
+#endif
 	uint32_t flashLatency;
 	uint32_t hclk;
 	uint32_t pclk1;
@@ -183,7 +193,9 @@ struct clock *clock_init() {
 #if defined(STM32F410xx) || defined(STM32F446xx) || defined(STM32F469_479xx)
 		pllr = PLL_HSI_PLLR;
 #endif /* STM32F410xx || STM32F446xx || STM32F469_479xx */
+#ifdef CONFIG_STM32_F4
 		vos = HSI_PWR_VOS;
+#endif
 		flashLatency = HSI_FLASH_LATENCY;
 		hclk = PLL_HSI_HCLK_DIV;
 		pclk1 = PLL_HSI_PCLK1_DIV;
@@ -208,7 +220,9 @@ struct clock *clock_init() {
 # if defined(STM32F410xx) || defined(STM32F446xx) || defined(STM32F469_479xx)
 				pllr = PLL_HSE_PLLR;
 # endif /* STM32F410xx || STM32F446xx || STM32F469_479xx */
+# ifdef CONFIG_STM32_F4
 				vos = HSE_PWR_VOS;
+# endif
 				flashLatency = HSE_FLASH_LATENCY;
 				hclk = PLL_HSE_HCLK_DIV;
 				pclk1 = PLL_HSE_PCLK1_DIV;
@@ -218,11 +232,13 @@ struct clock *clock_init() {
 #endif
 #if defined(STM32F410xx) || defined(STM32F446xx) || defined(STM32F469_479xx)
 		RCC_PLLConfig(RCC_PLLSource, pllm, plln, pllp, pllq, pllr);
-#elif defined(STM32F40_41xxx) || defined(STM32F427_437xx) || defined(STM32F429_439xx) || defined(STM32F401xx) || defined(STM32F411xE)
+#elif defined(STM32F40_41xxx) || defined(STM32F427_437xx) || defined(STM32F429_439xx) || defined(STM32F401xx) || defined(STM32F411xE) || defined(STM32F2XX)
 		RCC_PLLConfig(RCC_PLLSource, pllm, plln, pllp, pllq);
 #endif
+#ifdef CONFIG_STM32_F4
 		/* Setup Main Power Regulator Mode */
 		PWR_MainRegulatorModeConfig(vos);
+#endif
 		/* Flash prefetch, Instruction cache, Data cache and wait state Config */
 		FLASH_SetLatency(flashLatency);
 		FLASH_PrefetchBufferCmd(ENABLE);

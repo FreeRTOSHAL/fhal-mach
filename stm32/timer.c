@@ -4,8 +4,7 @@
 #define TIMER_PRV
 #include <timer_prv.h>
 #include <irq.h>
-#include <stm32f4xx_rcc.h>
-#include <stm32f4xx_tim.h>
+#include <stm32fxxx.h>
 enum timer_mode {
 	MODE_DISABLED,
 	MODE_ONESHOT,
@@ -195,6 +194,7 @@ struct timer stm32_tim1 = {
 # else
 	.irqNr = TIM1_UP_TIM10_IRQn,
 # endif
+	.maxCounter = UINT16_MAX,
 };
 TIMER_ADDDEV(stm32, stm32_tim1);
 /* Callback s. TIM10 */

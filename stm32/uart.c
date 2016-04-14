@@ -3,8 +3,7 @@
 #define UART_PRV
 #include <uart_prv.h>
 #include <vector.h>
-#include <stm32f4xx_rcc.h>
-#include <stm32f4xx_usart.h>
+#include <stm32fxxx.h>
 #include <mux.h>
 #include <iomux.h>
 struct pin {

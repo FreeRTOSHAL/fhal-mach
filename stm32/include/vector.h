@@ -11,7 +11,7 @@
 #define __Vendor_SysTickConfig    0
 
 
-#include <stm32f4xx.h>
+#include <stm32fxxx.h>
 
 typedef void (*vector_table_entry_t)(void);
 struct vector_table {

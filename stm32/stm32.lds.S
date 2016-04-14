@@ -3,9 +3,20 @@
 
 ENTRY(reset_handler)
 
+#if defined(CONFIG_STM32F401xx)
+# define FLASH_SIZE 512K
+# define SRAM_SIZE 94K
+#elif defined(CONFIG_STM32F2XX)
+# define FLASH_SIZE 1M
+# define SRAM_SIZE 128K
+#else
+/* TODO */
+# error "No Memmory Layout Settings for this prozesssor"
+#endif
+
 MEM_START
-	MEM_ADD(flash, 0x8000000, 512K)
-	MEM_ADD(sram,  0x20000000, 96K)
+	MEM_ADD(flash, 0x8000000, FLASH_SIZE)
+	MEM_ADD(sram,  0x20000000, SRAM_SIZE)
 MEM_STOP
 
 SECTIONS_START

@@ -71,5 +71,8 @@ HAL_DEFINE_GLOBAL_ARRAY(timer);
 #ifdef CONFIG_STM32_TIM14
 # define TIMER4_ID HAL_GET_ID(timer, stm32, stm32_tim14)
 #endif
-
+HAL_DEFINE_GLOBAL_ARRAY(sd);
+#ifdef CONFIG_STM32_SDIO
+# define SDIO_ID HAL_GET_ID(sd, stm32, stm32_sdio)
+#endif
 #endif
