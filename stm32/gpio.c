@@ -34,24 +34,42 @@ GPIO_INIT(stm32, index) {
 	if (ret > 0) {
 		return gpio;
 	}
+#ifdef CONFIG_STM32_F0
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOD, ENABLE);
+# if defined(CONFIG_STM32F072) || defined(CONFIG_STM32F091) 
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOE, ENABLE);
+# endif
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOF, ENABLE);
+	irq_setPrio(EXTI0_1_IRQn, 0xF);
+	irq_setPrio(EXTI2_3_IRQn, 0xF);
+	irq_setPrio(EXTI4_15_IRQn, 0xF);
+
+	irq_enable(EXTI0_1_IRQn);
+	irq_enable(EXTI2_3_IRQn);
+	irq_enable(EXTI4_15_IRQn);
+#else
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-#if !defined(CONFIG_STM32F401xx)
+# if !defined(CONFIG_STM32F401xx)
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG, ENABLE);
-#endif
+# endif
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOH, ENABLE);
-#if !defined(CONFIG_STM32F401xx)
+# if !defined(CONFIG_STM32F401xx)
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOI, ENABLE);
-# if defined(CONFIG_STM32F40_41xxx) || defined(CONFIG_STM32F427_437xx) || defined(CONFIG_STM32F429_439xx)
+#  if defined(CONFIG_STM32F40_41xxx) || defined(CONFIG_STM32F427_437xx) || defined(CONFIG_STM32F429_439xx)
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOJ, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOK, ENABLE);
+#  endif
 # endif
-#endif
 	irq_setPrio(EXTI0_IRQn, 0xF);
 	irq_setPrio(EXTI1_IRQn, 0xF);
 	irq_setPrio(EXTI2_IRQn, 0xF);
@@ -69,6 +87,7 @@ GPIO_INIT(stm32, index) {
 
 	irq_enable(EXTI9_5_IRQn);
 	irq_enable(EXTI15_10_IRQn);
+#endif
 	return gpio;
 }
 GPIO_DEINIT(stm32, g) {
@@ -107,7 +126,11 @@ GPIO_PIN_INIT(stm32, g, pin, dir, setting) {
 
 	GPIO_StructInit(&gpio_pin->init);
 	gpio_pin->init.GPIO_Pin = gpio_pin->mask;
+#ifdef CONFIG_STM32_F0
+	gpio_pin->init.GPIO_Speed = GPIO_Speed_Level_3;
+#else
 	gpio_pin->init.GPIO_Speed = GPIO_Speed_100MHz;
+#endif
 	gpio_pin->init.GPIO_OType = GPIO_OType_PP; 
 	switch(setting) {
 		case GPIO_OPEN:
@@ -167,7 +190,7 @@ GPIO_PIN_CLEAR_PIN(stm32, pin) {
 	return 0;
 }
 GPIO_PIN_TOGGLE_PIN(stm32, pin) {
-	GPIO_ToggleBits(pin->base, pin->mask);
+	/*GPIO_ToggleBits(pin->base, pin->mask);*/ /* TODO */
 	return 0;
 }
 GPIO_PIN_GET_VALUE(stm32, pin) {
@@ -296,12 +319,14 @@ struct gpio stm32_gpio = {
 		GPIOD,
 		GPIOE,
 		GPIOF,
+#ifndef CONFIG_STM32_F0
 		GPIOG,
 		GPIOH,
 		GPIOI,
-#ifdef CONFIG_STM32_F4
+# ifdef CONFIG_STM32_F4
 		GPIOJ,
 		GPIOK,
+# endif
 #endif
 	},
 	.exti = EXTI,
@@ -310,6 +335,17 @@ GPIO_ADDDEV(stm32, stm32_gpio);
 void exti0_irqn(void) {
 	gpio_interruptHandler(&stm32_gpio);
 }
+#ifdef CONFIG_STM32_F0
+void exti0_1_irqn(void) {
+	gpio_interruptHandler(&stm32_gpio);
+}
+void exti2_3_irqn(void) {
+	gpio_interruptHandler(&stm32_gpio);
+}
+void exti4_15_irqn(void) {
+	gpio_interruptHandler(&stm32_gpio);
+}
+#else
 void exti1_irqn(void) {
 	gpio_interruptHandler(&stm32_gpio);
 }
@@ -328,3 +364,4 @@ void exti9_5_irqn(void) {
 void exti15_10_irqn(void) {
 	gpio_interruptHandler(&stm32_gpio);
 }
+#endif

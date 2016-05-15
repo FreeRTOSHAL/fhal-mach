@@ -39,7 +39,11 @@ int32_t mux_pinctl(struct mux *mux, uint32_t pin, uint32_t ctl, uint32_t extra) 
 	GPIO_InitTypeDef init;
 	GPIO_StructInit(&init);
 	init.GPIO_Pin = mask;
+#ifdef CONFIG_STM32_F0
+	init.GPIO_Speed = GPIO_Speed_Level_3; /* TODO */
+#else
 	init.GPIO_Speed = GPIO_Speed_100MHz; /* TODO */
+#endif
 	init.GPIO_OType = GPIO_OType_PP; /* TODO */
 	if ((ctl & MUX_CTL_OPEN) != 0) {
 		init.GPIO_PuPd = GPIO_PuPd_NOPULL;

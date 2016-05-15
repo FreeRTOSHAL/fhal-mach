@@ -107,25 +107,36 @@
 #endif
 #if defined(STM32F401xx)
 /* HSI Setting Max Freq 84 MHz input 16MHz */
-#define PLL_HSI_PLLN 168
-#define PLL_HSI_PLLM 8
-#define PLL_HSI_PLLP 4
-#define PLL_HSI_PLLQ 7
-#define PLL_HSI_HCLK_DIV RCC_SYSCLK_Div1
-#define PLL_HSI_PCLK1_DIV RCC_HCLK_Div2
-#define PLL_HSI_PCLK2_DIV RCC_HCLK_Div1
-#define HSI_FLASH_LATENCY FLASH_Latency_2  
-#define HSI_PWR_VOS PWR_Regulator_Voltage_Scale2
+# define PLL_HSI_PLLN 168
+# define PLL_HSI_PLLM 8
+# define PLL_HSI_PLLP 4
+# define PLL_HSI_PLLQ 7
+# define PLL_HSI_HCLK_DIV RCC_SYSCLK_Div1
+# define PLL_HSI_PCLK1_DIV RCC_HCLK_Div2
+# define PLL_HSI_PCLK2_DIV RCC_HCLK_Div1
+# define HSI_FLASH_LATENCY FLASH_Latency_2  
+# define HSI_PWR_VOS PWR_Regulator_Voltage_Scale2
 #elif defined(STM32F2XX)
 /* HSI Setting Max Freq 120 MHz input 16MHz */
-#define PLL_HSI_PLLN 120
-#define PLL_HSI_PLLM 8
-#define PLL_HSI_PLLP 2
-#define PLL_HSI_PLLQ 5
-#define PLL_HSI_HCLK_DIV RCC_SYSCLK_Div1
-#define PLL_HSI_PCLK1_DIV RCC_HCLK_Div2
-#define PLL_HSI_PCLK2_DIV RCC_HCLK_Div2
-#define HSI_FLASH_LATENCY FLASH_Latency_4  
+# define PLL_HSI_PLLN 120
+# define PLL_HSI_PLLM 8
+# define PLL_HSI_PLLP 2
+# define PLL_HSI_PLLQ 5
+# define PLL_HSI_HCLK_DIV RCC_SYSCLK_Div1
+# define PLL_HSI_PCLK1_DIV RCC_HCLK_Div2
+# define PLL_HSI_PCLK2_DIV RCC_HCLK_Div4
+# define HSI_FLASH_LATENCY FLASH_Latency_4  
+#elif defined(STM32F40_41xxx)
+/* HSI Setting Max Freq 168 MHz input 16MHz */
+# define PLL_HSI_PLLN 168
+# define PLL_HSI_PLLM 8
+# define PLL_HSI_PLLP 2
+# define PLL_HSI_PLLQ 7
+# define PLL_HSI_HCLK_DIV RCC_SYSCLK_Div1
+# define PLL_HSI_PCLK1_DIV RCC_HCLK_Div2
+# define PLL_HSI_PCLK2_DIV RCC_HCLK_Div4
+# define HSI_FLASH_LATENCY FLASH_Latency_5  
+# define HSI_PWR_VOS PWR_Regulator_Voltage_Scale3
 #else
 /* TODO */
 # error "No PLL Settings for this prozesssor"

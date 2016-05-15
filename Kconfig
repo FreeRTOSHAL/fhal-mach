@@ -21,7 +21,7 @@ choice
 	config MACH_STM32
 		bool "Ti STM32"
 		depends on ARCH_ARM
-		depends on ARCH_ARM_CORTEX_M4F || ARCH_ARM_CORTEX_M3
+		depends on ARCH_ARM_CORTEX_M0 || ARCH_ARM_CORTEX_M4F || ARCH_ARM_CORTEX_M3
 		help
 			Ti STM32 Prozessor
 endchoice

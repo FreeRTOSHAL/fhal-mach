@@ -1,6 +1,9 @@
 comment "Ti STM32 Settings"
 choice 
 	prompt "Select Prozessor Type"
+	config STM32_F0
+		bool "STM32 F0xxx"
+		depends on ARCH_ARM_CORTEX_M0
 	config STM32_F2
 		bool "STM32 F3xxxx"
 		depends on ARCH_ARM_CORTEX_M3
@@ -8,6 +11,29 @@ choice
 		bool "STM32 F4xxxx"
 		depends on ARCH_ARM_CORTEX_M3 || ARCH_ARM_CORTEX_M4F
 endchoice
+if STM32_F0=y
+	choice
+		prompt "Select Prozessor"
+		config STM32F030
+			bool "STM32F030"
+		config STM32F031
+			bool "STM32F031"
+		config STM32F051
+			bool "STM32F051"
+		config STM32F072
+			bool "STM32F072"
+		config STM32F070xB
+			bool "STM32F070xB"
+		config STM32F042
+			bool "STM32F042"
+		config STM32F070x6
+			bool "STM32F070x6"
+		config STM32F091
+			bool "STM32F091"
+		config STM32F030xC
+			bool "STM32F030xC"
+	endchoice
+endif
 if STM32_F2=y
 	choice
 		prompt "Select Prozessor"
@@ -42,6 +68,85 @@ if STM32_F4=y
 			bool "STM32F469_479xx"
 	endchoice
 endif
+choice
+	prompt "Flash Size"
+	config STM32_8K
+		bool "8K Flash"
+	config STM32_16K
+		bool "16K Flash"
+	config STM32_32K
+		bool "32K Flash"
+	config STM32_64K
+		bool "64K Flash"
+	config STM32_128K
+		bool "128K Flash"
+		depends on STM32F401xx || STM32F2XX
+	config STM32_192K
+		bool "192K Flash"
+	config STM32_256K
+		bool "256K Flash"
+		depends on STM32F401xx || STM32F2XX
+	config STM32_384K
+		bool "384K Flash"
+		depends on STM32F401xx
+	config STM32_512K
+		bool "512K Flash"
+		depends on STM32F401xx || STM32F2XX || STM32F40_41xxx
+	config STM32_768K
+		bool "768K Flash"
+		depends on STM32F2XX
+	config STM32_1M
+		bool "1M Flash"
+		depends on STM32F2XX || STM32F40_41xxx
+	config STM32_2M
+		bool "2M Flash"
+endchoice
+choice
+	prompt "RAM Size"
+	config STM32_RAM_2K
+		bool "2K RAM"
+	config STM32_RAM_4K
+		bool "4K RAM"
+	config STM32_RAM_6K
+		bool "6K RAM"
+	config STM32_RAM_8K
+		bool "8K RAM"
+	config STM32_RAM_10K
+		bool "10K RAM"
+	config STM32_RAM_16K
+		bool "16K RAM"
+	config STM32_RAM_20K
+		bool "20K RAM"
+	config STM32_RAM_24K
+		bool "24K RAM"
+	config STM32_RAM_32K
+		bool "32K RAM"
+	config STM32_RAM_40K
+		bool "40K RAM"
+	config STM32_RAM_48K
+		bool "48K RAM"
+	config STM32_RAM_64K
+		bool "64K RAM"
+		depends on STM32F401xx || STM32F2XX
+	config STM32_RAM_80K
+		bool "80K RAM"
+	config STM32_RAM_96K
+		bool "96K RAM"
+		depends on STM32F401xx || STM32F2XX
+	config STM32_RAM_128K
+		bool "128K RAM"
+		depends on STM32F2XX || STM32F40_41xxx
+	config STM32_RAM_192K
+		bool "192K RAM"
+	config STM32_RAM_256K
+		bool "256K RAM"
+	config STM32_RAM_320K
+		bool "320K RAM"
+	config STM32_RAM_384K
+		bool "384K RAM"
+	config STM32_RAM_512K
+		bool "512K RAM"
+endchoice
 config SYSTICK_USE_EXTERNAL
 	bool "Systick Use External Source"
 	default n
@@ -89,6 +194,11 @@ config KERNEL_INTERRUPT_PRIORITY
 config MACH_LD_SCRIPT
 	string 
 	default "mach/stm32/stm32.lds"
+if STM32_F0=y
+	config MACH_INCLUDE
+		string
+		default "-Imach/stm32/include -Imach/stm32/st_periph_driver_f0/include/"
+endif
 if STM32_F2=y
 	config MACH_INCLUDE
 		string
@@ -102,6 +212,17 @@ endif
 config MACH_DEFINE_HEAP
 	bool
 	default y
+if STM32_F2=y || STM32_F4=y
+config STM32_CLOCK_BIG
+	bool
+	default y
+endif
+if STM32_F0=y
+config STM32_CLOCK_SMALL
+	bool
+	default y
+endif
+
 config MACH_INIT_STACK_SIZE
 	int "Init Stack Size"
 	default 600
@@ -127,10 +248,12 @@ config MACH_HAS_SPI
 	default y
 config MACH_HAS_SDIO
 	bool
+	depends on !STM32_F0
 	default y
 comment "PLL Settings"
 menuconfig EXTERNEL_OSCILLATOR
 	bool "Activate External Cristal Oscillator"
+	depends on !STM32_F0
 	comment "PLL Settings"
 		depends on EXTERNEL_OSCILLATOR
 	comment "Waring: PLL Setting could damage Target" 
@@ -293,6 +416,7 @@ menuconfig STM32_UART
 	menuconfig STM32_UART_2
 		bool "Activate UART 2"
 		depends on STM32_UART
+		depends on !STM32F031
 		help
 			Activate UART 2
 		choice
@@ -323,35 +447,81 @@ menuconfig STM32_UART
 		bool "Activate UART 3"
 		depends on STM32_UART
 		depends on !STM32F401xx
+		depends on !STM32F051
+		depends on !STM32F031
+		depends on !STM32F030
+		depends on !STM32F042
+		depends on !STM32F070x6
 		help
 			Activate UART 3
 	config STM32_UART_4
 		bool "Activate UART 4"
 		depends on STM32_UART
 		depends on !STM32F401xx
+		depends on !STM32F051
+		depends on !STM32F031
+		depends on !STM32F030
+		depends on !STM32F042
+		depends on !STM32F091
+		depends on !STM32F070x6
+		depends on !STM32F030xC
 		help
 			Activate UART 4
 	config STM32_UART_5
 		bool "Activate UART 5"
 		depends on STM32_UART
 		depends on !STM32F401xx
+		depends on !STM32F051
+		depends on !STM32F031
+		depends on !STM32F030
+		depends on !STM32F072
+		depends on !STM32F042
+		depends on !STM32F091
+		depends on !STM32F070xB
+		depends on !STM32F070x6
+		depends on !STM32F030xC
 		help
 			Activate UART 5
 	config STM32_UART_6
 		bool "Activate UART 6"
 		depends on STM32_UART
+		depends on !STM32F051
+		depends on !STM32F031
+		depends on !STM32F030
+		depends on !STM32F072
+		depends on !STM32F042
+		depends on !STM32F091
+		depends on !STM32F070xB
+		depends on !STM32F070x6
 		help
 			Activate UART 6
 	config STM32_UART_7
 		bool "Activate UART 7"
 		depends on STM32_UART
 		depends on !STM32F401xx
+		depends on !STM32F051
+		depends on !STM32F031
+		depends on !STM32F030
+		depends on !STM32F072
+		depends on !STM32F042
+		depends on !STM32F091
+		depends on !STM32F070xB
+		depends on !STM32F070x6
+		depends on !STM32F030xC
 		help
 			Activate UART 7
 	config STM32_UART_8
 		bool "Activate UART 8"
 		depends on STM32_UART
 		depends on !STM32F401xx
+		depends on !STM32F051
+		depends on !STM32F031
+		depends on !STM32F030
+		depends on !STM32F072
+		depends on !STM32F042
+		depends on !STM32F070xB
+		depends on !STM32F070x6
+		depends on !STM32F030xC
 		help
 			Activate UART 8
 menuconfig STM32_TIMER
@@ -364,21 +534,21 @@ menuconfig STM32_TIMER
 		bool "Activate TIM 1"
 		default n
 		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F446xx || STM32F469_479xx
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F446xx || STM32F469_479xx || STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
 		help 
 			Activate TIM 1
 	config STM32_TIM2
 		bool "Activate TIM 2"
 		default n
 		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx || STM32F051 || STM32F031 || STM32F072 || STM32F042 || STM32F091
 		help 
 			Activate TIM 2
 	config STM32_TIM3
 		bool "Activate TIM 3"
 		default n
 		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx || STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
 		help 
 			Activate TIM 3
 	config STM32_TIM4
@@ -399,14 +569,14 @@ menuconfig STM32_TIMER
 		bool "Activate TIM 6"
 		default n
 		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F469_479xx || STM32F446xx
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F469_479xx || STM32F446xx || STM32F051 || STM32F072 || STM32F091 || STM32F070xB || STM32F030xC
 		help 
 			Activate TIM 6
 	config STM32_TIM7
 		bool "Activate TIM 7"
 		default n
 		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx || STM32F072 || STM32F091 || STM32F070xB || STM32F030xC
 		help 
 			Activate TIM 7
 	config STM32_TIM8
@@ -443,7 +613,6 @@ menuconfig STM32_TIMER
 		depends on STM32_TIMER
 		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
 		help 
-		help 
 			Activate TIM 12
 	config STM32_TIM13
 		bool "Activate TIM 13"
@@ -451,16 +620,35 @@ menuconfig STM32_TIMER
 		depends on STM32_TIMER
 		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
 		help 
-		help 
 			Activate TIM 13
 	config STM32_TIM14
 		bool "Activate TIM 14"
 		default n
 		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
-		help 
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx || STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
 		help 
 			Activate TIM 14
+	config STM32_TIM15
+		bool "Activate TIM 15"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F051 || STM32F030 || STM32F072 || STM32F091 || STM32F070xB || STM32F030xC
+		help 
+			Activate TIM 15
+	config STM32_TIM16
+		bool "Activate TIM 16"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
+		help 
+			Activate TIM 16
+	config STM32_TIM17
+		bool "Activate TIM 17"
+		default n
+		depends on STM32_TIMER
+		depends on STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
+		help 
+			Activate TIM 17
 config STM32_DMA
 	bool 
 	default n

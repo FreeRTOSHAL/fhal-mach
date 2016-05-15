@@ -1,9 +1,13 @@
+obj-$(CONFIG_STM32_F0) += st_periph_driver_f0/
 obj-$(CONFIG_STM32_F2) += st_periph_driver_f2/
 obj-$(CONFIG_STM32_F4) += st_periph_driver_f4/
 obj-$(CONFIG_STM32_UART) += uart.o
 obj-$(CONFIG_STM32_TIMER) += timer.o
+obj-$(CONFIG_STM32_TIMER_M0) += timer_dev_m0.o
+obj-$(CONFIG_STM32_TIMER_M3_4) += timer_dev.o
 obj-$(CONFIG_STM32_SDIO) += sdio.o
-obj-y += clock.o
+obj-$(CONFIG_STM32_CLOCK_BIG) += clock.o vector.o
+obj-$(CONFIG_STM32_CLOCK_SMALL) += clock_m0.o vector_m0.o
 obj-y += gpio.o mux.o
 obj-y += sysinit.o
 extra-y += stm32.lds

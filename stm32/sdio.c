@@ -23,6 +23,7 @@ struct sd {
 	struct sd_pin pins[10];
 	SemaphoreHandle_t sem;
 	uint32_t status;
+	uint32_t dmaStatus;
 	uint32_t blockSize;
 	struct sd_setting settings;
 };
@@ -40,6 +41,15 @@ struct sd {
 			) \
 		) != 0x0 \
 	)
+#define CHECK_DMASTAT(x) ( \
+		( \
+			x & (\
+				DMA_FLAG_TEIF3 | \
+				DMA_FLAG_DMEIF3 \
+			) \
+		) != 0x0 \
+	)
+#define DMA_IT (DMA_IT_TC | DMA_IT_TE | DMA_IT_FE)
 
 #define CMD(x) (x)
 
@@ -53,7 +63,11 @@ void sdio_InterruptHandler(struct sd *sd) {
 	portYIELD_FROM_ISR(shouldYield);
 }
 void sdio_DMAInterruptHandler(struct sd *sd) {
+	//BaseType_t shouldYield = 0;
+	sd->dmaStatus = sd->dma->LISR;
 	DMA_ClearFlag(sd->dmaStream,  DMA_FLAG_TCIF3 | DMA_FLAG_HTIF3 | DMA_FLAG_TEIF3 | DMA_FLAG_DMEIF3 | DMA_FLAG_FEIF3);
+	//xSemaphoreGiveFromISR(sd->sem, &shouldYield);
+	//portYIELD_FROM_ISR(shouldYield);
 }
 
 uint8_t sdio_calcClock(struct sd *sd, uint64_t clk) {
@@ -202,7 +216,7 @@ static int32_t waitISR(struct sd *sd, uint32_t command, uint32_t mask, TickType_
 		/* Disable Interrupt */
 		SDIO_ITConfig(mask, DISABLE);
 	}
-	if (command == CMD(5)) {
+	if (command == CMD(5) || (sd->gen.selectACMD && command == ACMD(41))) {
 		/* ERATA 2.10.2: Wrong CCRCFAIL status after a response without CRC is received */ 
 		/* CCRCFAIL is normal here R5 has no CRC */
 		sd->status &= ~(SDIO_FLAG_CCRCFAIL);
@@ -253,7 +267,7 @@ static int32_t stm32_sd_send_command(struct sd *sd, uint32_t command, uint32_t a
 		}
 		/* Use Command response Callback */
 		/* Error Interrupt active in init Function */
-		if (command == CMD(5)) {
+		if (command == CMD(5) || (sd->gen.selectACMD && command == ACMD(41))) {
 			/* ERATA 2.10.2: Wrong CCRCFAIL status after a response without CRC is received */ 
 			/* CMDREND only set if CRC Check is ok so wait for CCRCFAIL */
 			isrMask = SDIO_IT_CMDREND | SDIO_IT_CCRCFAIL;
@@ -274,7 +288,7 @@ static int32_t stm32_sd_send_command(struct sd *sd, uint32_t command, uint32_t a
 	if (ret < 0) {
 		goto stm32_sdio_send_command_error0;
 	}
-	if (command == CMD(5)) {
+	if (command == CMD(5) || (sd->gen.selectACMD && command == ACMD(41))) {
 		/* ERATA 2.10.2: Wrong CCRCFAIL status after a response without CRC is received */ 
 		/* waitISR disabled all CRCRCFAIL Interrupts */
 		SDIO_ITConfig(SDIO_IT_CCRCFAIL, ENABLE);
@@ -362,7 +376,7 @@ static void prepareContoller(struct sd *sd, SDIO_DataInitTypeDef *cfg, size_t si
 		/* Peripheral is controlling DMA */
 		DMA_FlowControllerConfig(sd->dmaStream, DMA_FlowCtrl_Peripheral);
 		DMA_ClearFlag(sd->dmaStream,  DMA_FLAG_TCIF3 | DMA_FLAG_HTIF3 | DMA_FLAG_TEIF3 | DMA_FLAG_DMEIF3 | DMA_FLAG_FEIF3);
-		DMA_ITConfig(sd->dmaStream, DMA_IT_TC | DMA_IT_HT | DMA_IT_TE | DMA_IT_FE, ENABLE);
+		DMA_ITConfig(sd->dmaStream, DMA_IT, ENABLE);
 	}
 }
 
@@ -378,29 +392,38 @@ int32_t transverData(struct sd *sd, SDIO_DataInitTypeDef *cfg, uint32_t command,
 			goto sdio_transferData_error0;
 		}
 	}
-	ret = prepareWaitISR(sd, SDIO_IT_DBCKEND, inISR);
+	ret = prepareWaitISR(sd, SDIO_IT_DATAEND, inISR);
 	if (ret < 0) {
 		goto sdio_transferData_error0;
 	}
 	/* Configure Controller  */
 	SDIO_DataConfig(cfg);
+	DMA_Cmd(sd->dmaStream, ENABLE);
 	/* Enable DMA */
 	SDIO_DMACmd(ENABLE);
-	DMA_Cmd(sd->dmaStream, ENABLE);
-	ret = waitISR(sd, command, SDIO_IT_DBCKEND, waittime, inISR);
+	ret = waitISR(sd, command, SDIO_IT_DATAEND, waittime, inISR);
 	if (ret < 0) {
 		goto sdio_transferData_error1;
 	}
-	DMA_Cmd(sd->dmaStream, DISABLE);
+	/* Check DMA Status */
+	if (CHECK_DMASTAT(sd->dmaStatus)) {
+		goto sdio_transferData_error1;
+	}
 	SDIO_DMACmd(DISABLE);
-	DMA_ITConfig(sd->dmaStream, DMA_IT_TC | DMA_IT_HT | DMA_IT_TE | DMA_IT_FE, DISABLE);
+	DMA_Cmd(sd->dmaStream, DISABLE);
+	DMA_ITConfig(sd->dmaStream, DMA_IT, DISABLE);
 	DMA_DeInit(sd->dmaStream);
+	/* Clean Setup */
+	SDIO_DataStructInit(cfg);
+	SDIO_DataConfig(cfg);
 	return 0;
 sdio_transferData_error1:
 	SDIO_DMACmd(DISABLE);
 	DMA_Cmd(sd->dmaStream, DISABLE);
-	DMA_ITConfig(sd->dmaStream, DMA_IT_TC | DMA_IT_HT | DMA_IT_TE | DMA_IT_FE, DISABLE);
+	DMA_ITConfig(sd->dmaStream, DMA_IT, DISABLE);
 	DMA_DeInit(sd->dmaStream);
+	SDIO_DataStructInit(cfg);
+	SDIO_DataConfig(cfg);
 sdio_transferData_error0:
 	return ret;
 }

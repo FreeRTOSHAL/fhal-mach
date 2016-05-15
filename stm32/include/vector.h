@@ -7,7 +7,7 @@
 //#define __FPU_PRESENT             1
 //#define __FPU_USED                1
 //#define __MPU_PRESENT             0
-#define __NVIC_PRIO_BITS          4
+//#define __NVIC_PRIO_BITS          4
 #define __Vendor_SysTickConfig    0
 
 

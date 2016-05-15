@@ -303,13 +303,13 @@ const struct vector_table vector_table SECTION(".vectors") = {
 static void clearBss(volatile uint32_t *dst, volatile uint32_t *src) {
 	asm volatile(
 			"mov r5, #0" "\n"
-			"b reset_handler_clear_bss_cmp" "\n"
-		"reset_handler_clear_bss:" 
+			"b 2f" "\n"
+		"1:" 
 			"str r5, [%0, #0]" "\n"
 			"add %0, #4" "\n"
-		"reset_handler_clear_bss_cmp:" 
+		"2:" 
 			"cmp %0, %1" "\n"
-			"bcc reset_handler_clear_bss"
+			"bcc 1b"
 		:
 		: "r" (dst), "r" (src)
 		: "r5"
@@ -396,8 +396,8 @@ void NAKED reset_handler() {
 		len = (uint32_t)(*tableaddr++);
 		asm volatile(
 				"mov r5, #0" "\n"
-				"b reset_handler_load_data_cmp" "\n"
-			"reset_handler_load_data:"
+				"b 2f" "\n"
+			"1:"
 				/* Load form flash */
 				"ldr r6, [%1, #0]" "\n"
 				/* Store in RAM*/
@@ -405,9 +405,9 @@ void NAKED reset_handler() {
 				"add %2, #4" "\n"
 				"add %1, #4" "\n"
 				"add r5, #4" "\n"
-			"reset_handler_load_data_cmp:"
+			"2:"
 				"cmp r5, %0" "\n"
-				"bcc reset_handler_load_data" 
+				"bcc 1b" 
 			:
 			: "r" (len), "r" (src), "r" (dst)
 			: "r5", "r6"
@@ -438,13 +438,13 @@ void NAKED reset_handler() {
 			"orr r5, r6" "\n"
 			"lsl r5, r5, #8" "\n"
 			"orr r5, r6" "\n"
-			"b reset_handler_clear_stack_cmp" "\n"
-		"reset_handler_clear_stack:" 
+			"b 2f" "\n"
+		"1:" 
 			"str r5, [%0, #0]" "\n"
 			"add %0, #4" "\n"
-		"reset_handler_clear_stack_cmp:" 
+		"2:" 
 			"cmp sp, %0" "\n"
-			"bcc reset_handler_clear_stack"
+			"bcc 1b"
 		:
 		: "r" (dst)
 		: "r5", "r6"
@@ -473,10 +473,10 @@ __attribute__((naked)) void hard_fault_handler(void) {
                         "MOVS   R0, #4  \n"
                         "MOV    R1, LR  \n"
                         "TST    R0, R1  \n"
-                        "BEQ    _MSP    \n"
+                        "BEQ    1f    \n"
                         "MRS    R0, PSP \n"
                         "B      hard_fault_handlerC      \n"
-                "_MSP:  \n"
+                "1f:  \n"
                         "MRS    R0, MSP \n"
                         "B      hard_fault_handlerC      \n"
 	) ;
