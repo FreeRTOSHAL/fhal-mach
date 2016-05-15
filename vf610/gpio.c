@@ -275,7 +275,7 @@ GPIO_PIN_DEINIT(vf, pin) {
 		pin->callback = NULL;
 		pin->data = NULL;
 	}
-	g->pins[gpio_pin->bank][gpio_pin->pin] = NULL;
+	pin->gpio->pins[pin->bank][pin->pin] = NULL;
 	vPortFree(pin);
 	return 0; /* TODO */
 }
