@@ -476,7 +476,7 @@ __attribute__((naked)) void hard_fault_handler(void) {
                         "BEQ    1f    \n"
                         "MRS    R0, PSP \n"
                         "B      hard_fault_handlerC      \n"
-                "1f:  \n"
+                "1:  \n"
                         "MRS    R0, MSP \n"
                         "B      hard_fault_handlerC      \n"
 	) ;
