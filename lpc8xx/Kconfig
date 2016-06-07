@@ -1,0 +1,48 @@
+comment "VF610 Settings"
+config MACH_INIT_STACK_SIZE
+	int "Init Stack Size"
+	default 600
+	help
+		Stack Size of Init Prozess. Stack size used by Interrupt and Init Prozess
+
+config MACH_LD_SCRIPT
+	string 
+	default "mach/lpc8xx/lpc8xx.lds"
+
+config MACH_INCLUDE
+	string
+	default "-Imach/lpc8xx/include"
+config MACH_DEFINE_HEAP
+	bool
+	default y
+
+config LPC_PLL
+	bool "Use PLL"
+	default y
+config LPC_QUARZ
+	depends on LPC_PLL
+	int "Quatz Speed(kHz)"
+	default 12000
+config LPC_SPEED
+	depends on LPC_PLL
+	int "Quatz Speed(kHz)"
+	default 24000
+config LPC_GPIO
+	bool "LPC8xx GPIO Driver"
+	depends on GPIO
+	default y
+	help
+		LPC8xx GPIO Driver
+
+#config MACH_HAS_UART
+#	bool
+#	default y
+config MACH_HAS_GPIO
+	bool
+	default y
+config MACH_HAS_NEWLIB
+	bool
+	default y
+config MACH_HAS_NVIC
+	bool
+	default y
