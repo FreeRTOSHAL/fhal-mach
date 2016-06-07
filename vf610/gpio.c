@@ -127,10 +127,18 @@ static void gpio_handleInterrupt(struct gpio *gpio, uint8_t bank) {
 
 GPIO_INIT(vf, index) {
 	struct gpio *gpio = GPIO_GET_DEV(index);
+	int32_t ret;
 	uint32_t i;
 	uint32_t j;
 	if (gpio == NULL) {
 		return NULL;
+	}
+	ret = gpio_genericInit(gpio);
+	if (ret < 0) {
+		return NULL;
+	}
+	if (ret == GPIO_ALREDY_INITED) {
+		return gpio;
 	}
 	/* TODO Mange GPIO Interrupt Assigned to Cortex - A5 and Cortex - M4 */
 	/* Clear all Interrupt Assignment  */
@@ -199,9 +207,7 @@ static int32_t gpioPin_setup(struct gpio_pin *pin) {
 }
 GPIO_PIN_SET_DIRECTION(vf, pin, dir) {
 	int32_t ret = 0;
-	if (ret == 0) {
-		pin->dir = dir;
-	}
+	pin->dir = dir;
 	ret = gpioPin_setup(pin);
 	if (ret < 0) {
 		return ret;
