@@ -1,0 +1,149 @@
+comment "VF610 Settings"
+config MAX_SYSCALL_INTERRUPT_PRIORITY
+	hex
+	default 0x20
+config KERNEL_INTERRUPT_PRIORITY 
+	hex
+	default 0xf0
+
+config MACH_INIT_STACK_SIZE
+	int "Init Stack Size"
+	default 600
+	help
+		Stack Size of Init Prozess. Stack size used by Interrupt and Init Prozess
+
+config MACH_LD_SCRIPT
+	string 
+	default "mach/imx6/imx6sx.lds"
+
+config MACH_INCLUDE
+	string
+	default "-Imach/imx6/include"
+config MACH_DEFINE_HEAP
+	bool
+	default y
+config MACH_HAS_NEWLIB
+	bool
+	default y
+config MACH_HAS_UART
+	bool
+	default y
+menuconfig IMX_UART
+	bool "IMX Uart"
+	depends on UART
+	default n
+	help
+		Enable IMX UART
+	menuconfig IMX_UART_1
+		bool "Enable UART 1"
+		depends on IMX_UART
+		help
+			Enable UART 1
+		choice
+			prompt "TX Pin"
+			depends on IMX_UART_1
+			config IMX_UART_1_GPIO1_IO05
+				bool "PAD_GPIO1_IO05"
+			config IMX_UART_1_ENET2_COL
+				bool "PAD_ENET2_COL"
+		endchoice
+		choice
+			prompt "RX Pin"
+			depends on IMX_UART_1
+			config IMX_UART_1_GPIO1_IO04
+				bool "PAD_GPIO1_IO04"
+			config IMX_UART_1_ENET2_CRS
+				bool "PAD_ENET2_CRS"
+		endchoice
+	menuconfig IMX_UART_2
+		bool "Enable UART 2"
+		depends on IMX_UART
+		help 
+			Enable UART 2
+		choice
+			prompt "TX Pin"
+			depends on IMX_UART_2
+			config IMX_UART_2_GPIO1_IO07
+				bool "PAD_GPIO1_IO07"
+			config IMX_UART_2_SD1_DATA0
+				bool "PAD_SD1_DATA0"
+		endchoice
+		choice
+			prompt "RX Pin"
+			depends on IMX_UART_2
+			config IMX_UART_2_GPIO1_IO06
+				bool "PAD_GPIO1_IO06"
+			config IMX_UART_2_SD1_DATA1
+				bool "PAD_SD1_DATA1"
+		endchoice
+	menuconfig IMX_UART_3
+		bool "Enable UART 3"
+		depends on IMX_UART
+		help
+			Enable UART 3
+		choice
+			prompt "TX Pin"
+			depends on IMX_UART_3
+			config IMX_UART_3_NAND_DATA06
+				bool "PAD_NAND_DATA06"
+			config IMX_UART_3_QSPI1B_SCLK
+				bool "PAD_QSPI1B_SCLK"
+			config IMX_UART_3_SD3_DATA4
+				bool "PAD_SD3_DATA4"
+		endchoice
+		choice
+			prompt "RX Pin"
+			depends on IMX_UART_3
+			config IMX_UART_3_NAND_DATA07
+				bool "PAD_NAND_DATA07"
+			config IMX_UART_3_QSPI1B_SS0_B
+				bool "PAD_QSPI1B_SS0_B"
+			config IMX_UART_3_SD3_DATA5
+				bool "PAD_SD3_DATA5"
+		endchoice
+	menuconfig IMX_UART_4
+		bool "Enable UART 4"
+		depends on IMX_UART
+		help
+			Enable UART 4
+		choice
+			prompt "TX Pin"
+			depends on IMX_UART_4
+			config IMX_UART_4_CSI_MCLK
+				bool "PAD_CSI_MCLK"
+			config IMX_UART_4_SD2_DATA0
+				bool "PAD_SD2_DATA0"
+			config IMX_UART_4_SD3_DATA4
+				bool "PAD_SD3_DATA4"
+		endchoice
+		choice
+			prompt "RX Pin"
+			depends on IMX_UART_4
+			config IMX_UART_4_CSI_PIXCLK
+				bool "PAD_CSI_PIXCLK"
+			config IMX_UART_4_SD2_DATA1
+				bool "PAD_SD2_DATA1"
+			config IMX_UART_4_SD3_CMD
+				bool "PAD_SD3_CMD"
+		endchoice
+	menuconfig IMX_UART_5
+		bool "Enable UART 5"
+		depends on IMX_UART
+		help
+			Enable UART 5
+		choice
+			prompt "TX Pin"
+			depends on IMX_UART_5
+			config IMX_UART_5_KEY_ROW3
+				bool "PAD_KEY_ROW3"
+			config IMX_UART_5_SD4_DATA4
+				bool "PAD_SD4_DATA4"
+		endchoice
+		choice
+			prompt "RX Pin"
+			depends on IMX_UART_5
+			config IMX_UART_5_KEY_COL3
+				bool "PAD_KEY_COL3"
+			config IMX_UART_5_SD4_DATA5
+				bool "PAD_SD4_DATA5"
+		endchoice
