@@ -148,9 +148,7 @@ void WEAK ALIAS(dummy_handler) gpio4_isr(void);
 
 void NAKED reset_handler();
 void nmi_handler();
-void hard_fault_handler();
-void bus_fault_handler();
-void usage_fault_handler();
+void fault_handler();
 void debug_monitor_handler();
 
 extern void xPortPendSVHandler( void ) __attribute__ (( naked ));
@@ -176,10 +174,10 @@ const struct vector_table vector_table SECTION(".vectors") = {
 	.initial_sp_value = (unsigned int *) &_end_stack,
 	.reset = reset_handler,
 	.nmi = nmi_handler,
-	.hard_fault = hard_fault_handler,
-	.memory_manage_fault = hard_fault_handler, /* not in CM0 */
-	.bus_fault = bus_fault_handler,           /* not in CM0 */
-	.usage_fault = usage_fault_handler,         /* not in CM0 */
+	.hard_fault = fault_handler,
+	.memory_manage_fault = fault_handler, /* not in CM0 */
+	.bus_fault = fault_handler,           /* not in CM0 */
+	.usage_fault = fault_handler,         /* not in CM0 */
 	.sv_call = vPortSVCHandler, /* FreeRTOS Handler */
 	.debug_monitor = debug_monitor_handler,       /* not in CM0 */
 	.pend_sv = xPortPendSVHandler, /* FreeRTOS Handler */
@@ -459,93 +457,6 @@ void NAKED reset_handler() {
 	for(;;); /* Main shoud not return */
 }
 void nmi_handler() {
-	CONFIG_ASSERT(0);
-}
-
-__attribute__((naked)) void hard_fault_handler(void) {
-        /*
-         * Get the appropriate stack pointer, depending on our mode,
-         * and use it as the parameter to the C handler. This function
-         * will never return
-         */
-
-        __asm(  
-                        "MOVS   R0, #4  \n"
-                        "MOV    R1, LR  \n"
-                        "TST    R0, R1  \n"
-                        "BEQ    1f    \n"
-                        "MRS    R0, PSP \n"
-                        "B      hard_fault_handlerC      \n"
-                "1:  \n"
-                        "MRS    R0, MSP \n"
-                        "B      hard_fault_handlerC      \n"
-	) ;
-}
-
-void hard_fault_handlerC(unsigned long *hardfault_args) {
-	volatile unsigned long stacked_r0 ;
-	volatile unsigned long stacked_r1 ;
-	volatile unsigned long stacked_r2 ;
-	volatile unsigned long stacked_r3 ;
-	volatile unsigned long stacked_r12 ;
-	volatile unsigned long stacked_lr ;
-	volatile unsigned long stacked_pc ;
-	volatile unsigned long stacked_psr ;
-	volatile unsigned long _CFSR ;
-	volatile unsigned long _HFSR ;
-	volatile unsigned long _DFSR ;
-	volatile unsigned long _AFSR ;
-	volatile unsigned long _BFAR ;
-	volatile unsigned long _MMAR ;
-
-	stacked_r0 = ((unsigned long)hardfault_args[0]) ;
-	stacked_r1 = ((unsigned long)hardfault_args[1]) ;
-	stacked_r2 = ((unsigned long)hardfault_args[2]) ;
-	stacked_r3 = ((unsigned long)hardfault_args[3]) ;
-	stacked_r12 = ((unsigned long)hardfault_args[4]) ;
-	stacked_lr = ((unsigned long)hardfault_args[5]) ;
-	stacked_pc = ((unsigned long)hardfault_args[6]) ;
-	stacked_psr = ((unsigned long)hardfault_args[7]) ;
-
-	// Configurable Fault Status Register
-	// Consists of MMSR, BFSR and UFSR
-	_CFSR = (*((volatile unsigned long *)(0xE000ED28))) ;   
-
-	// Hard Fault Status Register
-	_HFSR = (*((volatile unsigned long *)(0xE000ED2C))) ;
-
-	// Debug Fault Status Register
-	_DFSR = (*((volatile unsigned long *)(0xE000ED30))) ;
-
-	// Auxiliary Fault Status Register
-	_AFSR = (*((volatile unsigned long *)(0xE000ED3C))) ;
-
-	// Read the Fault Address Registers. These may not contain valid values.
-	// Check BFARVALID/MMARVALID to see if they are valid values
-	// MemManage Fault Address Register
-	_MMAR = (*((volatile unsigned long *)(0xE000ED34))) ;
-	// Bus Fault Address Register
-	_BFAR = (*((volatile unsigned long *)(0xE000ED38))) ;
-	CONFIG_ASSERT(0);
-	(void) stacked_r0 ;
-	(void) stacked_r1 ;
-	(void) stacked_r2 ;
-	(void) stacked_r3 ;
-	(void) stacked_r12 ;
-	(void) stacked_lr ;
-	(void) stacked_pc ;
-	(void) stacked_psr ;
-	(void) _CFSR ;
-	(void) _HFSR ;
-	(void) _DFSR ;
-	(void) _AFSR ;
-	(void) _BFAR ;
-	(void) _MMAR ;
-}
-void bus_fault_handler() {
-	CONFIG_ASSERT(0);
-}
-void usage_fault_handler() {
 	CONFIG_ASSERT(0);
 }
 void debug_monitor_handler() {

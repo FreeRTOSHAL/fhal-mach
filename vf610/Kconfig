@@ -40,6 +40,9 @@ config MACH_LD_SCRIPT
 config MACH_INCLUDE
 	string
 	default "-Imach/vf610/include"
+config MACH_USE_GENERIC_FAULT_HANDLER
+	bool
+	default y
 config VF610_UART
 	bool "VF610 UART"
 	depends on UART

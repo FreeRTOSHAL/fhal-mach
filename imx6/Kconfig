@@ -22,6 +22,9 @@ config MACH_INCLUDE
 config MACH_DEFINE_HEAP
 	bool
 	default y
+config MACH_USE_GENERIC_FAULT_HANDLER
+	bool
+	default y
 config MACH_HAS_NEWLIB
 	bool
 	default y

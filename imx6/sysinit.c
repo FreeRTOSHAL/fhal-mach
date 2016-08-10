@@ -187,6 +187,7 @@ extern uint32_t _start_stack;
 extern uint32_t _start_bss_freertos;
 extern uint32_t _end_bss_freertos;
 #endif
+void fault_handler(void);
 
 extern int main(void);
 
@@ -194,10 +195,10 @@ const struct vector_table vector_table SECTION(".vectors") = {
 	.initial_sp_value = (unsigned int *) &_end_stack,
 	.reset = reset_handler,
 	.nmi = nmi_handler,
-	.hard_fault = hard_fault_handler,
-	.memory_manage_fault = hard_fault_handler, /* not in CM0 */
-	.bus_fault = bus_fault_handler,           /* not in CM0 */
-	.usage_fault = usage_fault_handler,         /* not in CM0 */
+	.hard_fault = fault_handler,
+	.memory_manage_fault = fault_handler, /* not in CM0 */
+	.bus_fault = fault_handler,           /* not in CM0 */
+	.usage_fault = fault_handler,         /* not in CM0 */
 	.sv_call = vPortSVCHandler, /* FreeRTOS Handler */
 	.debug_monitor = debug_monitor_handler,       /* not in CM0 */
 	.pend_sv = xPortPendSVHandler, /* FreeRTOS Handler */
@@ -498,6 +499,7 @@ void nmi_handler() {
 	CONFIG_ASSERT(0);
 }
 
+#if 0
 __attribute__((naked)) void hard_fault_handler(void) {
         /*
          * Get the appropriate stack pointer, depending on our mode,
@@ -584,6 +586,7 @@ void bus_fault_handler() {
 void usage_fault_handler() {
 	CONFIG_ASSERT(0);
 }
+#endif
 void debug_monitor_handler() {
 	CONFIG_ASSERT(0);
 }

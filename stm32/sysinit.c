@@ -22,9 +22,11 @@
 
 void NAKED reset_handler();
 void nmi_handler();
+#ifndef CONFIG_MACH_USE_GENERIC_FAULT_HANDLER
 void hard_fault_handler();
 void bus_fault_handler();
 void usage_fault_handler();
+#endif
 void debug_monitor_handler();
 
 extern void _end_stack(void);
@@ -198,6 +200,7 @@ void nmi_handler() {
 	CONFIG_ASSERT(0);
 }
 
+#ifndef CONFIG_MACH_USE_GENERIC_FAULT_HANDLER
 __attribute__((naked)) void hard_fault_handler(void) {
         /*
          * Get the appropriate stack pointer, depending on our mode,
@@ -284,6 +287,7 @@ void bus_fault_handler() {
 void usage_fault_handler() {
 	CONFIG_ASSERT(0);
 }
+#endif
 void debug_monitor_handler() {
 	CONFIG_ASSERT(0);
 }

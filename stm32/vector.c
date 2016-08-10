@@ -3,9 +3,7 @@
 #include "stm32fxxx.h"
 void NAKED reset_handler();
 void nmi_handler();
-void hard_fault_handler();
-void bus_fault_handler();
-void usage_fault_handler();
+void fault_handler();
 void debug_monitor_handler();
 void NAKED dummy_handler();
 
@@ -544,10 +542,10 @@ const struct vector_table vector_table SECTION(".vectors") = {
 	.initial_sp_value = (unsigned int *) &_end_stack,
 	.reset = reset_handler,
 	.nmi = nmi_handler,
-	.hard_fault = hard_fault_handler,
-	.memory_manage_fault = hard_fault_handler, /* not in CM0 */
-	.bus_fault = bus_fault_handler,     /* not in CM0 */
-	.usage_fault = usage_fault_handler,   /* not in CM0 */
+	.hard_fault = fault_handler,
+	.memory_manage_fault = fault_handler, /* not in CM0 */
+	.bus_fault = fault_handler,     /* not in CM0 */
+	.usage_fault = fault_handler,   /* not in CM0 */
 	.sv_call = vPortSVCHandler, /* FreeRTOS Handler */
 	.debug_monitor = debug_monitor_handler, /* not in CM0 */
 	.pend_sv = xPortPendSVHandler, /* FreeRTOS Handler */
