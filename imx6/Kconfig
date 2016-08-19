@@ -31,6 +31,9 @@ config MACH_HAS_NEWLIB
 config MACH_HAS_UART
 	bool
 	default y
+config MACH_HAS_MAILBOX
+	bool
+	default y
 menuconfig IMX_UART
 	bool "IMX Uart"
 	depends on UART
@@ -150,3 +153,21 @@ menuconfig IMX_UART
 			config IMX_UART_5_SD4_DATA5
 				bool "PAD_SD4_DATA5"
 		endchoice
+menuconfig IMX_MAILBOX
+	bool "IMX Mailbox"
+	depends on MAILBOX
+	default n
+	help
+		IMX Interprocessor Maibox
+	config IMX_MAILBOX_0
+		bool "IMX Mailbox 0"
+		depends on IMX_MAILBOX
+	config IMX_MAILBOX_1
+		bool "IMX Mailbox 1"
+		depends on IMX_MAILBOX
+	config IMX_MAILBOX_2
+		bool "IMX Mailbox 2"
+		depends on IMX_MAILBOX
+	config IMX_MAILBOX_3
+		bool "IMX Mailbox 3"
+		depends on IMX_MAILBOX

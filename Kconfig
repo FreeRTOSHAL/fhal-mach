@@ -31,10 +31,10 @@ endif
 if MACH_LINUX=y
 source mach/linux/Kconfig
 endif
-if MACH_STM32
+if MACH_STM32=y
 source mach/stm32/Kconfig
 endif
-if MACH_IMX6
+if MACH_IMX6=y
 source mach/imx6/Kconfig
 endif
 endmenu
