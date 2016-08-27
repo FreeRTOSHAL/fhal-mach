@@ -21,6 +21,7 @@
  * IN THE SOFTWARE.
  */
 #include <FreeRTOS.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <system.h>
@@ -29,6 +30,7 @@
 #include <irq.h>
 #include <queue.h>
 #include <mailbox.h>
+#include <vector.h>
 #define MAILBOX_PRV
 #include <mailbox_prv.h>
 
@@ -75,31 +77,40 @@ struct mailbox {
 	uint32_t id;
 	SemaphoreHandle_t txsem;
 	QueueHandle_t rxqueue;
+	bool full;
 };
 static struct mailbox_contoller contoller;
 /* Mu ISR */
 void MU_M4_Handler(void) { 
 	uint32_t sr = contoller.base->sr;
-	uint32_t cr = contoller.base->sr;
+	uint32_t cr = contoller.base->cr;
 	uint32_t tmp; 
-	uint32_t i;
+	int32_t i;
 	struct mailbox *mbox;
 	uint32_t data;
 	BaseType_t ret;
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+	printf("call %s\n", __FUNCTION__);
+	printf("sr: 0x%08lx cr: 0x%08lx\n", sr, cr);
 	if (sr & MU_ASR_RF_MASK || ((cr & MU_ACR_TIE_MASK) & (sr & MU_ASR_TE_MASK))) {
 		if (sr & MU_ASR_RF_MASK) {
+			printf("recv Data\n");
 			tmp = (sr & MU_ASR_RF_MASK) >> MU_ASR_RF_OFFSET;
-			for (i = 0; (i < 4 && tmp > 0); i++, tmp >>= 1) {
+			for (i = 3; (i >= 0 && tmp > 0); i--, tmp >>= 1) {
 				if (tmp & 0x1) {
 					mbox = contoller.mboxs[i];
+					printf("recv Data for: %lu\n", i);
 					if (mbox != NULL) {
 						data = contoller.base->rr[i];
+						printf("data: 0x%lx\n", data);
 						ret = xQueueSendToFrontFromISR(mbox->rxqueue, &data, &pxHigherPriorityTaskWoken);
 						if (ret == pdFALSE) {
-							/* TODO error :( */
+							mbox->full = true;
+							/* Disable Interrupt until spave is in Queue */
+							contoller.base->cr &= ~MU_ACR_RIE(i);
 						}
 					} else {
+						printf("Disable Interupt ...\n");
 						/* Disable Interrupt no instance exists */
 						contoller.base->cr &= ~MU_ACR_RIE(i);
 					}
@@ -107,11 +118,12 @@ void MU_M4_Handler(void) {
 			}
 		}
 		if ((cr & MU_ACR_TIE_MASK) & (sr & MU_ASR_TE_MASK)) {
-			tmp = (cr & MU_ACR_TIE_MASK) & (sr & MU_ASR_TE_MASK);
-			for (i = 0; (i < 4 && tmp > 0); i++) {
+			tmp = ((cr & MU_ACR_TIE_MASK) & (sr & MU_ASR_TE_MASK)) >> MU_ASR_TE_OFFSET;
+			for (i = 3; (i >= 0 && tmp > 0); i--, tmp >>= 1) {
 				if (tmp & 0x1) {
 					mbox = contoller.mboxs[i];
 					if (mbox != NULL) {
+						printf("txdone give sem\n");
 						xSemaphoreGiveFromISR(mbox->txsem, &pxHigherPriorityTaskWoken);
 						contoller.base->cr &= ~MU_ACR_TIE(i);
 					}
@@ -149,6 +161,7 @@ MAILBOX_INIT(imx, index) {
 	if (mbox->rxqueue == NULL) {
 		goto imx_mailbox_init_error1;
 	}
+	mbox->full = false;
 	/* Enable the RX Interrupt */
 	mbox->contoller->base->cr |= MU_ACR_RIE(mbox->id);
 	ret = irq_setPrio(mbox->contoller->irq, 0xFF);
@@ -180,6 +193,7 @@ MAILBOX_DEINIT(imx, mbox) {
 MAILBOX_SEND(imx, mbox, data, waittime) {
 	BaseType_t ret;
 	mailbox_lock(mbox, waittime, -1);
+	printf("call %s\n", __FUNCTION__);
 	if (!(mbox->contoller->base->sr & MU_ASR_TE(mbox->id))) {
 		goto imx_mailbox_send_error0;
 	}
@@ -199,10 +213,18 @@ imx_mailbox_send_error0:
 }
 MAILBOX_RECV(imx, mbox, data, waittime) {
 	BaseType_t ret;
+	printf("call %s\n", __FUNCTION__);
 	ret = xQueueReceive(mbox->rxqueue, data, waittime);
 	if (ret == pdFALSE) {
 		return -1;
 	}
+	mailbox_lock(mbox, -1, waittime);
+	if (mbox->full) {
+		mbox->full = false;
+		/* we recive one message reactivate ISR */
+		mbox->contoller->base->cr |= MU_ACR_RIE(mbox->id);
+	}
+	mailbox_unlock(mbox, -1);
 	return 0;
 }
 MAILBOX_RECV_ISR(imx, mbox, data) {

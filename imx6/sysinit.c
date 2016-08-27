@@ -604,4 +604,3 @@ void NAKED dummy_handler() {
 	);
 	CONFIG_ASSERT(0);
 }
-
