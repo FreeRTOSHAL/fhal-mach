@@ -27,13 +27,11 @@
 #include <system.h>
 #include "cache.h"
 #include <clock.h>
+#include <ctrl.h>
 
 #define SCB_CPACR_FULL  (BIT(0) | BIT(1))
 #define SCB_CPACR_CP10(x) (x << (20))
 #define SCB_CPACR_CP11(x) (x << (22))
-
-void NAKED dummy_handler();
-void WEAK ALIAS(dummy_handler) CORTEX_M4_Handler(void); /* Cache Controller interrupt*/
 
 void NAKED reset_handler();
 void nmi_handler();
@@ -57,79 +55,7 @@ extern uint32_t _start_stack;
 void fault_handler(void);
 
 extern int main(void);
-
-struct vector_table vector_table SECTION(".vectors") = {
-	.initial_sp_value = (unsigned int *) &_end_stack,
-	.reset = reset_handler,
-	.nmi = nmi_handler,
-	.hard_fault = fault_handler,
-	.memory_manage_fault = fault_handler, /* not in CM0 */
-	.bus_fault = fault_handler,           /* not in CM0 */
-	.usage_fault = fault_handler,         /* not in CM0 */
-	.sv_call = vPortSVCHandler, /* FreeRTOS Handler */
-	.debug_monitor = debug_monitor_handler,       /* not in CM0 */
-	.pend_sv = xPortPendSVHandler, /* FreeRTOS Handler */
-	.systick = xPortSysTickHandler, /* FreeRTOS Handler */
-	/* IRQs are dynamicly mapped */
-        .irq = {
-		[0] = dummy_handler,
-		[1] = dummy_handler,
-		[2] = dummy_handler,
-		[3] = dummy_handler,
-		[4] = dummy_handler,
-		[5] = dummy_handler,
-		[6] = dummy_handler,
-		[7] = dummy_handler,
-		[8] = dummy_handler,
-		[9] = dummy_handler,
-		[10] = dummy_handler,
-		[11] = dummy_handler,
-		[12] = dummy_handler,
-		[13] = dummy_handler,
-		[14] = dummy_handler,
-		[15] = dummy_handler,
-		[16] = dummy_handler,
-		[17] = dummy_handler,
-		[18] = dummy_handler,
-		[19] = dummy_handler,
-		[20] = dummy_handler,
-		[21] = dummy_handler,
-		[22] = dummy_handler,
-		[23] = dummy_handler,
-		[24] = dummy_handler,
-		[25] = dummy_handler,
-		[26] = dummy_handler,
-		[27] = dummy_handler,
-		[28] = dummy_handler,
-		[29] = dummy_handler,
-		[30] = dummy_handler,
-		[31] = dummy_handler,
-		[32] = dummy_handler,
-		[33] = dummy_handler,
-		[34] = dummy_handler,
-		[35] = dummy_handler,
-		[36] = dummy_handler,
-		[37] = dummy_handler,
-		[38] = dummy_handler,
-		[39] = dummy_handler,
-		[40] = dummy_handler,
-		[41] = dummy_handler,
-		[42] = dummy_handler,
-		[43] = dummy_handler,
-		[44] = dummy_handler,
-		[45] = dummy_handler,
-		[46] = dummy_handler,
-		[47] = dummy_handler,
-		[48] = dummy_handler,
-		[49] = dummy_handler,
-		[50] = dummy_handler,
-		[51] = dummy_handler,
-		[52] = dummy_handler,
-		[53] = dummy_handler,
-		[54] = dummy_handler,
-		[55] = dummy_handler,
-	}
-};
+extern struct vector_table vector_table;
 
 static void clearBss(volatile uint32_t *dst, volatile uint32_t *src) {
 	asm volatile(
@@ -175,7 +101,7 @@ void NAKED reset_handler() {
 		"ldr sp,=_end_stack;"
 	);
 	{
-		volatile debugger = 0;
+		volatile int32_t debugger = 0;
 		while(debugger == 0);
 	}
 	/* Set Vector Table Offset to our memory based vector table */
@@ -289,6 +215,7 @@ void NAKED reset_handler() {
 #ifdef CONFIG_VF610_CACHE
 	cache_init();
 #endif
+	ctrl_init();
 	main();
 	for(;;); /* Main shoud not return */
 }
@@ -297,21 +224,6 @@ void nmi_handler() {
 }
 
 void debug_monitor_handler() {
-	CONFIG_ASSERT(0);
-}
-
-void NAKED dummy_handler() {
-	asm volatile(
-		"mov r0, pc \n"
-		"subs r0, r0, #3 \n"
-		"ldr r1, =vector_table \n"
-		"mrs r2, ipsr \n"
-		"ldr r2, [r1, r2, LSL #2] \n"
-		"cmp r0, r2 \n"
-		"it ne \n"
-		"movne pc, r2 \n"
-		:::"r0", "r1", "r2"
-	);
 	CONFIG_ASSERT(0);
 }
 
