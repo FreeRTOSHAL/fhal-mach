@@ -1,0 +1,1018 @@
+if AM57xx_MAILBOX = y
+	menuconfig AM57xx_MAILBOX1
+		bool "AM57xx Mailbox 1"
+		default n
+	if AM57xx_MAILBOX1 = y
+		config AM57xx_MAILBOX1_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX1_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX1_0_RX
+				depends on AM57xx_MAILBOX1_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX1_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX1_1_RX
+				depends on AM57xx_MAILBOX1_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX1_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX1_2_RX
+				depends on AM57xx_MAILBOX1_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX1_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX1_3_RX
+				depends on AM57xx_MAILBOX1_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX1_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX1_4_RX
+				depends on AM57xx_MAILBOX1_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX1_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX1_5_RX
+				depends on AM57xx_MAILBOX1_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX1_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX1_6_RX
+				depends on AM57xx_MAILBOX1_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX1_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX1_7_RX
+				depends on AM57xx_MAILBOX1_7
+				bool "RX Mode"
+	endif
+	menuconfig AM57xx_MAILBOX2
+		bool "AM57xx Mailbox 2"
+		default n
+	if AM57xx_MAILBOX2 = y
+		config AM57xx_MAILBOX2_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX2_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX2_0_RX
+				depends on AM57xx_MAILBOX2_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX2_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX2_1_RX
+				depends on AM57xx_MAILBOX2_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX2_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX2_2_RX
+				depends on AM57xx_MAILBOX2_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX2_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX2_3_RX
+				depends on AM57xx_MAILBOX2_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX2_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX2_4_RX
+				depends on AM57xx_MAILBOX2_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX2_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX2_5_RX
+				depends on AM57xx_MAILBOX2_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX2_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX2_6_RX
+				depends on AM57xx_MAILBOX2_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX2_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX2_7_RX
+				depends on AM57xx_MAILBOX2_7
+				bool "RX Mode"
+		config AM57xx_MAILBOX2_8
+			bool "Mailbox 8"
+			default n
+			config AM57xx_MAILBOX2_8_RX
+				depends on AM57xx_MAILBOX2_8
+				bool "RX Mode"
+		config AM57xx_MAILBOX2_9
+			bool "Mailbox 9"
+			default n
+			config AM57xx_MAILBOX2_9_RX
+				depends on AM57xx_MAILBOX2_9
+				bool "RX Mode"
+		config AM57xx_MAILBOX2_10
+			bool "Mailbox 10"
+			default n
+			config AM57xx_MAILBOX2_10_RX
+				depends on AM57xx_MAILBOX2_10
+				bool "RX Mode"
+		config AM57xx_MAILBOX2_11
+			bool "Mailbox 11"
+			default n
+			config AM57xx_MAILBOX2_11_RX
+				depends on AM57xx_MAILBOX2_11
+				bool "RX Mode"
+	endif
+	menuconfig AM57xx_MAILBOX3
+		bool "AM57xx Mailbox 3"
+		default n
+	if AM57xx_MAILBOX3 = y
+		config AM57xx_MAILBOX3_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX3_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX3_0_RX
+				depends on AM57xx_MAILBOX3_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX3_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX3_1_RX
+				depends on AM57xx_MAILBOX3_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX3_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX3_2_RX
+				depends on AM57xx_MAILBOX3_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX3_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX3_3_RX
+				depends on AM57xx_MAILBOX3_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX3_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX3_4_RX
+				depends on AM57xx_MAILBOX3_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX3_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX3_5_RX
+				depends on AM57xx_MAILBOX3_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX3_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX3_6_RX
+				depends on AM57xx_MAILBOX3_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX3_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX3_7_RX
+				depends on AM57xx_MAILBOX3_7
+				bool "RX Mode"
+		config AM57xx_MAILBOX3_8
+			bool "Mailbox 8"
+			default n
+			config AM57xx_MAILBOX3_8_RX
+				depends on AM57xx_MAILBOX3_8
+				bool "RX Mode"
+		config AM57xx_MAILBOX3_9
+			bool "Mailbox 9"
+			default n
+			config AM57xx_MAILBOX3_9_RX
+				depends on AM57xx_MAILBOX3_9
+				bool "RX Mode"
+		config AM57xx_MAILBOX3_10
+			bool "Mailbox 10"
+			default n
+			config AM57xx_MAILBOX3_10_RX
+				depends on AM57xx_MAILBOX3_10
+				bool "RX Mode"
+		config AM57xx_MAILBOX3_11
+			bool "Mailbox 11"
+			default n
+			config AM57xx_MAILBOX3_11_RX
+				depends on AM57xx_MAILBOX3_11
+				bool "RX Mode"
+	endif
+	menuconfig AM57xx_MAILBOX4
+		bool "AM57xx Mailbox 4"
+		default n
+	if AM57xx_MAILBOX4 = y
+		config AM57xx_MAILBOX4_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX4_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX4_0_RX
+				depends on AM57xx_MAILBOX4_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX4_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX4_1_RX
+				depends on AM57xx_MAILBOX4_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX4_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX4_2_RX
+				depends on AM57xx_MAILBOX4_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX4_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX4_3_RX
+				depends on AM57xx_MAILBOX4_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX4_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX4_4_RX
+				depends on AM57xx_MAILBOX4_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX4_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX4_5_RX
+				depends on AM57xx_MAILBOX4_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX4_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX4_6_RX
+				depends on AM57xx_MAILBOX4_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX4_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX4_7_RX
+				depends on AM57xx_MAILBOX4_7
+				bool "RX Mode"
+		config AM57xx_MAILBOX4_8
+			bool "Mailbox 8"
+			default n
+			config AM57xx_MAILBOX4_8_RX
+				depends on AM57xx_MAILBOX4_8
+				bool "RX Mode"
+		config AM57xx_MAILBOX4_9
+			bool "Mailbox 9"
+			default n
+			config AM57xx_MAILBOX4_9_RX
+				depends on AM57xx_MAILBOX4_9
+				bool "RX Mode"
+		config AM57xx_MAILBOX4_10
+			bool "Mailbox 10"
+			default n
+			config AM57xx_MAILBOX4_10_RX
+				depends on AM57xx_MAILBOX4_10
+				bool "RX Mode"
+		config AM57xx_MAILBOX4_11
+			bool "Mailbox 11"
+			default n
+			config AM57xx_MAILBOX4_11_RX
+				depends on AM57xx_MAILBOX4_11
+				bool "RX Mode"
+	endif
+	menuconfig AM57xx_MAILBOX5
+		bool "AM57xx Mailbox 5"
+		default n
+	if AM57xx_MAILBOX5 = y
+		config AM57xx_MAILBOX5_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX5_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX5_0_RX
+				depends on AM57xx_MAILBOX5_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX5_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX5_1_RX
+				depends on AM57xx_MAILBOX5_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX5_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX5_2_RX
+				depends on AM57xx_MAILBOX5_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX5_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX5_3_RX
+				depends on AM57xx_MAILBOX5_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX5_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX5_4_RX
+				depends on AM57xx_MAILBOX5_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX5_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX5_5_RX
+				depends on AM57xx_MAILBOX5_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX5_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX5_6_RX
+				depends on AM57xx_MAILBOX5_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX5_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX5_7_RX
+				depends on AM57xx_MAILBOX5_7
+				bool "RX Mode"
+		config AM57xx_MAILBOX5_8
+			bool "Mailbox 8"
+			default n
+			config AM57xx_MAILBOX5_8_RX
+				depends on AM57xx_MAILBOX5_8
+				bool "RX Mode"
+		config AM57xx_MAILBOX5_9
+			bool "Mailbox 9"
+			default n
+			config AM57xx_MAILBOX5_9_RX
+				depends on AM57xx_MAILBOX5_9
+				bool "RX Mode"
+		config AM57xx_MAILBOX5_10
+			bool "Mailbox 10"
+			default n
+			config AM57xx_MAILBOX5_10_RX
+				depends on AM57xx_MAILBOX5_10
+				bool "RX Mode"
+		config AM57xx_MAILBOX5_11
+			bool "Mailbox 11"
+			default n
+			config AM57xx_MAILBOX5_11_RX
+				depends on AM57xx_MAILBOX5_11
+				bool "RX Mode"
+	endif
+	menuconfig AM57xx_MAILBOX6
+		bool "AM57xx Mailbox 6"
+		default n
+	if AM57xx_MAILBOX6 = y
+		config AM57xx_MAILBOX6_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX6_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX6_0_RX
+				depends on AM57xx_MAILBOX6_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX6_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX6_1_RX
+				depends on AM57xx_MAILBOX6_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX6_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX6_2_RX
+				depends on AM57xx_MAILBOX6_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX6_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX6_3_RX
+				depends on AM57xx_MAILBOX6_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX6_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX6_4_RX
+				depends on AM57xx_MAILBOX6_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX6_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX6_5_RX
+				depends on AM57xx_MAILBOX6_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX6_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX6_6_RX
+				depends on AM57xx_MAILBOX6_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX6_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX6_7_RX
+				depends on AM57xx_MAILBOX6_7
+				bool "RX Mode"
+		config AM57xx_MAILBOX6_8
+			bool "Mailbox 8"
+			default n
+			config AM57xx_MAILBOX6_8_RX
+				depends on AM57xx_MAILBOX6_8
+				bool "RX Mode"
+		config AM57xx_MAILBOX6_9
+			bool "Mailbox 9"
+			default n
+			config AM57xx_MAILBOX6_9_RX
+				depends on AM57xx_MAILBOX6_9
+				bool "RX Mode"
+		config AM57xx_MAILBOX6_10
+			bool "Mailbox 10"
+			default n
+			config AM57xx_MAILBOX6_10_RX
+				depends on AM57xx_MAILBOX6_10
+				bool "RX Mode"
+		config AM57xx_MAILBOX6_11
+			bool "Mailbox 11"
+			default n
+			config AM57xx_MAILBOX6_11_RX
+				depends on AM57xx_MAILBOX6_11
+				bool "RX Mode"
+	endif
+	menuconfig AM57xx_MAILBOX7
+		bool "AM57xx Mailbox 7"
+		default n
+	if AM57xx_MAILBOX7 = y
+		config AM57xx_MAILBOX7_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX7_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX7_0_RX
+				depends on AM57xx_MAILBOX7_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX7_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX7_1_RX
+				depends on AM57xx_MAILBOX7_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX7_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX7_2_RX
+				depends on AM57xx_MAILBOX7_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX7_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX7_3_RX
+				depends on AM57xx_MAILBOX7_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX7_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX7_4_RX
+				depends on AM57xx_MAILBOX7_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX7_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX7_5_RX
+				depends on AM57xx_MAILBOX7_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX7_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX7_6_RX
+				depends on AM57xx_MAILBOX7_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX7_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX7_7_RX
+				depends on AM57xx_MAILBOX7_7
+				bool "RX Mode"
+		config AM57xx_MAILBOX7_8
+			bool "Mailbox 8"
+			default n
+			config AM57xx_MAILBOX7_8_RX
+				depends on AM57xx_MAILBOX7_8
+				bool "RX Mode"
+		config AM57xx_MAILBOX7_9
+			bool "Mailbox 9"
+			default n
+			config AM57xx_MAILBOX7_9_RX
+				depends on AM57xx_MAILBOX7_9
+				bool "RX Mode"
+		config AM57xx_MAILBOX7_10
+			bool "Mailbox 10"
+			default n
+			config AM57xx_MAILBOX7_10_RX
+				depends on AM57xx_MAILBOX7_10
+				bool "RX Mode"
+		config AM57xx_MAILBOX7_11
+			bool "Mailbox 11"
+			default n
+			config AM57xx_MAILBOX7_11_RX
+				depends on AM57xx_MAILBOX7_11
+				bool "RX Mode"
+	endif
+	menuconfig AM57xx_MAILBOX8
+		bool "AM57xx Mailbox 8"
+		default n
+	if AM57xx_MAILBOX8 = y
+		config AM57xx_MAILBOX8_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX8_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX8_0_RX
+				depends on AM57xx_MAILBOX8_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX8_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX8_1_RX
+				depends on AM57xx_MAILBOX8_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX8_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX8_2_RX
+				depends on AM57xx_MAILBOX8_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX8_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX8_3_RX
+				depends on AM57xx_MAILBOX8_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX8_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX8_4_RX
+				depends on AM57xx_MAILBOX8_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX8_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX8_5_RX
+				depends on AM57xx_MAILBOX8_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX8_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX8_6_RX
+				depends on AM57xx_MAILBOX8_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX8_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX8_7_RX
+				depends on AM57xx_MAILBOX8_7
+				bool "RX Mode"
+		config AM57xx_MAILBOX8_8
+			bool "Mailbox 8"
+			default n
+			config AM57xx_MAILBOX8_8_RX
+				depends on AM57xx_MAILBOX8_8
+				bool "RX Mode"
+		config AM57xx_MAILBOX8_9
+			bool "Mailbox 9"
+			default n
+			config AM57xx_MAILBOX8_9_RX
+				depends on AM57xx_MAILBOX8_9
+				bool "RX Mode"
+		config AM57xx_MAILBOX8_10
+			bool "Mailbox 10"
+			default n
+			config AM57xx_MAILBOX8_10_RX
+				depends on AM57xx_MAILBOX8_10
+				bool "RX Mode"
+		config AM57xx_MAILBOX8_11
+			bool "Mailbox 11"
+			default n
+			config AM57xx_MAILBOX8_11_RX
+				depends on AM57xx_MAILBOX8_11
+				bool "RX Mode"
+	endif
+	menuconfig AM57xx_MAILBOX9
+		bool "AM57xx Mailbox 9"
+		default n
+	if AM57xx_MAILBOX9 = y
+		config AM57xx_MAILBOX9_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX9_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX9_0_RX
+				depends on AM57xx_MAILBOX9_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX9_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX9_1_RX
+				depends on AM57xx_MAILBOX9_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX9_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX9_2_RX
+				depends on AM57xx_MAILBOX9_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX9_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX9_3_RX
+				depends on AM57xx_MAILBOX9_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX9_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX9_4_RX
+				depends on AM57xx_MAILBOX9_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX9_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX9_5_RX
+				depends on AM57xx_MAILBOX9_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX9_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX9_6_RX
+				depends on AM57xx_MAILBOX9_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX9_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX9_7_RX
+				depends on AM57xx_MAILBOX9_7
+				bool "RX Mode"
+		config AM57xx_MAILBOX9_8
+			bool "Mailbox 8"
+			default n
+			config AM57xx_MAILBOX9_8_RX
+				depends on AM57xx_MAILBOX9_8
+				bool "RX Mode"
+		config AM57xx_MAILBOX9_9
+			bool "Mailbox 9"
+			default n
+			config AM57xx_MAILBOX9_9_RX
+				depends on AM57xx_MAILBOX9_9
+				bool "RX Mode"
+		config AM57xx_MAILBOX9_10
+			bool "Mailbox 10"
+			default n
+			config AM57xx_MAILBOX9_10_RX
+				depends on AM57xx_MAILBOX9_10
+				bool "RX Mode"
+		config AM57xx_MAILBOX9_11
+			bool "Mailbox 11"
+			default n
+			config AM57xx_MAILBOX9_11_RX
+				depends on AM57xx_MAILBOX9_11
+				bool "RX Mode"
+	endif
+	menuconfig AM57xx_MAILBOX10
+		bool "AM57xx Mailbox 10"
+		default n
+	if AM57xx_MAILBOX10 = y
+		config AM57xx_MAILBOX10_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX10_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX10_0_RX
+				depends on AM57xx_MAILBOX10_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX10_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX10_1_RX
+				depends on AM57xx_MAILBOX10_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX10_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX10_2_RX
+				depends on AM57xx_MAILBOX10_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX10_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX10_3_RX
+				depends on AM57xx_MAILBOX10_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX10_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX10_4_RX
+				depends on AM57xx_MAILBOX10_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX10_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX10_5_RX
+				depends on AM57xx_MAILBOX10_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX10_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX10_6_RX
+				depends on AM57xx_MAILBOX10_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX10_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX10_7_RX
+				depends on AM57xx_MAILBOX10_7
+				bool "RX Mode"
+		config AM57xx_MAILBOX10_8
+			bool "Mailbox 8"
+			default n
+			config AM57xx_MAILBOX10_8_RX
+				depends on AM57xx_MAILBOX10_8
+				bool "RX Mode"
+		config AM57xx_MAILBOX10_9
+			bool "Mailbox 9"
+			default n
+			config AM57xx_MAILBOX10_9_RX
+				depends on AM57xx_MAILBOX10_9
+				bool "RX Mode"
+		config AM57xx_MAILBOX10_10
+			bool "Mailbox 10"
+			default n
+			config AM57xx_MAILBOX10_10_RX
+				depends on AM57xx_MAILBOX10_10
+				bool "RX Mode"
+		config AM57xx_MAILBOX10_11
+			bool "Mailbox 11"
+			default n
+			config AM57xx_MAILBOX10_11_RX
+				depends on AM57xx_MAILBOX10_11
+				bool "RX Mode"
+	endif
+	menuconfig AM57xx_MAILBOX11
+		bool "AM57xx Mailbox 11"
+		default n
+	if AM57xx_MAILBOX11 = y
+		config AM57xx_MAILBOX11_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX11_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX11_0_RX
+				depends on AM57xx_MAILBOX11_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX11_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX11_1_RX
+				depends on AM57xx_MAILBOX11_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX11_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX11_2_RX
+				depends on AM57xx_MAILBOX11_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX11_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX11_3_RX
+				depends on AM57xx_MAILBOX11_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX11_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX11_4_RX
+				depends on AM57xx_MAILBOX11_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX11_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX11_5_RX
+				depends on AM57xx_MAILBOX11_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX11_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX11_6_RX
+				depends on AM57xx_MAILBOX11_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX11_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX11_7_RX
+				depends on AM57xx_MAILBOX11_7
+				bool "RX Mode"
+		config AM57xx_MAILBOX11_8
+			bool "Mailbox 8"
+			default n
+			config AM57xx_MAILBOX11_8_RX
+				depends on AM57xx_MAILBOX11_8
+				bool "RX Mode"
+		config AM57xx_MAILBOX11_9
+			bool "Mailbox 9"
+			default n
+			config AM57xx_MAILBOX11_9_RX
+				depends on AM57xx_MAILBOX11_9
+				bool "RX Mode"
+		config AM57xx_MAILBOX11_10
+			bool "Mailbox 10"
+			default n
+			config AM57xx_MAILBOX11_10_RX
+				depends on AM57xx_MAILBOX11_10
+				bool "RX Mode"
+		config AM57xx_MAILBOX11_11
+			bool "Mailbox 11"
+			default n
+			config AM57xx_MAILBOX11_11_RX
+				depends on AM57xx_MAILBOX11_11
+				bool "RX Mode"
+	endif
+	menuconfig AM57xx_MAILBOX12
+		bool "AM57xx Mailbox 12"
+		default n
+	if AM57xx_MAILBOX12 = y
+		config AM57xx_MAILBOX12_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX12_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX12_0_RX
+				depends on AM57xx_MAILBOX12_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX12_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX12_1_RX
+				depends on AM57xx_MAILBOX12_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX12_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX12_2_RX
+				depends on AM57xx_MAILBOX12_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX12_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX12_3_RX
+				depends on AM57xx_MAILBOX12_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX12_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX12_4_RX
+				depends on AM57xx_MAILBOX12_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX12_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX12_5_RX
+				depends on AM57xx_MAILBOX12_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX12_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX12_6_RX
+				depends on AM57xx_MAILBOX12_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX12_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX12_7_RX
+				depends on AM57xx_MAILBOX12_7
+				bool "RX Mode"
+		config AM57xx_MAILBOX12_8
+			bool "Mailbox 8"
+			default n
+			config AM57xx_MAILBOX12_8_RX
+				depends on AM57xx_MAILBOX12_8
+				bool "RX Mode"
+		config AM57xx_MAILBOX12_9
+			bool "Mailbox 9"
+			default n
+			config AM57xx_MAILBOX12_9_RX
+				depends on AM57xx_MAILBOX12_9
+				bool "RX Mode"
+		config AM57xx_MAILBOX12_10
+			bool "Mailbox 10"
+			default n
+			config AM57xx_MAILBOX12_10_RX
+				depends on AM57xx_MAILBOX12_10
+				bool "RX Mode"
+		config AM57xx_MAILBOX12_11
+			bool "Mailbox 11"
+			default n
+			config AM57xx_MAILBOX12_11_RX
+				depends on AM57xx_MAILBOX12_11
+				bool "RX Mode"
+	endif
+	menuconfig AM57xx_MAILBOX13
+		bool "AM57xx Mailbox 13"
+		default n
+	if AM57xx_MAILBOX13 = y
+		config AM57xx_MAILBOX13_USERID
+			int "Mailbox UserID"
+			default 1
+		config AM57xx_MAILBOX13_0
+			bool "Mailbox 0"
+			default n
+			config AM57xx_MAILBOX13_0_RX
+				depends on AM57xx_MAILBOX13_0
+				bool "RX Mode"
+		config AM57xx_MAILBOX13_1
+			bool "Mailbox 1"
+			default n
+			config AM57xx_MAILBOX13_1_RX
+				depends on AM57xx_MAILBOX13_1
+				bool "RX Mode"
+		config AM57xx_MAILBOX13_2
+			bool "Mailbox 2"
+			default n
+			config AM57xx_MAILBOX13_2_RX
+				depends on AM57xx_MAILBOX13_2
+				bool "RX Mode"
+		config AM57xx_MAILBOX13_3
+			bool "Mailbox 3"
+			default n
+			config AM57xx_MAILBOX13_3_RX
+				depends on AM57xx_MAILBOX13_3
+				bool "RX Mode"
+		config AM57xx_MAILBOX13_4
+			bool "Mailbox 4"
+			default n
+			config AM57xx_MAILBOX13_4_RX
+				depends on AM57xx_MAILBOX13_4
+				bool "RX Mode"
+		config AM57xx_MAILBOX13_5
+			bool "Mailbox 5"
+			default n
+			config AM57xx_MAILBOX13_5_RX
+				depends on AM57xx_MAILBOX13_5
+				bool "RX Mode"
+		config AM57xx_MAILBOX13_6
+			bool "Mailbox 6"
+			default n
+			config AM57xx_MAILBOX13_6_RX
+				depends on AM57xx_MAILBOX13_6
+				bool "RX Mode"
+		config AM57xx_MAILBOX13_7
+			bool "Mailbox 7"
+			default n
+			config AM57xx_MAILBOX13_7_RX
+				depends on AM57xx_MAILBOX13_7
+				bool "RX Mode"
+		config AM57xx_MAILBOX13_8
+			bool "Mailbox 8"
+			default n
+			config AM57xx_MAILBOX13_8_RX
+				depends on AM57xx_MAILBOX13_8
+				bool "RX Mode"
+		config AM57xx_MAILBOX13_9
+			bool "Mailbox 9"
+			default n
+			config AM57xx_MAILBOX13_9_RX
+				depends on AM57xx_MAILBOX13_9
+				bool "RX Mode"
+		config AM57xx_MAILBOX13_10
+			bool "Mailbox 10"
+			default n
+			config AM57xx_MAILBOX13_10_RX
+				depends on AM57xx_MAILBOX13_10
+				bool "RX Mode"
+		config AM57xx_MAILBOX13_11
+			bool "Mailbox 11"
+			default n
+			config AM57xx_MAILBOX13_11_RX
+				depends on AM57xx_MAILBOX13_11
+				bool "RX Mode"
+	endif
+endif

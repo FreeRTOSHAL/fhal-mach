@@ -31,3 +31,11 @@ config MACH_HAS_NEWLIB
 config MACH_HAS_NVIC
 	bool
 	default y
+config MACH_HAS_MAILBOX
+	bool
+	default y
+menuconfig AM57xx_MAILBOX
+	depends on MAILBOX
+	bool "AM57xx Mailbox"
+	default n
+	source mach/am57xx/Kconfig.mailbox
