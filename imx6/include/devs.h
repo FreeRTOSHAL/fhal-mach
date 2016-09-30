@@ -30,4 +30,13 @@ HAL_DEFINE_GLOBAL_ARRAY(mailbox);
 #ifdef CONFIG_IMX_MAILBOX_3
 # define MAILBOX3_ID HAL_GET_ID(mailbox, imx, mailbox_data3)
 #endif
+HAL_DEFINE_GLOBAL_ARRAY(mac);
+HAL_DEFINE_GLOBAL_ARRAY(timer);
+#ifdef CONFIG_IMX_ENET1
+# define ENET1_ID HAL_GET_ID(mac, imx, fec_enet1)
+# define ENET1_TIMER_ID HAL_GET_ID(timer, imx, fec_enet1_ieee1588)
+#endif
+#ifdef CONFIG_IMX_ENET2
+# define ENET2_ID HAL_GET_ID(mac, imx, fec_enet2)
+#endif
 #endif

@@ -37,6 +37,15 @@ config MACH_HAS_UART
 config MACH_HAS_MAILBOX
 	bool
 	default y
+config MACH_HAS_NET
+	bool
+	default y
+config MACH_HAS_MAC
+	bool
+	default y
+config MACH_HAS_TIMER
+	bool
+	default y
 menuconfig IMX_UART
 	bool "IMX Uart"
 	depends on UART
@@ -174,3 +183,28 @@ menuconfig IMX_MAILBOX
 	config IMX_MAILBOX_3
 		bool "IMX Mailbox 3"
 		depends on IMX_MAILBOX
+menuconfig IMX_ENET
+	bool "IMX Enet"
+	depends on MAC
+	select TIMER
+	default n
+	help
+		IMX Ethenet driver
+	config IMX_ENET_BUFFERSIZE
+		int "Buffersize (shall power of two)"
+		depends on IMX_ENET
+		default 512
+		help
+			Buffersize (shall power of two)
+
+			The Buffer size is CONFIG_IMX_ENET_BUFFSIZE * 1536 Bytes * 3 Queue * 2(RX + TX)
+			For Example CONFIG_IMX_ENET_BUFFSIZE is 512 
+			4.5 MB Space is allocated
+	config IMX_ENET1
+		bool "ENET1"
+		depends on IMX_ENET
+		default n
+	config IMX_ENET2
+		bool "ENET2"
+		depends on IMX_ENET
+		default n

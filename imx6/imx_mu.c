@@ -90,6 +90,7 @@ void MU_M4_Handler(void) {
 	uint32_t data;
 	BaseType_t ret;
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+	BaseType_t wake;
 	printf("call %s\n", __FUNCTION__);
 	printf("sr: 0x%08lx cr: 0x%08lx\n", sr, cr);
 	if (sr & MU_ASR_RF_MASK || ((cr & MU_ACR_TIE_MASK) & (sr & MU_ASR_TE_MASK))) {
@@ -100,11 +101,16 @@ void MU_M4_Handler(void) {
 				if (tmp & 0x1) {
 					mbox = contoller.mboxs[i];
 					printf("recv Data for: %lu\n", i);
-					if (mbox != NULL) {
-						data = contoller.base->rr[i];
-						printf("data: 0x%lx\n", data);
-						ret = xQueueSendToFrontFromISR(mbox->rxqueue, &data, &pxHigherPriorityTaskWoken);
-						if (ret == pdFALSE) {
+					if (mbox != NULL && mbox->gen.init) {
+						if (!xQueueIsQueueFullFromISR(mbox->rxqueue)) {
+							data = contoller.base->rr[i];
+							printf("data: 0x%lx\n", data);
+							wake = pdFALSE;
+							ret = xQueueSendToBackFromISR(mbox->rxqueue, &data, &wake);
+							CONFIG_ASSERT(ret == pdPASS);
+							pxHigherPriorityTaskWoken |= wake;
+						} else {
+							printf("Queue is Full disable rescv\n");
 							mbox->full = true;
 							/* Disable Interrupt until spave is in Queue */
 							contoller.base->cr &= ~MU_ACR_RIE(i);
@@ -124,8 +130,10 @@ void MU_M4_Handler(void) {
 					mbox = contoller.mboxs[i];
 					if (mbox != NULL) {
 						printf("txdone give sem\n");
-						xSemaphoreGiveFromISR(mbox->txsem, &pxHigherPriorityTaskWoken);
+						wake = pdFALSE;
+						xSemaphoreGiveFromISR(mbox->txsem, &wake);
 						contoller.base->cr &= ~MU_ACR_TIE(i);
+						pxHigherPriorityTaskWoken |= wake;
 					}
 				}
 			}
@@ -214,6 +222,10 @@ imx_mailbox_send_error0:
 MAILBOX_RECV(imx, mbox, data, waittime) {
 	BaseType_t ret;
 	printf("call %s\n", __FUNCTION__);
+	{
+		UBaseType_t nr = uxQueueMessagesWaiting(mbox->rxqueue);
+		printf("message in queue: %lu\n", nr);
+	}
 	ret = xQueueReceive(mbox->rxqueue, data, waittime);
 	if (ret == pdFALSE) {
 		return -1;
@@ -234,11 +246,11 @@ MAILBOX_RECV_ISR(imx, mbox, data) {
 	return 0;
 }
 MAILBOX_SEND_ISR(imx, mbox, data) {
-	if (mbox->contoller->base->sr & MU_ASR_TE(mbox->id)) {
+	if (!(mbox->contoller->base->sr & MU_ASR_TE(mbox->id))) {
 		return -1;
 	}
 	mbox->contoller->base->tr[mbox->id] = data;
-	while(mbox->contoller->base->sr & MU_ASR_TE(mbox->id));
+	while(!(mbox->contoller->base->sr & MU_ASR_TE(mbox->id)));
 	return 0;
 }
 MAILBOX_OPS(imx);

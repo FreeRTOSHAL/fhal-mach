@@ -29,7 +29,6 @@
 #include <clock.h>
 #include <rdc.h>
 #include <rdc_defs_imx6sx.h>
-
 #define SCB_CPACR_FULL  (BIT(0) | BIT(1))
 #define SCB_CPACR_CP10(x) (x << (20))
 #define SCB_CPACR_CP11(x) (x << (22))
