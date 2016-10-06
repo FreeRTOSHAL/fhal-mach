@@ -399,7 +399,7 @@ PWM_SET_DUTY_CYCLE(ftm, pwm, us) {
 
 #ifdef CONFIG_FLEXTIMER_CAPTURE
 CAPTURE_INIT(ftm, index) {
-	struct capture *capture = CAPUTRE_GET_DEV(index);
+	struct capture *capture = CAPTURE_GET_DEV(index);
 	struct timer *ftm;
 	int32_t ret;
 	if (capture == NULL) {
