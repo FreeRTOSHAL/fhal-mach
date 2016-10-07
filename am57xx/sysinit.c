@@ -28,6 +28,7 @@
 #include "cache.h"
 #include <clock.h>
 #include <ctrl.h>
+#include <core_cmInstr.h>
 
 #define SCB_CPACR_FULL  (BIT(0) | BIT(1))
 #define SCB_CPACR_CP10(x) (x << (20))
@@ -73,6 +74,9 @@ static void clearBss(volatile uint32_t *dst, volatile uint32_t *src) {
 		
 	);
 }
+volatile uint32_t pattern;
+volatile bool isCPU1 = false;
+volatile bool CPU1IsActive = false;
 
 void NAKED reset_handler() {
 	volatile uint32_t *dst, *src, *tableaddr;
@@ -100,10 +104,77 @@ void NAKED reset_handler() {
 	asm volatile (
 		"ldr sp,=_end_stack;"
 	);
+#ifdef CONFIG_AM57xx_WAIT_FOR_DEBUGGER
 	{
 		volatile int32_t debugger = 0;
+		/* Shutdown Core1 */
+		*((uint32_t *) 0x6AE06510) |=  BIT(1);
+		__ISB();
+		__DSB();
 		while(debugger == 0);
 	}
+#else
+	if (pattern != 0x42424243) {
+		pattern = 0x42424243;
+		isCPU1 = false;
+		CPU1IsActive = false;
+	}
+	/* Stop Core1 */
+	/* TODO Fixme Hack!! */
+	if (!isCPU1) {
+		/* Shutdown Core1 */
+		*((uint32_t *) 0x6AE06510) |=  BIT(1);
+		__ISB();
+		__DSB();
+		/* Wait some time */
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		/* We are core0 */
+		isCPU1 = true;
+		CPU1IsActive = false;
+		__ISB();
+		__DSB();
+#if 1
+		/* Clear Reset and start CPU1 */
+		*((uint32_t *) 0x6AE06510) &=  ~BIT(1);
+		/* Wait until CPU1 is Set CPU1 Is Active */
+		while (!CPU1IsActive);
+		/* Ok CPU1 is Active */
+#endif
+	} else {
+		CPU1IsActive = true;
+		/* idle Core1 */
+		for(;;) __WFI();
+	}
+#endif
 	/* Set Vector Table Offset to our memory based vector table */
 	SCB->VTOR = (uint32_t) &vector_table;
 #ifdef CONFIG_ARCH_ARM_CORTEX_M4F

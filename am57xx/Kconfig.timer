@@ -1,0 +1,221 @@
+if AM57xx_TIMER=y
+config AM57xx_TIMER_DEBUG
+	bool "Timer Debug"
+	default n
+config AM57xx_TIMER_PWM
+	bool "Enable PWM Support"
+	depends on PWM
+	default n
+config AM57xx_TIMER_CAPTURE
+	bool "Enable Capture Support"
+	depends on CAPTURE
+	default n
+config AM57xx_TIMER1
+	bool "Timer 1"
+	default n
+	if AM57xx_TIMER1 = y
+		config AM57xx_TIMER1_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER1_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER2
+	bool "Timer 2"
+	default n
+	if AM57xx_TIMER2 = y
+		config AM57xx_TIMER2_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER2_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER3
+	bool "Timer 3"
+	default n
+	if AM57xx_TIMER3 = y
+		config AM57xx_TIMER3_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER3_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER4
+	bool "Timer 4"
+	default n
+	if AM57xx_TIMER4 = y
+		config AM57xx_TIMER4_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER4_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER5
+	bool "Timer 5"
+	default n
+	if AM57xx_TIMER5 = y
+		config AM57xx_TIMER5_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER5_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER6
+	bool "Timer 6"
+	default n
+	if AM57xx_TIMER6 = y
+		config AM57xx_TIMER6_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER6_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER7
+	bool "Timer 7"
+	default n
+	if AM57xx_TIMER7 = y
+		config AM57xx_TIMER7_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER7_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER8
+	bool "Timer 8"
+	default n
+	if AM57xx_TIMER8 = y
+		config AM57xx_TIMER8_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER8_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER9
+	bool "Timer 9"
+	default n
+	if AM57xx_TIMER9 = y
+		config AM57xx_TIMER9_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER9_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER10
+	bool "Timer 10"
+	default n
+	if AM57xx_TIMER10 = y
+		config AM57xx_TIMER10_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER10_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER11
+	bool "Timer 11"
+	default n
+	if AM57xx_TIMER11 = y
+		config AM57xx_TIMER11_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER11_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER12
+	bool "Timer 12"
+	default n
+	if AM57xx_TIMER12 = y
+		config AM57xx_TIMER12_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER12_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER13
+	bool "Timer 13"
+	default n
+	if AM57xx_TIMER13 = y
+		config AM57xx_TIMER13_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER13_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER14
+	bool "Timer 14"
+	default n
+	if AM57xx_TIMER14 = y
+		config AM57xx_TIMER14_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER14_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER15
+	bool "Timer 15"
+	default n
+	if AM57xx_TIMER15 = y
+		config AM57xx_TIMER15_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER15_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+config AM57xx_TIMER16
+	bool "Timer 16"
+	default n
+	if AM57xx_TIMER16 = y
+		config AM57xx_TIMER16_PWM
+			bool "PWM Support"
+			depends on AM57xx_TIMER_PWM
+			default n
+		config AM57xx_TIMER16_CAPTURE
+			bool "Capture Support"
+			depends on AM57xx_TIMER_CAPTURE
+			default n
+	endif
+endif

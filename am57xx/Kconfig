@@ -34,8 +34,47 @@ config MACH_HAS_NVIC
 config MACH_HAS_MAILBOX
 	bool
 	default y
+config MACH_HAS_GPIO
+	bool
+	default y
+config MACH_HAS_SPI
+	bool
+	default y
+config MACH_HAS_TIMER
+	bool
+	default y
+config MACH_HAS_PWM
+	bool
+	default y
+config MACH_HAS_CAPTURE
+	bool
+	default y
+config AM57xx_WAIT_FOR_DEBUGGER
+	bool "Wait for Debugger"
+	default n
+config AM57xx_MUX_DEBUG
+	bool "Mux Debug"
+	default n
+config AM57xx_GPIO
+	bool "AM57xx GPIO Contoller"
+	default n
+	depends on GPIO
+	config AM57xx_GPIO_DEBUG
+		bool "Debug GPIO"
+		default n
+		depends on AM57xx_GPIO
 menuconfig AM57xx_MAILBOX
 	depends on MAILBOX
 	bool "AM57xx Mailbox"
 	default n
 	source mach/am57xx/Kconfig.mailbox
+menuconfig AM57xx_SPI
+	depends on SPI
+	bool "AM57xx SPI"
+	default n
+	source mach/am57xx/Kconfig.spi
+menuconfig AM57xx_TIMER
+	depends on TIMER
+	bool "Am57xx General-Purpose Timers"
+	default n
+	source mach/am57xx/Kconfig.timer

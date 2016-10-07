@@ -1,0 +1,35 @@
+if AM57xx_SPI = y
+config AM57xx_SPI_DEBUG
+	bool "Enable SPI Debug"
+	default n
+menuconfig AM57xx_SPI1
+	bool "SPI 1"
+	if AM57xx_SPI1=y
+	config AM57xx_SPI1_D0_OUT_D1_IN
+		bool "D0 is Out D1 is In"
+		help
+			D0 is Output and D1 is Input
+			else 
+			D0 is Input and D1 is Output
+	endif
+menuconfig AM57xx_SPI3
+	bool "SPI 3"
+	if AM57xx_SPI3=y
+	config AM57xx_SPI3_D0_OUT_D1_IN
+		bool "D0 is Out D1 is In"
+		help
+			D0 is Output and D1 is Input
+			else 
+			D0 is Input and D1 is Output
+	endif
+menuconfig AM57xx_SPI4
+	bool "SPI 4"
+	if AM57xx_SPI4=y
+	config AM57xx_SPI4_D0_OUT_D1_IN
+		bool "D0 is Out D1 is In"
+		help
+			D0 is Output and D1 is Input
+			else 
+			D0 is Input and D1 is Output
+	endif
+endif

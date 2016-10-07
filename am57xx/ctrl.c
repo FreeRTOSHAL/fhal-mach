@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <irq.h>
 #include <vector.h>
+#include <system.h>
 extern void NAKED reset_handler();
 extern void nmi_handler();
 extern void hard_fault_handler();
@@ -123,16 +124,45 @@ struct vector_table vector_table SECTION(".vectors") = {
 		[55] = dummy_handler,
 	}
 };
+struct l3_main_firewall_region {
+	uint32_t START_REGION; /* 0x80 */
+	uint32_t END_REGION; /* 0x84 */
+	uint32_t MRM_PERMISSION_REGION_LOW; /* 0x88 */
+	uint32_t MRM_PERMISSION_REGION_HIGH; /* 0x8C */
+};
+struct l3_mail_firewall_error {
+	uint32_t ERROR_LOG; /* 0x0 */
+	uint32_t LOGICAL_ADDR_ERRLOG; /* 0x4 */
+};
+struct l3_main_firewall {
+	struct l3_mail_firewall_error error[2];
+	uint32_t reserved0[12]; /* 0x8 - 0x3C */
+	uint32_t REGUPDATE_CONTROL; /* 0x40 */
+	uint32_t reserved1[15]; /* 0x44 - 0x7C */
+	struct l3_main_firewall_region regions[7]; /* 0x80 - 0xBC */
+};
+
 #define IRQ_MAP_IPU1_BASE ((uint32_t *) 0x6A0027E0)
 #define IRQ_MAP_IPU2_BASE ((uint32_t *) 0x6A002854)
+#define L3_MAIN_FIREWAL_MPU_BASE ((struct l3_main_firewall *) 0x6A15B000)
+#define L3_MAIN_FIREWAL_IPU1_BASE ((struct l3_main_firewall *) 0x6A15B000)
+
 int32_t ctrl_init() {
+	struct l3_main_firewall *mpu_firewall = L3_MAIN_FIREWAL_MPU_BASE;
+	struct l3_main_firewall *ipu1_firewall = L3_MAIN_FIREWAL_IPU1_BASE;
 	uint32_t *reg;
 	int32_t i = 0;
-	for (i = 0; i < ((NVIC_IRQ_COUNT - 7) >> 1); i++) {
-		reg = (uint32_t *) IRQ_MAP_IPU1_BASE + (i << 2);
+	for (i = 7; i < NVIC_IRQ_COUNT; i += 2) {
+		reg = IRQ_MAP_IPU1_BASE + ((i - 7) >> 1);
 		/* set all muxes to Reserved */
 		*reg = 0x1FF & (0x1FF << 16);
+		vector_table.irq[i] = dummy_handler;
+		if ((i + 1) < NVIC_IRQ_COUNT) {
+			vector_table.irq[i + 1] = dummy_handler;
+		}
 	}
+	CONFIG_ASSERT(&mpu_firewall->REGUPDATE_CONTROL == (uint32_t *) (((uintptr_t) L3_MAIN_FIREWAL_MPU_BASE) + 0x40));
+	CONFIG_ASSERT(&ipu1_firewall->REGUPDATE_CONTROL == (uint32_t *) (((uintptr_t) L3_MAIN_FIREWAL_IPU1_BASE) + 0x40));
 	return 0;
 }
 
@@ -158,6 +188,7 @@ int32_t ctrl_setHandler(uint32_t irq_crossbar_nr, void (*handler)()) {
 	 * Mux Interrupt
 	 */
 	reg = IRQ_MAP_IPU1_BASE + ((i - 7) >> 1);
+	printf("IRQ Reg %p\n",reg);
 	if ((i - 7) & 0x1) {
 		*reg |= ((irq_crossbar_nr & 0x1FF) << 16);
 	} else {
