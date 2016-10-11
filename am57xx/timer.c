@@ -98,8 +98,8 @@ struct timer {
 	uint32_t irq;
 	bool periodic;
 
-	struct timer_reg *base;
-	uint32_t *clkbase;
+	volatile struct timer_reg *base;
+	volatile uint32_t *clkbase;
 	uint32_t irqBase;
 	void (*irqHandler)();
 #ifdef CONFIG_AM57xx_TIMER_CAPTURE
@@ -130,9 +130,10 @@ TIMER_INIT(am57xx, index, prescaler, basetime, adjust) {
 	timer->adjust = adjust;
 	/* Check Clock is enabled */
 	if (((*timer->clkbase >> 16) & 0x3) == 0x3) {
-		PRINTF("Activate Timer Clock\n");
+		PRINTF("Activate Timer Clock register: %p\n", timer->clkbase);
 		/* Activate Timer Clock */
 		*timer->clkbase |= 0x2;
+		CONFIG_ASSERT(((*timer->clkbase) & 0x3) == 0x2);
 		while(((*timer->clkbase >> 16) & 0x3) == 0x3);
 		PRINTF("Timer Clock Activate\n");
 	}
@@ -211,36 +212,43 @@ TIMER_STOP(am57xx, timer) {
 }
 static uint64_t counterToUS(struct timer *timer, uint32_t value) {
 	/* Too Many Cast for Optimizer do it step by step */
-	uint64_t diff;
 	uint64_t us;
 	uint64_t v = value;
 	uint64_t p = timer->prescaler;
-	uint64_t b = timer->basetime;
-	diff = timer->basetime;
-	/* Fix basetime > UINT32_t ! */
-	if (timer->adjust < 0) {
-		diff -= (uint64_t) timer->adjust;
+	if (timer->adjust != 0) {
+		uint64_t b = timer->basetime;
+		uint64_t diff;
+		diff = timer->basetime;
+		/* Fix basetime > UINT32_t ! */
+		if (timer->adjust < 0) {
+			diff -= (uint64_t) timer->adjust;
+		} else {
+			diff += (uint64_t) timer->adjust;
+		}
+		us = (v * p) / 20 /* MHz */; 
+		us = (us * b) / diff;
 	} else {
-		diff += (uint64_t) timer->adjust;
+		us = (v * p) / 20 /* MHz */; 
 	}
 	
-	us = (v * p) / 20 /* MHz */; 
-	us = (us * b) / diff;
 
 	return us;
 }
 static uint64_t USToCounter(struct timer *timer, uint64_t value) {
+	uint64_t us = value;
 	uint64_t p = timer->prescaler;
-	uint64_t b = timer->basetime;
-	uint64_t diff = timer->basetime;
-	/* Fix basetime > UINT32_t ! */
-	if (timer->adjust < 0) {
-		diff -= (uint64_t) timer->adjust;
-	} else {
-		diff += (uint64_t) timer->adjust;
-	}
+	if (timer->adjust != 0) {
+		uint64_t b = timer->basetime;
+		uint64_t diff = timer->basetime;
+		/* Fix basetime > UINT32_t ! */
+		if (timer->adjust < 0) {
+			diff -= (uint64_t) timer->adjust;
+		} else {
+			diff += (uint64_t) timer->adjust;
+		}
 
-	uint64_t us = (value * diff) / b;
+		us = (value * diff) / b;
+	}
 	uint64_t counterValue = (20 /* MHz */ * us) / (p);
 	PRINTF("us: %llu counterValue: %llu\n", value, counterValue);
 
@@ -399,6 +407,7 @@ PWM_SET_DUTY_CYCLE(am57xx, pwm, us) {
 	struct timer *timer = pwm->timer;
 	uint32_t TCLR = timer->base->TCLR;
 	if (!(TCLR & TIMER_TCLR_ST)) {
+		PRINTF("Timer not started\n");
 		return -1;
 	}
 	PRINTF("Setup Match Register to 0x%llx\n", timer->base->TLDR + USToCounter(timer, us));
@@ -409,6 +418,7 @@ PWM_SET_DUTY_CYCLE(am57xx, pwm, us) {
 	PRINTF("Match Register: 0x%lx\n", timer->base->TMAR);
 	return 0;
 }
+PWM_OPS(am57xx);
 #endif
 #ifdef CONFIG_AM57xx_TIMER_CAPTURE
 struct capture {
@@ -554,13 +564,13 @@ struct capture capture1_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_GPMC_BEN1,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 #if 0
 	.pin = {
 		.pin = PAD_GPIO6_14,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 #endif
@@ -595,14 +605,14 @@ struct pwm pwm2_data = {
 	.timer = &timer2_data,
 	/* TODO Muxing */
 	.pin = {
-		.pin = PAD_GPMC_BEN0,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.pin = PAD_GPIO6_15,
+		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
-		.pin = PAD_GPIO6_15,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.pin = PAD_GPMC_BEN0,
+		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 */
@@ -616,14 +626,14 @@ struct capture capture2_data = {
 	.timer = &timer2_data,
 	/* TODO Muxing */
 	.pin = {
-		.pin = PAD_GPMC_BEN0,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.pin = PAD_GPIO6_15,
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
-		.pin = PAD_GPIO6_15,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.pin = PAD_GPMC_BEN0,
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 */
@@ -680,13 +690,13 @@ struct capture capture3_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_GPMC_ADVN_ALE,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_GPIO6_16,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 */
@@ -743,13 +753,13 @@ struct capture capture4_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_GPMC_CLK,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_MCASP1_AXR7,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 */
@@ -770,7 +780,7 @@ struct timer timer5_data = {
 	HAL_NAME("AM57xx Timer 5")
 	.base = (struct timer_reg *) 0x68820000,
 	.irqBase = TIMER5_IRQ,
-	.clkbase = (uint32_t *) 0x4A005558,
+	.clkbase = (uint32_t *) 0x6A005558,
 	.irqHandler = am57xx_timer_IRQHandler5,
 # ifdef CONFIG_AM57xx_TIMER5_CAPTURE
 	.capture = &capture5_data,
@@ -806,13 +816,13 @@ struct capture capture5_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_GPMC_A15,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_MCASP1_AXR8,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 */
@@ -869,13 +879,13 @@ struct capture capture6_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_GPMC_A14,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_MCASP1_AXR9,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 */
@@ -933,13 +943,13 @@ struct capture capture7_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_GPMC_A13,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_MCASP1_AXR10,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 */
@@ -997,13 +1007,13 @@ struct capture capture8_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_GPMC_A12,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_GPMC_A12,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 */
@@ -1060,13 +1070,13 @@ struct capture capture9_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_GPMC_A11,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_MCASP1_AXR12,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 */
@@ -1124,13 +1134,13 @@ struct capture capture10_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_MCASP1_AXR13,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_GPMC_A10,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 */
@@ -1187,13 +1197,13 @@ struct capture capture11_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_MCASP1_AXR14,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
 /*
 	.pin = {
 		.pin = PAD_GPMC_A9,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
 */
@@ -1228,15 +1238,15 @@ struct pwm pwm12_data = {
 	.timer = &timer12_data,
 	/* TODO Muxing */
 	.pin = {
-		.pin = PAD_GPMC_A8,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
-		.extra = MUX_INPUT,
-	},
-/*
-	.pin = {
 		.pin = PAD_MCASP1_AXR15,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
+	},
+/*
+	.pin = {
+		.pin = PAD_GPMC_A8,
+		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.extra = MUX_INPUT,
 	},
 */
 };
@@ -1250,13 +1260,13 @@ struct capture capture12_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_GPMC_A8,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_MCASP1_AXR15,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
 */
@@ -1313,13 +1323,13 @@ struct capture capture13_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_VIN1A_VSYNC0,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_XREF_CLK0,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
 */
@@ -1376,13 +1386,13 @@ struct capture capture14_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_VIN1A_HSYNC0,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_XREF_CLK1,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
 */
@@ -1439,13 +1449,13 @@ struct capture capture15_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_VIN1A_FLD0,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_USB2_DRVVBUS,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
 */
@@ -1466,7 +1476,7 @@ struct timer timer16_data = {
 	HAL_NAME("AM57xx Timer 16")
 	.base = (struct timer_reg *) 0x6882E000,
 	.irqBase = TIMER16_IRQ,
-	.clkbase = (uint32_t *) 0x4A009830,
+	.clkbase = (uint32_t *) 0x6A009830,
 	.irqHandler = am57xx_timer_IRQHandler16,
 # ifdef CONFIG_AM57xx_TIMER16_CAPTURE
 	.capture = &capture16_data,
@@ -1480,7 +1490,7 @@ struct pwm pwm16_data = {
 	.timer = &timer16_data,
 	/* TODO Muxing */
 	.pin = {
-		.pin = PAD_VIN1A_DE0,
+		.pin = PAD_XREF_CLK3,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
@@ -1488,7 +1498,7 @@ struct pwm pwm16_data = {
 	.pin = {
 		.pin = PAD_VIN1A_DE0,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
-		.extra = MUX_INPUT | MUX_WAKEUP,
+		.extra = MUX_INPUT,
 	},
 */
 };
@@ -1502,13 +1512,13 @@ struct capture capture16_data = {
 	/* TODO Muxing */
 	.pin = {
 		.pin = PAD_VIN1A_DE0,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
 		.pin = PAD_VIN1A_DE0,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
 */
