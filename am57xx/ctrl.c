@@ -198,16 +198,19 @@ int32_t ctrl_setHandler(uint32_t irq_crossbar_nr, void (*handler)()) {
 }
 
 void NAKED dummy_handler() {
+	register uint32_t irqNr;
 	asm volatile(
 		"mov r0, pc \n"
 		"subs r0, r0, #3 \n"
 		"ldr r1, =vector_table \n"
-		"mrs r2, ipsr \n"
-		"ldr r2, [r1, r2, LSL #2] \n"
+		"mrs r3, ipsr \n"
+		"ldr r2, [r1, r3, LSL #2] \n"
 		"cmp r0, r2 \n"
 		"it ne \n"
 		"movne pc, r2 \n"
-		:::"r0", "r1", "r2"
+		"mov %0, r3"
+		: "=r" (irqNr) ::"r0", "r1", "r2", "r3"
 	);
+	printf("irqNr: %lu\n", irqNr);
 	CONFIG_ASSERT(0);
 }

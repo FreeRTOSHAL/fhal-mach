@@ -79,8 +79,8 @@ volatile bool isCPU1 = false;
 volatile bool CPU1IsActive = false;
 
 void NAKED reset_handler() {
-	volatile uint32_t *dst, *src, *tableaddr;
-	volatile uint32_t len;
+	volatile register uint32_t *dst, *src, *tableaddr;
+	volatile register uint32_t len;
 
 	asm volatile(
 		"mov r0, #0" "\n"
