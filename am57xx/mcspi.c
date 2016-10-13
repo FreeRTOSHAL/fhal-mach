@@ -466,17 +466,22 @@ static int32_t am57xx_spiSlave_transverDataPoll(struct spi_slave *slave, uint16_
 		chan->TXx = *sendData;
 		while ((chan->CHxSTAT & (SPI_CHxSTAT_RXS | SPI_CHxSTAT_TXS)) != (SPI_CHxSTAT_RXS | SPI_CHxSTAT_TXS));
 		*recvData = (uint16_t) (chan->RXx & bitmask);
-		if (sendLen > 1) {
-			sendData++;
+		if (sendLen > 0) {
+			if (sendLen > 1) {
+				sendData++;
+			}
 			sendLen--;
 		}
-		if (recvLen > 1) {
-			recvData++;
+		if (recvLen > 0) {
+			if (recvLen > 1) {
+				recvData++;
+			}
 			recvLen--;
 		}
 	}
 	chan->CHxCTRL &= ~SPI_CHxCTRL_EN;
 	chan->CHxCONF &= ~SPI_CHxCONF_FORCE;
+
 	return 0;
 }
 SPI_SLAVE_TRANSVER(am57xx, slave, sendData, recvData, len, waittime) {
