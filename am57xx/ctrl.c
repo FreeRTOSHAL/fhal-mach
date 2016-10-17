@@ -214,3 +214,12 @@ void NAKED dummy_handler() {
 	printf("irqNr: %lu\n", irqNr);
 	CONFIG_ASSERT(0);
 }
+
+void nmi_handler() {
+	CONFIG_ASSERT(0);
+}
+
+void debug_monitor_handler() {
+	CONFIG_ASSERT(0);
+}
+
