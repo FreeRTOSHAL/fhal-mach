@@ -171,7 +171,7 @@ initCPU2:
 	str r0, [r1, #0]
 	dsb
 	isb
-	/*sev*/
+	sev
 	/* wait for reset */
 1:
 	wfi
@@ -200,10 +200,10 @@ cpuIDUnkown:
 	/* wait for CPU2 */
 	ldr r1, =cpu2isInited
 1:
-	/*wfe*/
 	ldr r0, [r1, #0]
 	cmp r0, #1
-	it ne
+	itt ne
+	wfene
 	bne 1b
 
 	/* set reset handler back to reset_handler */
