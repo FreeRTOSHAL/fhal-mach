@@ -78,12 +78,6 @@
 #define PWMSS_ECAP_ECFRC_CEVT2 BIT(2)
 #define PWMSS_ECAP_ECFRC_CEVT1 BIT(1)
 
-struct pwmss_cfg_reg {
-  uint32_t IDVER; /* 0x0 */
-  uint32_t SYSCONFIG; /* 0x4 */
-  uint32_t CLKCONFIG; /* 0x8 */
-  uint32_t CLKSTATUS; /* 0xC */
-};
 struct ecap_reg {
   uint32_t TSCNT; /* 0x0 */
   uint32_t CNTPHS; /* 0x4 */
@@ -101,7 +95,14 @@ struct ecap_reg {
   uint32_t reserved2[10]; /* 0x34 - 0x58 */
   uint32_t PID; /* 0x5C */
 };
-
+struct pwmss_cfg_reg {
+  uint32_t IDVER; /* 0x0 */
+  uint32_t SYSCONFIG; /* 0x4 */
+  uint32_t CLKCONFIG; /* 0x8 */
+  uint32_t CLKSTATUS; /* 0xC */
+  uint32_t reserved1[241] /* 0x10 - 0xFC */
+  struct ecap_reg ecap_base;
+};
 struct timer {
   struct timer_generic gen;
   uint64_t basetime;
@@ -111,7 +112,7 @@ struct timer {
   void *data;
   uint32_t irq;
   bool periodic; //?
-  struct pwmss_cfg_reg *pwmss_base;
+  struct pwmss_cfg_reg *base;
   struct ecap_reg *ecap_base;
   uint32_t *clkbase;
   uint32_t irqBase;
@@ -144,20 +145,18 @@ TIMER_INIT(am57xx, index, prescaler, basetime, adjust) {
   if (((*timer->clkbase >> 16) & 0x3) == 0x3) {
     PRINTF("Activate Timer Clock\n")
     *timer->clkbase |= 0x2;
-    /*@Andy: Wieso hast du ne Endlosschleife in timer.c eingebaut?*/
-    while(((*timer->clkbase >> 16) & 0x3) == 0x3) {
-      base &= ~(0x3 << 16);
-    };
+
+    while(((*timer->clkbase >> 16) & 0x3) == 0x3);
     PRINTF("Timer Clock Activate\n");
   }
 
-  reg = timer->pwmss_base->SYSCONFIG;
+  reg = timer->base->SYSCONFIG;
   /* reset timer */
   reg |= PWMSS_SYSCONFIG_SOFTRESET;
   /* Setup idle mode */
   reg |= PWMSS_SYSCONFIG_IDLEMODE(0x2);
 
-  timer->pwmss_base->SYSCONFIG = reg;
+  timer->base->SYSCONFIG = reg;
 
   if (prescaler <= 62) {
       if ((prescaler%2) == 0) {
@@ -165,10 +164,10 @@ TIMER_INIT(am57xx, index, prescaler, basetime, adjust) {
       } else {
         prsclr = (prescaler+1) >> 1;
       }
-  }
-  if (prescaler > 62) {
+  } else {
     prsclr = 62 >> 1;
   }
+
   timer->ecap_base->ECCTL1 |= PWMSS_ECAP_ECCTL1_EVTFLTPS(prsclr);
   timer->prescaler = (uint32_t) prsclr;
 
@@ -279,20 +278,19 @@ TIMER_ONESHOT(am57xx, timer, us) {
 TIMER_GET_TIME(am57xx, timer) {
 
 }
-
-#ifdef CONFIG_AM57XX_PWMSS
-struct pwmss {
-  struct pwm_generic gen;
-  struct timer *timer;
-  struct pinCFG pin;
-};
-PWM_INIT(am57xx, index) {
-  int32_t ret;
-  struct pwmss *pwmss;
-  struct timer *timer;
-  struct mux *mux = mux_init();
-  pwmss = PWM_GET_DEV(index);
-  **TODO ask if ok and finish this**
-}
-
 */
+
+#ifdef CONFIG_AM57XX_PWMSS1_TIMER
+static void am57xx_pwmss1_timer_IRQHandler();
+
+struct timer pwmss1_timer_data = {
+  TIMER_INIT_DEV(am57xx)
+  HAL_NAME("AM57xx Timer 1")
+  .base = 0x4843E000,
+  .ecap_base = 0x6843E100,
+  .irgHandler = am57xx_pwmss1_timer_IRQHandler,
+  .clkbase = 0x6A0097C4,
+};
+TIMER_ADDDEV(am57xx, pwmss1_timer_data);
+
+#endif
