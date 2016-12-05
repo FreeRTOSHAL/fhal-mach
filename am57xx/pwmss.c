@@ -280,6 +280,8 @@ TIMER_GET_TIME(am57xx, timer) {
 }
 */
 
+
+/*@Andy wenns ok ist kann ich auch timer2 und 3 hinzufügen!*/
 #ifdef CONFIG_AM57XX_PWMSS1_TIMER
 static void am57xx_pwmss1_timer_IRQHandler();
 
@@ -288,6 +290,7 @@ struct timer pwmss1_timer_data = {
   HAL_NAME("AM57xx Timer 1")
   .base = 0x4843E000,
   .ecap_base = 0x6843E100,
+  .irq = 
   .irgHandler = am57xx_pwmss1_timer_IRQHandler,
   .clkbase = 0x6A0097C4,
 };
