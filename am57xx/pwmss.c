@@ -2,6 +2,13 @@
 #define TIMER_PRV
 #include <timer_prv.h>
 
+
+#include <vector.h>
+#include <irq.h>
+#include <hal.h>
+#include <ctrl.h>
+#include <task.h>
+
 #define PWMSS_SYSCONFIG_IDLEMODE(x) (((x) & 0x3) << 2)
 #define PWMSS_SYSCONFIG_SOFTRESET BIT(0)
 
@@ -108,7 +115,7 @@ struct timer {
   uint64_t basetime;
   int64_t adjust;
   uint32_t prescaler;
-  bool (*callback)(struct timer *timer), void *data;
+  bool (*callback)(struct timer *timer, void *data);
   void *data;
   uint32_t irq;
   bool periodic; //?
@@ -200,7 +207,7 @@ TIMER_SET_OVERFLOW_CALLBACK(am57xx, timer, callback, data) {
     timer->ecap_base->ECEINT |= PWMSS_ECAP_ECEINT_CNTOVF;
     timer->ecap_base->ECFLG |= PWMSS_ECAP_ECFLG_CNTOVF;
   } else {
-    timer->ecap_base-> ECEINT &= ~PWMSS_ECAP_ECEINT_CNTOVF;
+    timer->ecap_base->ECEINT &= ~PWMSS_ECAP_ECEINT_CNTOVF;
     timer->ecap_base->ECFLG &= ~PWMSS_ECAP_ECFLG_CNTOVF;
   }
   return 0;
@@ -215,8 +222,8 @@ TIMER_STOP(am57xx, timer) {
 }
 
 
-/*@Andy: die beiden Umrechnugsfunktionen habe ich von dir übernommen.
-  bräuchte nochmal ne genaue Erklärung.
+/*@Andy: Copied counter functions from your code. Need explanation of
+  values or have to see it in tests to get hang of it
 */
 static uint64_t counterToUS(struct timer *timer, uint32_t value) {
 	/* Too Many Cast for Optimizer do it step by step */
@@ -268,9 +275,9 @@ TIMER_ONESHOT(am57xx, timer, us) {
   }
   ECCTL2 |= PWMSS_ECAP_ECCTL2_CONTONESHT;
 
-  /*@Andy: Muss ich hier alle Einstellungen im ECCTL2-Register löschen? */
+  /*@Andy: Do I have to reset all bits from control register? */
 
-  ECCTL2 = timer->ecap_base->ECCTL2;
+  timer->ecap_base->ECCTL2 = ECCTL2;
   return timer_start(timer);
 }
 
@@ -281,7 +288,19 @@ TIMER_GET_TIME(am57xx, timer) {
 */
 
 
-/*@Andy wenns ok ist kann ich auch timer2 und 3 hinzufügen!*/
+static void am57xx_pwmss_timer_IRQHandler(struct timer* timer) {
+  bool wakeThread = false;
+  uint32_t status = timer->ecap_base->ECFLG;
+
+  PRINTF("%lu: %p Tick status %lx\n", xTaskGetTickCount(), timer, status);
+  if (status & PWMSS_ECAP_ECFLG_CNTOVF) {
+    if (timer->callback){
+      wakeThread |= timer->callback(timer, timer->data);
+    }
+  }
+  portYIELD_FROM_ISR(wakeThread);
+}
+
 #ifdef CONFIG_AM57XX_PWMSS1_TIMER
 static void am57xx_pwmss1_timer_IRQHandler();
 
@@ -290,10 +309,51 @@ struct timer pwmss1_timer_data = {
   HAL_NAME("AM57xx Timer 1")
   .base = 0x4843E000,
   .ecap_base = 0x6843E100,
-  .irq = 
+  .irq = PWMSS1_IRQ_eCAP0INT,
   .irgHandler = am57xx_pwmss1_timer_IRQHandler,
   .clkbase = 0x6A0097C4,
 };
 TIMER_ADDDEV(am57xx, pwmss1_timer_data);
 
+static void am57xx_pwmss1_timer_IRQHandler() {
+  am57xx_pwmss_timer_IRQHandler(&pwmss1_timer_data);
+}
+#endif
+
+#ifdef CONFIG_AM57XX_PWMSS2_TIMER
+static void am57xx_pwmss2_timer_IRQHandler();
+
+struct timer pwmss2_timer_data = {
+  TIMER_INIT_DEV(am57xx)
+  HAL_NAME("AM57xx Timer 2")
+  .base = 0x48430000,
+  .ecap_base = 0x68430100,
+  .irq = PWMSS2_IRQ_eCAP1INT,
+  .irgHandler = am57xx_pwmss2_timer_IRQHandler,
+  .clkbase = 0x6A009790,
+};
+TIMER_ADDDEV(am57xx, pwmss2_timer_data);
+
+static void am57xx_pwmss1_timer_IRQHandler() {
+  am57xx_pwmss_timer_IRQHandler(&pwmss2_timer_data);
+}
+#endif
+
+#ifdef CONFIG_AM57XX_PWMSS3_TIMER
+static void am57xx_pwmss3_timer_IRQHandler();
+
+struct timer pwmss3_timer_data = {
+  TIMER_INIT_DEV(am57xx)
+  HAL_NAME("AM57xx Timer 3")
+  .base = 0x48432000,
+  .ecap_base = 0x68432100,
+  .irq = PWMSS3_IRQ_eCAP2INT,
+  .irgHandler = am57xx_pwmss3_timer_IRQHandler,
+  .clkbase = 0x6A009798,
+};
+TIMER_ADDDEV(am57xx, pwmss3_timer_data);
+
+static void am57xx_pwmss3_timer_IRQHandler() {
+  am57xx_pwmss_timer_IRQHandler(&pwmss3_timer_data);
+}
 #endif
