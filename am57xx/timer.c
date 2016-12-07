@@ -914,7 +914,7 @@ struct timer timer7_data = {
 # endif
 };
 TIMER_ADDDEV(am57xx, timer7_data);
-# ifdef CONFIG_AM57xx_TIMER2_PWM
+# ifdef CONFIG_AM57xx_TIMER7_PWM
 struct pwm pwm7_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 7")
@@ -1364,15 +1364,15 @@ struct pwm pwm14_data = {
 	.timer = &timer14_data,
 	/* TODO Muxing */
 	.pin = {
-		.pin = PAD_VIN1A_HSYNC0,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
-		.extra = MUX_INPUT,
-	},
-/*
-	.pin = {
 		.pin = PAD_XREF_CLK1,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
+	},
+/*
+	.pin = {
+		.pin = PAD_VIN1A_HSYNC0,
+		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.extra = MUX_INPUT,
 	},
 */
 };

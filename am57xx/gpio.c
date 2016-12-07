@@ -439,6 +439,7 @@ void am57xx_handleIRQ(struct gpio *gpio, uint8_t port, uint8_t nr) {
 	pins = gpio->pins[port];
 	status = base->IRQSTATUS[nr];
 
+	PRINTF("port: %u nr: %u status: %lu\n", port, nr, status);
 
 	for (i = 0; i < 32 && status != 0; i++, status >>= 1) {
 		if (status & 0x1) {
@@ -478,6 +479,7 @@ GPIO_INIT(am57xx, index) {
 			while((*clkreg) & (0x3 << 16));
 		}
 		gpio->base[i]->SYSCONFIG |= GPIO_SYSCONFIG_AUTOIDLE | GPIO_SYSCONFIG_ENAWAKEUP | GPIO_SYSCONFIG_IDLEMODE_SMART_IDLE;
+		gpio->base[i]->CTRL &= ~(GPIO_CTRL_DISABLEMODULE | GPIO_CTRL_GATERINGRATIO(0x3));
 		gpio->base[i]->CTRL |= GPIO_CTRL_GATERINGRATIO(0x0);
 	}
 	memset(gpio->pins, 0, sizeof(struct gpio_pin *) * 8 * 32);
@@ -488,18 +490,11 @@ GPIO_INIT(am57xx, index) {
 	if (ret < 0) { \
 		return NULL;\
 	} \
+	PRINTF("Setup IRQ for port: %d nr: %d IRQNR: %ld\n", gpioID, nr, ret); \
 	gpio->irq[i++] = (uint32_t) ret; \
 } while(0)
 	i = 0;
 	/* Map only second line */
-	/*MAP_GPIO_IRQ_HANDLER(i, 1, 1);
-	MAP_GPIO_IRQ_HANDLER(i, 2, 1);
-	MAP_GPIO_IRQ_HANDLER(i, 3, 1);
-	MAP_GPIO_IRQ_HANDLER(i, 4, 1);
-	MAP_GPIO_IRQ_HANDLER(i, 5, 1);
-	MAP_GPIO_IRQ_HANDLER(i, 6, 1);
-	MAP_GPIO_IRQ_HANDLER(i, 7, 1);
-	MAP_GPIO_IRQ_HANDLER(i, 8, 1);*/
 
 	/* Second Line is defaut maped on no Prozessor */
 	MAP_GPIO_IRQ_HANDLER(i, 1, 2);
@@ -510,7 +505,7 @@ GPIO_INIT(am57xx, index) {
 	MAP_GPIO_IRQ_HANDLER(i, 6, 2);
 	MAP_GPIO_IRQ_HANDLER(i, 7, 2);
 	MAP_GPIO_IRQ_HANDLER(i, 8, 2);
-	for (i = 0; i < 16; i++) {
+	for (i = 0; i < 8; i++) {
 		ret = irq_setPrio(gpio->irq[i], 0xFF);
 		if (ret < 0) {
 			return NULL;
@@ -616,7 +611,7 @@ GPIO_PIN_DISABLE_INTERRUPT(am57xx, pin) {
 	pin->base->IRQSTATUS_CLR[1] = BIT(pin->pin);
 	pin->base->RISINGDETECT &= ~BIT(pin->pin);
 	pin->base->FALLINGDETECT &= ~BIT(pin->pin);
-	pin->base->LEVELDETECT[1] &= ~~BIT(pin->pin);
+	pin->base->LEVELDETECT[1] &= ~BIT(pin->pin);
 	return -1;
 }
 GPIO_PIN_SET_CALLBACK(am57xx, pin, callback, data, inter) {
@@ -634,7 +629,7 @@ static int32_t gpioPin_setup(struct gpio_pin *pin) {
 		return -1;
 	}
 	/* Input mode is bidirectional */
-	extra |= MUX_INPUT;
+	extra |= MUX_INPUT | MUX_WAKEUP;
 	switch (pin->dir) {
 		case GPIO_INPUT:
 			pin->base->OE |= GPIO_OUTPUTEN(pin->pin);
