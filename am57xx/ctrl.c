@@ -21,6 +21,7 @@
  * IN THE SOFTWARE.
  */
 #include <FreeRTOS.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <irq.h>
 #include <vector.h>

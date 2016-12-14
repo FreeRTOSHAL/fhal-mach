@@ -2,12 +2,14 @@
 #define TIMER_PRV
 #include <timer_prv.h>
 
-
+#include <FreeRTOS.h>
 #include <vector.h>
 #include <irq.h>
 #include <hal.h>
 #include <ctrl.h>
 #include <task.h>
+#define PRINTF(fmt, ...)
+
 
 #define PWMSS_SYSCONFIG_IDLEMODE(x) (((x) & 0x3) << 2)
 #define PWMSS_SYSCONFIG_SOFTRESET BIT(0)
@@ -107,7 +109,7 @@ struct pwmss_cfg_reg {
   uint32_t SYSCONFIG; /* 0x4 */
   uint32_t CLKCONFIG; /* 0x8 */
   uint32_t CLKSTATUS; /* 0xC */
-  uint32_t reserved1[241] /* 0x10 - 0xFC */
+  uint32_t reserved1[241]; /* 0x10 - 0xFC */
   struct ecap_reg ecap_base;
 };
 struct timer {
@@ -132,11 +134,11 @@ TIMER_INIT(am57xx, index, prescaler, basetime, adjust) {
   struct timer *timer;
   timer = TIMER_GET_DEV(index);
   if (timer == NULL) {
-    goto am5xx_pwmss_init_error0;
+    goto am57xx_pwmss_init_error0;
   }
   ret = timer_generic_init(timer);
   if (ret < 0) {
-    goto am5xx_pwmss_init_error0;
+    goto am57xx_pwmss_init_error0;
   }
   if (ret > 0) {
     goto am57xx_pwmss_init_exit;
@@ -214,11 +216,13 @@ TIMER_SET_OVERFLOW_CALLBACK(am57xx, timer, callback, data) {
 }
 
 TIMER_START(am57xx, timer) {
-  timer->ecap_reg->ECCTL2 |= PWMSS_ECAP_ECCTL2_TSCNTSTP;
+  timer->ecap_base->ECCTL2 |= PWMSS_ECAP_ECCTL2_TSCNTSTP;
+  return 0;
 }
 
 TIMER_STOP(am57xx, timer) {
-  timer->ecap_reg->ECCTL2 &= ~PWMSS_ECAP_ECCTL2_TSCNTSTP;
+  timer->ecap_base->ECCTL2 &= ~PWMSS_ECAP_ECCTL2_TSCNTSTP;
+  return 0;
 }
 
 
@@ -307,18 +311,18 @@ static void am57xx_pwmss1_timer_IRQHandler();
 struct timer pwmss1_timer_data = {
   TIMER_INIT_DEV(am57xx)
   HAL_NAME("AM57xx Timer 1")
-  .base = 0x4843E000,
-  .ecap_base = 0x6843E100,
+  .base = (struct pwmss_cfg_reg*) 0x4843E000,
+  .ecap_base = (struct ecap_reg*) 0x6843E100,
   .irq = PWMSS1_IRQ_eCAP0INT,
-  .irgHandler = am57xx_pwmss1_timer_IRQHandler,
-  .clkbase = 0x6A0097C4,
+  .irqHandler = am57xx_pwmss1_timer_IRQHandler,
+  .clkbase = (uint32_t*) 0x6A0097C4,
 };
 TIMER_ADDDEV(am57xx, pwmss1_timer_data);
 
 static void am57xx_pwmss1_timer_IRQHandler() {
   am57xx_pwmss_timer_IRQHandler(&pwmss1_timer_data);
 }
-#endif
+#endif /* CONFIG_AM57XX_PWMSS1_TIMER */
 
 #ifdef CONFIG_AM57XX_PWMSS2_TIMER
 static void am57xx_pwmss2_timer_IRQHandler();
@@ -326,18 +330,18 @@ static void am57xx_pwmss2_timer_IRQHandler();
 struct timer pwmss2_timer_data = {
   TIMER_INIT_DEV(am57xx)
   HAL_NAME("AM57xx Timer 2")
-  .base = 0x48430000,
-  .ecap_base = 0x68430100,
+  .base = (struct pwmss_cfg_reg*) 0x48430000,
+  .ecap_base = (struct ecap_reg*) 0x68430100,
   .irq = PWMSS2_IRQ_eCAP1INT,
-  .irgHandler = am57xx_pwmss2_timer_IRQHandler,
-  .clkbase = 0x6A009790,
+  .irqHandler = am57xx_pwmss2_timer_IRQHandler,
+  .clkbase = (uint32_t*) 0x6A009790,
 };
 TIMER_ADDDEV(am57xx, pwmss2_timer_data);
 
-static void am57xx_pwmss1_timer_IRQHandler() {
+static void am57xx_pwmss2_timer_IRQHandler() {
   am57xx_pwmss_timer_IRQHandler(&pwmss2_timer_data);
 }
-#endif
+#endif /* CONFIG_AM57XX_PWMSS2_TIMER */
 
 #ifdef CONFIG_AM57XX_PWMSS3_TIMER
 static void am57xx_pwmss3_timer_IRQHandler();
@@ -345,15 +349,15 @@ static void am57xx_pwmss3_timer_IRQHandler();
 struct timer pwmss3_timer_data = {
   TIMER_INIT_DEV(am57xx)
   HAL_NAME("AM57xx Timer 3")
-  .base = 0x48432000,
-  .ecap_base = 0x68432100,
+  .base = (struct pwmss_cfg_reg*) 0x48432000,
+  .ecap_base = (struct ecap_reg*) 0x68432100,
   .irq = PWMSS3_IRQ_eCAP2INT,
-  .irgHandler = am57xx_pwmss3_timer_IRQHandler,
-  .clkbase = 0x6A009798,
+  .irqHandler = am57xx_pwmss3_timer_IRQHandler,
+  .clkbase = (uint32_t*) 0x6A009798,
 };
 TIMER_ADDDEV(am57xx, pwmss3_timer_data);
 
 static void am57xx_pwmss3_timer_IRQHandler() {
   am57xx_pwmss_timer_IRQHandler(&pwmss3_timer_data);
 }
-#endif
+#endif /* CONFIG_AM57XX_PWMSS3_TIMER */

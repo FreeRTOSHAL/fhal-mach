@@ -2,7 +2,7 @@ comment "AM57xx Settings"
 config MAX_SYSCALL_INTERRUPT_PRIORITY
 	hex
 	default 0x20
-config KERNEL_INTERRUPT_PRIORITY 
+config KERNEL_INTERRUPT_PRIORITY
 	hex
 	default 0xf0
 
@@ -13,7 +13,7 @@ config MACH_INIT_STACK_SIZE
 		Stack Size of Init Prozess. Stack size used by Interrupt and Init Prozess
 
 config MACH_LD_SCRIPT
-	string 
+	string
 	default "mach/am57xx/am57xx.lds"
 
 config MACH_INCLUDE
@@ -78,3 +78,8 @@ menuconfig AM57xx_TIMER
 	bool "Am57xx General-Purpose Timers"
 	default n
 	source mach/am57xx/Kconfig.timer
+menuconfig AM57xx_PWMSS_TIMER
+	depends on TIMER
+	bool "AM57xx PWMSS Timer"
+	default n
+	source mach/am57xx/Kconfig.pwmss
