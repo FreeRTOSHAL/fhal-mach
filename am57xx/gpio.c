@@ -469,7 +469,7 @@ GPIO_INIT(am57xx, index) {
 		return gpio;
 	}
 	for (i = 0; i < 8; i++) {
-		volatile uint32_t *clkreg = gpio->clkbase[i]; 
+		volatile uint32_t *clkreg = gpio->clkbase[i];
 		for (j = 0; j < 32; j++) {
 			gpio->pins[i][j] = NULL;
 		}
@@ -523,7 +523,7 @@ GPIO_INIT(am57xx, index) {
 	return gpio;
 }
 GPIO_DEINIT(am57xx, gpio) {
-	// TODO 
+	// TODO
 	return 0;
 }
 GPIO_PIN_INIT(am57xx, gpio, offset, dir, setting) {
@@ -583,7 +583,7 @@ am57xx_gpio_pin_init_error1:
 am57xx_gpio_pin_init_error0:
 	return NULL;
 }
-GPIO_PIN_DEINIT(ns, pin) {
+GPIO_PIN_DEINIT(am57xx, pin) {
 	pin->gpio->pins[pin->bank][pin->pin] = NULL;
 	vPortFree(pin);
 	return 0;
@@ -655,7 +655,7 @@ static int32_t gpioPin_setup(struct gpio_pin *pin) {
 			break;
 	}
 	ctl |= MUX_CTL_MODE(0xE);
-	ret = mux_pinctl(mux, pin->offset, ctl, extra); 
+	ret = mux_pinctl(mux, pin->offset, ctl, extra);
 	return ret;
 }
 GPIO_PIN_SET_DIRECTION(am57xx, pin, dir) {
@@ -708,7 +708,7 @@ GPIO_PIN_TOGGLE_PIN(am57xx, pin) {
 GPIO_PIN_GET_VALUE(am57xx, pin) {
 	return GPIO_DATAIN(pin->pin, pin->base->DATAIN) == 0x1;
 }
-GPIO_OPS(am57xx)
+GPIO_OPS(am57xx);
 struct gpio am57xx_gpio_data = {
 	GPIO_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx GPIO")

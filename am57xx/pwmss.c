@@ -226,9 +226,6 @@ TIMER_STOP(am57xx, timer) {
 }
 
 
-/*@Andy: Copied counter functions from your code. Need explanation of
-  values or have to see it in tests to get hang of it
-*/
 static uint64_t counterToUS(struct timer *timer, uint32_t value) {
 	/* Too Many Cast for Optimizer do it step by step */
 	uint64_t diff;
@@ -279,18 +276,14 @@ TIMER_ONESHOT(am57xx, timer, us) {
   }
   ECCTL2 |= PWMSS_ECAP_ECCTL2_CONTONESHT;
 
-  /*@Andy: Do I have to reset all bits from control register? */
-
   timer->ecap_base->ECCTL2 = ECCTL2;
   return timer_start(timer);
 }
 
-/*TODO
 TIMER_GET_TIME(am57xx, timer) {
-
+	uint32_t counter = timer->ecap_base->TSCNT;
+  return counterToUS(timer, counter);
 }
-*/
-
 
 static void am57xx_pwmss_timer_IRQHandler(struct timer* timer) {
   bool wakeThread = false;

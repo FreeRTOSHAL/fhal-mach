@@ -3,7 +3,7 @@
 #include <hal.h>
 HAL_DEFINE_GLOBAL_ARRAY(mailbox);
 /**
- * Get Mailbox ID 
+ * Get Mailbox ID
  * \param id Mailbox Contoller ID 1 - 13
  * \param subid Mailbox ID in Contoller 0 - 11
  * \return Mailbox ID in GLobal array
@@ -67,4 +67,7 @@ HAL_DEFINE_GLOBAL_ARRAY(capture);
 #define CAPTURE14_ID HAL_GET_ID(capture, am57xx, capture14_data)
 #define CAPTURE15_ID HAL_GET_ID(capture, am57xx, capture15_data)
 #define CAPTURE16_ID HAL_GET_ID(capture, am57xx, capture16_data)
+#define PWMSS1_TIMER_ID HAL_GET_ID(timer, am57xx, pwmss1_timer_data)
+#define PWMSS2_TIMER_ID HAL_GET_ID(timer, am57xx, pwmss2_timer_data)
+#define PWMSS3_TIMER_ID HAL_GET_ID(timer, am57xx, pwmss3_timer_data)
 #endif
