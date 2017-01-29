@@ -167,7 +167,7 @@ TIMER_INIT(am57xx, index, prescaler, basetime, adjust) {
 	}
 	timer->irq = (uint32_t) ret;
 	PRINTF("IRQNr: %lu\n", timer->irq);
-	ret = irq_setPrio(timer->irq, 0xFF);
+	ret = irq_setPrio(timer->irq, 0xFE);
 	if (ret < 0) {
 		goto am57xx_timer_init_error1;
 	}
