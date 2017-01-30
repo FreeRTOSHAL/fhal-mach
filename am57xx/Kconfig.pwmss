@@ -1,12 +1,36 @@
 if AM57xx_PWMSS_TIMER=y
-config AM57XX_PWMSS1_TIMER
+config AM57xx_PWMSS_TIMER_DEBUG
+  bool "PWMSS Timer Debug"
+  default n
+config AM57xx_PWMSS_CAPTURE
+  bool "Enable PWMSS Capture Support"
+  depends on CAPTURE
+  default n
+config AM57xx_PWMSS1_TIMER
   bool "PWMSS1-Timer"
   default n
-config AM57XX_PWMSS2_TIMER
+  if AM57xx_PWMSS1_TIMER = y
+    config AM57xx_PWMSS1_CAPTURE
+      bool "Enable PWMSS1 Capture"
+      depends on AM57xx_PWMSS_CAPTURE
+      default n
+  endif
+config AM57xx_PWMSS2_TIMER
   bool "PWMSS2-Timer"
   default n
-config AM57XX_PWMSS3_TIMER
+  if AM57xx_PWMSS2_TIMER = y
+    config AM57xx_PWMSS2_CAPTURE
+      bool "Enable PWMSS2 Capture"
+      depends on AM57xx_PWMSS_CAPTURE
+      default n
+  endif
+config AM57xx_PWMSS3_TIMER
   bool "PWMSS3-Timer"
   default n
-
+  if AM57xx_PWMSS3_TIMER = y
+    config AM57xx_PWMSS3_CAPTURE
+      bool "Enable PWMSS3 Capture"
+      depends on AM57xx_PWMSS_CAPTURE
+      default n
+  endif
 endif

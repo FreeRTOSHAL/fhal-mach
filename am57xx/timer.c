@@ -225,12 +225,12 @@ static uint64_t counterToUS(struct timer *timer, uint32_t value) {
 		} else {
 			diff += (uint64_t) timer->adjust;
 		}
-		us = (v * p) / 20 /* MHz */; 
+		us = (v * p) / 20 /* MHz */;
 		us = (us * b) / diff;
 	} else {
-		us = (v * p) / 20 /* MHz */; 
+		us = (v * p) / 20 /* MHz */;
 	}
-	
+
 
 	return us;
 }
