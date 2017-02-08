@@ -1348,7 +1348,7 @@ extern struct capture capture14_data;
 struct timer timer14_data = {
 	TIMER_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Timer 14")
-	.base = (struct timer_reg *) 0x6A0097D0,
+	.base = (struct timer_reg *) 0x6882A000,
 	.irqBase = TIMER14_IRQ,
 	.clkbase = (uint32_t *) 0x6A0097D0,
 	.irqHandler = am57xx_timer_IRQHandler14,
@@ -1366,7 +1366,7 @@ struct pwm pwm14_data = {
 	.pin = {
 		.pin = PAD_XREF_CLK1,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
-		.extra = MUX_INPUT | MUX_WAKEUP,
+		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
@@ -1385,15 +1385,15 @@ struct capture capture14_data = {
 	.timer = &timer14_data,
 	/* TODO Muxing */
 	.pin = {
-		.pin = PAD_VIN1A_HSYNC0,
-		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
-		.extra = MUX_INPUT,
-	},
-/*
-	.pin = {
 		.pin = PAD_XREF_CLK1,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
+	},
+/*
+	.pin = {
+		.pin = PAD_VIN1A_HSYNC0,
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
+		.extra = MUX_INPUT,
 	},
 */
 };
