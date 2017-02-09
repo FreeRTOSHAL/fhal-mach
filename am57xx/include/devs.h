@@ -70,4 +70,7 @@ HAL_DEFINE_GLOBAL_ARRAY(capture);
 #define PWMSS1_TIMER_ID HAL_GET_ID(timer, am57xx, pwmss1_timer_data)
 #define PWMSS2_TIMER_ID HAL_GET_ID(timer, am57xx, pwmss2_timer_data)
 #define PWMSS3_TIMER_ID HAL_GET_ID(timer, am57xx, pwmss3_timer_data)
+#define PWMSS1_CAPTURE_ID HAL_GET_ID(capture, am57xx, pwmss1_capture_data)
+#define PWMSS2_CAPTURE_ID HAL_GET_ID(capture, am57xx, pwmss2_capture_data)
+#define PWMSS3_CAPTURE_ID HAL_GET_ID(capture, am57xx, pwmss3_capture_data)
 #endif

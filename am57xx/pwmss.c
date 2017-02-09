@@ -11,6 +11,8 @@
 #include <hal.h>
 #include <ctrl.h>
 #include <task.h>
+#include <mux.h>
+#include <iomux.h>
 #ifdef CONFIG_AM57xx_PWMSS_TIMER_DEBUG
 # define PRINTF(fmt, ...) printf("TIMER: " fmt, ##__VA_ARGS__)
 #else
@@ -326,7 +328,7 @@ static void am57xx_pwmss_timer_IRQHandler(struct timer* timer) {
   }
 
 #ifdef CONFIG_AM57xx_PWMSS_CAPTURE
-  if (status & PWMSS_ECAP_ECFLG_INT $$ timer->callback) {
+  if (status & PWMSS_ECAP_ECFLG_INT && timer->callback) {
     wakeThread |= am57xx_pwmss_capture_IRQHandler(timer->capture);
   }
 #endif
@@ -341,16 +343,15 @@ struct capture {
   void *data;
   struct timer *timer;
   struct pinCFG pin;
-}
+};
 
 CAPTURE_INIT(am57xx, index) {
   struct mux *mux = mux_init();
   struct capture *capture = CAPTURE_GET_DEV(index);
   if (capture == NULL) {
-    return am57xx_capture_init_error0;
+    goto am57xx_capture_init_error0;
   }
   int32_t ret;
-  struct timer *ftm = capture->timer;
   ret = capture_generic_init(capture);
   if (ret < 0) {
     goto am57xx_capture_init_exit;
@@ -367,11 +368,11 @@ CAPTURE_INIT(am57xx, index) {
     PRINTF("mux not working\n");
     goto am57xx_capture_init_error1;
   }
-am57xx_caputre_init_exit:
+am57xx_capture_init_exit:
   return capture;
-am57xx_caputre_init_error1:
+am57xx_capture_init_error1:
   capture->gen.init = false;
-am57xx_caputre_init_error0:
+am57xx_capture_init_error0:
   return NULL;
 }
 
@@ -387,9 +388,10 @@ CAPTURE_SET_CALLBACK(am57xx, capture, callback, data) {
     capture->timer->ecap_base->ECEINT |= PWMSS_ECAP_ECEINT_CEVT1;
     capture->timer->ecap_base->ECFLG |= PWMSS_ECAP_ECFLG_CEVT1;
   } else {
-    capture->timer->ecap_base->ECEINT &= ~PWMSS_ECAP_ECEINT_CEVT1;
-    capture->timer->ecap_base->ECFLG &= ~PWMSS_ECAP_ECFLG_CEVT1;
+    //capture->timer->ecap_base->ECEINT &= ~PWMSS_ECAP_ECEINT_CEVT1;
+    capture->timer->ecap_base->ECCLR |= PWMSS_ECAP_ECCLR_CEVT1;
   }
+  return 0;
 }
 
 CAPTURE_SET_PERIOD(am57xx, capture, us) {
@@ -397,7 +399,7 @@ CAPTURE_SET_PERIOD(am57xx, capture, us) {
   struct timer *timer = capture->timer;
   struct ecap_reg *ecap = timer->ecap_base;
   if (ecap->ECCTL2 & PWMSS_ECAP_ECCTL2_TSCNTSTP) {
-    ret = stop_timer(timer);
+    ret = timer_stop(timer);
     if (ret < 0){
       return -1;
     }
@@ -415,15 +417,17 @@ CAPTURE_SET_PERIOD(am57xx, capture, us) {
   PRINTF("Setup Counter to: 0x%lx\n", ecap->TSCNT);
 
   timer_start(timer);
+  return 0;
 }
 
 CAPTURE_GET_TIME(am57xx, capture) {
-  timer_getTime(counter->timer);
+  timer_getTime(capture->timer);
+  return 0;
 }
 
 CAPTURE_GET_CHANNEL_TIME(am57xx, capture) {
   struct timer *timer = capture->timer;
-  struct ecap_base *ecap = timer->ecap_base;
+  struct ecap_reg *ecap = timer->ecap_base;
   uint32_t counter = ecap->TSCNT - ecap->CNTPHS;
   return counterToUS(timer, counter);
 }
@@ -465,11 +469,11 @@ TIMER_ADDDEV(am57xx, pwmss1_timer_data);
 struct capture pwmss1_capture_data {
   CAPTURE_INIT_DEV(am57xx)
   HAL_NAME("AM57xx PWMSS Capture 1")
-  .timer = pwmss1_timer_data,
+  .timer = &pwmss1_timer_data,
   .pin = {
-    .pin =
-    .cfg =
-    .extra =
+    .pin = PAD_VIN2A_D2,
+    .cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
+    .extra = MUX_INPUT,
   },
 };
 CAPTURE_ADDDEV(am57xx, pwmss1_capture_data);
@@ -491,8 +495,8 @@ extern struct capture pwmss2_capture_data;
 struct timer pwmss2_timer_data = {
   TIMER_INIT_DEV(am57xx)
   HAL_NAME("AM57xx Timer 2")
-  .base = (struct pwmss_cfg_reg*) 0x68430000,
-  .ecap_base = (struct ecap_reg*) 0x68430100,
+  .base = (struct pwmss_cfg_reg*) 0x68440000,
+  .ecap_base = (struct ecap_reg*) 0x68440100,
   .irq = PWMSS2_IRQ_eCAP1INT,
   .irqHandler = am57xx_pwmss2_timer_IRQHandler,
   .clkbase = (uint32_t*) 0x6A009790,
@@ -503,14 +507,14 @@ struct timer pwmss2_timer_data = {
 TIMER_ADDDEV(am57xx, pwmss2_timer_data);
 
 #ifdef CONFIG_AM57xx_PWMSS2_CAPTURE
-struct capture pwmss2_capture_data {
+struct capture pwmss2_capture_data = {
   CAPTURE_INIT_DEV(am57xx)
   HAL_NAME("AM57xx PWMSS Capture 2")
-  .timer = pwmss2_timer_data,
+  .timer = &pwmss2_timer_data,
   .pin = {
-    .pin =
-    .cfg =
-    .extra =
+    .pin = PAD_VIN2A_D12,
+    .cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
+    .extra = MUX_INPUT,
   },
 };
 CAPTURE_ADDDEV(am57xx, pwmss2_capture_data);
@@ -531,8 +535,8 @@ extern struct capture pwmss3_capture_data;
 struct timer pwmss3_timer_data = {
   TIMER_INIT_DEV(am57xx)
   HAL_NAME("AM57xx Timer 3")
-  .base = (struct pwmss_cfg_reg*) 0x68432000,
-  .ecap_base = (struct ecap_reg*) 0x68432100,
+  .base = (struct pwmss_cfg_reg*) 0x68442000,
+  .ecap_base = (struct ecap_reg*) 0x68442100,
   .irq = PWMSS3_IRQ_eCAP2INT,
   .irqHandler = am57xx_pwmss3_timer_IRQHandler,
   .clkbase = (uint32_t*) 0x6A009798,
@@ -546,11 +550,11 @@ TIMER_ADDDEV(am57xx, pwmss3_timer_data);
 struct capture pwmss3_capture_data {
   CAPTURE_INIT_DEV(am57xx)
   HAL_NAME("AM57xx PWMSS Capture 3")
-  .timer = pwmss3_timer_data,
+  .timer = &pwmss3_timer_data,
   .pin = {
-    .pin =
-    .cfg =
-    .extra =
+    .pin = PAD_VIN2A_D20,
+    .cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
+    .extra = MUX_INPUT,
   },
 };
 CAPTURE_ADDDEV(am57xx, pwmss3_capture_data);
