@@ -1048,14 +1048,14 @@ struct pwm pwm9_data = {
 	.timer = &timer9_data,
 	/* TODO Muxing */
 	.pin = {
-		.pin = PAD_GPMC_A11,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.pin = PAD_MCASP1_AXR12,
+		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
-		.pin = PAD_MCASP1_AXR12,
-		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.pin = PAD_GPMC_A11,
+		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 */
@@ -1069,14 +1069,14 @@ struct capture capture9_data = {
 	.timer = &timer9_data,
 	/* TODO Muxing */
 	.pin = {
-		.pin = PAD_GPMC_A11,
-		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
+		.pin = PAD_MCASP1_AXR12,
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
 /*
 	.pin = {
-		.pin = PAD_MCASP1_AXR12,
-		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
+		.pin = PAD_GPMC_A11,
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
 */
