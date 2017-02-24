@@ -202,6 +202,10 @@ TIMER_INIT(am57xx, index, prescaler, basetime, adjust) {
   if (ret < 0) {
     goto am57xx_pwmss_init_error1;
   }
+  ret = irq_enable(timer->irq);
+  if (ret < 0) {
+    goto am57xx_pwmss_init_error1;
+  }
 am57xx_pwmss_init_exit:
   return timer;
 am57xx_pwmss_init_error1:
@@ -219,7 +223,6 @@ TIMER_SET_OVERFLOW_CALLBACK(am57xx, timer, callback, data) {
   timer->data = data;
   if (callback != NULL) {
     timer->ecap_base->ECEINT |= PWMSS_ECAP_ECEINT_CNTOVF;
-    timer->ecap_base->ECFLG |= PWMSS_ECAP_ECFLG_CNTOVF;
   } else {
     timer->ecap_base->ECEINT &= ~PWMSS_ECAP_ECEINT_CNTOVF;
     timer->ecap_base->ECFLG &= ~PWMSS_ECAP_ECFLG_CNTOVF;
@@ -319,20 +322,24 @@ static bool am57xx_pwmss_capture_IRQHandler(struct capture *capture);
 
 static void am57xx_pwmss_timer_IRQHandler(struct timer* timer) {
   bool wakeThread = false;
-  uint32_t status = timer->ecap_base->ECFLG;
-
+  struct ecap_reg *ecap = timer->ecap_base;
+  uint32_t status = ecap->ECFLG;
   PRINTF("%lu: %p Tick status %lx\n", xTaskGetTickCount(), timer, status);
 
   if (status & PWMSS_ECAP_ECFLG_CNTOVF && timer->callback) {
+    ecap->ECCLR |= PWMSS_ECAP_ECCLR_CNTOVF;
+    ecap->ECCLR |= PWMSS_ECAP_ECCLR_INT;
+    //ecap->ECCLR &= ~PWMSS_ECAP_ECCLR_CNTOVF;
+    status = ecap->ECFLG;
     wakeThread |= timer->callback(timer, timer->data);
+    printf("Stats: %u\n", (unsigned) status);
   }
-
 #ifdef CONFIG_AM57xx_PWMSS_CAPTURE
   if (status & PWMSS_ECAP_ECFLG_INT && timer->callback) {
     wakeThread |= am57xx_pwmss_capture_IRQHandler(timer->capture);
   }
 #endif
-
+  printf("my pins togglinn: %d\n", wakeThread);
   portYIELD_FROM_ISR(wakeThread);
 }
 
@@ -456,7 +463,7 @@ struct timer pwmss1_timer_data = {
   HAL_NAME("AM57xx Timer 1")
   .base = (struct pwmss_cfg_reg*) 0x6843E000,
   .ecap_base = (struct ecap_reg*) 0x6843E100,
-  .irq = PWMSS1_IRQ_eCAP0INT,
+  .irqBase = PWMSS1_IRQ_eCAP0INT,
   .irqHandler = am57xx_pwmss1_timer_IRQHandler,
   .clkbase = (uint32_t*) 0x6A0097C4,
 #ifdef CONFIG_AM57xx_PWMSS1_CAPTURE
@@ -497,7 +504,7 @@ struct timer pwmss2_timer_data = {
   HAL_NAME("AM57xx Timer 2")
   .base = (struct pwmss_cfg_reg*) 0x68440000,
   .ecap_base = (struct ecap_reg*) 0x68440100,
-  .irq = PWMSS2_IRQ_eCAP1INT,
+  .irqBase = PWMSS2_IRQ_eCAP1INT,
   .irqHandler = am57xx_pwmss2_timer_IRQHandler,
   .clkbase = (uint32_t*) 0x6A009790,
 #ifdef CONFIG_AM57xx_PWMSS2_CAPTURE
@@ -537,7 +544,7 @@ struct timer pwmss3_timer_data = {
   HAL_NAME("AM57xx Timer 3")
   .base = (struct pwmss_cfg_reg*) 0x68442000,
   .ecap_base = (struct ecap_reg*) 0x68442100,
-  .irq = PWMSS3_IRQ_eCAP2INT,
+  .irqBase = PWMSS3_IRQ_eCAP2INT,
   .irqHandler = am57xx_pwmss3_timer_IRQHandler,
   .clkbase = (uint32_t*) 0x6A009798,
 #ifdef CONFIG_AM57xx_PWMSS3_CAPTURE
