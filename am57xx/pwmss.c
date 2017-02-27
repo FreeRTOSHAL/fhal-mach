@@ -37,8 +37,6 @@
 #define PWMSS_CLKCONFIG_ECAP_CLKSTOP_ACK BIT(1)
 #define PWMSS_CLKCONFIG_ECAP_CLK_EN_ACK BIT(0)
 
-
-
 /*ECAP-Funktionality*/
 #define PWMSS_ECAP_ECCTL1_FREESOFT(x) (((x) & 0x3) << 14)
 #define PWMSS_ECAP_ECCTL1_EVTFLTPS(x) (((x) & 0x1F) << 9)
@@ -179,7 +177,10 @@ TIMER_INIT(am57xx, index, prescaler, basetime, adjust) {
 
   timer->base->SYSCONFIG = reg;
 
-  if (prescaler <= 62) {
+
+  if (prescaler == 1) {
+    prsclr = 0;
+  } else if (prescaler <= 62) {
       if ((prescaler%2) == 0) {
         prsclr = prescaler >> 1;
       } else {
@@ -190,7 +191,6 @@ TIMER_INIT(am57xx, index, prescaler, basetime, adjust) {
   }
 
   timer->ecap_base->ECCTL1 |= PWMSS_ECAP_ECCTL1_EVTFLTPS(prsclr);
-  timer->prescaler = (uint32_t) prsclr;
 
   ret = ctrl_setHandler(timer->irqBase, timer->irqHandler);
   if (ret < 0) {
@@ -225,7 +225,6 @@ TIMER_SET_OVERFLOW_CALLBACK(am57xx, timer, callback, data) {
     timer->ecap_base->ECEINT |= PWMSS_ECAP_ECEINT_CNTOVF;
   } else {
     timer->ecap_base->ECEINT &= ~PWMSS_ECAP_ECEINT_CNTOVF;
-    timer->ecap_base->ECFLG &= ~PWMSS_ECAP_ECFLG_CNTOVF;
   }
   return 0;
 }
@@ -243,37 +242,43 @@ TIMER_STOP(am57xx, timer) {
 
 static uint64_t counterToUS(struct timer *timer, uint32_t value) {
 	/* Too Many Cast for Optimizer do it step by step */
-	uint64_t diff;
+
 	uint64_t us;
-	uint64_t v = value;
-	uint64_t p = timer->prescaler;
-	uint64_t b = timer->basetime;
-	diff = timer->basetime;
+  uint64_t p = timer->prescaler;
+  uint64_t v = value;
+  if (timer->adjust != 0) {
+  	uint64_t diff;
+  	uint64_t b = timer->basetime;
+  	diff = timer->basetime;
 	/* Fix basetime > UINT32_t ! */
-	if (timer->adjust < 0) {
-		diff -= (uint64_t) timer->adjust;
-	} else {
-		diff += (uint64_t) timer->adjust;
-	}
 
-	us = (v * p) / 20 /* MHz */;
-	us = (us * b) / diff;
-
+  	if (timer->adjust < 0) {
+  		diff -= (uint64_t) timer->adjust;
+  	} else {
+  		diff += (uint64_t) timer->adjust;
+  	}
+  	us = (v * p) / 133 /* MHz */;
+  	us = (us * b) / diff;
+  } else {
+    us = (v * p) / 133 /* MHz */;
+  }
 	return us;
 }
 static uint64_t USToCounter(struct timer *timer, uint64_t value) {
 	uint64_t p = timer->prescaler;
 	uint64_t b = timer->basetime;
 	uint64_t diff = timer->basetime;
+  uint64_t us = value;
 	/* Fix basetime > UINT32_t ! */
-	if (timer->adjust < 0) {
-		diff -= (uint64_t) timer->adjust;
-	} else {
-		diff += (uint64_t) timer->adjust;
-	}
-
-	uint64_t us = (value * diff) / b;
-	uint64_t counterValue = (20 /* MHz */ * us) / (p);
+  if (timer->adjust != 0) {
+  	if (timer->adjust < 0) {
+  		diff -= (uint64_t) timer->adjust;
+  	} else {
+  		diff += (uint64_t) timer->adjust;
+  	}
+  	us = (value * diff) / b;
+  }
+  uint64_t counterValue = (133 /* MHz */ * us) / (p);
 	PRINTF("us: %llu counterValue: %llu\n", value, counterValue);
 
 	return counterValue;
@@ -281,23 +286,27 @@ static uint64_t USToCounter(struct timer *timer, uint64_t value) {
 
 TIMER_ONESHOT(am57xx, timer, us) {
   uint32_t ret;
-  uint32_t ECCTL2 = timer->ecap_base->ECCTL2;
+  struct ecap_reg *ecap = timer->ecap_base;
+  uint32_t ECCTL2 = ecap->ECCTL2;
   if(ECCTL2 & PWMSS_ECAP_ECCTL2_TSCNTSTP) {
-    ECCTL2 = timer->ecap_base->ECCTL2;
+    ECCTL2 = ecap->ECCTL2;
     ret = timer_stop(timer);
     if (ret < 0) {
       return -1;
     }
   }
+  ecap->TSCNT = UINT32_MAX - USToCounter(timer, us);
+  timer->periodic = false;
   ECCTL2 |= PWMSS_ECAP_ECCTL2_CONTONESHT;
 
-  timer->ecap_base->ECCTL2 = ECCTL2;
+  ecap->ECCTL2 = ECCTL2;
   return timer_start(timer);
 }
 TIMER_PERIODIC(am57xx, timer, us) {
 
   uint32_t ret;
-  uint32_t ECCTL2 = timer->ecap_base->ECCTL2;
+  struct ecap_reg *ecap = timer->ecap_base;
+  uint32_t ECCTL2 = ecap->ECCTL2;
   if(ECCTL2 & PWMSS_ECAP_ECCTL2_TSCNTSTP) {
     ret = timer_stop(timer);
     if (ret < 0) {
@@ -305,8 +314,11 @@ TIMER_PERIODIC(am57xx, timer, us) {
     }
   }
   timer->periodic = true;
-
+  ecap->TSCNT = UINT32_MAX - USToCounter(timer, us);
+  ecap->CNTPHS = ecap->TSCNT;
   ECCTL2 &= ~PWMSS_ECAP_ECCTL2_CONTONESHT;
+
+  ecap->ECCTL2 = ECCTL2;
   return timer_start(timer);
 }
 
@@ -324,22 +336,26 @@ static void am57xx_pwmss_timer_IRQHandler(struct timer* timer) {
   bool wakeThread = false;
   struct ecap_reg *ecap = timer->ecap_base;
   uint32_t status = ecap->ECFLG;
+  //printf("Activated: %x, Flags: %lx\n", ecap->ECEINT, status);
   PRINTF("%lu: %p Tick status %lx\n", xTaskGetTickCount(), timer, status);
+
+  if (timer->periodic) {
+    ecap->TSCNT = ecap->CNTPHS;
+  }
 
   if (status & PWMSS_ECAP_ECFLG_CNTOVF && timer->callback) {
     ecap->ECCLR |= PWMSS_ECAP_ECCLR_CNTOVF;
-    ecap->ECCLR |= PWMSS_ECAP_ECCLR_INT;
-    //ecap->ECCLR &= ~PWMSS_ECAP_ECCLR_CNTOVF;
     status = ecap->ECFLG;
     wakeThread |= timer->callback(timer, timer->data);
-    printf("Stats: %u\n", (unsigned) status);
+    printf("Overflow-Int generated\n");
   }
 #ifdef CONFIG_AM57xx_PWMSS_CAPTURE
-  if (status & PWMSS_ECAP_ECFLG_INT && timer->callback) {
+  if (status & PWMSS_ECAP_ECFLG_CEVT1 && timer->capture) {
+    printf("Capture-Event-Int generated\n");
     wakeThread |= am57xx_pwmss_capture_IRQHandler(timer->capture);
   }
 #endif
-  printf("my pins togglinn: %d\n", wakeThread);
+  ecap->ECCLR |= PWMSS_ECAP_ECCLR_INT;
   portYIELD_FROM_ISR(wakeThread);
 }
 
@@ -391,12 +407,12 @@ CAPTURE_DEINIT(am57xx, capture) {
 CAPTURE_SET_CALLBACK(am57xx, capture, callback, data) {
   capture->callback = callback;
   capture->data = data;
+  struct timer *timer = capture->timer;
   if (callback != NULL) {
-    capture->timer->ecap_base->ECEINT |= PWMSS_ECAP_ECEINT_CEVT1;
-    capture->timer->ecap_base->ECFLG |= PWMSS_ECAP_ECFLG_CEVT1;
+    timer->ecap_base->ECEINT |= PWMSS_ECAP_ECEINT_CEVT1;
   } else {
     //capture->timer->ecap_base->ECEINT &= ~PWMSS_ECAP_ECEINT_CEVT1;
-    capture->timer->ecap_base->ECCLR |= PWMSS_ECAP_ECCLR_CEVT1;
+    timer->ecap_base->ECEINT &= ~PWMSS_ECAP_ECEINT_CEVT1;
   }
   return 0;
 }
@@ -413,14 +429,9 @@ CAPTURE_SET_PERIOD(am57xx, capture, us) {
   }
   ecap->ECCTL2 &= ~PWMSS_ECAP_ECCTL2_CAPAPWM;
 
-  uint32_t ECCLR = ecap->ECCLR;
-
-  //ECCLR &= ~PWMSS_ECAP_ECCLR_CMPE
-  //ECCLR &= ~PWMSS_ECAP_ECCLR_CNTOVF;
-
-  ecap->CNTPHS = ecap->TSCNT;
-  ecap->ECCLR = ECCLR;
+  //ecap->CAP4 = ecap->TSCNT;
   ecap->TSCNT = UINT32_MAX - USToCounter(timer, us);
+  ecap->CNTPHS = ecap->TSCNT;
   PRINTF("Setup Counter to: 0x%lx\n", ecap->TSCNT);
 
   timer_start(timer);
@@ -435,13 +446,16 @@ CAPTURE_GET_TIME(am57xx, capture) {
 CAPTURE_GET_CHANNEL_TIME(am57xx, capture) {
   struct timer *timer = capture->timer;
   struct ecap_reg *ecap = timer->ecap_base;
-  uint32_t counter = ecap->TSCNT - ecap->CNTPHS;
+  uint32_t counter = ecap->TSCNT - ecap->CAP1;
   return counterToUS(timer, counter);
 }
 
 static bool am57xx_pwmss_capture_IRQHandler(struct capture *capture) {
   uint64_t time;
   bool wakeThread = false;
+
+  struct ecap_reg *ecap = capture->timer->ecap_base;
+  ecap->ECCLR |= PWMSS_ECAP_ECCLR_CEVT1;
   if (capture->callback) {
     time = capture_getChannelTime(capture);
     wakeThread |= capture->callback(capture, 0, time, capture->data);
@@ -473,7 +487,7 @@ struct timer pwmss1_timer_data = {
 TIMER_ADDDEV(am57xx, pwmss1_timer_data);
 
 #ifdef CONFIG_AM57xx_PWMSS1_CAPTURE
-struct capture pwmss1_capture_data {
+struct capture pwmss1_capture_data = {
   CAPTURE_INIT_DEV(am57xx)
   HAL_NAME("AM57xx PWMSS Capture 1")
   .timer = &pwmss1_timer_data,
@@ -554,7 +568,7 @@ struct timer pwmss3_timer_data = {
 TIMER_ADDDEV(am57xx, pwmss3_timer_data);
 
 #ifdef CONFIG_AM57xx_PWMSS3_CAPTURE
-struct capture pwmss3_capture_data {
+struct capture pwmss3_capture_data = {
   CAPTURE_INIT_DEV(am57xx)
   HAL_NAME("AM57xx PWMSS Capture 3")
   .timer = &pwmss3_timer_data,
