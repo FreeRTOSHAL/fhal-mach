@@ -180,7 +180,7 @@ TIMER_INIT(am57xx, index, prescaler, basetime, adjust) {
 
   if (prescaler == 1) {
     prsclr = 0;
-  } else if (prescaler <= 62) {
+  } else if (prescaler > 1 && prescaler <= 62) {
       if ((prescaler%2) == 0) {
         prsclr = prescaler >> 1;
       } else {
@@ -262,6 +262,7 @@ static uint64_t counterToUS(struct timer *timer, uint32_t value) {
   } else {
     us = (v * p) / 133 /* MHz */;
   }
+  //PRINTF("counter: %lu usValue: %llu\n", value, us);
 	return us;
 }
 static uint64_t USToCounter(struct timer *timer, uint64_t value) {
@@ -279,7 +280,7 @@ static uint64_t USToCounter(struct timer *timer, uint64_t value) {
   	us = (value * diff) / b;
   }
   uint64_t counterValue = (133 /* MHz */ * us) / (p);
-	PRINTF("us: %llu counterValue: %llu\n", value, counterValue);
+	//PRINTF("us: %llu counterValue: %llu\n", value, counterValue);
 
 	return counterValue;
 }
@@ -323,7 +324,7 @@ TIMER_PERIODIC(am57xx, timer, us) {
 }
 
 TIMER_GET_TIME(am57xx, timer) {
-	uint32_t counter = timer->ecap_base->TSCNT;
+	uint32_t counter = timer->ecap_base->TSCNT - timer->ecap_base->CNTPHS;
   return counterToUS(timer, counter);
 }
 
@@ -337,22 +338,22 @@ static void am57xx_pwmss_timer_IRQHandler(struct timer* timer) {
   struct ecap_reg *ecap = timer->ecap_base;
   uint32_t status = ecap->ECFLG;
   //printf("Activated: %x, Flags: %lx\n", ecap->ECEINT, status);
-  PRINTF("%lu: %p Tick status %lx\n", xTaskGetTickCount(), timer, status);
+  //PRINTF("%lu: %p Tick status %lx\n", xTaskGetTickCount(), timer, status);
 
-  if (timer->periodic) {
-    ecap->TSCNT = ecap->CNTPHS;
-  }
 
   if (status & PWMSS_ECAP_ECFLG_CNTOVF && timer->callback) {
-    ecap->ECCLR |= PWMSS_ECAP_ECCLR_CNTOVF;
-    status = ecap->ECFLG;
+    //printf("Overflow-Int generated\n");
     wakeThread |= timer->callback(timer, timer->data);
-    printf("Overflow-Int generated\n");
+    ecap->ECCLR |= PWMSS_ECAP_ECCLR_CNTOVF;
+    if (timer->periodic) {
+      ecap->TSCNT = ecap->CNTPHS;
+    }
   }
 #ifdef CONFIG_AM57xx_PWMSS_CAPTURE
   if (status & PWMSS_ECAP_ECFLG_CEVT1 && timer->capture) {
-    printf("Capture-Event-Int generated\n");
+    //printf("Capture-Event-Int generated\n");
     wakeThread |= am57xx_pwmss_capture_IRQHandler(timer->capture);
+    ecap->ECCLR |= PWMSS_ECAP_ECCLR_CEVT1;
   }
 #endif
   ecap->ECCLR |= PWMSS_ECAP_ECCLR_INT;
@@ -446,7 +447,9 @@ CAPTURE_GET_TIME(am57xx, capture) {
 CAPTURE_GET_CHANNEL_TIME(am57xx, capture) {
   struct timer *timer = capture->timer;
   struct ecap_reg *ecap = timer->ecap_base;
-  uint32_t counter = ecap->TSCNT - ecap->CAP1;
+  uint32_t counter = 0;
+  uint32_t value = ecap->TSCNT;
+  counter = value - ecap->CNTPHS;
   return counterToUS(timer, counter);
 }
 
@@ -455,11 +458,12 @@ static bool am57xx_pwmss_capture_IRQHandler(struct capture *capture) {
   bool wakeThread = false;
 
   struct ecap_reg *ecap = capture->timer->ecap_base;
-  ecap->ECCLR |= PWMSS_ECAP_ECCLR_CEVT1;
+
   if (capture->callback) {
     time = capture_getChannelTime(capture);
     wakeThread |= capture->callback(capture, 0, time, capture->data);
   }
+  ecap->ECCLR |= PWMSS_ECAP_ECCLR_CEVT1;
   return wakeThread;
 }
 #endif
