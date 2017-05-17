@@ -40,10 +40,16 @@ config MACH_HAS_MAILBOX
 config MACH_HAS_NET
 	bool
 	default y
+	config MACH_NET_DEFAULT_ALGIN
+		int
+		default 512
 config MACH_HAS_MAC
 	bool
 	default y
 config MACH_HAS_TIMER
+	bool
+	default y
+config MACH_HAS_RTC
 	bool
 	default y
 menuconfig IMX_UART
@@ -200,6 +206,19 @@ menuconfig IMX_ENET
 			The Buffer size is CONFIG_IMX_ENET_BUFFSIZE * 1536 Bytes * 3 Queue * 2(RX + TX)
 			For Example CONFIG_IMX_ENET_BUFFSIZE is 512 
 			4.5 MB Space is allocated
+	config IMX_ENET_PROMISCUOUS_MODE
+		bool "Set ENet in Permoiscous mode"
+		default y
+		depends on IMX_ENET
+	config IMX_ENET_IEEE1588
+		bool "Enable IEEE1588 Timer (not working!)"
+		default y
+		depends on IMX_ENET
+		depends on RTC
+		config IMX_ENET_IEEE1588_SLAVE
+			bool "Enable Slave mode"
+			default n
+			depends on IMX_ENET_IEEE1588
 	config IMX_ENET1
 		bool "ENET1"
 		depends on IMX_ENET
