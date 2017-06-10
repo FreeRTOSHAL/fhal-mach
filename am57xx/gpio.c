@@ -578,7 +578,7 @@ am57xx_gpio_pin_init_error1:
 am57xx_gpio_pin_init_error0:
 	return NULL;
 }
-GPIO_PIN_DEINIT(ns, pin) {
+GPIO_PIN_DEINIT(am57xx, pin) {
 	pin->gpio->pins[pin->bank][pin->pin] = NULL;
 	vPortFree(pin);
 	return 0;
@@ -703,7 +703,7 @@ GPIO_PIN_TOGGLE_PIN(am57xx, pin) {
 GPIO_PIN_GET_VALUE(am57xx, pin) {
 	return GPIO_DATAIN(pin->pin, pin->base->DATAIN) == 0x1;
 }
-GPIO_OPS(am57xx)
+GPIO_OPS(am57xx);
 struct gpio am57xx_gpio_data = {
 	GPIO_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx GPIO")
