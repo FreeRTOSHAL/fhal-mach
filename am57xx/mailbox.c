@@ -35,6 +35,7 @@
 #include <mailbox_prv.h>
 #include <ctrl.h>
 #include <kconfig.h>
+#include <os.h>
 #define MBOX_IRQ_RX(id) BIT(id << 1)
 #define MBOX_IRQ_TX(id) BIT((id << 1) + 1)
 struct mailbox_irq {
@@ -70,8 +71,8 @@ struct mailbox_contoller {
 struct mailbox {
 	struct mailbox_generic gen;
 	struct mailbox_contoller *contoller;
-	SemaphoreHandle_t txsem;
-	QueueHandle_t rxqueue;
+	OS_DEFINE_SEMARPHORE_BINARAY(txsem);
+	OS_DEFINE_QUEUE(rxqueue, 255, sizeof(uint32_t));
 	bool full;
 	const uint32_t id;
 	const bool isRX;
@@ -124,7 +125,7 @@ MAILBOX_INIT(omap, index) {
 	}
 	if (mbox->isRX) {
 		/* TODO CONFIG */
-		mbox->rxqueue = xQueueCreate(255, sizeof(uint32_t));
+		mbox->rxqueue = OS_CREATE_QUEUE(255, sizeof(uint32_t), mbox->rxqueue);
 		if (mbox->rxqueue == NULL) {
 			goto omap_mailbox_init_error1;
 		}
@@ -134,7 +135,7 @@ MAILBOX_INIT(omap, index) {
 			contoller->base->irq[contoller->userID].IRQENABLE_SET = MBOX_IRQ_RX(mbox->id);
 		}
 	} else {
-		vSemaphoreCreateBinary(mbox->txsem);
+		mbox->txsem = OS_CREATE_SEMARPHORE_BINARAY(mbox->txsem);
 		if (mbox->txsem == NULL) {
 			goto omap_mailbox_init_error0;
 		}

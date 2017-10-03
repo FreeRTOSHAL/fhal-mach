@@ -28,8 +28,9 @@
 #include <irq.h>
 #define BUFFER_PRV
 #include <buffer_prv.h>
+#include <os.h>
 struct buffer_prv {
-	SemaphoreHandle_t sem;
+	OS_DEFINE_SEMARPHORE_BINARAY(sem);
 };
 
 struct buffer_prv prv[4];
@@ -80,7 +81,7 @@ void cpu2cpu_int3_isr() {
 int32_t buffer_init_prv(struct buffer *buffer) {
 	if (buffer->readOnly) {
 		buffer->prv = &prv[buffer->irqnr];
-		buffer->prv->sem = xSemaphoreCreateBinary();
+		buffer->prv->sem = OS_CREATE_SEMARPHORE_BINARAY(buffer->prv->sem);
 		if (buffer->prv->sem == NULL) {
 			return -1;
 		}

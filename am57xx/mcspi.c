@@ -164,7 +164,7 @@ struct spi {
 	enum spi_mode mode;
 	uint32_t irq;
 	struct spi_slave *slaves[4];
-	SemaphoreHandle_t irqLock;
+	OS_DEFINE_SEMARPHORE_BINARAY(irqLock);
 
 	volatile struct spi_reg *base;
 	const uint32_t irqBase;
@@ -258,7 +258,7 @@ SPI_INIT(am57xx, index, mode, opt) {
 		goto am57xx_spi_init_error1;
 	}
 
-	spi->irqLock = xSemaphoreCreateBinary();
+	spi->irqLock = OS_CREATE_SEMARPHORE_BINARAY(spi->irqLock);
 	if (spi->irqLock == NULL) {
 		goto am57xx_spi_init_error1;
 	}

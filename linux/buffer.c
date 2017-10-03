@@ -26,8 +26,9 @@
 #include <semphr.h>
 #define BUFFER_PRV
 #include <buffer_prv.h>
+#include <os.h>
 struct buffer_prv {
-	SemaphoreHandle_t sem;
+	OS_DEFINE_SEMARPHORE_BINARAY(sem);
 };
 
 struct buffer_prv *prv = NULL;
@@ -40,7 +41,7 @@ int32_t buffer_init_prv(struct buffer *buffer) {
 	}
 	prv = calloc(1, sizeof(struct buffer_prv));
 	buffer->prv = prv;
-	prv->sem = xSemaphoreCreateBinary();
+	prv->sem = OS_CREATE_SEMARPHORE_BINARAY(prv->sem);
 	if (prv->sem == NULL) {
 		return -1;
 	}

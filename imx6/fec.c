@@ -20,6 +20,7 @@
 #define RTC_PRV
 #include <rtc_prv.h>
 #include <ccm_analog_imx6sx.h>
+#include <os.h>
 
 #define ENET_MMFR_OP_WRTIE ENET_MMFR_OP(0x1)
 #define ENET_MMFR_OP_READ ENET_MMFR_OP(0x2)
@@ -187,10 +188,10 @@ struct fec_bd_ex {
 #endif
 } PACKED;
 struct fec_task {
-	TaskHandle_t task;
+	OS_DEFINE_TASK(task, 1024);
 	struct mac *mac;
 	struct fec_queue *queue;
-	SemaphoreHandle_t restartLock;
+	OS_DEFINE_SEMARPHORE_BINARAY(restartLock);
 };
 struct fec_queue {
 	uint32_t qid;
@@ -203,7 +204,7 @@ struct fec_queue {
 struct mac {
 	struct mac_generic gen;
 	volatile ENET_Type *base;
-	SemaphoreHandle_t miiDone;
+	OS_DEFINE_SEMARPHORE_BINARAY(miiDone);
 	struct fec_queue tx_queue[NR_OF_QUEUES];
 	uint8_t txtmp[CONFIG_IMX_ENET_BUFFERSIZE][FEC_ENET_RX_FRSIZE];
 	struct fec_queue rx_queue[NR_OF_QUEUES];
@@ -665,10 +666,12 @@ static void fec_txTask(void *data) {
 		printTXBD(bd, queue->qid);
 #endif
 		bd->bd.buffaddr = 0;
+#ifdef CONFIG_IMX_ENET_IEEE1588
 		bd->esc = 0;
 		bd->prot_tlt = 0;
 		bd->bdu = 0;
 		bd->ts = 0;
+#endif
 		bd->bd.length = 0;
 		net_freeNetbuff(net, buff);
 		queue->buffs[index] = NULL;
@@ -797,7 +800,7 @@ MAC_INIT(imx, index) {
 	if (ret > 0) {
 		return mac;
 	}
-	mac->miiDone = xSemaphoreCreateBinary();
+	mac->miiDone = OS_CREATE_SEMARPHORE_BINARAY(mac->miiDone);
 	if (mac->miiDone == NULL) {
 		goto fec_mac_init_error0;
 	}
@@ -846,14 +849,14 @@ MAC_INIT(imx, index) {
 			struct fec_task *task = &mac->rxTasks[i];
 			task->queue = &mac->rx_queue[i];
 			task->mac = mac;
-			task->restartLock = xSemaphoreCreateBinary();
+			task->restartLock = OS_CREATE_SEMARPHORE_BINARAY(task->restartLock);
 			if (task->restartLock == NULL) {
 				goto fec_mac_init_error2;
 			}
 			xSemaphoreGive(task->restartLock);
 			xSemaphoreTake(task->restartLock, 0);
 
-			ret = xTaskCreate(fec_rxTask, "Enet RX Task", 1024, task, 3, &task->task);
+			ret = OS_CREATE_TASK(fec_rxTask, "Enet RX Task", 1024, task, 3, task->task);
 			if (ret != pdPASS) {
 				/* TODO Cleanup tasks */
 				goto fec_mac_init_error2;
@@ -863,14 +866,14 @@ MAC_INIT(imx, index) {
 			struct fec_task *task = &mac->txTasks[i];
 			task->queue = &mac->tx_queue[i];
 			task->mac = mac;
-			task->restartLock = xSemaphoreCreateBinary();
+			task->restartLock = OS_CREATE_SEMARPHORE_BINARAY(task->restartLock);
 			if (task->restartLock == NULL) {
 				goto fec_mac_init_error2;
 			}
 			xSemaphoreGive(task->restartLock);
 			xSemaphoreTake(task->restartLock, 0);
 
-			ret = xTaskCreate(fec_txTask, "Enet TX Task", 1024, task, 4, &task->task);
+			ret = OS_CREATE_TASK(fec_txTask, "Enet TX Task", 1024, task, 4, task->task);
 			if (ret != pdPASS) {
 				/* TODO Cleanup tasks */
 				goto fec_mac_init_error2;

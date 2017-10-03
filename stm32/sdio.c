@@ -8,6 +8,7 @@
 #include <semphr.h>
 #include <stm32fxxx.h>
 #include <iomux.h>
+#include <os.h>
 
 struct sd_pin {
 	uint32_t pin;
@@ -21,7 +22,7 @@ struct sd {
 	DMA_Stream_TypeDef *dmaStream;
 	uint32_t dmaChannel;
 	struct sd_pin pins[10];
-	SemaphoreHandle_t sem;
+	OS_DEFINE_SEMARPHORE_BINARAY(sem);
 	uint32_t status;
 	uint32_t dmaStatus;
 	uint32_t blockSize;
@@ -110,7 +111,7 @@ SD_INIT(stm32, index, settings) {
 	if (ret > 0) {
 		return sd;
 	}
-	sd->sem = xSemaphoreCreateBinary();
+	sd->sem = OS_CREATE_SEMARPHORE_BINARAY(sd->sem);
 	if (sd->sem == NULL) {
 		goto stm32_sd_init_error0;
 	}

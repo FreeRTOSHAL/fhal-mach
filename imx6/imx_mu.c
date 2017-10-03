@@ -75,8 +75,8 @@ struct mailbox {
 	struct mailbox_contoller *contoller;
 	/* Channel ID */
 	uint32_t id;
-	SemaphoreHandle_t txsem;
-	QueueHandle_t rxqueue;
+	OS_DEFINE_SEMARPHORE_BINARAY(txsem);
+	OS_DEFINE_QUEUE(rxqueue, 255, sizeof(uint32_t));
 	bool full;
 };
 static struct mailbox_contoller contoller;
@@ -158,14 +158,14 @@ MAILBOX_INIT(imx, index) {
 	if (ret > 0) {
 		return mbox;
 	}
-	vSemaphoreCreateBinary(mbox->txsem);
+	mbox->txsem = OS_CREATE_SEMARPHORE_BINARAY(mbox->txsem);
 	if (mbox->txsem == NULL) {
 		goto imx_mailbox_init_error0;
 	}
 	xSemaphoreGive(mbox->txsem);
 	xSemaphoreTake(mbox->txsem, 0);
 	/* TODO CONFIG */
-	mbox->rxqueue = xQueueCreate(255, sizeof(uint32_t));
+	mbox->rxqueue = OS_CREATE_QUEUE(255, sizeof(uint32_t), mbox->rxqueue);
 	if (mbox->rxqueue == NULL) {
 		goto imx_mailbox_init_error1;
 	}

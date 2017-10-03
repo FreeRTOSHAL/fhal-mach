@@ -23,4 +23,6 @@ config MACH_LD_SCRIPT
 config MACH_HAS_MALLOC
 	bool
 	default y
-
+config MACH_HAS_NO_LOCATION
+	bool
+	default y

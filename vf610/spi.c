@@ -39,6 +39,7 @@
 #include <core_cmInstr.h>
 #include <alloca.h>
 #include <clock.h>
+#include <os.h>
 
 #ifdef CONFIG_SPIDEBUG
 #define SPI_PRINTF(ftm, ...) printf(ftm, ##__VA_ARGS__)
@@ -175,7 +176,7 @@ struct spi {
 	bool shareCTAR;
 	uint8_t irqnr;
 	uint8_t index;
-	SemaphoreHandle_t irqLock;
+	OS_DEFINE_SEMARPHORE_BINARAY(irqLock);
 	const struct spi_pin pin[];
 };
 
@@ -242,7 +243,7 @@ SPI_INIT(dspi, index, mode, opt) {
 	if (ret > 0) {
 		return spi;
 	}
-	spi->irqLock = xSemaphoreCreateBinary();
+	spi->irqLock = OS_CREATE_SEMARPHORE_BINARAY(spi->irqLock);
 	if (spi->irqLock == NULL) {
 		return NULL;
 	}

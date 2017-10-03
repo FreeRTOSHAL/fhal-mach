@@ -32,6 +32,7 @@
 #include <mux.h>
 #include <iomux.h>
 #include <irq.h>
+#include <os.h>
 
 #define IPG_CLK clock_getPeripherySpeed(clock_init())
 
@@ -90,7 +91,7 @@ struct adc_base {
 	struct adc_generic gen;
 	volatile struct vf610_adc *base;
 	uint32_t irq;
-	SemaphoreHandle_t sem;
+	OS_DEFINE_SEMARPHORE_BINARAY(sem);
 	uint8_t bits;
 	uint32_t hz;
 	uint32_t val;
@@ -309,7 +310,7 @@ ADC_INIT(vf610, index, bits, hz) {
 		return NULL;
 	}
 	if (ret == 0) {
-		base->sem = xSemaphoreCreateBinary();
+		base->sem = OS_CREATE_SEMARPHORE_BINARAY(base->sem);
 		xSemaphoreGive(base->sem);
 		xSemaphoreTake(base->sem, 0);
 		/* 

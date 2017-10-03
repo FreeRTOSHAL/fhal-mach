@@ -1,6 +1,8 @@
 #include <timer.h>
 #define TIMER_PRV
 #include <timer_prv.h>
+#include <stm32fxxx.h>
+#include <timer_stm32.h>
 void stm32_timer_interruptHandler(struct timer *timer);
 #ifdef CONFIG_STM32_TIM1
 struct timer stm32_tim1 = {
@@ -116,7 +118,7 @@ struct timer stm32_tim8 = {
 	.base = TIM8,
 	.clock = RCC_APB2Periph_TIM8,
 	.RCC_APBxPeriphClockCmd = RCC_APB2PeriphClockCmd,
-	.irqNr = TIM8_UP_TIM13_IRQn
+	.irqNr = TIM8_UP_TIM13_IRQn,
 	.maxCounter = UINT16_MAX,
 };
 TIMER_ADDDEV(stm32, stm32_tim8);

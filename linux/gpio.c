@@ -39,7 +39,7 @@ struct gpio_pin {
 
 GPIO_INIT(linux_emu, index) {
 	int32_t ret;
-	struct gpio *gpio = GET_GPIO_DEV(index);
+	struct gpio *gpio = GPIO_GET_DEV(index);
 	if (gpio == NULL) {
 		return NULL;
 	}

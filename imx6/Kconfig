@@ -192,6 +192,7 @@ menuconfig IMX_MAILBOX
 menuconfig IMX_ENET
 	bool "IMX Enet"
 	depends on MAC
+	depends on SUPPORT_DYNAMIC_ALLOCATION
 	select TIMER
 	default n
 	help

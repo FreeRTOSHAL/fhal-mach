@@ -33,7 +33,7 @@ struct uart {
 
 UART_INIT(linux_emu, port, bautrate) {
 	int32_t ret;
-	struct uart *uart = UART_GET_DEV(index);
+	struct uart *uart = UART_GET_DEV(port);
 	if (uart == NULL) {
 		return NULL;
 	}
