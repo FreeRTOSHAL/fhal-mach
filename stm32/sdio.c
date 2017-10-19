@@ -12,7 +12,7 @@
 
 struct sd_pin {
 	uint32_t pin;
-	uint32_t ctl;
+	uint32_t cfg;
 };
 
 struct sd {
@@ -124,7 +124,7 @@ SD_INIT(stm32, index, settings) {
 		int i;
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_SDIO, ENABLE);
 		for (i = 0; i < 6; i++) { /* TODO Config max BusWide */
-			ret = mux_pinctl(mux, sd->pins[i].pin, sd->pins[i].ctl, IO_AF_MODE);
+			ret = mux_pinctl(mux, sd->pins[i].pin, sd->pins[i].cfg, IO_AF_MODE);
 			if (ret < 0) {
 				sd->gen.init = false;
 				goto stm32_sd_init_error1;
@@ -513,52 +513,52 @@ struct sd stm32_sdio = {
 		/* SDIO_CK */
 		{
 			.pin = PTC12,
-			.ctl = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
 		},
 		/* SDIO_CMD */
 		{
 			.pin = PTD2,
-			.ctl = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
 		},
 		/* SDIO_D0 */
 		{
 			.pin = PTC8,
-			.ctl = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
 		},
 		/* SDIO_D1 */
 		{
 			.pin = PTC9,
-			.ctl = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
 		},
 		/* SDIO_D2 */
 		{
 			.pin = PTC10,
-			.ctl = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
 		},
 		/* SDIO_D3 */
 		{
 			.pin = PTC11,
-			.ctl = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
 		},
 		/* SDIO_D4 */
 		{
 			.pin = PTB8,
-			.ctl = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
 		},
 		/* SDIO_D5 */
 		{
 			.pin = PTB9,
-			.ctl = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
 		},
 		/* SDIO_D6 */
 		{
 			.pin = PTC6,
-			.ctl = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
 		},
 		/* SDIO_D7 */
 		{
 			.pin = PTC7,
-			.ctl = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(12),
 		},
 	},
 };

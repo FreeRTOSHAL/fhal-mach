@@ -68,3 +68,14 @@ int32_t mux_pinctl(struct mux *mux, uint32_t pin, uint32_t ctl, uint32_t extra) 
 	GPIO_Init(gpio, &init);
 	return 0;
 }
+int32_t mux_configPins(struct mux *mux, const struct pinCFG *cfg, uint32_t len) {
+	uint32_t i;
+	uint32_t ret;
+	for (i = 0; i < len; i++) {
+		ret = mux_pinctl(mux, cfg[i].pin, cfg[i].cfg, cfg[i].extra);
+		if (ret < 0) {
+			return -1;
+		}
+	}
+	return 0;
+}

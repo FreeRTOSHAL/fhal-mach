@@ -1,5 +1,6 @@
 #ifndef IOMUX_H_
 #define IOMUX_H_
+#include <mux.h>
 
 #define IO_IN_MODE BIT(0)
 #define IO_OUT_MODE BIT(1)
@@ -135,6 +136,29 @@ enum pins{
 	PTH13,
 	PTH14,
 	PTH15,
+	PTI0,
+	PTI1,
+	PTI2,
+	PTI3,
+	PTI4,
+	PTI5,
+	PTI6,
+	PTI7,
+	PTI8,
+	PTI9,
+	PTI10,
+	PTI11,
+	PTI12,
+	PTI13,
+	PTI14,
+	PTI15,
 	GPIO_COUNT,
 };
+
+struct pinCFG {
+	uint32_t pin;
+	uint32_t cfg;
+	uint32_t extra;
+};
+int32_t mux_configPins(struct mux *mux, const struct pinCFG *cfg, uint32_t len);
 #endif
