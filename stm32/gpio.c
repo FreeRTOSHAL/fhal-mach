@@ -19,6 +19,7 @@ struct gpio_pin {
 	EXTI_InitTypeDef extiInit;
 	bool (*callback)(struct gpio_pin *pin, uint32_t pinID, void *data);
 	void *data;
+	bool value;
 };
 
 GPIO_INIT(stm32, index) {
@@ -158,6 +159,10 @@ GPIO_PIN_INIT(stm32, g, pin, dir, setting) {
 			break;
 	}
 	GPIO_Init(gpio_pin->base, &gpio_pin->init);
+	ret = gpioPin_clearPin(gpio_pin);
+	if (ret < 0) {
+		goto gpio_getPin_error1;
+	}
 	return gpio_pin;
 gpio_getPin_error1:
 	vPortFree(gpio_pin);
@@ -179,19 +184,21 @@ GPIO_PIN_SET_VALUE(stm32, pin, value) {
 	} else {
 		GPIO_ResetBits(pin->base, pin->mask);
 	}
+	pin->value = value;
 	return 0;
 }
 GPIO_PIN_SET_PIN(stm32, pin) {
 	GPIO_SetBits(pin->base, pin->mask);
+	pin->value = true;
 	return 0;
 }
 GPIO_PIN_CLEAR_PIN(stm32, pin) {
 	GPIO_ResetBits(pin->base, pin->mask);
+	pin->value = false;
 	return 0;
 }
 GPIO_PIN_TOGGLE_PIN(stm32, pin) {
-	/*GPIO_ToggleBits(pin->base, pin->mask);*/ /* TODO */
-	return 0;
+	return gpioPin_setValue(pin, !pin->value);
 }
 GPIO_PIN_GET_VALUE(stm32, pin) {
 	return GPIO_ReadInputDataBit(pin->base, pin->mask) == Bit_SET;
