@@ -17,7 +17,7 @@ struct gpio_pin {
 	uint32_t mask;
 	GPIO_InitTypeDef init;
 	EXTI_InitTypeDef extiInit;
-	bool (*callback)(struct gpio_pin *pin, uint8_t pinID, void *data);
+	bool (*callback)(struct gpio_pin *pin, uint32_t pinID, void *data);
 	void *data;
 };
 
