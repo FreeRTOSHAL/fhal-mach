@@ -1,0 +1,124 @@
+menuconfig STM32_UART
+	bool "UART Driver"
+	default y
+	depends on UART
+	select UART_GENERIC_STRING
+	select UART_GENERIC_BYTE
+	help
+		UART Driver
+	config STM32_UART_1
+		bool "Activate UART 1"
+		depends on STM32_UART
+		help
+			Activate UART 1
+	menuconfig STM32_UART_2
+		bool "Activate UART 2"
+		depends on STM32_UART
+		depends on !STM32F031
+		help
+			Activate UART 2
+		choice
+			prompt "TX Pin"
+			depends on STM32_UART_2
+			config STM32_UART_2_PTA2
+				bool "TX on PTA2"
+				help
+					TX on PTA2
+			config STM32_UART_2_PTD5
+				bool "TX on PTD5"
+				help
+					TX on PTD5
+		endchoice
+		choice
+			prompt "RX Pin"
+			depends on STM32_UART_2
+			config STM32_UART_2_PTA3
+				bool "RX on PTA3"
+				help
+					RX on PTA3
+			config STM32_UART_2_PTD6
+				bool "RX on PTD6"
+				help
+					RX on PTD6
+		endchoice
+	config STM32_UART_3
+		bool "Activate UART 3"
+		depends on STM32_UART
+		depends on !STM32F401xx
+		depends on !STM32F051
+		depends on !STM32F031
+		depends on !STM32F030
+		depends on !STM32F042
+		depends on !STM32F070x6
+		help
+			Activate UART 3
+	config STM32_UART_4
+		bool "Activate UART 4"
+		depends on STM32_UART
+		depends on !STM32F401xx
+		depends on !STM32F051
+		depends on !STM32F031
+		depends on !STM32F030
+		depends on !STM32F042
+		depends on !STM32F091
+		depends on !STM32F070x6
+		depends on !STM32F030xC
+		help
+			Activate UART 4
+	config STM32_UART_5
+		bool "Activate UART 5"
+		depends on STM32_UART
+		depends on !STM32F401xx
+		depends on !STM32F051
+		depends on !STM32F031
+		depends on !STM32F030
+		depends on !STM32F072
+		depends on !STM32F042
+		depends on !STM32F091
+		depends on !STM32F070xB
+		depends on !STM32F070x6
+		depends on !STM32F030xC
+		help
+			Activate UART 5
+	config STM32_UART_6
+		bool "Activate UART 6"
+		depends on STM32_UART
+		depends on !STM32F051
+		depends on !STM32F031
+		depends on !STM32F030
+		depends on !STM32F072
+		depends on !STM32F042
+		depends on !STM32F091
+		depends on !STM32F070xB
+		depends on !STM32F070x6
+		help
+			Activate UART 6
+	config STM32_UART_7
+		bool "Activate UART 7"
+		depends on STM32_UART
+		depends on !STM32F401xx
+		depends on !STM32F051
+		depends on !STM32F031
+		depends on !STM32F030
+		depends on !STM32F072
+		depends on !STM32F042
+		depends on !STM32F091
+		depends on !STM32F070xB
+		depends on !STM32F070x6
+		depends on !STM32F030xC
+		help
+			Activate UART 7
+	config STM32_UART_8
+		bool "Activate UART 8"
+		depends on STM32_UART
+		depends on !STM32F401xx
+		depends on !STM32F051
+		depends on !STM32F031
+		depends on !STM32F030
+		depends on !STM32F072
+		depends on !STM32F042
+		depends on !STM32F070xB
+		depends on !STM32F070x6
+		depends on !STM32F030xC
+		help
+			Activate UART 8

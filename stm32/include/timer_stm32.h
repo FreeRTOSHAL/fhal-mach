@@ -2,6 +2,12 @@
 #define TIMER_STM32_H_
 #include <stdint.h>
 #include <stm32fxxx.h>
+#ifdef CONFIG_STM32_PWM
+#include <pwm_stm32.h>
+#endif
+#ifdef CONFIG_STM32_CAPTURE
+#include <capture_stm32.h>
+#endif
 enum timer_mode {
 	MODE_DISABLED,
 	MODE_ONESHOT,
@@ -24,5 +30,11 @@ struct timer {
 	void (*RCC_APBxPeriphClockCmd)(uint32_t RCC_APBxPeriph, FunctionalState NewState);
 	const uint32_t irqNr;
 	const uint64_t maxCounter;
+#ifdef CONFIG_STM32_PWM
+	struct pwm *pwm[4];
+#endif
+#ifdef CONFIG_STM32_CAPTURE
+	struct capture *capture[4];
+#endif
 };
 #endif

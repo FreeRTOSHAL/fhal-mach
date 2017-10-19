@@ -3,6 +3,9 @@
 #include <timer_prv.h>
 #include <stm32fxxx.h>
 #include <timer_stm32.h>
+#ifdef CONFIG_STM32_PWM
+# error not implemnted /* TODO implement */
+#endif
 void stm32_timer_interruptHandler(struct timer *timer);
 #ifdef CONFIG_STM32_TIM1
 struct timer stm32_tim1 = {

@@ -255,6 +255,12 @@ config MACH_HAS_NVIC
 config MACH_HAS_TIMER
 	bool
 	default y
+config MACH_HAS_PWM
+	bool
+	default y
+config MACH_HAS_CAPTURE
+	bool
+	default y
 config MACH_HAS_SPI
 	bool
 	default y
@@ -394,8 +400,6 @@ menuconfig EXTERNEL_OSCILLATOR
 	choice
 		prompt "High Speed APB clock (APB2 Clock) Div"
 		depends on EXTERNEL_OSCILLATOR
-		config PCLK2_DIV_1
-			bool "APB2 Clock Div 1"
 		config PCLK2_DIV_2
 			bool "APB2 Clock Div 2"
 		config PCLK2_DIV_4
@@ -404,6 +408,8 @@ menuconfig EXTERNEL_OSCILLATOR
 			bool "APB2 Clock Div 8"
 		config PCLK2_DIV_16
 			bool "APB2 Clock Div 16"
+		config PCLK2_DIV_1
+			bool "APB2 Clock Div 1 (Warring see max Speed)"
 	endchoice
 comment "Periphery Setting"
 config STM32_MUX
@@ -412,255 +418,8 @@ config STM32_MUX
 	select GPIO
 	help
 		GPIO is needet for muxing
-menuconfig STM32_UART
-	bool "UART Driver"
-	default y
-	depends on UART
-	select UART_GENERIC_STRING
-	select UART_GENERIC_BYTE
-	help
-		UART Driver
-	config STM32_UART_1
-		bool "Activate UART 1"
-		depends on STM32_UART
-		help
-			Activate UART 1
-	menuconfig STM32_UART_2
-		bool "Activate UART 2"
-		depends on STM32_UART
-		depends on !STM32F031
-		help
-			Activate UART 2
-		choice
-			prompt "TX Pin"
-			depends on STM32_UART_2
-			config STM32_UART_2_PTA2
-				bool "TX on PTA2"
-				help
-					TX on PTA2
-			config STM32_UART_2_PTD5
-				bool "TX on PTD5"
-				help
-					TX on PTD5
-		endchoice
-		choice
-			prompt "RX Pin"
-			depends on STM32_UART_2
-			config STM32_UART_2_PTA3
-				bool "RX on PTA3"
-				help
-					RX on PTA3
-			config STM32_UART_2_PTD6
-				bool "RX on PTD6"
-				help
-					RX on PTD6
-		endchoice
-	config STM32_UART_3
-		bool "Activate UART 3"
-		depends on STM32_UART
-		depends on !STM32F401xx
-		depends on !STM32F051
-		depends on !STM32F031
-		depends on !STM32F030
-		depends on !STM32F042
-		depends on !STM32F070x6
-		help
-			Activate UART 3
-	config STM32_UART_4
-		bool "Activate UART 4"
-		depends on STM32_UART
-		depends on !STM32F401xx
-		depends on !STM32F051
-		depends on !STM32F031
-		depends on !STM32F030
-		depends on !STM32F042
-		depends on !STM32F091
-		depends on !STM32F070x6
-		depends on !STM32F030xC
-		help
-			Activate UART 4
-	config STM32_UART_5
-		bool "Activate UART 5"
-		depends on STM32_UART
-		depends on !STM32F401xx
-		depends on !STM32F051
-		depends on !STM32F031
-		depends on !STM32F030
-		depends on !STM32F072
-		depends on !STM32F042
-		depends on !STM32F091
-		depends on !STM32F070xB
-		depends on !STM32F070x6
-		depends on !STM32F030xC
-		help
-			Activate UART 5
-	config STM32_UART_6
-		bool "Activate UART 6"
-		depends on STM32_UART
-		depends on !STM32F051
-		depends on !STM32F031
-		depends on !STM32F030
-		depends on !STM32F072
-		depends on !STM32F042
-		depends on !STM32F091
-		depends on !STM32F070xB
-		depends on !STM32F070x6
-		help
-			Activate UART 6
-	config STM32_UART_7
-		bool "Activate UART 7"
-		depends on STM32_UART
-		depends on !STM32F401xx
-		depends on !STM32F051
-		depends on !STM32F031
-		depends on !STM32F030
-		depends on !STM32F072
-		depends on !STM32F042
-		depends on !STM32F091
-		depends on !STM32F070xB
-		depends on !STM32F070x6
-		depends on !STM32F030xC
-		help
-			Activate UART 7
-	config STM32_UART_8
-		bool "Activate UART 8"
-		depends on STM32_UART
-		depends on !STM32F401xx
-		depends on !STM32F051
-		depends on !STM32F031
-		depends on !STM32F030
-		depends on !STM32F072
-		depends on !STM32F042
-		depends on !STM32F070xB
-		depends on !STM32F070x6
-		depends on !STM32F030xC
-		help
-			Activate UART 8
-menuconfig STM32_TIMER
-	bool "Timer Driver"
-	default n
-	depends on TIMER
-	help
-		Timer Driver
-	config STM32_TIM1
-		bool "Activate TIM 1"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F446xx || STM32F469_479xx || STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
-		help 
-			Activate TIM 1
-	config STM32_TIM2
-		bool "Activate TIM 2"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx || STM32F051 || STM32F031 || STM32F072 || STM32F042 || STM32F091
-		help 
-			Activate TIM 2
-	config STM32_TIM3
-		bool "Activate TIM 3"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx || STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
-		help 
-			Activate TIM 3
-	config STM32_TIM4
-		bool "Activate TIM 4"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
-		help 
-			Activate TIM 4
-	config STM32_TIM5
-		bool "Activate TIM 5"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
-		help 
-			Activate TIM 5
-	config STM32_TIM6
-		bool "Activate TIM 6"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F469_479xx || STM32F446xx || STM32F051 || STM32F072 || STM32F091 || STM32F070xB || STM32F030xC
-		help 
-			Activate TIM 6
-	config STM32_TIM7
-		bool "Activate TIM 7"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx || STM32F072 || STM32F091 || STM32F070xB || STM32F030xC
-		help 
-			Activate TIM 7
-	config STM32_TIM8
-		bool "Activate TIM 8"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
-		help 
-			Activate TIM 8
-	config STM32_TIM9
-		bool "Activate TIM 9"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
-		help 
-			Activate TIM 9
-	config STM32_TIM10
-		bool "Activate TIM 10"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
-		help 
-			Activate TIM 10
-	config STM32_TIM11
-		bool "Activate TIM 11"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
-		help 
-			Activate TIM 11
-	config STM32_TIM12
-		bool "Activate TIM 12"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
-		help 
-			Activate TIM 12
-	config STM32_TIM13
-		bool "Activate TIM 13"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
-		help 
-			Activate TIM 13
-	config STM32_TIM14
-		bool "Activate TIM 14"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx || STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
-		help 
-			Activate TIM 14
-	config STM32_TIM15
-		bool "Activate TIM 15"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F051 || STM32F030 || STM32F072 || STM32F091 || STM32F070xB || STM32F030xC
-		help 
-			Activate TIM 15
-	config STM32_TIM16
-		bool "Activate TIM 16"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
-		help 
-			Activate TIM 16
-	config STM32_TIM17
-		bool "Activate TIM 17"
-		default n
-		depends on STM32_TIMER
-		depends on STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
-		help 
-			Activate TIM 17
+source mach/stm32/Kconfig.uart
+source mach/stm32/Kconfig.timer
 config STM32_DMA
 	bool 
 	default n

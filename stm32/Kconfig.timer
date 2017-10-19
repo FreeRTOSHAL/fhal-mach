@@ -1,0 +1,930 @@
+menuconfig STM32_TIMER
+	bool "Timer Driver"
+	default n
+	depends on TIMER
+	help
+		Timer Driver
+if STM32_TIMER=y
+	config STM32_TIMER_DEBUG
+		bool "Timer Debug"
+	config STM32_PWM
+		bool "PWM Support"
+		depends on PWM
+		help
+			Enable PWM Support
+	config STM32_CAPTURE
+		bool "Capture Support"
+		depends on CAPTURE
+		help
+			Enable Capture Support
+	config STM32_TIM1
+		bool "Activate TIM 1"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F446xx || STM32F469_479xx || STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
+		help 
+			Activate TIM 1
+		menuconfig STM32_TIM1_PWM
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM1
+			depends on STM32_PWM
+			if STM32_TIM1_PWM=y
+				config STM32_TIM1_PWM_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM1_PWM_1
+						config STM32_TIM1_PWM_1_A8
+							bool "PA8"
+						config STM32_TIM1_PWM_1_E9
+							bool "PE9"
+					endchoice
+				config STM32_TIM1_PWM_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM1_PWM_2
+						config STM32_TIM1_PWM_2_A9
+							bool "PA9"
+						config STM32_TIM1_PWM_2_E11
+							bool "PE11"
+					endchoice
+				config STM32_TIM1_PWM_3
+					bool "Channel 3"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM1_PWM_3
+						config STM32_TIM1_PWM_3_A10
+							bool "PA10"
+						config STM32_TIM1_PWM_3_E13
+							bool "PE13"
+					endchoice
+				config STM32_TIM1_PWM_4
+					bool "Channel 4"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM1_PWM_4
+						config STM32_TIM1_PWM_4_A11
+							bool "PA11"
+						config STM32_TIM1_PWM_4_E14
+							bool "PE14"
+					endchoice
+			endif
+		menuconfig STM32_TIM1_CAPTURE
+			bool "Activate Capture"
+			default n
+			depends on STM32_TIM1
+			depends on STM32_CAPTURE
+			if STM32_TIM1_CAPTURE=y
+				config STM32_TIM1_CAPTURE_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM1_CAPTURE_1
+						config STM32_TIM1_CAPTURE_1_A8
+							bool "PA8"
+						config STM32_TIM1_CAPTURE_1_E9
+							bool "PE9"
+					endchoice
+				config STM32_TIM1_CAPTURE_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM1_CAPTURE_2
+						config STM32_TIM1_CAPTURE_2_A9
+							bool "PA9"
+						config STM32_TIM1_CAPTURE_2_E11
+							bool "PE11"
+					endchoice
+				config STM32_TIM1_CAPTURE_3
+					bool "Channel 3"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM1_CAPTURE_3
+						config STM32_TIM1_CAPTURE_3_A10
+							bool "PA10"
+						config STM32_TIM1_CAPTURE_3_E13
+							bool "PE13"
+					endchoice
+				config STM32_TIM1_CAPTURE_4
+					bool "Channel 4"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM1_CAPTURE_4
+						config STM32_TIM1_CAPTURE_4_A11
+							bool "PA11"
+						config STM32_TIM1_CAPTURE_4_E14
+							bool "PE14"
+					endchoice
+			endif
+	config STM32_TIM2
+		bool "Activate TIM 2"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx || STM32F051 || STM32F031 || STM32F072 || STM32F042 || STM32F091
+		help 
+			Activate TIM 2
+		menuconfig STM32_TIM2_PWM
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM2
+			depends on STM32_PWM
+			if STM32_TIM2_PWM=y
+				config STM32_TIM2_PWM_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM2_PWM_1
+						config STM32_TIM2_PWM_1_A0
+							bool "PA0"
+						config STM32_TIM2_PWM_1_A5
+							bool "PA5"
+					endchoice
+				config STM32_TIM2_PWM_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM2_PWM_2
+						config STM32_TIM2_PWM_2_A1
+							bool "PA1"
+						config STM32_TIM2_PWM_2_B3
+							bool "PB3"
+					endchoice
+				config STM32_TIM2_PWM_3
+					bool "Channel 3"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM2_PWM_3
+						config STM32_TIM2_PWM_3_A2
+							bool "PA2"
+						config STM32_TIM2_PWM_3_B10
+							bool "PB10"
+					endchoice
+				config STM32_TIM2_PWM_4
+					bool "Channel 4"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM2_PWM_4
+						config STM32_TIM2_PWM_4_A3
+							bool "PA3"
+						config STM32_TIM2_PWM_4_B11
+							bool "PB11"
+					endchoice
+			endif
+		menuconfig STM32_TIM2_CAPTURE
+			bool "Activate Capture"
+			default n
+			depends on STM32_TIM2
+			depends on STM32_CAPTURE
+			if STM32_TIM2_CAPTURE=y
+				config STM32_TIM2_CAPTURE_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM2_CAPTURE_1
+						config STM32_TIM2_CAPTURE_1_A0
+							bool "PA0"
+						config STM32_TIM2_CAPTURE_1_A5
+							bool "PA5"
+					endchoice
+				config STM32_TIM2_CAPTURE_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM2_CAPTURE_2
+						config STM32_TIM2_CAPTURE_2_A1
+							bool "PA1"
+						config STM32_TIM2_CAPTURE_2_B3
+							bool "PB3"
+					endchoice
+				config STM32_TIM2_CAPTURE_3
+					bool "Channel 3"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM2_CAPTURE_3
+						config STM32_TIM2_CAPTURE_3_A2
+							bool "PA2"
+						config STM32_TIM2_CAPTURE_3_B10
+							bool "PB10"
+					endchoice
+				config STM32_TIM2_CAPTURE_4
+					bool "Channel 4"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM2_CAPTURE_4
+						config STM32_TIM2_CAPTURE_4_A3
+							bool "PA3"
+						config STM32_TIM2_CAPTURE_4_B11
+							bool "PB11"
+					endchoice
+			endif
+	config STM32_TIM3
+		bool "Activate TIM 3"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx || STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
+		help 
+			Activate TIM 3
+		menuconfig STM32_TIM3_PWM
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM3
+			depends on STM32_PWM
+			if STM32_TIM3_PWM=y
+				config STM32_TIM3_PWM_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM3_PWM_1
+						config STM32_TIM3_PWM_1_A6
+							bool "PA6"
+						config STM32_TIM3_PWM_1_B4
+							bool "PB4"
+					endchoice
+				config STM32_TIM3_PWM_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM3_PWM_2
+						config STM32_TIM3_PWM_2_A7
+							bool "PA7"
+						config STM32_TIM3_PWM_2_B5
+							bool "PB5"
+					endchoice
+				config STM32_TIM3_PWM_3
+					bool "Channel 3"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM3_PWM_3
+						config STM32_TIM3_PWM_3_B0
+							bool "PB0"
+						config STM32_TIM3_PWM_3_C8
+							bool "PC8"
+					endchoice
+				config STM32_TIM3_PWM_4
+					bool "Channel 4"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM3_PWM_4
+						config STM32_TIM3_PWM_4_B1
+							bool "PB1"
+						config STM32_TIM3_PWM_4_C9
+							bool "PC9"
+					endchoice
+			endif
+		menuconfig STM32_TIM3_CAPTURE
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM3
+			depends on STM32_CAPTURE
+			if STM32_TIM3_CAPTURE=y
+				config STM32_TIM3_CAPTURE_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM3_CAPTURE_1
+						config STM32_TIM3_CAPTURE_1_A6
+							bool "PA6"
+						config STM32_TIM3_CAPTURE_1_B4
+							bool "PB4"
+					endchoice
+				config STM32_TIM3_CAPTURE_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM3_CAPTURE_2
+						config STM32_TIM3_CAPTURE_2_A7
+							bool "PA7"
+						config STM32_TIM3_CAPTURE_2_B5
+							bool "PB5"
+					endchoice
+				config STM32_TIM3_CAPTURE_3
+					bool "Channel 3"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM3_CAPTURE_3
+						config STM32_TIM3_CAPTURE_3_B0
+							bool "PB0"
+						config STM32_TIM3_CAPTURE_3_C8
+							bool "PC8"
+					endchoice
+				config STM32_TIM3_CAPTURE_4
+					bool "Channel 4"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM3_CAPTURE_4
+						config STM32_TIM3_CAPTURE_4_B1
+							bool "PB1"
+						config STM32_TIM3_CAPTURE_4_C9
+							bool "PC9"
+					endchoice
+			endif
+	config STM32_TIM4
+		bool "Activate TIM 4"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 4
+		menuconfig STM32_TIM4_PWM
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM4
+			depends on STM32_PWM
+			if STM32_TIM4_PWM=y
+				config STM32_TIM4_PWM_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM4_PWM_1
+						config STM32_TIM4_PWM_1_B6
+							bool "PB6"
+						config STM32_TIM4_PWM_1_D12
+							bool "PD12"
+					endchoice
+				config STM32_TIM4_PWM_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM4_PWM_2
+						config STM32_TIM4_PWM_2_B7
+							bool "PB7"
+						config STM32_TIM4_PWM_2_B13
+							bool "PB13"
+					endchoice
+				config STM32_TIM4_PWM_3
+					bool "Channel 3"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM4_PWM_3
+						config STM32_TIM4_PWM_3_B8
+							bool "PB8"
+						config STM32_TIM4_PWM_3_D14
+							bool "PD4"
+					endchoice
+				config STM32_TIM4_PWM_4
+					bool "Channel 4"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM4_PWM_4
+						config STM32_TIM4_PWM_4_B9
+							bool "PB9"
+						config STM32_TIM4_PWM_4_D15
+							bool "PD15"
+					endchoice
+			endif
+		menuconfig STM32_TIM4_CAPTURE
+			bool "Activate Capture"
+			default n
+			depends on STM32_TIM4
+			depends on STM32_CAPTURE
+			if STM32_TIM4_CAPTURE=y
+				config STM32_TIM4_CAPTURE_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM4_CAPTURE_1
+						config STM32_TIM4_CAPTURE_1_B6
+							bool "PB6"
+						config STM32_TIM4_CAPTURE_1_D12
+							bool "PD12"
+					endchoice
+				config STM32_TIM4_CAPTURE_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM4_CAPTURE_2
+						config STM32_TIM4_CAPTURE_2_B7
+							bool "PB7"
+						config STM32_TIM4_CAPTURE_2_B13
+							bool "PB13"
+					endchoice
+				config STM32_TIM4_CAPTURE_3
+					bool "Channel 3"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM4_CAPTURE_3
+						config STM32_TIM4_CAPTURE_3_B8
+							bool "PB8"
+						config STM32_TIM4_CAPTURE_3_D14
+							bool "PFD4"
+					endchoice
+				config STM32_TIM4_CAPTURE_4
+					bool "Channel 4"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM4_CAPTURE_4
+						config STM32_TIM4_CAPTURE_4_B9
+							bool "PB9"
+						config STM32_TIM4_CAPTURE_4_D15
+							bool "PD15"
+					endchoice
+			endif
+	config STM32_TIM5
+		bool "Activate TIM 5"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 5
+		menuconfig STM32_TIM5_PWM
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM5
+			depends on STM32_PWM
+			if STM32_TIM5_PWM=y
+				config STM32_TIM5_PWM_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM5_PWM_1
+						config STM32_TIM5_PWM_1_A0
+							bool "PA0"
+						config STM32_TIM5_PWM_1_H10
+							bool "PH10"
+					endchoice
+				config STM32_TIM5_PWM_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM5_PWM_2
+						config STM32_TIM5_PWM_2_A1
+							bool "PA1"
+						config STM32_TIM5_PWM_2_H11
+							bool "PH11"
+					endchoice
+				config STM32_TIM5_PWM_3
+					bool "Channel 3"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM5_PWM_3
+						config STM32_TIM5_PWM_3_A2
+							bool "PA2"
+						config STM32_TIM5_PWM_3_H12
+							bool "PH12"
+					endchoice
+				config STM32_TIM5_PWM_4
+					bool "Channel 4"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM5_PWM_4
+						config STM32_TIM5_PWM_4_A3
+							bool "PA3"
+						config STM32_TIM5_PWM_4_I0
+							bool "PI0"
+					endchoice
+			endif
+		menuconfig STM32_TIM5_CAPTURE
+			bool "Activate Capture"
+			default n
+			depends on STM32_TIM5
+			depends on STM32_CAPTURE
+			if STM32_TIM5_CAPTURE=y
+				config STM32_TIM5_CAPTURE_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM5_CAPTURE_1
+						config STM32_TIM5_CAPTURE_1_A0
+							bool "PA0"
+						config STM32_TIM5_CAPTURE_1_H10
+							bool "PH10"
+					endchoice
+				config STM32_TIM5_CAPTURE_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM5_CAPTURE_2
+						config STM32_TIM5_CAPTURE_2_A1
+							bool "PA1"
+						config STM32_TIM5_CAPTURE_2_H11
+							bool "PH11"
+					endchoice
+				config STM32_TIM5_CAPTURE_3
+					bool "Channel 3"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM5_CAPTURE_3
+						config STM32_TIM5_CAPTURE_3_A2
+							bool "PA2"
+						config STM32_TIM5_CAPTURE_3_H12
+							bool "PH12"
+					endchoice
+				config STM32_TIM5_CAPTURE_4
+					bool "Channel 4"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM5_CAPTURE_4
+						config STM32_TIM5_CAPTURE_4_A3
+							bool "PA3"
+						config STM32_TIM5_CAPTURE_4_I0
+							bool "PI0"
+					endchoice
+			endif
+	config STM32_TIM6
+		bool "Activate TIM 6"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F469_479xx || STM32F446xx || STM32F051 || STM32F072 || STM32F091 || STM32F070xB || STM32F030xC
+		help 
+			Activate TIM 6
+	config STM32_TIM7
+		bool "Activate TIM 7"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx || STM32F072 || STM32F091 || STM32F070xB || STM32F030xC
+		help 
+			Activate TIM 7
+	config STM32_TIM8
+		bool "Activate TIM 8"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 8
+		menuconfig STM32_TIM8_PWM
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM8
+			depends on STM32_PWM
+			if STM32_TIM8_PWM=y
+				config STM32_TIM8_PWM_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM8_PWM_1
+						config STM32_TIM8_PWM_1_C8
+							bool "PC8"
+						config STM32_TIM8_PWM_1_I15
+							bool "PI15"
+					endchoice
+				config STM32_TIM8_PWM_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM8_PWM_2
+						config STM32_TIM8_PWM_2_C7
+							bool "PC7"
+						config STM32_TIM8_PWM_2_I6
+							bool "PI6"
+					endchoice
+				config STM32_TIM8_PWM_3
+					bool "Channel 3"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM8_PWM_3
+						config STM32_TIM8_PWM_3_C8
+							bool "PC8"
+						config STM32_TIM8_PWM_3_I7
+							bool "PI7"
+					endchoice
+				config STM32_TIM8_PWM_4
+					bool "Channel 4"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM8_PWM_4
+						config STM32_TIM8_PWM_4_C9
+							bool "PC9"
+						config STM32_TIM8_PWM_4_I2
+							bool "PI2"
+					endchoice
+			endif
+		menuconfig STM32_TIM8_CAPTURE
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM8
+			depends on STM32_CAPTURE
+			if STM32_TIM8_CAPTURE=y
+				config STM32_TIM8_CAPTURE_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM8_CAPTURE_1
+						config STM32_TIM8_CAPTURE_1_C8
+							bool "PC8"
+						config STM32_TIM8_CAPTURE_1_I15
+							bool "PI15"
+					endchoice
+				config STM32_TIM8_CAPTURE_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM8_CAPTURE_2
+						config STM32_TIM8_CAPTURE_2_C7
+							bool "PC7"
+						config STM32_TIM8_CAPTURE_2_I6
+							bool "PI6"
+					endchoice
+				config STM32_TIM8_CAPTURE_3
+					bool "Channel 3"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM8_CAPTURE_3
+						config STM32_TIM8_CAPTURE_3_C8
+							bool "PC8"
+						config STM32_TIM8_CAPTURE_3_I7
+							bool "PI7"
+					endchoice
+				config STM32_TIM8_CAPTURE_4
+					bool "Channel 4"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM8_CAPTURE_4
+						config STM32_TIM8_CAPTURE_4_C9
+							bool "PC9"
+						config STM32_TIM8_CAPTURE_4_I2
+							bool "PI2"
+					endchoice
+			endif
+	config STM32_TIM9
+		bool "Activate TIM 9"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 9
+		menuconfig STM32_TIM9_PWM
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM9
+			depends on STM32_PWM
+			if STM32_TIM9_PWM=y
+				config STM32_TIM9_PWM_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM9_PWM_1
+						config STM32_TIM9_PWM_1_A2
+							bool "PA2"
+						config STM32_TIM9_PWM_1_E5
+							bool "PE5"
+					endchoice
+				config STM32_TIM9_PWM_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM9_PWM_2
+						config STM32_TIM9_PWM_2_A3
+							bool "PA3"
+						config STM32_TIM9_PWM_2_E6
+							bool "PE6"
+					endchoice
+			endif
+		menuconfig STM32_TIM9_CAPTURE
+			bool "Activate Capture"
+			default n
+			depends on STM32_TIM9
+			depends on STM32_CAPTURE
+			if STM32_TIM9_CAPTURE=y
+				config STM32_TIM9_CAPTURE_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM9_CAPTURE_1
+						config STM32_TIM9_CAPTURE_1_A2
+							bool "PA2"
+						config STM32_TIM9_CAPTURE_1_E5
+							bool "PE5"
+					endchoice
+				config STM32_TIM9_CAPTURE_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM9_CAPTURE_2
+						config STM32_TIM9_CAPTURE_2_A3
+							bool "PA3"
+						config STM32_TIM9_CAPTURE_2_E6
+							bool "PE6"
+					endchoice
+			endif
+	config STM32_TIM10
+		bool "Activate TIM 10"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 10
+		menuconfig STM32_TIM10_PWM
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM10
+			depends on STM32_PWM
+			if STM32_TIM10_PWM=y
+				config STM32_TIM10_PWM_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM10_PWM_1
+						config STM32_TIM10_PWM_1_B8
+							bool "PB8"
+						config STM32_TIM10_PWM_1_F6
+							bool "PF6"
+					endchoice
+			endif
+		menuconfig STM32_TIM10_CAPTURE
+			bool "Activate Capture"
+			default n
+			depends on STM32_TIM10
+			depends on STM32_CAPTURE
+			if STM32_TIM10_CAPTURE=y
+				config STM32_TIM10_CAPTURE_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM10_CAPTURE_1
+						config STM32_TIM10_CAPTURE_1_B8
+							bool "PB8"
+						config STM32_TIM10_CAPTURE_1_F6
+							bool "PF6"
+					endchoice
+			endif
+	config STM32_TIM11
+		bool "Activate TIM 11"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F410xx || STM32F401xx || STM32F411xE || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 11
+		menuconfig STM32_TIM11_PWM
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM11
+			depends on STM32_PWM
+			if STM32_TIM11_PWM=y
+				config STM32_TIM11_PWM_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM11_PWM_1
+						config STM32_TIM11_PWM_1_B9
+							bool "PB9"
+						config STM32_TIM11_PWM_1_F7
+							bool "PF7"
+					endchoice
+			endif
+		menuconfig STM32_TIM11_CAPTURE
+			bool "Activate Capture"
+			default n
+			depends on STM32_TIM11
+			depends on STM32_CAPTURE
+			if STM32_TIM11_CAPTURE=y
+				config STM32_TIM11_CAPTURE_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM11_CAPTURE_1
+						config STM32_TIM11_CAPTURE_1_B9
+							bool "PB9"
+						config STM32_TIM11_CAPTURE_1_F7
+							bool "PF7"
+					endchoice
+			endif
+	config STM32_TIM12
+		bool "Activate TIM 12"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 12
+		menuconfig STM32_TIM12_PWM
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM12
+			depends on STM32_PWM
+			if STM32_TIM12_PWM=y
+				config STM32_TIM12_PWM_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM12_PWM_1
+						config STM32_TIM12_PWM_1_B14
+							bool "PB14"
+						config STM32_TIM12_PWM_1_H6
+							bool "PH6"
+					endchoice
+				config STM32_TIM12_PWM_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM12_PWM_2
+						config STM32_TIM12_PWM_2_B15
+							bool "PB15"
+						config STM32_TIM12_PWM_2_H9
+							bool "PH9"
+					endchoice
+			endif
+		menuconfig STM32_TIM12_CAPTURE
+			bool "Activate Capture"
+			default n
+			depends on STM32_TIM12
+			depends on STM32_CAPTURE
+			if STM32_TIM12_CAPTURE=y
+				config STM32_TIM12_CAPTURE_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM12_CAPTURE_1
+						config STM32_TIM12_CAPTURE_1_B14
+							bool "PB14"
+						config STM32_TIM12_CAPTURE_1_H6
+							bool "PH6"
+					endchoice
+				config STM32_TIM12_CAPTURE_2
+					bool "Channel 2"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM12_CAPTURE_2
+						config STM32_TIM12_CAPTURE_2_B15
+							bool "PB15"
+						config STM32_TIM12_CAPTURE_2_H9
+							bool "PH9"
+					endchoice
+			endif
+	config STM32_TIM13
+		bool "Activate TIM 13"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx
+		help 
+			Activate TIM 13
+		menuconfig STM32_TIM13_PWM
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM13
+			depends on STM32_PWM
+			if STM32_TIM13_PWM=y
+				config STM32_TIM13_PWM_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM13_PWM_1
+						config STM32_TIM13_PWM_1_A6
+							bool "PA6"
+						config STM32_TIM13_PWM_1_F8
+							bool "PF8"
+					endchoice
+			endif
+		menuconfig STM32_TIM13_CAPTURE
+			bool "Activate Capture"
+			default n
+			depends on STM32_TIM13
+			depends on STM32_CAPTURE
+			if STM32_TIM13_CAPTURE=y
+				config STM32_TIM13_CAPTURE_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM13_CAPTURE_1
+						config STM32_TIM13_CAPTURE_1_A6
+							bool "PA6"
+						config STM32_TIM13_CAPTURE_1_F8
+							bool "PF8"
+					endchoice
+			endif
+	config STM32_TIM14
+		bool "Activate TIM 14"
+		default n
+		depends on STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F469_479xx || STM32F446xx || STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
+		help 
+			Activate TIM 14
+		menuconfig STM32_TIM14_PWM
+			bool "Activate PWM"
+			default n
+			depends on STM32_TIM14
+			depends on STM32_PWM
+			if STM32_TIM14_PWM=y
+				config STM32_TIM14_PWM_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM14_PWM_1
+						config STM32_TIM14_PWM_1_A7
+							bool "PA7"
+						config STM32_TIM14_PWM_1_F9
+							bool "PF9"
+					endchoice
+			endif
+		menuconfig STM32_TIM14_CAPTURE
+			bool "Activate Capture"
+			default n
+			depends on STM32_TIM14
+			depends on STM32_CAPTURE
+			if STM32_TIM14_CAPTURE=y
+				config STM32_TIM14_CAPTURE_1
+					bool "Channel 1"
+					choice
+						prompt "Pin"
+						depends on STM32_TIM14_CAPTURE_1
+						config STM32_TIM14_CAPTURE_1_A7
+							bool "PA7"
+						config STM32_TIM14_CAPTURE_1_F9
+							bool "PF9"
+					endchoice
+			endif
+	config STM32_TIM15
+		bool "Activate TIM 15"
+		default n
+		depends on STM32F051 || STM32F030 || STM32F072 || STM32F091 || STM32F070xB || STM32F030xC
+		help 
+			Activate TIM 15
+	config STM32_TIM16
+		bool "Activate TIM 16"
+		default n
+		depends on STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
+		help 
+			Activate TIM 16
+	config STM32_TIM17
+		bool "Activate TIM 17"
+		default n
+		depends on STM32F051 || STM32F031 || STM32F030 || STM32F072 || STM32F042 || STM32F091 || STM32F070xB || STM32F070x6 || STM32F030xC
+		help 
+			Activate TIM 17
+endif
