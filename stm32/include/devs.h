@@ -275,4 +275,14 @@ HAL_DEFINE_GLOBAL_ARRAY(sd);
 #ifdef CONFIG_STM32_SDIO
 # define SDIO_ID HAL_GET_ID(sd, stm32, stm32_sdio)
 #endif
+HAL_DEFINE_GLOBAL_ARRAY(spi);
+#ifdef CONFIG_STM32_SPI_1
+# define SPI1_ID HAL_GET_ID(spi, stm32, stm32_spi1)
+#endif
+#ifdef CONFIG_STM32_SPI_2
+# define SPI2_ID HAL_GET_ID(spi, stm32, stm32_spi2)
+#endif
+#ifdef CONFIG_STM32_SPI_3
+# define SPI3_ID HAL_GET_ID(spi, stm32, stm32_spi3)
+#endif
 #endif

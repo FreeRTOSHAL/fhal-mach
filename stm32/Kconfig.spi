@@ -1,0 +1,110 @@
+menuconfig STM32_SPI
+	bool "SPI"
+	depends on SPI
+if STM32_SPI
+	menuconfig STM32_SPI_1
+		bool "Activate SPI 1"
+		if STM32_SPI_1
+			choice
+				prompt "MISO Pin"
+				config STM32_SPI_1_MISO_PTA6
+					bool "MISO on PTA6"
+				config STM32_SPI_1_MISO_PTB4
+					bool "MISO on PTB4"
+			endchoice
+			choice
+				prompt "MOSI Pin"
+				config STM32_SPI_1_MOSI_PTA7
+					bool "MOSI on PTA7"
+				config STM32_SPI_1_MOSI_PTB5
+					bool "MOSI on PTB5"
+			endchoice
+			choice
+				prompt "CLK Pin"
+				config STM32_SPI_1_CLK_PTA5
+					bool "CLK on PTA5"
+				config STM32_SPI_1_CLK_PTB3
+					bool "CLK on PTB3"
+			endchoice
+			choice
+				prompt "CLK NSS"
+				config STM32_SPI_1_NSS_PTA4
+					bool "NSS on PTA4"
+				config STM32_SPI_1_NSS_PTA15
+					bool "NSS on PTA15"
+			endchoice
+		endif
+	menuconfig STM32_SPI_2
+		bool "Activate SPI 2"
+		if STM32_SPI_2
+			choice
+				prompt "MISO Pin"
+				config STM32_SPI_2_MISO_PTB14
+					bool "MISO on PTB14"
+				config STM32_SPI_2_MISO_PTC2
+					bool "MISO on PTC2"
+				config STM32_SPI_2_MISO_PTI2
+					bool "MISO on PTC2"
+			endchoice
+			choice
+				prompt "MOSI Pin"
+				config STM32_SPI_2_MOSI_PTB15
+					bool "MOSI on PTB15"
+				config STM32_SPI_2_MOSI_PTC3
+					bool "MOSI on PTC3"
+				config STM32_SPI_2_MOSI_PTI3
+					bool "MOSI on PTI3"
+			endchoice
+			choice
+				prompt "CLK Pin"
+				config STM32_SPI_2_CLK_PTB10
+					bool "CLK on PTB10"
+				config STM32_SPI_2_CLK_PTB13
+					bool "CLK on PTB13"
+				config STM32_SPI_2_CLK_PTI1
+					bool "CLK on PTI1"
+			endchoice
+			choice
+				prompt "CLK NSS"
+				config STM32_SPI_2_NSS_PTB9
+					bool "NSS on PTB9"
+				config STM32_SPI_2_NSS_PTB12
+					bool "NSS on PTB12"
+				config STM32_SPI_2_NSS_PTI0
+					bool "NSS on PTI0"
+			endchoice
+		endif
+	menuconfig STM32_SPI_3
+		bool "Activate SPI 3"
+		if STM32_SPI_3
+			choice
+				prompt "MISO Pin"
+				config STM32_SPI_3_MISO_PTB4
+					bool "MISO on PTB4"
+				config STM32_SPI_3_MISO_PTC11
+					bool "MISO on PTC11"
+			endchoice
+			choice
+				prompt "MOSI Pin"
+				config STM32_SPI_3_MOSI_PTB5
+					bool "MOSI on PTB5"
+				config STM32_SPI_3_MOSI_PTC12
+					bool "MOSI on PTC12"
+			endchoice
+			choice
+				prompt "CLK Pin"
+				config STM32_SPI_3_CLK_PTB3
+					bool "CLK on PTB3"
+				config STM32_SPI_3_CLK_PTC10
+					bool "CLK on PTC10"
+			endchoice
+			choice
+				prompt "CLK NSS"
+				config STM32_SPI_3_NSS_PTA4
+					bool "NSS on PTA4"
+				config STM32_SPI_3_NSS_PTA15
+					bool "NSS on PTA15"
+			endchoice
+		endif
+
+endif

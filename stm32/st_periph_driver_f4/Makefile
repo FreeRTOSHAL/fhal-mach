@@ -8,3 +8,4 @@ obj-$(CONFIG_STM32_UART) += stm32f4xx_usart.o
 obj-$(CONFIG_STM32_TIMER) += stm32f4xx_tim.o
 obj-$(CONFIG_STM32_SDIO) += stm32f4xx_sdio.o
 obj-$(CONFIG_STM32_DMA) += stm32f4xx_dma.o
+obj-$(CONFIG_STM32_SPI) += stm32f4xx_spi.o

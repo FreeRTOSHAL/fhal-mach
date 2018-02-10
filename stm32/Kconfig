@@ -36,9 +36,15 @@ if STM32_F0=y
 	config STM32_TIMER_M0
 		bool
 		default y
+	config STM32_SPI_M0
+		bool
+		default y
 endif
 if STM32_F0=n
 	config STM32_TIMER_M3_4
+		bool
+		default y
+	config STM32_SPI_M3_4
 		bool
 		default y
 endif
@@ -420,6 +426,7 @@ config STM32_MUX
 		GPIO is needet for muxing
 source mach/stm32/Kconfig.uart
 source mach/stm32/Kconfig.timer
+source mach/stm32/Kconfig.spi
 config STM32_DMA
 	bool 
 	default n
