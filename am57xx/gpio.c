@@ -554,6 +554,7 @@ GPIO_PIN_INIT(am57xx, gpio, offset, dir, setting) {
 		goto am57xx_gpio_pin_init_error0;
 	}
 	memset(pin, 0, sizeof(struct gpio_pin));
+	pin->gpio = gpio;
 	pin->index = index;
 	pin->offset = offset;
 	pin->bank = index >> 5; /* index / 32 */
