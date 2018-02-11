@@ -72,9 +72,16 @@ bootCPU1:
 /* CPU2 */
 bootCPU2:
 	/* TODO */
+#ifdef CONFIG_MACH_AM57xx_ACRIVATE_CPU1
+	/* Load resetVector of CPU2 */
+	ldr r1, cpu2Code
+	ldr r0, [r1, #4]
+	bx r0
+#endif
 1:
 	wfi
 	b 1b
+
 .type bootCPUUnkown, #function
 .section .text
 .global bootCPUUnkown
@@ -214,46 +221,6 @@ cpuIDUnkown:
 	/* jump back to reset_handler */
 	b reset_handler
 
-.type datainit, #function
-.section .text
-.global datainit
-datainit:
-	push {r0, r1, r2, r3, r4, r5, r6, lr}
-	ldr r0, =_data_table
-	ldr r1, =_data_table_end
-0:
-	ldr r2, [r0], #4 /* src */
-	ldr r3, [r0], #4 /* dst */
-	ldr r4, [r0], #4 /* len */
-	mov r5, #0
-	b 2f
-1:
-	ldr r6, [r2], #4
-	str r6, [r3], #4
-	add r5, #4
-2:
-	cmp r5, r4
-	bcc 1b
-	cmp r0, r1
-	bne 0b
-	pop {r0, r1, r2, r3, r4, r5, r6, pc}
-
-.type bssinit, #function
-.section .text
-.global bssinit
-bssinit:
-	push {r0, r1, r5, lr}
-	ldr r0, =__bss_start__
-	ldr r1, =__bss_end__
-	mov r5, #0
-	b 2f
-1:
-	str r5, [r0], #4
-2:
-	cmp r0, r1
-	bcc 1b
-	pop {r0, r1, r5, pc}
-
 .section .text
 CORTEXM4_RW_PID1: .word 0xE00FE000
 VTOR: .word 0xE000ED08 
@@ -261,3 +228,6 @@ USE_MSP: .word 0xFFFFFFFD
 vectorPtr: .word vector_table
 resetRegister: .word 0x6AE06510
 cpu2isInited: .word 0x0
+#ifdef CONFIG_MACH_AM57xx_ACRIVATE_CPU1
+cpu2Code: .word cpu1
+#endif

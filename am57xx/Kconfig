@@ -1,4 +1,23 @@
 comment "AM57xx Settings"
+choice 
+	prompt "Select CPU"
+	config MACH_AM57xx_IPU_CPU0
+		bool "IPU CPU0"
+		depends on ARCH_ARM
+	config MACH_AM57xx_IPU_CPU1
+		bool "IPU CPU1"
+		depends on ARCH_ARM
+	# TODO Add DSP
+endchoice
+config MACH_AM57xx_ACRIVATE_CPU1
+	bool "Activate CPU1"
+	default n
+	depends on MACH_AM57xx_IPU_CPU0
+
+config MACH_AM57xx_CPU1_BIN_FILE
+	string "CPU1 Bin File"
+	default ""
+	depends on MACH_AM57xx_ACRIVATE_CPU1
 config MAX_SYSCALL_INTERRUPT_PRIORITY
 	hex
 	default 0x20
