@@ -30,6 +30,10 @@ choice
 		depends on ARCH_ARM_CORTEX_M3
 		help
 			am57xx M4 Mach
+	config MACH_S32K
+		bool "NXP S32K"
+		help
+			NXP S32K Mach
 endchoice
 if MACH_VF610=y
 source mach/vf610/Kconfig
@@ -45,5 +49,11 @@ source mach/imx6/Kconfig
 endif
 if MACH_AM57xx
 source mach/am57xx/Kconfig
+endif
+if MACH_S32K=y
+source mach/s32k/Kconfig
+endif
+if MACH_VF610=y || MACH_S32K=y
+source mach/nxp/Kconfig
 endif
 endmenu

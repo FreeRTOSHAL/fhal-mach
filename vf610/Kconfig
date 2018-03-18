@@ -39,8 +39,11 @@ config MACH_LD_SCRIPT
 
 config MACH_INCLUDE
 	string
-	default "-Imach/vf610/include"
+	default "-Imach/vf610/include -Imach/nxp/include/"
 config MACH_USE_GENERIC_FAULT_HANDLER
+	bool
+	default y
+config USE_NXP_LIB
 	bool
 	default y
 config VF610_UART
@@ -156,6 +159,14 @@ config VF610_CACHE
 	bool "Activate VF610 M4 Cache"
 	default n
 	select CACHE
+config VF610_GPIO
+	bool "Activate GPIO"
+	depends on GPIO
+	select NXP_GPIO
+	config GPIO_PORT_COUNT
+		int
+		depends on NXP_GPIO
+		default 5
 menuconfig FLEXTIMER
 	depends on TIMER
 	bool "Activate Flextimer"

@@ -1,0 +1,6 @@
+config FLEXTIMER
+	bool
+	default n
+config NXP_GPIO
+	bool
+	default n

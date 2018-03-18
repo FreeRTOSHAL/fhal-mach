@@ -2,7 +2,7 @@
 #define DEVS_H_
 #include <hal.h>
 HAL_DEFINE_GLOBAL_ARRAY(gpio);
-#define GPIO_ID HAL_GET_ID(gpio, vf, gpio)
+#define GPIO_ID HAL_GET_ID(gpio, nxp, gpio)
 HAL_DEFINE_GLOBAL_ARRAY(uart);
 #ifdef CONFIG_VF610_LPUART00
 # define LPUART0_ID HAL_GET_ID(uart, lp, uart_data00)
