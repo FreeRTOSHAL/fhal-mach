@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <clock.h>
 #include <stm32fxxx.h> 
-#ifdef CONFIG_EXTERNEL_OSCILLATOR
+#ifdef CONFIG_EXTERNAL_OSCILLATOR
 # define PLL_HSE_PLLN CONFIG_PLLN
 # define PLL_HSE_PLLM CONFIG_PLLM
 # define PLL_HSE_PLLP CONFIG_PLLP
@@ -215,7 +215,7 @@ struct clock *clock_init() {
 		/* PLL not in use disable PLL */
 		RCC_PLLCmd(DISABLE);
 
-#ifdef CONFIG_EXTERNEL_OSCILLATOR
+#ifdef CONFIG_EXTERNAL_OSCILLATOR
 		/* Check HSE is available */
 		{
 			ErrorStatus status;

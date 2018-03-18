@@ -26,7 +26,7 @@ struct clock *clock_init() {
 	uint32_t RCC_PCLK = RCC_HCLK_Div1;
 	uint32_t flashLatency = FLASH_Latency_1;
 /* TODO */
-#ifdef CONFIG_EXTERNEL_OSCILLATOR
+#ifdef CONFIG_EXTERNAL_OSCILLATOR
 	{
 		RCC_HSEConfig(RCC_HSE_ON);
 		ErrorStatus status = RCC_WaitForHSEStartUp();
