@@ -28,7 +28,7 @@ ENTRY(reset_handler)
 MEM_START
 	/* Only Support S32K144 */
 	MEM_ADD(flash, 0x0, 512K)
-	MEM_ADD(sram, 0x20000000, 64K)
+	MEM_ADD(sram, 0x1FFF8000, 60K)
 MEM_STOP
 
 SECTIONS_START
