@@ -35,6 +35,9 @@ SECTIONS_START
 	. = ORIGIN(flash);
 	VECTOR_START
 		VECTOR_DEFAULT
+		. = 0x400;
+		*(.flashconfig)
+		. = ALIGN(0x4);
 	VECTOR_STOP(flash)
 
 	TEXT_START
