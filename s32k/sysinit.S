@@ -136,6 +136,9 @@ reset_handler:
 	bl bssinit
 
 	bl clock_init
+#ifdef CONFIG_MACH_S32K_ENABLE_INST_CACHE
+	bl cache_init
+#endif
 	bl main
 1:
 	wfi

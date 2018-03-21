@@ -46,6 +46,9 @@ config USE_NXP_LIB
 config MACH_S32K_DISABLE_WDOG
 	bool "Disable Watchdog at startup"
 	default y
+config MACH_S32K_ENABLE_INST_CACHE
+	bool "Enable Instruction Cache"
+	default y
 # GPIO Subsytem is use by muxing system
 config S32K_GPIO
 	bool
