@@ -49,6 +49,7 @@ config MACH_S32K_DISABLE_WDOG
 config MACH_S32K_ENABLE_INST_CACHE
 	bool "Enable Instruction Cache"
 	default y
+	select CACHE
 # GPIO Subsytem is use by muxing system
 config S32K_GPIO
 	bool
