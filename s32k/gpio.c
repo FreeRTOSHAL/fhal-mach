@@ -36,6 +36,20 @@
 #define GPIO2_INT 0x4004B000
 #define GPIO3_INT 0x4004C000
 #define GPIO4_INT 0x4004D000
+#define GPIO0_CLOCK 0x40065124
+#define GPIO1_CLOCK 0x40065128
+#define GPIO2_CLOCK 0x4006512C
+#define GPIO3_CLOCK 0x40065130
+#define GPIO4_CLOCK 0x40065134
+int32_t nxp_gpio_setupClock(struct gpio *gpio) {
+	/* Activate Clock Gate for GPIO Ports*/
+	*((uint32_t *) GPIO0_CLOCK) = BIT(30);
+	*((uint32_t *) GPIO1_CLOCK) = BIT(30);
+	*((uint32_t *) GPIO2_CLOCK) = BIT(30);
+	*((uint32_t *) GPIO3_CLOCK) = BIT(30);
+	*((uint32_t *) GPIO4_CLOCK) = BIT(30);
+	return 0;
+}
 static struct gpio gpio = {
 	GPIO_INIT_DEV(nxp)
 	HAL_NAME("Vybrid GPIO Contoller")
@@ -65,17 +79,17 @@ static struct gpio gpio = {
 };
 GPIO_ADDDEV(nxp, gpio);
 void PORTA_isr(void) {
-	gpio_handleInterrupt(&gpio, 0);
+	nxp_gpio_handleInterrupt(&gpio, 0);
 }
 void PORTB_isr(void) {
-	gpio_handleInterrupt(&gpio, 1);
+	nxp_gpio_handleInterrupt(&gpio, 1);
 }
 void PORTC_isr(void) {
-	gpio_handleInterrupt(&gpio, 2);
+	nxp_gpio_handleInterrupt(&gpio, 2);
 }
 void PORTD_isr(void) {
-	gpio_handleInterrupt(&gpio, 3);
+	nxp_gpio_handleInterrupt(&gpio, 3);
 }
 void PORTE_isr(void) {
-	gpio_handleInterrupt(&gpio, 4);
+	nxp_gpio_handleInterrupt(&gpio, 4);
 }

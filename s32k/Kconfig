@@ -1,4 +1,25 @@
 comment "NXP S32k Settings"
+choice 
+	prompt "Select Prozessor Type"
+	config S32K116
+		bool "NXP S32K144"
+		depends on ARCH_ARM_CORTEX_M0
+	config S32K118
+		bool "NXP S32K144"
+		depends on ARCH_ARM_CORTEX_M0
+	config S32K142
+		bool "NXP S32K142"
+		depends on ARCH_ARM_CORTEX_M3 || ARCH_ARM_CORTEX_M4F
+	config S32K144
+		bool "NXP S32K144"
+		depends on ARCH_ARM_CORTEX_M3 || ARCH_ARM_CORTEX_M4F
+	config S32K146
+		bool "NXP S32K146"
+		depends on ARCH_ARM_CORTEX_M3 || ARCH_ARM_CORTEX_M4F
+	config S32K148
+		bool "NXP S32K148"
+		depends on ARCH_ARM_CORTEX_M3 || ARCH_ARM_CORTEX_M4F
+endchoice
 config MAX_SYSCALL_INTERRUPT_PRIORITY
 	hex
 	default 0x20
@@ -56,14 +77,11 @@ config S32K_GPIO
 	default y
 	select GPIO
 	select NXP_GPIO
+	select NXP_GPIO_MUX
 	config GPIO_PORT_COUNT
 		int
 		depends on NXP_GPIO
 		default 5
-	config NXP_GPIO_MUX
-		bool
-		default y
-		depends on NXP_GPIO
 menuconfig S32k_FLEXTIMER
 	depends on TIMER
 	select FLEXTIMER

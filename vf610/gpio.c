@@ -65,7 +65,7 @@
 #define GPIO3_INT 0x4004C000
 #define GPIO4_INT 0x4004D000
 #define HMI2015_GPIO_GENERAL_CTRL (PAD_CTL_PKE | PAD_CTL_PUE | PAD_CTL_SPEED_MED)
-int32_t gpioPin_setup(struct gpio_pin *pin) {
+int32_t nxp_gpioPin_setup(struct gpio_pin *pin) {
 	struct mux *mux = mux_init();
 	uint32_t ctl = PAD_CTL_MODE(MODE0);
 	uint32_t extra = HMI2015_GPIO_GENERAL_CTRL;
@@ -96,6 +96,10 @@ int32_t gpioPin_setup(struct gpio_pin *pin) {
 	ret = mux_pinctl(mux, PIN_NR(pin->bank, pin->pin), ctl, extra);
 	return ret;
 }
+int32_t nxp_gpio_setupClock(struct gpio *gpio) {
+	/* nothing to do */
+	return 0;
+}
 static struct gpio gpio = {
 	GPIO_INIT_DEV(nxp)
 	HAL_NAME("Vybrid GPIO Contoller")
@@ -124,17 +128,17 @@ static struct gpio gpio = {
 };
 GPIO_ADDDEV(nxp, gpio);
 void gpio0_isr(void) {
-	gpio_handleInterrupt(&gpio, 0);
+	nxp_gpio_handleInterrupt(&gpio, 0);
 }
 void gpio1_isr(void) {
-	gpio_handleInterrupt(&gpio, 1);
+	nxp_gpio_handleInterrupt(&gpio, 1);
 }
 void gpio2_isr(void) {
-	gpio_handleInterrupt(&gpio, 2);
+	npx_gpio_handleInterrupt(&gpio, 2);
 }
 void gpio3_isr(void) {
-	gpio_handleInterrupt(&gpio, 3);
+	nxp_gpio_handleInterrupt(&gpio, 3);
 }
 void gpio4_isr(void) {
-	gpio_handleInterrupt(&gpio, 4);
+	nxpgpio_handleInterrupt(&gpio, 4);
 }

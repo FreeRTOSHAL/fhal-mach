@@ -29,6 +29,9 @@
 #include <irq.h>
 #include "iomux.h"
 #include "vector.h"
+#ifdef CONFIG_NXP_GPIO_MUX
+# include <nxp/mux.h>
+#endif
 
 /**
  * Convert Bank Pin Number to global Pin number
@@ -55,7 +58,7 @@
 #define PORTX_DFCR_1KHZ_LPO (1 << 0)
 
 #define PORTX_DFWR_FILT(x) ((x & 0xA) << 0)
-void gpio_handleInterrupt(struct gpio *gpio, uint8_t bank) {
+void nxp_gpio_handleInterrupt(struct gpio *gpio, uint8_t bank) {
 	uint32_t tmp;
 	uint32_t i = 0; 
 	BaseType_t yield = pdFALSE;
@@ -76,6 +79,41 @@ void gpio_handleInterrupt(struct gpio *gpio, uint8_t bank) {
 	}
 	portYIELD_FROM_ISR(yield);
 }
+#ifdef CONFIG_NXP_GPIO_MUX
+int32_t nxp_gpioPin_setup(struct gpio_pin *pin) {
+	struct mux *mux = mux_init();
+	uint32_t ctl = MUX_CTL_MODE(MODE1);
+	uint32_t extra = 0;
+	int32_t ret;
+	switch (pin->dir) {
+		case GPIO_INPUT:
+			pin->base->PDDR &= ~BIT(pin->pin);
+			pin->base->PIDR |= BIT(pin->pin);
+			/* not supported 
+			if (pin->schmittTrigger) {
+			}*/
+			break;
+		case GPIO_OUTPUT:
+			pin->base->PDDR |= BIT(pin->pin);
+			pin->base->PIDR &= ~BIT(pin->pin);
+			break;
+			
+	}
+	switch (pin->setting) {
+		case GPIO_OPEN:
+			ctl |= MUX_CTL_OPEN;
+			break;
+		case GPIO_PULL_DOWN:
+			ctl |= MUX_CTL_PULL_DOWN;
+			break;
+		case GPIO_PULL_UP:
+			ctl |= MUX_CTL_PULL_UP;
+			break;
+	}
+	ret = mux_pinctl(mux, PIN_NR(pin->bank, pin->pin), ctl, extra);
+	return ret;
+}
+#endif
 
 GPIO_INIT(nxp, index) {
 	struct gpio *gpio = GPIO_GET_DEV(index);
@@ -91,6 +129,11 @@ GPIO_INIT(nxp, index) {
 	}
 	if (ret == GPIO_ALREDY_INITED) {
 		return gpio;
+	}
+	ret = nxp_gpio_setupClock(gpio);
+	if (ret < 0) {
+		gpio->gen.init = false;
+		return NULL;
 	}
 	/* TODO Mange GPIO Interrupt Assigned to Cortex - A5 and Cortex - M4 */
 	/* Clear all Interrupt Assignment  */
@@ -112,7 +155,7 @@ GPIO_DEINIT(nxp, g) {
 GPIO_PIN_SET_DIRECTION(nxp, pin, dir) {
 	int32_t ret = 0;
 	pin->dir = dir;
-	ret = gpioPin_setup(pin);
+	ret = nxp_gpioPin_setup(pin);
 	if (ret < 0) {
 		return ret;
 	}
@@ -123,14 +166,14 @@ GPIO_PIN_SET_DIRECTION(nxp, pin, dir) {
 }
 GPIO_PIN_SET_SETTING(nxp, pin, setting) {
 	pin->setting = setting;
-	return gpioPin_setup(pin);
+	return nxp_gpioPin_setup(pin);
 }
 GPIO_PIN_SCHMITT_TRIGGER(nxp, pin, schmitt) {
 	if (pin->dir == GPIO_OUTPUT) {
 		return -1;
 	}
 	pin->schmittTrigger = schmitt;
-	return gpioPin_setup(pin);
+	return nxp_gpioPin_setup(pin);
 }
 GPIO_PIN_INIT(nxp, g, pin, dir, setting) {
 	int32_t ret;

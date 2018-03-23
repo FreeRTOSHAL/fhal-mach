@@ -4,3 +4,6 @@ config FLEXTIMER
 config NXP_GPIO
 	bool
 	default n
+config NXP_GPIO_MUX
+	bool
+	default n

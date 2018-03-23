@@ -12,7 +12,7 @@ struct gpio_imx {
 	uint32_t PCOR; /* 0x8 */
 	uint32_t PTOR; /* 0xC */
 	uint32_t PDIR; /* 0x10 */
-#ifdef CONFIG_MACH_S32K
+#ifdef CONFIG_NXP_GPIO_MUX
 	uint32_t PDDR; /* 0x14 */
 	uint32_t PIDR; /* 0x18 */
 #endif
@@ -20,10 +20,9 @@ struct gpio_imx {
 
 struct gpio_imx_int {
 	uint32_t pcr[32]; /* 0x0 - 0x7C */
-#ifdef CONFIG_MACH_VF610
+#ifndef CONFIG_NXP_GPIO_MUX
 	uint8_t pad[0x20];
-#endif
-#ifdef CONFIG_MACH_S32K
+#else
 	uint32_t GPCLR; /* 0x80 */
 	uint32_t GPCHR; /* 0x84 */
 	uint32_t GICLR; /* 0x88 */
@@ -60,6 +59,7 @@ struct gpio_pin {
 	void *data;
 	enum gpio_interrupt inter;
 };
-int32_t gpioPin_setup(struct gpio_pin *pin);
-void gpio_handleInterrupt(struct gpio *gpio, uint8_t bank);
+int32_t nxp_gpio_setupClock(struct gpio *gpio);
+int32_t nxp_gpioPin_setup(struct gpio_pin *pin);
+void nxp_gpio_handleInterrupt(struct gpio *gpio, uint8_t bank);
 #endif
