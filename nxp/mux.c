@@ -50,7 +50,7 @@ int32_t mux_pinctl(struct mux* mux, uint32_t pin, uint32_t ctl, uint32_t extra) 
 	uint32_t p = (pin & 31);
 	/* pin >> 5 == ((uint8_t) (pin / 32)) */
 	uint32_t b = (pin >> 5);
-	volatile uint32_t *pcr = &mux->gpio->interrupts[b]->pcr[p];
+	volatile uint32_t *pcr = &mux->gpio->ports[b]->pcr[p];
 
 	/* Clear all Muxing Setting don't delete Interrupt Settings not handlet by this driver*/
 	*pcr &= (0xF << 16 | BIT(24));

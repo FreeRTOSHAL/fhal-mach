@@ -41,14 +41,14 @@ struct gpio {
 	struct gpio_generic gen;
 	const uint32_t gpioPerPort[CONFIG_GPIO_PORT_COUNT];
 	volatile struct gpio_imx *base[CONFIG_GPIO_PORT_COUNT];
-	volatile struct gpio_imx_int *interrupts[CONFIG_GPIO_PORT_COUNT];
+	volatile struct gpio_imx_int *ports[CONFIG_GPIO_PORT_COUNT];
 	struct gpio_pin *pins[CONFIG_GPIO_PORT_COUNT][32];
 	const uint32_t irqNr[CONFIG_GPIO_PORT_COUNT];
 };
 struct gpio_pin {
 	struct gpio *gpio;
 	volatile struct gpio_imx *base;
-	volatile struct gpio_imx_int *interrupt;
+	volatile struct gpio_imx_int *port;
 	uint32_t bank;
 	uint32_t pin;
 	enum gpio_direction dir;

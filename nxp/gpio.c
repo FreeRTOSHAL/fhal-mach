@@ -41,7 +41,7 @@
 
 #define PORTX_PCRN_ISF BIT(24)
 #define PORTX_PCRN_IRQC(x) ((x & 0xF) << 16)
-#define PORTX_PCRN_IRQC_DISABLE PORTX_PCRN_IRQC(0)
+#define PORTX_PCRN_IRQC_MASK PORTX_PCRN_IRQC(0xF)
 #define PORTX_PCRN_IRQC_RISING_DMA PORTX_PCRN_IRQC(1)
 #define PORTX_PCRN_IRQC_FALING_DMA PORTX_PCRN_IRQC(2)
 #define PORTX_PCRN_IRQC_EITHER_DMA PORTX_PCRN_IRQC(3)
@@ -62,8 +62,8 @@ void nxp_gpio_handleInterrupt(struct gpio *gpio, uint8_t bank) {
 	uint32_t tmp;
 	uint32_t i = 0; 
 	BaseType_t yield = pdFALSE;
-	tmp = gpio->interrupts[bank]->ISFR;
-	gpio->interrupts[bank]->ISFR = 0xFFFFFFFF;
+	tmp = gpio->ports[bank]->ISFR;
+	gpio->ports[bank]->ISFR = 0xFFFFFFFF;
 	while (tmp > 0) {
 		if ((tmp & 0x1) == 1) {
 			struct gpio_pin *pin = gpio->pins[bank][i];
@@ -139,10 +139,10 @@ GPIO_INIT(nxp, index) {
 	/* Clear all Interrupt Assignment  */
 	for (i = 0; i < CONFIG_GPIO_PORT_COUNT; i++) {
 		for (j = 0; j < gpio->gpioPerPort[i]; j++) {
-			gpio->interrupts[i]->pcr[j] = PORTX_PCRN_IRQC_DISABLE;
+			gpio->ports[i]->pcr[j] &= ~PORTX_PCRN_IRQC_MASK;
 		}
 		/* Clear all Interrupt Status */
-		gpio->interrupts[i]->ISFR = 0xFFFFFFFF;
+		gpio->ports[i]->ISFR = 0xFFFFFFFF;
 		/* Enable GPIO Interrupts */
 		irq_setPrio(gpio->irqNr[i], 0xF);
 		irq_enable(gpio->irqNr[i]);
@@ -206,7 +206,7 @@ GPIO_PIN_INIT(nxp, g, pin, dir, setting) {
 	/* pin & 31 == pin & (32 -1) == pin % 32*/
 	gpio_pin->pin = pin & 31;
 	gpio_pin->base = g->base[gpio_pin->bank];
-	gpio_pin->interrupt = g->interrupts[gpio_pin->bank];
+	gpio_pin->port = g->ports[gpio_pin->bank];
 	gpio_pin->schmittTrigger = false;
 	gpio_pin->callback = NULL;
 	gpio_pin->data = NULL;
@@ -276,15 +276,16 @@ GPIO_PIN_ENABLE_INTERRUPT(nxp, pin) {
 	if (pin->callback == NULL) {
 		return -1;
 	}
+	pin->port->pcr[pin->pin] &= ~PORTX_PCRN_IRQC_MASK;
 	switch(pin->inter) {
 		case GPIO_RISING:
-			pin->interrupt->pcr[pin->pin] = PORTX_PCRN_IRQC_RISING;
+			pin->port->pcr[pin->pin] |= PORTX_PCRN_IRQC_RISING;
 			break;
 		case GPIO_FALLING:
-			pin->interrupt->pcr[pin->pin] = PORTX_PCRN_IRQC_FALING;
+			pin->port->pcr[pin->pin] |= PORTX_PCRN_IRQC_FALING;
 			break;
 		case GPIO_EITHER:
-			pin->interrupt->pcr[pin->pin] = PORTX_PCRN_IRQC_EITHER;
+			pin->port->pcr[pin->pin] |= PORTX_PCRN_IRQC_EITHER;
 			break;
 		default:
 			return -1;
@@ -295,7 +296,7 @@ GPIO_PIN_DISABLE_INTERRUPT(nxp, pin) {
 	if (pin->callback == NULL) {
 		return -1;
 	}
-	pin->interrupt->pcr[pin->pin] = PORTX_PCRN_IRQC_DISABLE;
+	pin->port->pcr[pin->pin] &= ~PORTX_PCRN_IRQC_MASK;
 	return 0;
 }
 GPIO_PIN_SET_CALLBACK(nxp, pin, callback, data, inter) {

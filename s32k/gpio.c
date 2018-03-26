@@ -62,7 +62,7 @@ static struct gpio gpio = {
 		(volatile struct gpio_imx *) GPIO3_BASE,
 		(volatile struct gpio_imx *) GPIO4_BASE,
 	},
-	.interrupts = {
+	.ports = {
 		(volatile struct gpio_imx_int *) GPIO0_INT,
 		(volatile struct gpio_imx_int *) GPIO1_INT,
 		(volatile struct gpio_imx_int *) GPIO2_INT,
