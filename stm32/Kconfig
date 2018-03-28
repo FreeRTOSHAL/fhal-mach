@@ -276,14 +276,14 @@ config MACH_HAS_SDIO
 	default y
 comment "PLL Settings"
 menuconfig EXTERNAL_OSCILLATOR
-	bool "Activate External Cristal Oscillator"
+	bool "Activate External Crystal Oscillator"
 	depends on !STM32_F0
 	comment "PLL Settings"
 		depends on EXTERNAL_OSCILLATOR
 	comment "Waring: PLL Setting could damage Target" 
 		depends on EXTERNAL_OSCILLATOR
 	config HSE_HZ
-		int "Externel Oszilator Speed (Hz)"
+		int "External Oscillator Speed (Hz)"
 		depends on EXTERNAL_OSCILLATOR
 		default 25000000
 		help
