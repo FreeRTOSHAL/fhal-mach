@@ -409,7 +409,7 @@ TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
 	ftm->adjust = adjust;
 	{
 		struct clock *clock = clock_init();
-		int64_t speed = clock_getPeripherySpeed(clock);
+		int64_t speed = clock_getPeripherySpeed(clock, 0);
 		speed /= 1000000LL;
 		ftm->ipg_freq = (uint32_t) speed;
 	}

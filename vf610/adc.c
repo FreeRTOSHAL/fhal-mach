@@ -34,7 +34,7 @@
 #include <irq.h>
 #include <os.h>
 
-#define IPG_CLK clock_getPeripherySpeed(clock_init())
+#define IPG_CLK clock_getPeripherySpeed(clock_init(), 0)
 
 #define ADC_PIN_CTRL (PAD_CTL_IBE_ENABLE | PAD_CTL_DSE_75ohm)
 

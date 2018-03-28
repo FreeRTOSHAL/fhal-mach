@@ -3,6 +3,7 @@
 #include <clock.h>
 #include <hal.h>
 #include <S32K144.h> /* Support more then S32K144 */
+#include <nxp/clock.h>
 
 #ifdef CONFIG_EXTERNAL_OSCILLATOR
 
@@ -638,8 +639,43 @@ struct clock *clock_init() {
 int64_t clock_getCPUSpeed(struct clock *clk) {
 	return clock.run_core_hz; /* TODO */
 }
-int64_t clock_getPeripherySpeed(struct clock *clk) {
-	return 0; /* TODO */
+int64_t clock_getPeripherySpeed(struct clock *clk, uint32_t id) {
+	enum clockType clkType = id;
+	switch (clkType) {
+		case CLOCK_FIREC:
+			return clk->firc_hz;
+		case CLOCK_FIRC_DIV1:
+			return clk->firc_div1_hz;
+		case CLOCK_FIRC_DIV2:
+			return clk->firc_div2_hz;
+		case CLOCK_SIRC:
+			return clk->sirc_hz;
+		case CLOCK_SIRC_DIV1:
+			return clk->sirc_div1_hz;
+		case CLOCK_SIRC_DIV2:
+			return clk->sirc_div2_hz;
+		case CLOCK_LPO:
+			return clk->lpo_hz;
+		case CLOCK_SOSC:
+			return clk->sosc_hz;
+		case CLOCK_SOSC_DIV1:
+			return clk->sosc_div1_hz;
+		case CLOCK_SOSC_DIV2:
+			return clk->sosc_div2_hz;
+		case CLOCK_PLL:
+			return clk->pll_hz;
+		case CLOCK_PLL_DIV1:
+			return clk->pll_div1_hz;
+		case CLOCK_PLL_DIV2:
+			return clk->pll_div2_hz;
+		case CLOCK_BUS:
+			/* TODO: Support HSRUN and VLPR */
+			return clk->run_bus_hz;
+		case CLOCK_SLOW:
+			/* TODO: Support HSRUN and VLPR */
+			return clk->run_slow_hz;
+	}
+	return -1;
 }
 int32_t clock_deinit(struct clock *c) {
 	(void) c;

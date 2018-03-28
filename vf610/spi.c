@@ -47,7 +47,7 @@
 #define SPI_PRINTF(ftm, ...)
 #endif
 
-#define IPG_CLK clock_getPeripherySpeed(clock_init())
+#define IPG_CLK clock_getPeripherySpeed(clock_init(), 0)
 
 #define SPI_MCR_MSTR BIT(31)
 #define SPI_MCR_CONT_SCKE BIT(30)

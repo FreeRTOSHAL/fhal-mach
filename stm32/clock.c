@@ -284,7 +284,7 @@ int64_t clock_getCPUSpeed(struct clock *clk) {
 //	return SystemCoreClock;
 	return clk->clocks.SYSCLK_Frequency;
 }
-int64_t clock_getPeripherySpeed(struct clock *clk) {
+int64_t clock_getPeripherySpeed(struct clock *clk, uint32_t id) {
 	return clk->clocks.PCLK2_Frequency;
 }
 int32_t clock_deinit(struct clock *clk) {

@@ -232,8 +232,8 @@ struct rtc  {
 
 static int32_t fec_setupClock(struct mac *mac) {
 	struct clock *clk = clock_init();
-	uint32_t mii_speed = DIV_ROUND_UP(clock_getPeripherySpeed(clk), 5000000) - 1;
-	uint32_t holdtime = DIV_ROUND_UP(clock_getPeripherySpeed(clk), 100000000) - 1;
+	uint32_t mii_speed = DIV_ROUND_UP(clock_getPeripherySpeed(clk, 0), 5000000) - 1;
+	uint32_t holdtime = DIV_ROUND_UP(clock_getPeripherySpeed(clk, 0), 100000000) - 1;
 	if (mii_speed > 63) {
 		return -1;
 	}
@@ -1167,10 +1167,10 @@ static int32_t fec_restart(struct mac *mac) {
 	{
 		struct clock *clock = clock_init();
 		uint32_t rx_time_itr = 1000; /* Set 1000us rtc threshold */
-		uint32_t rx_time_clk = rx_time_itr * (clock_getPeripherySpeed(clock) / 64000) / 1000; 
+		uint32_t rx_time_clk = rx_time_itr * (clock_getPeripherySpeed(clock, 0) / 64000) / 1000; 
 		uint32_t rx_pkts_itr = 2; /* Set 200 frame count threshold */
 		uint32_t tx_time_itr = 1000;
-		uint32_t tx_time_clk = tx_time_itr * (clock_getPeripherySpeed(clock) / 64000) / 1000; 
+		uint32_t tx_time_clk = tx_time_itr * (clock_getPeripherySpeed(clock, 0) / 64000) / 1000; 
 		uint32_t tx_pkts_itr = 2;
 		uint32_t rx_itr;
 		uint32_t tx_itr;
@@ -1400,7 +1400,7 @@ RTC_DEINIT(fec, rtc) {
 static int32_t fec_rtc_start(struct rtc *rtc) {
 	struct clock *clk = clock_init();
 	struct mac *mac = rtc->mac;
-	int32_t inc = 1000000000 / clock_getPeripherySpeed(clk);
+	int32_t inc = 1000000000 / clock_getPeripherySpeed(clk, 0);
 	mac_lock(mac, 100 / portTICK_PERIOD_MS, -1);
 	mac->base->ATINC = ENET_ATINC_INC(inc);
 	mac->base->ATPER = ENET_ATPER_PERIOD(BIT(31));

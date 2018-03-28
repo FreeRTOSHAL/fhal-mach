@@ -376,7 +376,7 @@ int64_t clock_getCPUSpeed(struct clock *clk) {
 	clk->cpu = speed;
 	return speed;
 }
-int64_t clock_getPeripherySpeed(struct clock *clk) {
+int64_t clock_getPeripherySpeed(struct clock *clk, uint32_t id) {
 	/* only once Calculate Speed */
 	if (clk->periphery == 0) {
 		int64_t speed = clock_getCPUSpeed(clk);
