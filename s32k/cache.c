@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include <system.h>
 #include "cache.h"
-#include <S32K144.h> /* Support mor then S32K144 */
+#include <S32K144.h> /* Support more then S32K144 */
 
 struct s32k_caches {
 	volatile LMEM_Type *base;

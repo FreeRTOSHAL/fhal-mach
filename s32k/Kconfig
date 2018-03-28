@@ -1,4 +1,4 @@
-comment "NXP S32k Settings"
+comment "NXP S32K Settings"
 choice 
 	prompt "Select Prozessor Type"
 	config S32K116
@@ -82,7 +82,7 @@ config S32K_GPIO
 		int
 		depends on NXP_GPIO
 		default 5
-menuconfig S32k_FLEXTIMER
+menuconfig S32K_FLEXTIMER
 	depends on TIMER
 	select FLEXTIMER
 	bool "Activate Flextimer"
@@ -90,3 +90,504 @@ menuconfig S32k_FLEXTIMER
 	if FLEXTIMER
 	source mach/s32k/Kconfig.timer
 	endif
+menuconfig EXTERNAL_OSCILLATOR
+	bool "Activate External Crystal Oscillator"
+	default y
+	comment "Waring: PLL Setting could damage Target" 
+		depends on EXTERNAL_OSCILLATOR
+	config SOSC_HZ
+		int "External Oscillator Speed (Hz)"
+		depends on EXTERNAL_OSCILLATOR
+		default 8000000
+		help
+			External Oscillator Settings
+        choice
+                prompt "High Gain Oscillator"
+		depends on EXTERNAL_OSCILLATOR
+                config SOSCCFG_HGO_ON
+                        bool "yes"
+                config SOSCCFG_HGO_OFF
+                        bool "no"
+        endchoice
+        choice
+                prompt "System Clock Oscillator Divider 1"
+		depends on EXTERNAL_OSCILLATOR
+                config SOSCDIV1_1
+                        bool "/1"
+                config SOSCDIV1_DISABLED
+                        bool "Disabled"
+                config SOSCDIV1_2
+                        bool "/2"
+                config SOSCDIV1_3
+                        bool "/4"
+                config SOSCDIV1_4
+                        bool "/8"
+                config SOSCDIV1_5
+                        bool "/16"
+                config SOSCDIV1_6
+                        bool "/32"
+                config SOSCDIV1_7
+                        bool "/64"
+        endchoice
+        choice
+                prompt "System Clock Oscillator Divider 2"
+		depends on EXTERNAL_OSCILLATOR
+                config SOSCDIV2_1
+                        bool "/1"
+                config SOSCDIV2_DISABLED
+                        bool "Disabled"
+                config SOSCDIV2_2
+                        bool "/2"
+                config SOSCDIV2_3
+                        bool "/4"
+                config SOSCDIV2_4
+                        bool "/8"
+                config SOSCDIV2_5
+                        bool "/16"
+                config SOSCDIV2_6
+                        bool "/32"
+                config SOSCDIV2_7
+                        bool "/64"
+        endchoice
+        choice
+                prompt "System PLL Clock Divider 1"
+		depends on EXTERNAL_OSCILLATOR
+                config SPLLDIV1_2
+                        bool "/2"
+                config SPLLDIV1_DISABLED
+                        bool "Disabled"
+                config SPLLDIV1_1
+                        bool "/1"
+                config SPLLDIV1_3
+                        bool "/4"
+                config SPLLDIV1_4
+                        bool "/8"
+                config SPLLDIV1_5
+                        bool "/16"
+                config SPLLDIV1_6
+                        bool "/32"
+                config SPLLDIV1_7
+                        bool "/64"
+        endchoice
+        choice
+                prompt "System PLL Clock Divider 2"
+		depends on EXTERNAL_OSCILLATOR
+                config SPLLDIV2_3
+                        bool "/4"
+                config SPLLDIV2_DISABLED
+                        bool "Disabled"
+                config SPLLDIV2_1
+                        bool "/1"
+                config SPLLDIV2_2
+                        bool "/2"
+                config SPLLDIV2_4
+                        bool "/8"
+                config SPLLDIV2_5
+                        bool "/16"
+                config SPLLDIV2_6
+                        bool "/32"
+                config SPLLDIV2_7
+                        bool "/64"
+        endchoice
+        choice
+                prompt "System PLL pre Divider"
+		depends on EXTERNAL_OSCILLATOR
+                config SPLLPREDIV_000
+                        bool "/1"
+                config SPLLPREDIV_001
+                        bool "/2"
+                config SPLLPREDIV_010
+                        bool "/3"
+                config SPLLPREDIV_011
+                        bool "/4"
+                config SPLLPREDIV_100
+                        bool "/5"
+                config SPLLPREDIV_101
+                        bool "/6"
+                config SPLLPREDIV_110
+                        bool "/7"
+                config SPLLPREDIV_111
+                        bool "/8"
+        endchoice
+        choice
+                prompt "System PLL Multiplier"
+		depends on EXTERNAL_OSCILLATOR
+                config SPLLMUL_11000
+                        bool "x40"
+                config SPLLMUL_00000
+                        bool "x16"
+                config SPLLMUL_00001
+                        bool "x17"
+                config SPLLMUL_00010
+                        bool "x18"
+                config SPLLMUL_00011
+                        bool "x19"
+                config SPLLMUL_00100
+                        bool "x20"
+                config SPLLMUL_00101
+                        bool "x21"
+                config SPLLMUL_00110
+                        bool "x22"
+                config SPLLMUL_00111
+                        bool "x23"
+                config SPLLMUL_01000
+                        bool "x24"
+                config SPLLMUL_01001
+                        bool "x25"
+                config SPLLMUL_01010
+                        bool "x26"
+                config SPLLMUL_01011
+                        bool "x27"
+                config SPLLMUL_01100
+                        bool "x28"
+                config SPLLMUL_01101
+                        bool "x29"
+                config SPLLMUL_01110
+                        bool "x30"
+                config SPLLMUL_01111
+                        bool "x31"
+                config SPLLMUL_10000
+                        bool "x32"
+                config SPLLMUL_10001
+                        bool "x33"
+                config SPLLMUL_10010
+                        bool "x34"
+                config SPLLMUL_10011
+                        bool "x35"
+                config SPLLMUL_10100
+                        bool "x36"
+                config SPLLMUL_10101
+                        bool "x37"
+                config SPLLMUL_10110
+                        bool "x38"
+                config SPLLMUL_10111
+                        bool "x39"
+                config SPLLMUL_11000
+                        bool "x40"
+                config SPLLMUL_11001
+                        bool "x41"
+                config SPLLMUL_11010
+                        bool "x42"
+                config SPLLMUL_11011
+                        bool "x43"
+                config SPLLMUL_11100
+                        bool "x44"
+                config SPLLMUL_11101
+                        bool "x45"
+                config SPLLMUL_11110
+                        bool "x46"
+                config SPLLMUL_11111
+                        bool "x47"
+        endchoice
+        choice
+                prompt "Run Mode Clock Source"
+		depends on EXTERNAL_OSCILLATOR
+                config RCCR_SCS_0110
+                        bool "System PLL"
+                config RCCR_SCS_0001
+                        bool "System OSC"
+                config RCCR_SCS_0010
+                        bool "Slow IRC"
+                config RCCR_SCS_0011
+                        bool "Fast IRC"
+        endchoice
+        choice
+                prompt "Run Mode Clock Core Divider"
+		depends on EXTERNAL_OSCILLATOR
+                config RCCR_DIVCORE_0001
+                        bool "/2"
+                config RCCR_DIVCORE_0000
+                        bool "/1"
+                config RCCR_DIVCORE_0010
+                        bool "/3"
+                config RCCR_DIVCORE_0011
+                        bool "/4"
+                config RCCR_DIVCORE_00100
+                        bool "/5"
+                config RCCR_DIVCORE_0101
+                        bool "/6"
+                config RCCR_DIVCORE_0110
+                        bool "/7"
+                config RCCR_DIVCORE_0111
+                        bool "/8"
+                config RCCR_DIVCORE_1000
+                        bool "/9"
+                config RCCR_DIVCORE_1001
+                        bool "/10"
+                config RCCR_DIVCORE_1010
+                        bool "/11"
+                config RCCR_DIVCORE_1011
+                        bool "/12"
+                config RCCR_DIVCORE_1100
+                        bool "/13"
+                config RCCR_DIVCORE_1101
+                        bool "/14"
+                config RCCR_DIVCORE_1110
+                        bool "/15"
+                config RCCR_DIVCORE_1111
+                        bool "/16"
+        endchoice
+        choice
+                prompt "Run Mode Clock Bus Divider"
+		depends on EXTERNAL_OSCILLATOR
+                config RCCR_DIVBUS_0001
+                        bool "/2"
+                config RCCR_DIVBUS_0000
+                        bool "/1"
+                config RCCR_DIVBUS_0010
+                        bool "/3"
+                config RCCR_DIVBUS_0011
+                        bool "/4"
+                config RCCR_DIVBUS_00100
+                        bool "/5"
+                config RCCR_DIVBUS_0101
+                        bool "/6"
+                config RCCR_DIVBUS_0110
+                        bool "/7"
+                config RCCR_DIVBUS_0111
+                        bool "/8"
+                config RCCR_DIVBUS_1000
+                        bool "/9"
+                config RCCR_DIVBUS_1001
+                        bool "/10"
+                config RCCR_DIVBUS_1010
+                        bool "/11"
+                config RCCR_DIVBUS_1011
+                        bool "/12"
+                config RCCR_DIVBUS_1100
+                        bool "/13"
+                config RCCR_DIVBUS_1101
+                        bool "/14"
+                config RCCR_DIVBUS_1110
+                        bool "/15"
+                config RCCR_DIVBUS_1111
+                        bool "/16"
+        endchoice
+        choice
+                prompt "Run Mode Clock Slow/Flash Divider"
+		depends on EXTERNAL_OSCILLATOR
+                config RCCR_DIVSLOW_0010
+                        bool "/3"
+                config RCCR_DIVSLOW_0000
+                        bool "/1"
+                config RCCR_DIVSLOW_0001
+                        bool "/2"
+                config RCCR_DIVSLOW_0011
+                        bool "/4"
+                config RCCR_DIVSLOW_00100
+                        bool "/5"
+                config RCCR_DIVSLOW_0101
+                        bool "/6"
+                config RCCR_DIVSLOW_0110
+                        bool "/7"
+                config RCCR_DIVSLOW_0111
+                        bool "/8"
+        endchoice
+#        choice
+#                prompt "HSRun Mode Clock Source"
+#		depends on EXTERNAL_OSCILLATOR
+#                config HCCR_SCS_0110
+#                        bool "System PLL"
+#                config HCCR_SCS_0001
+#                        bool "System OSC"
+#                config HCCR_SCS_0010
+#                        bool "Slow IRC"
+#                config HCCR_SCS_0011
+#                        bool "Fast IRC"
+#        endchoice
+#        choice
+#                prompt "HSRun Mode Clock Core Divider"
+#		depends on EXTERNAL_OSCILLATOR
+#                config HCCR_DIVCORE_0000
+#                        bool "/1"
+#                config HCCR_DIVCORE_0001
+#                        bool "/2"
+#                config HCCR_DIVCORE_0010
+#                        bool "/3"
+#                config HCCR_DIVCORE_0011
+#                        bool "/4"
+#                config HCCR_DIVCORE_00100
+#                        bool "/5"
+#                config HCCR_DIVCORE_0101
+#                        bool "/6"
+#                config HCCR_DIVCORE_0110
+#                        bool "/7"
+#                config HCCR_DIVCORE_0111
+#                        bool "/8"
+#                config HCCR_DIVCORE_1000
+#                        bool "/9"
+#                config HCCR_DIVCORE_1001
+#                        bool "/10"
+#                config HCCR_DIVCORE_1010
+#                        bool "/11"
+#                config HCCR_DIVCORE_1011
+#                        bool "/12"
+#                config HCCR_DIVCORE_1100
+#                        bool "/13"
+#                config HCCR_DIVCORE_1101
+#                        bool "/14"
+#                config HCCR_DIVCORE_1110
+#                        bool "/15"
+#                config HCCR_DIVCORE_1111
+#                        bool "/16"
+#        endchoice
+#        choice
+#                prompt "HSRun Mode Clock Bus Divider"
+#		depends on EXTERNAL_OSCILLATOR
+#                config HCCR_DIVBUS_0000
+#                        bool "/1"
+#                config HCCR_DIVBUS_0001
+#                        bool "/2"
+#                config HCCR_DIVBUS_0010
+#                        bool "/3"
+#                config HCCR_DIVBUS_0011
+#                        bool "/4"
+#                config HCCR_DIVBUS_00100
+#                        bool "/5"
+#                config HCCR_DIVBUS_0101
+#                        bool "/6"
+#                config HCCR_DIVBUS_0110
+#                        bool "/7"
+#                config HCCR_DIVBUS_0111
+#                        bool "/8"
+#                config HCCR_DIVBUS_1000
+#                        bool "/9"
+#                config HCCR_DIVBUS_1001
+#                        bool "/10"
+#                config HCCR_DIVBUS_1010
+#                        bool "/11"
+#                config HCCR_DIVBUS_1011
+#                        bool "/12"
+#                config HCCR_DIVBUS_1100
+#                        bool "/13"
+#                config HCCR_DIVBUS_1101
+#                        bool "/14"
+#                config HCCR_DIVBUS_1110
+#                        bool "/15"
+#                config HCCR_DIVBUS_1111
+#                        bool "/16"
+#        endchoice
+#        choice
+#                prompt "HSRun Mode Clock Slow/Flash Divider"
+#		depends on EXTERNAL_OSCILLATOR
+#                config HCCR_DIVSLOW_0000
+#                        bool "/1"
+#                config HCCR_DIVSLOW_0001
+#                        bool "/2"
+#                config HCCR_DIVSLOW_0010
+#                        bool "/3"
+#                config HCCR_DIVSLOW_0011
+#                        bool "/4"
+#                config HCCR_DIVSLOW_00100
+#                        bool "/5"
+#                config HCCR_DIVSLOW_0101
+#                        bool "/6"
+#                config HCCR_DIVSLOW_0110
+#                        bool "/7"
+#                config HCCR_DIVSLOW_0111
+#                        bool "/8"
+#        endchoice
+#        choice
+#                prompt "VLPR Mode Clock Source"
+#		depends on EXTERNAL_OSCILLATOR
+#                config VCCR_SCS_0001
+#                        bool "System OSC"
+#                config VCCR_SCS_0010
+#                        bool "Slow IRC"
+#                config VCCR_SCS_0011
+#                        bool "Fast IRC"
+#                config VCCR_SCS_0110
+#                        bool "System PLL"
+#        endchoice
+#        choice
+#                prompt "VLPR Mode Clock Core Divider"
+#		depends on EXTERNAL_OSCILLATOR
+#                config VCCR_DIVCORE_0000
+#                        bool "/1"
+#                config VCCR_DIVCORE_0001
+#                        bool "/2"
+#                config VCCR_DIVCORE_0010
+#                        bool "/3"
+#                config VCCR_DIVCORE_0011
+#                        bool "/4"
+#                config VCCR_DIVCORE_00100
+#                        bool "/5"
+#                config VCCR_DIVCORE_0101
+#                        bool "/6"
+#                config VCCR_DIVCORE_0110
+#                        bool "/7"
+#                config VCCR_DIVCORE_0111
+#                        bool "/8"
+#                config VCCR_DIVCORE_1000
+#                        bool "/9"
+#                config VCCR_DIVCORE_1001
+#                        bool "/10"
+#                config VCCR_DIVCORE_1010
+#                        bool "/11"
+#                config VCCR_DIVCORE_1011
+#                        bool "/12"
+#                config VCCR_DIVCORE_1100
+#                        bool "/13"
+#                config VCCR_DIVCORE_1101
+#                        bool "/14"
+#                config VCCR_DIVCORE_1110
+#                        bool "/15"
+#                config VCCR_DIVCORE_1111
+#                        bool "/16"
+#        endchoice
+#        choice
+#                prompt "VLPR Mode Clock Bus Divider"
+#		depends on EXTERNAL_OSCILLATOR
+#                config VCCR_DIVBUS_0000
+#                        bool "/1"
+#                config VCCR_DIVBUS_0001
+#                        bool "/2"
+#                config VCCR_DIVBUS_0010
+#                        bool "/3"
+#                config VCCR_DIVBUS_0011
+#                        bool "/4"
+#                config VCCR_DIVBUS_00100
+#                        bool "/5"
+#                config VCCR_DIVBUS_0101
+#                        bool "/6"
+#                config VCCR_DIVBUS_0110
+#                        bool "/7"
+#                config VCCR_DIVBUS_0111
+#                        bool "/8"
+#                config VCCR_DIVBUS_1000
+#                        bool "/9"
+#                config VCCR_DIVBUS_1001
+#                        bool "/10"
+#                config VCCR_DIVBUS_1010
+#                        bool "/11"
+#                config VCCR_DIVBUS_1011
+#                        bool "/12"
+#                config VCCR_DIVBUS_1100
+#                        bool "/13"
+#                config VCCR_DIVBUS_1101
+#                        bool "/14"
+#                config VCCR_DIVBUS_1110
+#                        bool "/15"
+#                config VCCR_DIVBUS_1111
+#                        bool "/16"
+#        endchoice
+#        choice
+#                prompt "VLPR Mode Clock Slow/Flash Divider"
+#		depends on EXTERNAL_OSCILLATOR
+#                config VCCR_DIVSLOW_0000
+#                        bool "/1"
+#                config VCCR_DIVSLOW_0001
+#                        bool "/2"
+#                config VCCR_DIVSLOW_0010
+#                        bool "/3"
+#                config VCCR_DIVSLOW_0011
+#                        bool "/4"
+#                config VCCR_DIVSLOW_00100
+#                        bool "/5"
+#                config VCCR_DIVSLOW_0101
+#                        bool "/6"
+#                config VCCR_DIVSLOW_0110
+#                        bool "/7"
+#                config VCCR_DIVSLOW_0111
+#                        bool "/8"
+#        endchoice
