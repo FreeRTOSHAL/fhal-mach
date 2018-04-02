@@ -42,12 +42,13 @@
 #define GPIO3_CLOCK 0x40065130
 #define GPIO4_CLOCK 0x40065134
 int32_t nxp_gpio_setupClock(struct gpio *gpio) {
-	/* Activate Clock Gate for GPIO Ports*/
-	*((uint32_t *) GPIO0_CLOCK) = BIT(30);
-	*((uint32_t *) GPIO1_CLOCK) = BIT(30);
-	*((uint32_t *) GPIO2_CLOCK) = BIT(30);
-	*((uint32_t *) GPIO3_CLOCK) = BIT(30);
-	*((uint32_t *) GPIO4_CLOCK) = BIT(30);
+	PCC_Type *pcc = PCC;
+
+	pcc->PCCn[PCC_PORTA_INDEX] = PCC_PCCn_CGC_MASK;
+	pcc->PCCn[PCC_PORTB_INDEX] = PCC_PCCn_CGC_MASK;
+	pcc->PCCn[PCC_PORTC_INDEX] = PCC_PCCn_CGC_MASK;
+	pcc->PCCn[PCC_PORTD_INDEX] = PCC_PCCn_CGC_MASK;
+	pcc->PCCn[PCC_PORTE_INDEX] = PCC_PCCn_CGC_MASK;
 	return 0;
 }
 static struct gpio gpio = {

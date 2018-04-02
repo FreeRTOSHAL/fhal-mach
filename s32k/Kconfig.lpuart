@@ -1,0 +1,122 @@
+choice 
+	prompt "RX Buffer useage"
+	config MACH_S32K_LPUART_USE_SEMAPHORE
+		bool "RX Use Semaphore"
+		help
+			RX Use Semaphore and get char in userspace
+
+			Posible Overflow on high load but smaler footprint
+
+			Overflows are ignored
+	config MACH_S32K_LPUART_USE_QUEUE
+		bool "RX Use Queue"
+		help
+			RX Use Queue and get char in interrupt
+
+			Overflows are ignored!
+endchoice
+config MACH_S32K_LPUART_QUEUE_LENGTH
+	int "Queue Length"
+	depends on MACH_S32K_LPUART_USE_QUEUE
+	default 8
+
+menuconfig MACH_S32K_LPUART0
+	bool "LPUART 0"
+if MACH_S32K_LPUART0=y
+
+	choice 
+		prompt "UART Clock"
+		config MACH_S32K_LPUART0_SPLLDIV2
+			bool "SPLLDIV2"
+		config MACH_S32K_LPUART0_SOSCDIV2
+			bool "SOSCDIV2"
+		config MACH_S32K_LPUART0_SIRCDIV2
+			bool "SIRCDIV2"
+		config MACH_S32K_LPUART0_FIRCDIV2
+			bool "FIRCDIV2"
+	endchoice
+	choice 
+		prompt "TX Pin"
+		config MACH_S32K_LPUART0_TX_PTC3
+			bool "PTC3"
+		config MACH_S32K_LPUART0_TX_PTB1
+			bool "PTB1"
+		config MACH_S32K_LPUART0_TX_PTA3
+			bool "PTA3"
+	endchoice
+	choice 
+		prompt "RX Pin"
+		config MACH_S32K_LPUART0_RX_PTC2
+			bool "PTC2"
+		config MACH_S32K_LPUART0_RX_PTB0
+			bool "PTB0"
+		config MACH_S32K_LPUART0_RX_PTA2
+			bool "PTA2"
+	endchoice
+endif
+menuconfig MACH_S32K_LPUART1
+	bool "LPUART 1"
+if MACH_S32K_LPUART1=y
+	choice 
+		prompt "UART Clock"
+		config MACH_S32K_LPUART1_SPLLDIV2
+			bool "SPLLDIV2"
+		config MACH_S32K_LPUART1_SOSCDIV2
+			bool "SOSCDIV2"
+		config MACH_S32K_LPUART1_SIRCDIV2
+			bool "SIRCDIV2"
+		config MACH_S32K_LPUART1_FIRCDIV2
+			bool "FIRCDIV2"
+	endchoice
+	choice 
+		prompt "TX Pin"
+		config MACH_S32K_LPUART1_TX_PTC7
+			bool "PTC7"
+		config MACH_S32K_LPUART1_TX_PTC9
+			bool "PTC9"
+		config MACH_S32K_LPUART1_TX_PTD17
+			bool "PTD17"
+	endchoice
+	choice 
+		prompt "RX Pin"
+		config MACH_S32K_LPUART1_RX_PTC6
+			bool "PTC6"
+		config MACH_S32K_LPUART1_RX_PTC8
+			bool "PTC8"
+		config MACH_S32K_LPUART1_RX_PTD14
+			bool "PTD14"
+	endchoice
+endif
+menuconfig MACH_S32K_LPUART2
+	bool "LPUART 2"
+if MACH_S32K_LPUART2=y
+	choice 
+		prompt "UART Clock"
+		config MACH_S32K_LPUART2_SPLLDIV2
+			bool "SPLLDIV2"
+		config MACH_S32K_LPUART2_SOSCDIV2
+			bool "SOSCDIV2"
+		config MACH_S32K_LPUART2_SIRCDIV2
+			bool "SIRCDIV2"
+		config MACH_S32K_LPUART2_FIRCDIV2
+			bool "FIRCDIV2"
+	endchoice
+	choice 
+		prompt "TX Pin"
+		config MACH_S32K_LPUART2_TX_PTE12
+			bool "PTE12"
+		config MACH_S32K_LPUART2_TX_PTD7
+			bool "PTD7"
+		config MACH_S32K_LPUART2_TX_PTA9
+			bool "PTD9"
+	endchoice
+	choice 
+		prompt "RX Pin"
+		config MACH_S32K_LPUART2_RX_PTD17
+			bool "PTD17"
+		config MACH_S32K_LPUART2_RX_PTD6
+			bool "PTD6"
+		config MACH_S32K_LPUART2_RX_PTA8
+			bool "PTA8"
+	endchoice
+endif

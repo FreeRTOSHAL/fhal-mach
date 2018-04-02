@@ -1,6 +1,6 @@
 #ifndef NXP_MUX_H_
 #define NXP_MUX_H_
-#define MODE_DISABLE 0x0
+#define MODE0 0x0
 #define MODE1 0x1
 #define MODE2 0x2
 #define MODE3 0x3

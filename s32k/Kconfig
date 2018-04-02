@@ -591,3 +591,8 @@ menuconfig EXTERNAL_OSCILLATOR
 #                config VCCR_DIVSLOW_0111
 #                        bool "/8"
 #        endchoice
+menuconfig MACH_S32K_LPUART
+	bool "LPUART"
+	if MACH_S32K_LPUART=y
+		source mach/s32k/Kconfig.lpuart
+	endif
