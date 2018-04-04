@@ -88,7 +88,7 @@ int32_t nxp_gpioPin_setup(struct gpio_pin *pin) {
 	switch (pin->dir) {
 		case GPIO_INPUT:
 			pin->base->PDDR &= ~BIT(pin->pin);
-			pin->base->PIDR |= BIT(pin->pin);
+			pin->base->PIDR &= ~BIT(pin->pin);
 			/* not supported 
 			if (pin->schmittTrigger) {
 			}*/
