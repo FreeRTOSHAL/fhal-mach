@@ -61,6 +61,9 @@ config MACH_HAS_PWM
 config MACH_HAS_CAPTURE
 	bool
 	default y
+config MACH_HAS_ADC
+	bool
+	default y
 config USE_NXP_LIB
 	bool
 	default y
@@ -593,6 +596,13 @@ menuconfig EXTERNAL_OSCILLATOR
 #        endchoice
 menuconfig MACH_S32K_LPUART
 	bool "LPUART"
+	depends on UART
 	if MACH_S32K_LPUART=y
 		source mach/s32k/Kconfig.lpuart
+	endif
+menuconfig MACH_S32K_ADC
+	bool "ADC"
+	depends on ADC
+	if MACH_S32K_ADC=y
+		source mach/s32k/Kconfig.adc
 	endif

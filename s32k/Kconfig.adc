@@ -1,0 +1,96 @@
+#:%s/ADC_CHANNEL(\([0-9]*\), \([0-9]*\), \([A-Z0-9]*\), MODE[0-9]);/\tconfig MACH_S32K_ADC\1_\2\r\t\tbool "Channel \2 (\3)"/gc 
+menuconfig MACH_S32K_ADC0
+	bool "ADC 0"
+if MACH_S32K_ADC0
+	choice 
+		prompt "ADC Clock"
+		config MACH_S32K_ADC0_SPLLDIV2
+			bool "SPLLDIV2"
+		config MACH_S32K_ADC0_SOSCDIV2
+			bool "SOSCDIV2"
+		config MACH_S32K_ADC0_SIRCDIV2
+			bool "SIRCDIV2"
+		config MACH_S32K_ADC0_FIRCDIV2
+			bool "FIRCDIV2"
+	endchoice
+	config MACH_S32K_ADC0_0
+		bool "Channel 0 (PTA0)"
+	config MACH_S32K_ADC0_1
+		bool "Channel 1 (PTA1)"
+	config MACH_S32K_ADC0_2
+		bool "Channel 2 (PTA6)"
+	config MACH_S32K_ADC0_3
+		bool "Channel 3 (PTA7)"
+	config MACH_S32K_ADC0_4
+		bool "Channel 4 (PTB0)"
+	config MACH_S32K_ADC0_5
+		bool "Channel 5 (PTB1)"
+	config MACH_S32K_ADC0_6
+		bool "Channel 6 (PTB2)"
+	config MACH_S32K_ADC0_7
+		bool "Channel 7 (PTB3)"
+	config MACH_S32K_ADC0_8
+		bool "Channel 8 (PTB13)"
+	config MACH_S32K_ADC0_9
+		bool "Channel 9 (PTC1)"
+	config MACH_S32K_ADC0_10
+		bool "Channel 10 (PTC2)"
+	config MACH_S32K_ADC0_11
+		bool "Channel 11 (PTC3)"
+	config MACH_S32K_ADC0_12
+		bool "Channel 12 (PTC14)"
+	config MACH_S32K_ADC0_13
+		bool "Channel 13 (PTC15)"
+	config MACH_S32K_ADC0_14
+		bool "Channel 14 (PTC16)"
+	config MACH_S32K_ADC0_15
+		bool "Channel 15 (PTC17)"
+endif
+
+menuconfig MACH_S32K_ADC1
+	bool "ADC 0"
+if MACH_S32K_ADC1
+	choice 
+		prompt "ADC Clock"
+		config MACH_S32K_ADC1_SPLLDIV2
+			bool "SPLLDIV2"
+		config MACH_S32K_ADC1_SOSCDIV2
+			bool "SOSCDIV2"
+		config MACH_S32K_ADC1_SIRCDIV2
+			bool "SIRCDIV2"
+		config MACH_S32K_ADC1_FIRCDIV2
+			bool "FIRCDIV2"
+	endchoice
+	config MACH_S32K_ADC1_0
+		bool "Channel 0 (PTA2)"
+	config MACH_S32K_ADC1_1
+		bool "Channel 1 (PTA3)"
+	config MACH_S32K_ADC1_2
+		bool "Channel 2 (PTD2)"
+	config MACH_S32K_ADC1_3
+		bool "Channel 3 (PTD3)"
+	config MACH_S32K_ADC1_4
+		bool "Channel 4 (PTC6)"
+	config MACH_S32K_ADC1_5
+		bool "Channel 5 (PTC7)"
+	config MACH_S32K_ADC1_6
+		bool "Channel 6 (PTD4)"
+	config MACH_S32K_ADC1_7
+		bool "Channel 7 (PTB12)"
+	config MACH_S32K_ADC1_8
+		bool "Channel 8 (PTB13)"
+	config MACH_S32K_ADC1_9
+		bool "Channel 9 (PTB14)"
+	config MACH_S32K_ADC1_10
+		bool "Channel 10 (PTE2)"
+	config MACH_S32K_ADC1_11
+		bool "Channel 11 (PTE6)"
+	config MACH_S32K_ADC1_12
+		bool "Channel 12 (PTA15)"
+	config MACH_S32K_ADC1_13
+		bool "Channel 13 (PTA16)"
+	config MACH_S32K_ADC1_14
+		bool "Channel 14 (PTB0)"
+	config MACH_S32K_ADC1_15
+		bool "Channel 15 (PTB16)"
+endif
