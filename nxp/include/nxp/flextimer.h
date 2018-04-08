@@ -38,6 +38,12 @@
 #include <pwm_prv.h>
 #include <capture.h>
 #include <capture_prv.h>
+
+#define FTM_CLK_DISABLE 0x0
+#define FTM_CLK_SYSTEM 0x1
+#define FTM_CLK_FIXED 0x2
+#define FTM_CLK_EXTERN 0x3
+
 struct capture;
 struct pwm;
 struct ftm_reg;
@@ -53,7 +59,6 @@ struct timer {
 	volatile struct ftm_reg *base;
 	ftm_mode_t mode;
 	uint32_t prescaler;
-	int32_t irqnr;
 	bool (*irqhandle)(struct timer *ftm, void *data);
 	void *data;
 	uint32_t ftmid;
@@ -61,6 +66,10 @@ struct timer {
 	int64_t adjust;
 	struct capture const **capture;
 	uint32_t ipg_freq;
+	void const *clkData;
+	const uint32_t clk;
+	const uint32_t irqcount;
+	const uint32_t irqnr[6];
 };
 
 struct pwm_pin {
@@ -85,6 +94,7 @@ struct capture {
 };
 void flextimer_handleIRQ(struct timer *ftm);
 int32_t flextimer_setupChannelPin(struct timer *ftm, struct pwm_pin *pin);
+int32_t flextimer_setupClock(struct timer *ftm);
 #ifndef CONFIG_TIMER_MULTI
 extern const struct timer_ops ftm_timer_ops;
 #endif

@@ -42,14 +42,17 @@
 #define FTM_PRESCALE(x) (((x) & 0x7) << 0)
 #define FTM_SELECT_CLK_MASK (0x3 << 3)
 #define FTM_SELECT_CLK(x) (((x) & 0x3) << 3)
-#define FTM_INTERRUPT_EN BIT(6)
-#define FTM_OVERFLOWED BIT(7)
-#define FTM_IS_OVERFLOWED(x) (((x) >> 7) & 0x1)
+#ifdef CONFIG_NXP_FLEXTIMER_VERSION_1
+# define FTM_INTERRUPT_EN BIT(6)
+# define FTM_OVERFLOWED BIT(7)
+# define FTM_IS_OVERFLOWED(x) (((x) >> 7) & 0x1)
+#endif
+#ifdef CONFIG_NXP_FLEXTIMER_VERSION_2
+# define FTM_INTERRUPT_EN BIT(8)
+# define FTM_OVERFLOWED BIT(9)
+# define FTM_IS_OVERFLOWED(x) (((x) >> 9) & 0x1)
+#endif
 
-#define FTM_CLK_DISABLE 0x0
-#define FTM_CLK_SYSTEM 0x1
-#define FTM_CLK_FIXED 0x2
-#define FTM_CLK_EXTERN 0x3
 
 #define FTM_MODE_EN BIT(0)
 #define FTM_MODE_WR_PROTECT_DIS BIT(2)
@@ -99,7 +102,8 @@ struct ftm_reg {
 };
 
 
-static void clearIRQBit(struct timer *ftm) {
+static inline void clearIRQBit(struct timer *ftm) {
+#ifdef CONFIG_NXP_FLEXTIMER_ERRATA_E6484
 	volatile uint32_t tmp;
 	/* Disable write Protection not needed hear */
 	/* Workarount for Errata e6484 */
@@ -111,6 +115,11 @@ static void clearIRQBit(struct timer *ftm) {
 		/* write register */
 		ftm->base->sc = tmp;
 	}
+#else
+	if (FTM_IS_OVERFLOWED(ftm->base->sc)) {
+		ftm->base->sc &= ~FTM_OVERFLOWED;
+	}
+#endif
 }
 
 static inline uint64_t counterToUS(struct timer *ftm, uint32_t value) {
@@ -155,6 +164,8 @@ static inline uint64_t USToCounter(struct timer *ftm, uint64_t value) {
 
 void flextimer_handleIRQ(struct timer *ftm) {
 	bool ret = 0;
+	/* save copy from sc */
+	uint32_t sc = ftm->base->sc;
 	switch (ftm->mode) {
 		case ONESHOT:
 			ftm->mode = NOT_CONFIG;
@@ -185,7 +196,7 @@ void flextimer_handleIRQ(struct timer *ftm) {
 		}
 	}
 #endif
-	if (FTM_IS_OVERFLOWED(ftm->base->sc)) {
+	if (FTM_IS_OVERFLOWED(sc)) {
 		if (ftm->irqhandle) {
 			ret |= ftm->irqhandle(ftm, ftm->data); /* TODO Handle bool;) */
 		}
@@ -212,7 +223,7 @@ TIMER_START(ftm, ftm) {
 	if (ftm->mode != NOT_CONFIG) {
 		ftm_writeProtecDisable(ftm);
 		/* Select System Clock as Clock base and enable clock */
-		ftm->base->sc |= FTM_SELECT_CLK(FTM_CLK_SYSTEM);
+		ftm->base->sc |= FTM_SELECT_CLK(ftm->clk);
 		ftm_writeProtecEnable(ftm);
 	}
 	return 0;
@@ -407,11 +418,10 @@ TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
 	ftm->prescaler = prescaler;
 	ftm->basetime = basetime;
 	ftm->adjust = adjust;
+	ret = flextimer_setupClock(ftm);
+	if (ret < 0)
 	{
-		struct clock *clock = clock_init();
-		int64_t speed = clock_getPeripherySpeed(clock, 0);
-		speed /= 1000000LL;
-		ftm->ipg_freq = (uint32_t) speed;
+		return NULL;
 	}
 	
 	ftm_writeProtecDisable(ftm);
@@ -457,14 +467,23 @@ TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
 	/* Enable Write Protection  */
 	ftm_writeProtecEnable(ftm);
 	clearIRQBit(ftm);
-	irq_setPrio(ftm->irqnr, 0xFF);
-	irq_enable(ftm->irqnr);
+	/* Enable all IRQs */
+	for (i = 0; i < ftm->irqcount; i++) {
+		irq_setPrio(ftm->irqnr[i], 0xFF);
+		irq_enable(ftm->irqnr[i]);
+	}
 	return ftm;
 }
 TIMER_SET_OVERFLOW_CALLBACK(ftm, ftm, irqhandle, data) {
 	ftm->irqhandle = irqhandle;
 	ftm->data = data;
-	ftm->base->sc |= FTM_INTERRUPT_EN;
+	if (irqhandle) {
+		/* enable overflow interrupt */
+		ftm->base->sc |= FTM_INTERRUPT_EN;
+	} else {
+		/* disable overflow interrupt */
+		ftm->base->sc &= ~FTM_INTERRUPT_EN;
+	}
 	return 0;
 }
 TIMER_DEINIT(ftm, ftm) {

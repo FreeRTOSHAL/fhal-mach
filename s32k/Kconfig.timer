@@ -1,0 +1,92 @@
+menuconfig MACH_S32K_FLEXTIMER0
+	bool "Flextimer 0"
+if MACH_S32K_FLEXTIMER0
+	choice 
+		prompt "Clock Source"
+		config MACH_S32K_FLEXTIMER0_CLK_EXTERN
+			bool "Externel Clocksource"
+		config MACH_S32K_FLEXTIMER0_CLK_SYSTEM
+			bool "CPU Clocksource"
+	endchoice
+	choice 
+		prompt "Externel Clocksource"
+		depends on MACH_S32K_FLEXTIMER0_CLK_EXTERN
+		config MACH_S32K_FLEXTIMER0_SPLLDIV1
+			bool "SPLLDIV1"
+		config MACH_S32K_FLEXTIMER0_SOSCDIV1
+			bool "SOSCDIV1"
+		config MACH_S32K_FLEXTIMER0_SIRCDIV1
+			bool "SIRCDIV1"
+		config MACH_S32K_FLEXTIMER0_FIRCDIV1
+			bool "FIRCDIV1"
+	endchoice
+endif
+menuconfig MACH_S32K_FLEXTIMER1
+	bool "Flextimer 1"
+if MACH_S32K_FLEXTIMER1
+	choice 
+		prompt "Clock Source"
+		config MACH_S32K_FLEXTIMER1_CLK_EXTERN
+			bool "Externel Clocksource"
+		config MACH_S32K_FLEXTIMER1_CLK_SYSTEM
+			bool "CPU Clocksource"
+	endchoice
+	choice 
+		prompt "Externel Clocksource"
+		depends on MACH_S32K_FLEXTIMER1_CLK_EXTERN
+		config MACH_S32K_FLEXTIMER1_SPLLDIV1
+			bool "SPLLDIV1"
+		config MACH_S32K_FLEXTIMER1_SOSCDIV1
+			bool "SOSCDIV1"
+		config MACH_S32K_FLEXTIMER1_SIRCDIV1
+			bool "SIRCDIV1"
+		config MACH_S32K_FLEXTIMER1_FIRCDIV1
+			bool "FIRCDIV1"
+	endchoice
+endif
+menuconfig MACH_S32K_FLEXTIMER2
+	bool "Flextimer 2"
+if MACH_S32K_FLEXTIMER2
+	choice 
+		prompt "Clock Source"
+		config MACH_S32K_FLEXTIMER2_CLK_EXTERN
+			bool "Externel Clocksource"
+		config MACH_S32K_FLEXTIMER2_CLK_SYSTEM
+			bool "CPU Clocksource"
+	endchoice
+	choice 
+		prompt "Externel Clocksource"
+		depends on MACH_S32K_FLEXTIMER2_CLK_EXTERN
+		config MACH_S32K_FLEXTIMER2_SPLLDIV1
+			bool "SPLLDIV1"
+		config MACH_S32K_FLEXTIMER2_SOSCDIV1
+			bool "SOSCDIV1"
+		config MACH_S32K_FLEXTIMER2_SIRCDIV1
+			bool "SIRCDIV1"
+		config MACH_S32K_FLEXTIMER2_FIRCDIV1
+			bool "FIRCDIV1"
+	endchoice
+endif
+menuconfig MACH_S32K_FLEXTIMER3
+	bool "Flextimer 3"
+if MACH_S32K_FLEXTIMER3
+	choice 
+		prompt "Clock Source"
+		config MACH_S32K_FLEXTIMER3_CLK_EXTERN
+			bool "Externel Clocksource"
+		config MACH_S32K_FLEXTIMER3_CLK_SYSTEM
+			bool "CPU Clocksource"
+	endchoice
+	choice 
+		prompt "Externel Clocksource"
+		depends on MACH_S32K_FLEXTIMER3_CLK_EXTERN
+		config MACH_S32K_FLEXTIMER3_SPLLDIV1
+			bool "SPLLDIV1"
+		config MACH_S32K_FLEXTIMER3_SOSCDIV1
+			bool "SOSCDIV1"
+		config MACH_S32K_FLEXTIMER3_SIRCDIV1
+			bool "SIRCDIV1"
+		config MACH_S32K_FLEXTIMER3_FIRCDIV1
+			bool "FIRCDIV1"
+	endchoice
+endif

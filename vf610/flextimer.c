@@ -55,28 +55,38 @@ int32_t flextimer_setupChannelPin(struct timer *ftm, struct pwm_pin *pin) {
 	return 0;
 }
 
-#ifdef CONFIG_FLEXTIMER_CAPTURE
-# ifdef CONFIG_FLEXTIMER_0
+int32_t flextimer_setupClock(struct timer *ftm) {
+	struct clock *clock = clock_init();
+	int64_t speed = clock_getPeripherySpeed(clock, 0);
+	speed /= 1000000LL;
+	ftm->ipg_freq = (uint32_t) speed;
+	return 0;
+}
+
+#ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_0
 static struct capture const *ftm_captures_0[8];
 # endif
-# ifdef CONFIG_FLEXTIMER_1
-static struct capture const *ftm_captures_1[2];
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_1
+static struct capture const *ftm_captures_1[8];
 # endif
-# ifdef CONFIG_FLEXTIMER_2
-static struct capture const *ftm_captures_2[2];
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_2
+static struct capture const *ftm_captures_2[8];
 # endif
-# ifdef CONFIG_FLEXTIMER_3
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_3
 static struct capture const *ftm_captures_3[8];
 # endif
 #endif
 
-#ifdef CONFIG_FLEXTIMER_0
+#ifdef CONFIG_MACH_VF610_FLEXTIMER_0
 static struct timer ftm_timer_0 =  {
 	TIMER_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0")
-	.base = VF610_FLEXTIMER_0,
-	.irqnr = 42,
-#ifdef CONFIG_FLEXTIMER_CAPTURE
+	.base = VF610FLEXTIMER_0,
+	.irqnr = {42},
+	.irqcount = 1,
+	.clk = FTM_CLK_SYSTEM;
+#ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE
 	.capture = (struct capture const **) &ftm_captures_0,
 #endif
 };
@@ -86,13 +96,15 @@ void flextimer0_isr() {
 	flextimer_handleIRQ(ftm);
 }
 #endif
-#ifdef CONFIG_FLEXTIMER_1
+#ifdef CONFIG_MACH_VF610_FLEXTIMER_1
 static struct timer ftm_timer_1 = {
 	TIMER_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 1")
-	.base = VF610_FLEXTIMER_1,
-	.irqnr = 43,
-#ifdef CONFIG_FLEXTIMER_CAPTURE
+	.base = VF610FLEXTIMER_1,
+	.irqnr = {43},
+	.irqcount = 1,
+	.clk = FTM_CLK_SYSTEM;
+#ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE
 	.capture = (struct capture const **) &ftm_captures_1,
 #endif
 };
@@ -102,13 +114,15 @@ void flextimer1_isr() {
 	flextimer_handleIRQ(ftm);
 }
 #endif
-#ifdef CONFIG_FLEXTIMER_2
+#ifdef CONFIG_MACH_VF610_FLEXTIMER_2
 static struct timer ftm_timer_2 = {
 	TIMER_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 2")
-	.base = VF610_FLEXTIMER_2,
-	.irqnr = 44,
-#ifdef CONFIG_FLEXTIMER_CAPTURE
+	.base = VF610FLEXTIMER_2,
+	.irqnr = {44},
+	.irqcount = 1,
+	.clk = FTM_CLK_SYSTEM;
+#ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE
 	.capture = (struct capture const **) &ftm_captures_2,
 #endif
 };
@@ -118,13 +132,15 @@ void flextimer2_isr() {
 	flextimer_handleIRQ(ftm);
 }
 #endif
-#ifdef CONFIG_FLEXTIMER_3
+#ifdef CONFIG_MACH_VF610_FLEXTIMER_3
 static struct timer ftm_timer_3 = {
 	TIMER_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3")
-	.base = VF610_FLEXTIMER_3,
-	.irqnr = 45,
-#ifdef CONFIG_FLEXTIMER_CAPTURE
+	.base = VF610FLEXTIMER_3,
+	.irqnr = {45},
+	.irqcount = 1,
+	.clk = FTM_CLK_SYSTEM;
+#ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE
 	.capture = (struct capture const **) &ftm_captures_3,
 #endif
 };
@@ -136,8 +152,8 @@ void flextimer3_isr() {
 #endif
 
 
-#ifdef CONFIG_FLEXTIMER_PWM
-# ifdef CONFIG_FLEXTIMER_PWM_0_0
+#ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_0_0
 static struct pwm pwm_0_0 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 PWM: PTB0")
@@ -150,7 +166,7 @@ static struct pwm pwm_0_0 = {
 };
 PWM_ADDDEV(ftm, pwm_0_0);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_0_1
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_0_1
 static struct pwm pwm_0_1 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 PWM: PTB1")
@@ -163,7 +179,7 @@ static struct pwm pwm_0_1 = {
 };
 PWM_ADDDEV(ftm, pwm_0_1);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_0_2
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_0_2
 static struct pwm pwm_0_2 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 PWM: PTB2")
@@ -176,7 +192,7 @@ static struct pwm pwm_0_2 = {
 };
 PWM_ADDDEV(ftm, pwm_0_2);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_0_3
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_0_3
 static struct pwm pwm_0_3 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 PWM: PTB3")
@@ -189,7 +205,7 @@ static struct pwm pwm_0_3 = {
 };
 PWM_ADDDEV(ftm, pwm_0_3);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_0_4
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_0_4
 static struct pwm pwm_0_4 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 PWM: PTB4")
@@ -202,7 +218,7 @@ static struct pwm pwm_0_4 = {
 };
 PWM_ADDDEV(ftm, pwm_0_4);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_0_5
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_0_5
 static struct pwm pwm_0_5 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 PWM: PTB5")
@@ -215,7 +231,7 @@ static struct pwm pwm_0_5 = {
 };
 PWM_ADDDEV(ftm, pwm_0_5);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_0_6
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_0_6
 static struct pwm pwm_0_6 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 PWM: PTB6")
@@ -228,7 +244,7 @@ static struct pwm pwm_0_6 = {
 };
 PWM_ADDDEV(ftm, pwm_0_6);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_0_7
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_0_7
 static struct pwm pwm_0_7 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 PWM: PTB7")
@@ -241,7 +257,7 @@ static struct pwm pwm_0_7 = {
 };
 PWM_ADDDEV(ftm, pwm_0_7);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_1_0
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_1_0
 static struct pwm pwm_1_0 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 1 PWM: PTB8")
@@ -254,7 +270,7 @@ static struct pwm pwm_1_0 = {
 };
 PWM_ADDDEV(ftm, pwm_1_0);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_1_1
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_1_1
 static struct pwm pwm_1_1 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 1 PWM: PTB9")
@@ -267,7 +283,7 @@ static struct pwm pwm_1_1 = {
 };
 PWM_ADDDEV(ftm, pwm_1_1);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_2_0
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_2_0
 static struct pwm pwm_2_0 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 2 PWM: PTD23")
@@ -280,7 +296,7 @@ static struct pwm pwm_2_0 = {
 };
 PWM_ADDDEV(ftm, pwm_2_0);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_2_1
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_2_1
 static struct pwm pwm_2_1 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 2 PWM: PTD22")
@@ -293,7 +309,7 @@ static struct pwm pwm_2_1 = {
 };
 PWM_ADDDEV(ftm, pwm_2_1);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_3_0
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_3_0
 static struct pwm pwm_3_0 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 PWM: PTD31")
@@ -306,7 +322,7 @@ static struct pwm pwm_3_0 = {
 };
 PWM_ADDDEV(ftm, pwm_3_0);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_3_1
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_3_1
 static struct pwm pwm_3_1 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 PWM: PTD30")
@@ -319,7 +335,7 @@ static struct pwm pwm_3_1 = {
 };
 PWM_ADDDEV(ftm, pwm_3_1);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_3_2
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_3_2
 static struct pwm pwm_3_2 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 PWM: PTD29")
@@ -332,7 +348,7 @@ static struct pwm pwm_3_2 = {
 };
 PWM_ADDDEV(ftm, pwm_3_2);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_3_3
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_3_3
 static struct pwm pwm_3_3 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 PWM: PTD28")
@@ -345,7 +361,7 @@ static struct pwm pwm_3_3 = {
 };
 PWM_ADDDEV(ftm, pwm_3_3);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_3_4
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_3_4
 static struct pwm pwm_3_4 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 PWM: PTD27")
@@ -358,7 +374,7 @@ static struct pwm pwm_3_4 = {
 };
 PWM_ADDDEV(ftm, pwm_3_4);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_3_5
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_3_5
 static struct pwm pwm_3_5 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 PWM: PTD26")
@@ -371,7 +387,7 @@ static struct pwm pwm_3_5 = {
 };
 PWM_ADDDEV(ftm, pwm_3_5);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_3_6
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_3_6
 static struct pwm pwm_3_6 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 PWM: PTD25")
@@ -384,7 +400,7 @@ static struct pwm pwm_3_6 = {
 };
 PWM_ADDDEV(ftm, pwm_3_6);
 # endif
-# ifdef CONFIG_FLEXTIMER_PWM_3_7
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_PWM_3_7
 static struct pwm pwm_3_7 = {
 	PWM_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 PWM: PTD24")
@@ -399,8 +415,8 @@ PWM_ADDDEV(ftm, pwm_3_7);
 # endif
 #endif
 
-#ifdef CONFIG_FLEXTIMER_CAPTURE
-# ifdef CONFIG_FLEXTIMER_CAPTURE_0_0
+#ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_0
 static struct capture capture_0_0 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 Capture: PTB0")
@@ -413,7 +429,7 @@ static struct capture capture_0_0 = {
 };
 CAPTURE_ADDDEV(ftm, capture_0_0);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_0_1
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_1
 static struct capture capture_0_1 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 Capture: PTB1")
@@ -426,7 +442,7 @@ static struct capture capture_0_1 = {
 };
 CAPTURE_ADDDEV(ftm, capture_0_1);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_0_2
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_2
 static struct capture capture_0_2 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 Capture: PTB2")
@@ -439,7 +455,7 @@ static struct capture capture_0_2 = {
 };
 CAPTURE_ADDDEV(ftm, capture_0_2);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_0_3
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_3
 static struct capture capture_0_3 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 Capture: PTB3")
@@ -452,7 +468,7 @@ static struct capture capture_0_3 = {
 };
 CAPTURE_ADDDEV(ftm, capture_0_3);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_0_4
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_4
 static struct capture capture_0_4 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 Capture: PTB4")
@@ -465,7 +481,7 @@ static struct capture capture_0_4 = {
 };
 CAPTURE_ADDDEV(ftm, capture_0_4);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_0_5
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_5
 static struct capture capture_0_5 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 Capture: PTB5")
@@ -478,7 +494,7 @@ static struct capture capture_0_5 = {
 };
 CAPTURE_ADDDEV(ftm, capture_0_5);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_0_6
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_6
 static struct capture capture_0_6 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 Capture: PTB6")
@@ -491,7 +507,7 @@ static struct capture capture_0_6 = {
 };
 CAPTURE_ADDDEV(ftm, capture_0_6);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_0_7
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_7
 static struct capture capture_0_7 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 0 Capture: PTB7")
@@ -504,7 +520,7 @@ static struct capture capture_0_7 = {
 };
 CAPTURE_ADDDEV(ftm, capture_0_7);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_1_0
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_1_0
 static struct capture capture_1_0 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 1 Capture: PTB8")
@@ -517,7 +533,7 @@ static struct capture capture_1_0 = {
 };
 CAPTURE_ADDDEV(ftm, capture_1_0);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_1_1
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_1_1
 static struct capture capture_1_1 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 1 Capture: PTB9")
@@ -530,7 +546,7 @@ static struct capture capture_1_1 = {
 };
 CAPTURE_ADDDEV(ftm, capture_1_1);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_2_0
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_2_0
 static struct capture capture_2_0 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 2 Capture: PTD23")
@@ -543,7 +559,7 @@ static struct capture capture_2_0 = {
 };
 CAPTURE_ADDDEV(ftm, capture_2_0);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_2_1
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_2_1
 static struct capture capture_2_1 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 2 Capture: PTD22")
@@ -556,7 +572,7 @@ static struct capture capture_2_1 = {
 };
 CAPTURE_ADDDEV(ftm, capture_2_1);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_3_0
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_0
 static struct capture capture_3_0 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 Capture: PTD31")
@@ -569,7 +585,7 @@ static struct capture capture_3_0 = {
 };
 CAPTURE_ADDDEV(ftm, capture_3_0);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_3_1
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_1
 static struct capture capture_3_1 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 Capture: PTD30")
@@ -582,7 +598,7 @@ static struct capture capture_3_1 = {
 };
 CAPTURE_ADDDEV(ftm, capture_3_1);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_3_2
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_2
 static struct capture capture_3_2 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 Capture: PTD29")
@@ -595,7 +611,7 @@ static struct capture capture_3_2 = {
 };
 CAPTURE_ADDDEV(ftm, capture_3_2);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_3_3
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_3
 static struct capture capture_3_3 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 Capture: PTD28")
@@ -608,7 +624,7 @@ static struct capture capture_3_3 = {
 };
 CAPTURE_ADDDEV(ftm, capture_3_3);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_3_4
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_4
 static struct capture capture_3_4 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 Capture: PTD27")
@@ -621,7 +637,7 @@ static struct capture capture_3_4 = {
 };
 CAPTURE_ADDDEV(ftm, capture_3_4);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_3_5
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_5
 static struct capture capture_3_5 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 Capture: PTD26")
@@ -634,7 +650,7 @@ static struct capture capture_3_5 = {
 };
 CAPTURE_ADDDEV(ftm, capture_3_5);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_3_6
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_6
 static struct capture capture_3_6 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 Capture: PTD25")
@@ -647,7 +663,7 @@ static struct capture capture_3_6 = {
 };
 CAPTURE_ADDDEV(ftm, capture_3_6);
 # endif
-# ifdef CONFIG_FLEXTIMER_CAPTURE_3_7
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_7
 static struct capture capture_3_7 = {
 	CAPTURE_INIT_DEV(ftm)
 	HAL_NAME("Flextimer 3 Capture: PTD24")
@@ -663,114 +679,114 @@ CAPTURE_ADDDEV(ftm, capture_3_7);
 
 # ifdef CONFIG_FLTEXTIME_0
 static struct capture const *ftm_captures_0[8] = {
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_0
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_0
 	&capture_0_0,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_1
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_1
 	&capture_0_1,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_2
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_2
 	&capture_0_2,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_3
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_3
 	&capture_0_3,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_4
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_4
  	&capture_0_4,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_5
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_5
 	&capture_0_5,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_6
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_6
 	&capture_0_6,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_0_7
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_0_7
 	&capture_0_7,
 #  else
 	NULL,
 #  endif
 };
 # endif
-# ifdef CONFIG_FLEXTIMER_1
-static struct capture const *ftm_captures_1[2] = {
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_1_0
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_1
+static struct capture const *ftm_captures_1[8] = {
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_1_0
 	&capture_1_0,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_1_1
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_1_1
 	&capture_1_1,
 #  else
 	NULL,
 #  endif
 };
 # endif
-# ifdef CONFIG_FLEXTIMER_2
-static struct capture const *ftm_captures_2[2] = {
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_2_0
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_2
+static struct capture const *ftm_captures_2[8] = {
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_2_0
 	&capture_1_0,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_2_1
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_2_1
 	&capture_1_1,
 #  else
 	NULL,
 #  endif
 };
 # endif
-# ifdef CONFIG_FLEXTIMER_3
+# ifdef CONFIG_MACH_VF610_FLEXTIMER_3
 static struct capture const *ftm_captures_3[8] = {
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_0
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_0
 	&capture_3_0,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_1
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_1
 	&capture_3_1,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_2
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_2
 	&capture_3_2,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_3
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_3
 	&capture_3_3,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_4
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_4
 	&capture_3_4,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_5
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_5
 	&capture_3_5,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_6
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_6
 	&capture_3_6,
 #  else
 	NULL,
 #  endif
-#  ifdef CONFIG_FLEXTIMER_CAPTURE_3_7
+#  ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE_3_7
 	&capture_3_7,
 #  else
 	NULL,

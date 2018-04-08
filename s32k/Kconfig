@@ -85,14 +85,6 @@ config S32K_GPIO
 		int
 		depends on NXP_GPIO
 		default 5
-menuconfig S32K_FLEXTIMER
-	depends on TIMER
-	select FLEXTIMER
-	bool "Activate Flextimer"
-	default n
-	if FLEXTIMER
-	source mach/s32k/Kconfig.timer
-	endif
 menuconfig EXTERNAL_OSCILLATOR
 	bool "Activate External Crystal Oscillator"
 	default y
@@ -605,4 +597,13 @@ menuconfig MACH_S32K_ADC
 	depends on ADC
 	if MACH_S32K_ADC=y
 		source mach/s32k/Kconfig.adc
+	endif
+menuconfig MACH_S32K_FLEXTIMER
+	depends on TIMER
+	select NXP_FLEXTIMER
+	select NXP_FLEXTIMER_VERSION_2
+	bool "Activate Flextimer"
+	default n
+	if MACH_S32K_FLEXTIMER
+	source mach/s32k/Kconfig.timer
 	endif
