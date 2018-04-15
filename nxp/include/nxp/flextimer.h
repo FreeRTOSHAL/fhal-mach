@@ -95,13 +95,13 @@ struct capture {
 void flextimer_handleIRQ(struct timer *ftm);
 int32_t flextimer_setupChannelPin(struct timer *ftm, struct pwm_pin *pin);
 int32_t flextimer_setupClock(struct timer *ftm);
-#ifndef CONFIG_TIMER_MULTI
+#ifdef CONFIG_TIMER_MULTI
 extern const struct timer_ops ftm_timer_ops;
 #endif
-#ifndef CONFIG_PWM_MULTI
+#ifdef CONFIG_PWM_MULTI
 extern const struct pwm_ops ftm_pwm_ops;
 #endif
-#ifndef CONFIG_TIMER_MULTI
+#ifdef CONFIG_TIMER_MULTI
 extern const struct capture_ops ftm_capture_ops;
 #endif
 #endif

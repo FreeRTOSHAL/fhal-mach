@@ -192,6 +192,7 @@ menuconfig MACH_VF610_FLEXTIMER
 		default n
 	menuconfig MACH_VF610_FLEXTIMER_PWM
 		depends on MACH_VF610_FLEXTIMER && PWM
+		select MACH_NXP_FLEXTIMER_PWM
 		bool "Activate Flextimer PWM "
 		default n
 		config MACH_VF610_FLEXTIMER_PWM_0_0

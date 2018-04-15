@@ -14,6 +14,12 @@ config NXP_FLEXTIMER
 		default n
 		help
 			Version used by S32K
+	config NXP_FLEXTIMER_PWM
+		bool
+		default n
+	config NXP_FLEXTIMER_CAPTURE
+		bool
+		default n
 config NXP_GPIO
 	bool
 	default n

@@ -42,6 +42,7 @@
 #define FTM_PRESCALE(x) (((x) & 0x7) << 0)
 #define FTM_SELECT_CLK_MASK (0x3 << 3)
 #define FTM_SELECT_CLK(x) (((x) & 0x3) << 3)
+#define FTM_PWMEN(channelID) (BIT(channelID) << 16)
 #ifdef CONFIG_NXP_FLEXTIMER_VERSION_1
 # define FTM_INTERRUPT_EN BIT(6)
 # define FTM_OVERFLOWED BIT(7)
@@ -174,7 +175,7 @@ void flextimer_handleIRQ(struct timer *ftm) {
 		default:
 			break;
 	}
-#ifdef CONFIG_FLEXTIMER_CAPTURE
+#ifdef CONFIG_NXP_FLEXTIMER_CAPTURE
 	{
 		int i;
 		uint32_t status = ftm->base->status;
@@ -291,7 +292,7 @@ TIMER_GET_TIME(ftm, ftm) {
 	return us;
 }
 
-#ifdef CONFIG_FLEXTIMER_PWM
+#ifdef CONFIG_NXP_FLEXTIMER_PWM
 
 PWM_INIT(ftm, index) {
 	int32_t ret;
@@ -313,11 +314,23 @@ PWM_INIT(ftm, index) {
 	ftm_writeProtecDisable(ftm);
 	ftm->base->ch[pwm->channel].csc = FTM_CNSC_ELSB | FTM_CNSC_MSB;
 	ftm->base->ch[pwm->channel].cv = 0;
+#ifdef CONFIG_NXP_FLEXTIMER_VERSION_2
+	ftm->base->sc |= FTM_PWMEN(pwm->channel);
+#endif
 	ftm_writeProtecEnable(ftm);
 
 	return pwm;	
 }
 PWM_DEINIT(ftm, pwm) {
+	struct timer *ftm = pwm->timer;
+	ftm_writeProtecDisable(ftm);
+#ifdef CONFIG_NXP_FLEXTIMER_VERSION_2
+	ftm->base->sc &= ~FTM_PWMEN(pwm->channel);
+#endif
+	ftm->base->ch[pwm->channel].csc = 0;
+	ftm->base->ch[pwm->channel].cv = 0;
+	ftm_writeProtecEnable(ftm);
+	pwm->gen.init = false;
 	return 0;
 }
 PWM_SET_PERIOD(ftm, pwm, us) {
@@ -338,14 +351,14 @@ PWM_SET_DUTY_CYCLE(ftm, pwm, us) {
 		return -1;
 	}
 	ftm->base->ch[pwm->channel].cv = (uint32_t) counterValue;
-	__ISB();
 	__DSB();
+	__ISB();
 	return 0;
 }
 
 #endif
 
-#ifdef CONFIG_FLEXTIMER_CAPTURE
+#ifdef CONFIG_NXP_FLEXTIMER_CAPTURE
 CAPTURE_INIT(ftm, index) {
 	struct capture *capture = CAPTURE_GET_DEV(index);
 	struct timer *ftm;
@@ -491,9 +504,9 @@ TIMER_DEINIT(ftm, ftm) {
 	return 0;
 }
 TIMER_OPS(ftm);
-#ifdef CONFIG_FLEXTIMER_PWM
+#ifdef CONFIG_NXP_FLEXTIMER_PWM
 PWM_OPS(ftm);
 #endif
-#ifdef CONFIG_FLEXTIMER_CAPTURE
+#ifdef CONFIG_NXP_FLEXTIMER_CAPTURE
 CAPTURE_OPS(ftm);
 #endif

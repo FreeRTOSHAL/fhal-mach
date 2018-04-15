@@ -20,6 +20,101 @@ if MACH_S32K_FLEXTIMER0
 		config MACH_S32K_FLEXTIMER0_FIRCDIV1
 			bool "FIRCDIV1"
 	endchoice
+	menuconfig MACH_S32K_FLEXTIMER0_PWM
+		bool "Activate PWM"
+		depends on PWM
+		select NXP_FLEXTIMER_PWM
+	if MACH_S32K_FLEXTIMER0_PWM = y
+		# :%s/FLEXTIMER_PWM(\([0-9]\{1,2}\), \([0-9]\{1,2}\), \([A-Z0-9]\{4,5}\), \(MODE[0-9]\));/\t\tconfig MACH_S32K_FLEXTIMER\1_PWM\2_\3\r\t\t\tbool "PWM \2 (\3)"/g
+		config MACH_S32K_FLEXTIMER0_PWM0
+			bool "PWM 0"
+			choice
+				prompt "PWM 0"
+				depends on MACH_S32K_FLEXTIMER0_PWM0
+				config MACH_S32K_FLEXTIMER0_PWM0_PTD15
+					bool "PTD15"
+				config MACH_S32K_FLEXTIMER0_PWM0_PTC0
+					bool "PTC0"
+				config MACH_S32K_FLEXTIMER0_PWM0_PTB12
+					bool "PTB12"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_PWM1
+			bool "PWM 1"
+			choice
+				depends on MACH_S32K_FLEXTIMER0_PWM1
+				prompt "PWM 1"
+				config MACH_S32K_FLEXTIMER0_PWM1_PTB13
+					bool "PTB13"
+				config MACH_S32K_FLEXTIMER0_PWM1_PTD16
+					bool "PTD16"
+				config MACH_S32K_FLEXTIMER0_PWM1_PTC1
+					bool "PTC1"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_PWM2
+			bool "PWM 2"
+			choice
+				prompt "PWM 2"
+				depends on MACH_S32K_FLEXTIMER0_PWM2
+				config MACH_S32K_FLEXTIMER0_PWM2_PTD0
+					bool "PTD0"
+				config MACH_S32K_FLEXTIMER0_PWM2_PTC2
+					bool "PTC2"
+				config MACH_S32K_FLEXTIMER0_PWM2_PTB14
+					bool "PTB14"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_PWM3
+			bool "PWM 3"
+			choice
+				prompt "PWM 3"
+				depends on MACH_S32K_FLEXTIMER0_PWM3
+				config MACH_S32K_FLEXTIMER0_PWM3_PTD1
+					bool "PTD1"
+				config MACH_S32K_FLEXTIMER0_PWM3_PTC3
+					bool "PTC3"
+				config MACH_S32K_FLEXTIMER0_PWM3_PTB15
+					bool "PTB15"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_PWM4
+			bool "PWM 4"
+			choice
+				prompt "PWM 4"
+				depends on MACH_S32K_FLEXTIMER0_PWM4
+				config MACH_S32K_FLEXTIMER0_PWM4_PTB4
+					bool "PTB4"
+				config MACH_S32K_FLEXTIMER0_PWM4_PTB16
+					bool "PTB16"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_PWM5
+			bool "PWM 5"
+			choice
+				prompt "PWM 5"
+				depends on MACH_S32K_FLEXTIMER0_PWM5
+				config MACH_S32K_FLEXTIMER0_PWM5_PTB5
+					bool "PTB5"
+				config MACH_S32K_FLEXTIMER0_PWM5_PTB17
+					bool "PTB17"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_PWM6
+			bool "PWM 6"
+			choice
+				prompt "PWM 6"
+				depends on MACH_S32K_FLEXTIMER0_PWM6
+				config MACH_S32K_FLEXTIMER0_PWM6_PTA17
+					bool "PTA17"
+				config MACH_S32K_FLEXTIMER0_PWM6_PTE8
+					bool "PTE8"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_PWM7
+			bool "PWM 7"
+			choice
+				prompt "PWM 7"
+				depends on MACH_S32K_FLEXTIMER0_PWM7
+				config MACH_S32K_FLEXTIMER0_PWM7_PTE9
+					bool "PTE9"
+				config MACH_S32K_FLEXTIMER0_PWM7_PTE7
+					bool "PTE7"
+			endchoice
+	endif
 endif
 menuconfig MACH_S32K_FLEXTIMER1
 	bool "Flextimer 1"
@@ -43,6 +138,92 @@ if MACH_S32K_FLEXTIMER1
 		config MACH_S32K_FLEXTIMER1_FIRCDIV1
 			bool "FIRCDIV1"
 	endchoice
+	menuconfig MACH_S32K_FLEXTIMER1_PWM
+		bool "Activate PWM"
+		depends on PWM
+		select NXP_FLEXTIMER_PWM
+	if MACH_S32K_FLEXTIMER1_PWM = y
+		config MACH_S32K_FLEXTIMER1_PWM0
+			bool "PWM 0"
+			choice
+				prompt "PWM 0"
+				depends on MACH_S32K_FLEXTIMER1_PWM0
+				config MACH_S32K_FLEXTIMER1_PWM0_PTB2
+					bool "PTB2"
+				config MACH_S32K_FLEXTIMER1_PWM0_PTC4
+					bool "PTC4"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_PWM1
+			bool "PWM 1"
+			choice
+				prompt "PWM 1"
+				depends on MACH_S32K_FLEXTIMER1_PWM1
+				config MACH_S32K_FLEXTIMER1_PWM1_PTA1
+					bool "PTA1"
+				config MACH_S32K_FLEXTIMER1_PWM1_PTB3
+					bool "PTB3"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_PWM2
+			bool "PWM 2"
+			choice
+				prompt "PWM 2"
+				depends on MACH_S32K_FLEXTIMER1_PWM2
+				config MACH_S32K_FLEXTIMER1_PWM2_PTA15
+					bool "PTA15"
+				config MACH_S32K_FLEXTIMER1_PWM2_PTC14
+					bool "PTC14"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_PWM3
+			bool "PWM 3"
+			choice
+				prompt "PWM 3"
+				depends on MACH_S32K_FLEXTIMER1_PWM3
+				config MACH_S32K_FLEXTIMER1_PWM3_PTC15
+					bool "PTC15"
+				config MACH_S32K_FLEXTIMER1_PWM3_PTA16
+					bool "PTA16"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_PWM4
+			bool "PWM 4"
+			choice
+				prompt "PWM 4"
+				depends on MACH_S32K_FLEXTIMER1_PWM4
+				config MACH_S32K_FLEXTIMER1_PWM4_PTA10
+					bool "PTA10"
+				config MACH_S32K_FLEXTIMER1_PWM4_PTD8
+					bool "PTD8"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_PWM5
+			bool "PWM 5"
+			choice
+				prompt "PWM 5"
+				depends on MACH_S32K_FLEXTIMER1_PWM5
+				config MACH_S32K_FLEXTIMER1_PWM5_PTD9
+					bool "PTD9"
+				config MACH_S32K_FLEXTIMER1_PWM5_PTA11
+					bool "PTA11"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_PWM6
+			bool "PWM 6"
+			choice
+				prompt "PWM 6"
+				depends on MACH_S32K_FLEXTIMER1_PWM6
+				config MACH_S32K_FLEXTIMER1_PWM6_PTC0
+					bool "PTC0"
+				config MACH_S32K_FLEXTIMER1_PWM6_PTA12
+					bool "PTA12"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_PWM7
+			bool "PWM 7"
+			choice
+				prompt "PWM 7"
+				depends on MACH_S32K_FLEXTIMER1_PWM7
+				config MACH_S32K_FLEXTIMER1_PWM7_PTA13
+					bool "PTA13"
+				config MACH_S32K_FLEXTIMER1_PWM7_PTC1
+					bool "PTC1"
+			endchoice
+	endif
 endif
 menuconfig MACH_S32K_FLEXTIMER2
 	bool "Flextimer 2"
@@ -66,6 +247,96 @@ if MACH_S32K_FLEXTIMER2
 		config MACH_S32K_FLEXTIMER2_FIRCDIV1
 			bool "FIRCDIV1"
 	endchoice
+	menuconfig MACH_S32K_FLEXTIMER2_PWM
+		bool "Activate PWM"
+		depends on PWM
+		select NXP_FLEXTIMER_PWM
+	if MACH_S32K_FLEXTIMER2_PWM = y
+		config MACH_S32K_FLEXTIMER2_PWM0
+			bool "PWM 0"
+			choice
+				prompt "PWM 0"
+				depends on MACH_S32K_FLEXTIMER2_PWM0
+				config MACH_S32K_FLEXTIMER2_PWM0_PTD0
+					bool "PTD0"
+				config MACH_S32K_FLEXTIMER2_PWM0_PTD10
+					bool "PTD10"
+				config MACH_S32K_FLEXTIMER2_PWM0_PTC5
+					bool "PTC5"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_PWM1
+			bool "PWM 1"
+			choice
+				prompt "PWM 1"
+				depends on MACH_S32K_FLEXTIMER2_PWM1
+				config MACH_S32K_FLEXTIMER2_PWM1_PTD1
+					bool "PTD1"
+				config MACH_S32K_FLEXTIMER2_PWM1_PTD11
+					bool "PTD11"
+				config MACH_S32K_FLEXTIMER2_PWM1_PTA0
+					bool "PTA0"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_PWM2
+			bool "PWM 2"
+			choice
+				prompt "PWM 2"
+				depends on MACH_S32K_FLEXTIMER2_PWM2
+				config MACH_S32K_FLEXTIMER2_PWM2_PTE4
+					bool "PTE4"
+				config MACH_S32K_FLEXTIMER2_PWM2_PTD12
+					bool "PTD12"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_PWM3
+			bool "PWM 3"
+			choice
+				prompt "PWM 3"
+				depends on MACH_S32K_FLEXTIMER2_PWM3
+				config MACH_S32K_FLEXTIMER2_PWM3_PTE5
+					bool "PTE5"
+				config MACH_S32K_FLEXTIMER2_PWM3_PTD5
+					bool "PTD5"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_PWM4
+			bool "PWM 4"
+			choice
+				prompt "PWM 4"
+				depends on MACH_S32K_FLEXTIMER2_PWM4
+				config MACH_S32K_FLEXTIMER2_PWM4_PTE10
+					bool "PTE10"
+				config MACH_S32K_FLEXTIMER2_PWM4_PTD13
+					bool "PTD13"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_PWM5
+			bool "PWM 5"
+			choice
+				prompt "PWM 5"
+				depends on MACH_S32K_FLEXTIMER2_PWM5
+				config MACH_S32K_FLEXTIMER2_PWM5_PTE11
+					bool "PTE11"
+				config MACH_S32K_FLEXTIMER2_PWM5_PTD14
+					bool "PTD14"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_PWM6
+			bool "PWM 6"
+			choice
+				prompt "PWM 6"
+				depends on MACH_S32K_FLEXTIMER2_PWM6
+				config MACH_S32K_FLEXTIMER2_PWM6_PTE15
+					bool "PTE15"
+				config MACH_S32K_FLEXTIMER2_PWM6_PTC12
+					bool "PTC12"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_PWM7
+			bool "PWM 7"
+			choice
+				prompt "PWM 7"
+				depends on MACH_S32K_FLEXTIMER2_PWM7
+				config MACH_S32K_FLEXTIMER2_PWM7_PTE16
+					bool "PTE16"
+				config MACH_S32K_FLEXTIMER2_PWM7_PTC13
+					bool "PTC13"
+			endchoice
+	endif
 endif
 menuconfig MACH_S32K_FLEXTIMER3
 	bool "Flextimer 3"
@@ -89,4 +360,90 @@ if MACH_S32K_FLEXTIMER3
 		config MACH_S32K_FLEXTIMER3_FIRCDIV1
 			bool "FIRCDIV1"
 	endchoice
+	menuconfig MACH_S32K_FLEXTIMER3_PWM
+		bool "Activate PWM"
+		depends on PWM
+		select NXP_FLEXTIMER_PWM
+	if MACH_S32K_FLEXTIMER3_PWM = y
+		config MACH_S32K_FLEXTIMER3_PWM0
+			bool "PWM 0"
+			choice
+				prompt "PWM 0"
+				depends on MACH_S32K_FLEXTIMER3_PWM0
+				config MACH_S32K_FLEXTIMER3_PWM0_PTA2
+					bool "PTA2"
+				config MACH_S32K_FLEXTIMER3_PWM0_PTB8
+					bool "PTB8"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_PWM1
+			bool "PWM 1"
+			choice
+				prompt "PWM 1"
+				depends on MACH_S32K_FLEXTIMER3_PWM1
+				config MACH_S32K_FLEXTIMER3_PWM1_PTB9
+					bool "PTB9"
+				config MACH_S32K_FLEXTIMER3_PWM1_PTA3
+					bool "PTA3"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_PWM2
+			bool "PWM 2"
+			choice
+				prompt "PWM 2"
+				depends on MACH_S32K_FLEXTIMER3_PWM2
+				config MACH_S32K_FLEXTIMER3_PWM2_PTC6
+					bool "PTC6"
+				config MACH_S32K_FLEXTIMER3_PWM2_PTB10
+					bool "PTB10"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_PWM3
+			bool "PWM 3"
+			choice
+				prompt "PWM 3"
+				depends on MACH_S32K_FLEXTIMER3_PWM3
+				config MACH_S32K_FLEXTIMER3_PWM3_PTB11
+					bool "PTB11"
+				config MACH_S32K_FLEXTIMER3_PWM3_PTC7
+					bool "PTC7"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_PWM4
+			bool "PWM 4"
+			choice
+				prompt "PWM 4"
+				depends on MACH_S32K_FLEXTIMER3_PWM4
+				config MACH_S32K_FLEXTIMER3_PWM4_PTC10
+					bool "PTC10"
+				config MACH_S32K_FLEXTIMER3_PWM4_PTD2
+					bool "PTD2"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_PWM5
+			bool "PWM 5"
+			choice
+				prompt "PWM 5"
+				depends on MACH_S32K_FLEXTIMER3_PWM5
+				config MACH_S32K_FLEXTIMER3_PWM5_PTD3
+					bool "PTD3"
+				config MACH_S32K_FLEXTIMER3_PWM5_PTC11
+					bool "PTC11"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_PWM6
+			bool "PWM 6"
+			choice
+				prompt "PWM 6"
+				depends on MACH_S32K_FLEXTIMER3_PWM6
+				config MACH_S32K_FLEXTIMER3_PWM6_PTE2
+					bool "PTE2"
+				config MACH_S32K_FLEXTIMER3_PWM6_PTC12
+					bool "PTC12"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_PWM7
+			bool "PWM 7"
+			choice
+				prompt "PWM 7"
+				depends on MACH_S32K_FLEXTIMER3_PWM7
+				config MACH_S32K_FLEXTIMER3_PWM7_PTE6
+					bool "PTE6"
+				config MACH_S32K_FLEXTIMER3_PWM7_PTC13
+					bool "PTC13"
+			endchoice
+	endif
 endif
