@@ -48,7 +48,7 @@ int32_t flextimer_setupChannelPin(struct timer *ftm, struct pwm_pin *pin) {
 	if (pin->pin == 0) {
 		return -1;
 	}
-	ret = mux_pinctl(mux, pin->pin, MUX_CTL_MODE(pin->mode), VF610_PWM_GENERAL_CTRL);
+	ret = mux_pinctl(mux, pin->pin, pin->ctl, VF610_PWM_GENERAL_CTRL);
 	if (ret < 0) {
 		return -1;
 	}
@@ -161,7 +161,7 @@ static struct pwm pwm_0_0 = {
 	.channel = 0,
 	.pin = {
 		.pin = PTB0,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 PWM_ADDDEV(ftm, pwm_0_0);
@@ -174,7 +174,7 @@ static struct pwm pwm_0_1 = {
 	.channel = 1,
 	.pin = {
 		.pin = PTB1,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 PWM_ADDDEV(ftm, pwm_0_1);
@@ -187,7 +187,7 @@ static struct pwm pwm_0_2 = {
 	.channel = 2,
 	.pin = {
 		.pin = PTB2,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 PWM_ADDDEV(ftm, pwm_0_2);
@@ -200,7 +200,7 @@ static struct pwm pwm_0_3 = {
 	.channel = 3,
 	.pin = {
 		.pin = PTB3,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 PWM_ADDDEV(ftm, pwm_0_3);
@@ -213,7 +213,7 @@ static struct pwm pwm_0_4 = {
 	.channel = 4,
 	.pin = {
 		.pin = PTB4,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 PWM_ADDDEV(ftm, pwm_0_4);
@@ -226,7 +226,7 @@ static struct pwm pwm_0_5 = {
 	.channel = 5,
 	.pin = {
 		.pin = PTB5,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 PWM_ADDDEV(ftm, pwm_0_5);
@@ -239,7 +239,7 @@ static struct pwm pwm_0_6 = {
 	.channel = 6,
 	.pin = {
 		.pin = PTB6,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 PWM_ADDDEV(ftm, pwm_0_6);
@@ -252,7 +252,7 @@ static struct pwm pwm_0_7 = {
 	.channel = 7,
 	.pin = {
 		.pin = PTB7,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 PWM_ADDDEV(ftm, pwm_0_7);
@@ -265,7 +265,7 @@ static struct pwm pwm_1_0 = {
 	.channel = 0,
 	.pin = {
 		.pin = PTB8,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 PWM_ADDDEV(ftm, pwm_1_0);
@@ -278,7 +278,7 @@ static struct pwm pwm_1_1 = {
 	.channel = 1,
 	.pin = {
 		.pin = PTB9,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 PWM_ADDDEV(ftm, pwm_1_1);
@@ -291,7 +291,7 @@ static struct pwm pwm_2_0 = {
 	.channel = 0,
 	.pin = {
 		.pin = PTD23,
-		.mode = MODE3
+		.ctl = MUX_CTL_MODE(MODE3),
 	}
 };
 PWM_ADDDEV(ftm, pwm_2_0);
@@ -304,7 +304,7 @@ static struct pwm pwm_2_1 = {
 	.channel = 1,
 	.pin = {
 		.pin = PTD22,
-		.mode = MODE3
+		.ctl = MUX_CTL_MODE(MODE3),
 	}
 };
 PWM_ADDDEV(ftm, pwm_2_1);
@@ -317,7 +317,7 @@ static struct pwm pwm_3_0 = {
 	.channel = 0,
 	.pin = {
 		.pin = PTD31,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 PWM_ADDDEV(ftm, pwm_3_0);
@@ -330,7 +330,7 @@ static struct pwm pwm_3_1 = {
 	.channel = 1,
 	.pin = {
 		.pin = PTD30,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 PWM_ADDDEV(ftm, pwm_3_1);
@@ -343,7 +343,7 @@ static struct pwm pwm_3_2 = {
 	.channel = 2,
 	.pin = {
 		.pin = PTD29,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 PWM_ADDDEV(ftm, pwm_3_2);
@@ -356,7 +356,7 @@ static struct pwm pwm_3_3 = {
 	.channel = 3,
 	.pin = {
 		.pin = PTD28,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 PWM_ADDDEV(ftm, pwm_3_3);
@@ -369,7 +369,7 @@ static struct pwm pwm_3_4 = {
 	.channel = 4,
 	.pin = {
 		.pin = PTD27,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 PWM_ADDDEV(ftm, pwm_3_4);
@@ -382,7 +382,7 @@ static struct pwm pwm_3_5 = {
 	.channel = 5,
 	.pin = {
 		.pin = PTD26,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 PWM_ADDDEV(ftm, pwm_3_5);
@@ -395,7 +395,7 @@ static struct pwm pwm_3_6 = {
 	.channel = 6,
 	.pin = {
 		.pin = PTD25,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 PWM_ADDDEV(ftm, pwm_3_6);
@@ -408,7 +408,7 @@ static struct pwm pwm_3_7 = {
 	.channel = 7,
 	.pin = {
 		.pin = PTD24,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 PWM_ADDDEV(ftm, pwm_3_7);
@@ -424,7 +424,7 @@ static struct capture capture_0_0 = {
 	.channel = 0,
 	.pin = {
 		.pin = PTB0,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_0_0);
@@ -437,7 +437,7 @@ static struct capture capture_0_1 = {
 	.channel = 1,
 	.pin = {
 		.pin = PTB1,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_0_1);
@@ -450,7 +450,7 @@ static struct capture capture_0_2 = {
 	.channel = 2,
 	.pin = {
 		.pin = PTB2,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_0_2);
@@ -463,7 +463,7 @@ static struct capture capture_0_3 = {
 	.channel = 3,
 	.pin = {
 		.pin = PTB3,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_0_3);
@@ -476,7 +476,7 @@ static struct capture capture_0_4 = {
 	.channel = 4,
 	.pin = {
 		.pin = PTB4,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_0_4);
@@ -489,7 +489,7 @@ static struct capture capture_0_5 = {
 	.channel = 5,
 	.pin = {
 		.pin = PTB5,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_0_5);
@@ -502,7 +502,7 @@ static struct capture capture_0_6 = {
 	.channel = 6,
 	.pin = {
 		.pin = PTB6,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_0_6);
@@ -515,7 +515,7 @@ static struct capture capture_0_7 = {
 	.channel = 7,
 	.pin = {
 		.pin = PTB7,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_0_7);
@@ -528,7 +528,7 @@ static struct capture capture_1_0 = {
 	.channel = 0,
 	.pin = {
 		.pin = PTB8,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_1_0);
@@ -541,7 +541,7 @@ static struct capture capture_1_1 = {
 	.channel = 1,
 	.pin = {
 		.pin = PTB9,
-		.mode = MODE1
+		.ctl = MUX_CTL_MODE(MODE1),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_1_1);
@@ -554,7 +554,7 @@ static struct capture capture_2_0 = {
 	.channel = 0,
 	.pin = {
 		.pin = PTD23,
-		.mode = MODE3
+		.ctl = MUX_CTL_MODE(MODE3),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_2_0);
@@ -567,7 +567,7 @@ static struct capture capture_2_1 = {
 	.channel = 1,
 	.pin = {
 		.pin = PTD22,
-		.mode = MODE3
+		.ctl = MUX_CTL_MODE(MODE3),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_2_1);
@@ -580,7 +580,7 @@ static struct capture capture_3_0 = {
 	.channel = 0,
 	.pin = {
 		.pin = PTD31,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_3_0);
@@ -593,7 +593,7 @@ static struct capture capture_3_1 = {
 	.channel = 1,
 	.pin = {
 		.pin = PTD30,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_3_1);
@@ -606,7 +606,7 @@ static struct capture capture_3_2 = {
 	.channel = 2,
 	.pin = {
 		.pin = PTD29,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_3_2);
@@ -619,7 +619,7 @@ static struct capture capture_3_3 = {
 	.channel = 3,
 	.pin = {
 		.pin = PTD28,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_3_3);
@@ -632,7 +632,7 @@ static struct capture capture_3_4 = {
 	.channel = 4,
 	.pin = {
 		.pin = PTD27,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_3_4);
@@ -645,7 +645,7 @@ static struct capture capture_3_5 = {
 	.channel = 5,
 	.pin = {
 		.pin = PTD26,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_3_5);
@@ -658,7 +658,7 @@ static struct capture capture_3_6 = {
 	.channel = 6,
 	.pin = {
 		.pin = PTD25,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_3_6);
@@ -671,7 +671,7 @@ static struct capture capture_3_7 = {
 	.channel = 7,
 	.pin = {
 		.pin = PTD24,
-		.mode = MODE4
+		.ctl = MUX_CTL_MODE(MODE4),
 	}
 };
 CAPTURE_ADDDEV(ftm, capture_3_7);

@@ -49,7 +49,7 @@ int32_t flextimer_setupChannelPin(struct timer *ftm, struct pwm_pin *pin) {
 	if (pin->pin == 0) {
 		return -1;
 	}
-	ret = mux_pinctl(mux, pin->pin, MUX_CTL_MODE(pin->mode) | MUX_CTL_PULL_UP, 0);
+	ret = mux_pinctl(mux, pin->pin, pin->ctl, pin->extra);
 	if (ret < 0) {
 		return -1;
 	}
@@ -104,7 +104,8 @@ int32_t flextimer_setupClock(struct timer *ftm) {
 		.channel = pwmID, \
 		. pin = { \
 			.pin = p, \
-			.mode = m, \
+			.ctl = MUX_CTL_MODE(m) | MUX_CTL_PULL_UP, \
+			.extra = 0, \
 		}, \
 	}; \
 	PWM_ADDDEV(ftm, ftm_pwm_##timerID##_##pwmID)

@@ -74,7 +74,8 @@ struct timer {
 
 struct pwm_pin {
 	uint32_t pin;
-	uint32_t mode;
+	uint32_t ctl;
+	uint32_t extra;
 };
 
 struct pwm {
