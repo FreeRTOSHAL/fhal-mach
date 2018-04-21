@@ -102,7 +102,7 @@ extern const struct timer_ops ftm_timer_ops;
 #ifdef CONFIG_PWM_MULTI
 extern const struct pwm_ops ftm_pwm_ops;
 #endif
-#ifdef CONFIG_TIMER_MULTI
+#ifdef CONFIG_CAPTURE_MULTI
 extern const struct capture_ops ftm_capture_ops;
 #endif
 #endif

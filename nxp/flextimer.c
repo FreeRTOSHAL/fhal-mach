@@ -61,13 +61,16 @@
 #define FTM_FMS_WR_PROTECT_EN BIT(6)
 #define FTM_FMS_WR_PROTECT_IS_EN(x) (((x) >> 6) & 0x1)
 
-#define FTM_CNSC_DMA (1 << 0) 
-#define FTM_CNSC_ELSA (1 << 2)
-#define FTM_CNSC_ELSB (1 << 3)
-#define FTM_CNSC_MSA (1 << 4)
-#define FTM_CNSC_MSB (1 << 5)
-#define FTM_CNSC_CHIE (1 << 6)
-#define FTM_CNSC_CHF (1 << 7)
+#define FTM_CNSC_DMA BIT(0)
+#ifdef CONFIG_NXP_FLEXTIMER_VERSION_2
+# define FTM_CNSC_ICRST BIT(1)
+#endif
+#define FTM_CNSC_ELSA BIT(2)
+#define FTM_CNSC_ELSB BIT(3)
+#define FTM_CNSC_MSA BIT(4)
+#define FTM_CNSC_MSB BIT(5)
+#define FTM_CNSC_CHIE BIT(6)
+#define FTM_CNSC_CHF BIT(7)
 #define FTM_CNSC_IS_CHF(x) ((x >> 7) & 0x1)
 
 struct ftm_channel{
@@ -379,12 +382,21 @@ CAPTURE_INIT(ftm, index) {
 	ftm->base->ch[capture->channel].cv = 0;
 	ftm->base->ch[capture->channel].csc = FTM_CNSC_ELSB | FTM_CNSC_ELSA | FTM_CNSC_CHIE;
 	//ftm->base->ch[channel].csc = FTM_CNSC_ELSA | FTM_CNSC_CHIE;
+#ifdef CONFIG_NXP_FLEXTIMER_VERSION_2
+	ftm->base->sc &= ~FTM_PWMEN(capture->channel);
+#endif
 	ftm_writeProtecEnable(ftm);
 
 	return capture;
 }
 
 CAPTURE_DEINIT(ftm, capture) {
+	struct timer *ftm;
+	ftm = capture->timer;
+	ftm_writeProtecDisable(ftm);
+	ftm->base->ch[capture->channel].csc = 0;
+	ftm->base->ch[capture->channel].cv = 0;
+	ftm_writeProtecEnable(ftm);
 	return 0;
 }
 CAPTURE_SET_PERIOD(ftm, capture, us) {

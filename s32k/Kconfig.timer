@@ -115,6 +115,101 @@ if MACH_S32K_FLEXTIMER0
 					bool "PTE7"
 			endchoice
 	endif
+	menuconfig MACH_S32K_FLEXTIMER0_CAPTURE
+		bool "Activate CAPTURE"
+		depends on CAPTURE
+		select NXP_FLEXTIMER_CAPTURE
+	if MACH_S32K_FLEXTIMER0_CAPTURE = y
+		# :%s/FLEXTIMER_CAPTURE(\([0-9]\{1,2}\), \([0-9]\{1,2}\), \([A-Z0-9]\{4,5}\), \(MODE[0-9]\));/\t\tconfig MACH_S32K_FLEXTIMER\1_CAPTURE\2_\3\r\t\t\tbool "CAPTURE \2 (\3)"/g
+		config MACH_S32K_FLEXTIMER0_CAPTURE0
+			bool "CAPTURE 0"
+			choice
+				prompt "CAPTURE 0"
+				depends on MACH_S32K_FLEXTIMER0_CAPTURE0
+				config MACH_S32K_FLEXTIMER0_CAPTURE0_PTD15
+					bool "PTD15"
+				config MACH_S32K_FLEXTIMER0_CAPTURE0_PTC0
+					bool "PTC0"
+				config MACH_S32K_FLEXTIMER0_CAPTURE0_PTB12
+					bool "PTB12"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_CAPTURE1
+			bool "CAPTURE 1"
+			choice
+				depends on MACH_S32K_FLEXTIMER0_CAPTURE1
+				prompt "CAPTURE 1"
+				config MACH_S32K_FLEXTIMER0_CAPTURE1_PTB13
+					bool "PTB13"
+				config MACH_S32K_FLEXTIMER0_CAPTURE1_PTD16
+					bool "PTD16"
+				config MACH_S32K_FLEXTIMER0_CAPTURE1_PTC1
+					bool "PTC1"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_CAPTURE2
+			bool "CAPTURE 2"
+			choice
+				prompt "CAPTURE 2"
+				depends on MACH_S32K_FLEXTIMER0_CAPTURE2
+				config MACH_S32K_FLEXTIMER0_CAPTURE2_PTD0
+					bool "PTD0"
+				config MACH_S32K_FLEXTIMER0_CAPTURE2_PTC2
+					bool "PTC2"
+				config MACH_S32K_FLEXTIMER0_CAPTURE2_PTB14
+					bool "PTB14"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_CAPTURE3
+			bool "CAPTURE 3"
+			choice
+				prompt "CAPTURE 3"
+				depends on MACH_S32K_FLEXTIMER0_CAPTURE3
+				config MACH_S32K_FLEXTIMER0_CAPTURE3_PTD1
+					bool "PTD1"
+				config MACH_S32K_FLEXTIMER0_CAPTURE3_PTC3
+					bool "PTC3"
+				config MACH_S32K_FLEXTIMER0_CAPTURE3_PTB15
+					bool "PTB15"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_CAPTURE4
+			bool "CAPTURE 4"
+			choice
+				prompt "CAPTURE 4"
+				depends on MACH_S32K_FLEXTIMER0_CAPTURE4
+				config MACH_S32K_FLEXTIMER0_CAPTURE4_PTB4
+					bool "PTB4"
+				config MACH_S32K_FLEXTIMER0_CAPTURE4_PTB16
+					bool "PTB16"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_CAPTURE5
+			bool "CAPTURE 5"
+			choice
+				prompt "CAPTURE 5"
+				depends on MACH_S32K_FLEXTIMER0_CAPTURE5
+				config MACH_S32K_FLEXTIMER0_CAPTURE5_PTB5
+					bool "PTB5"
+				config MACH_S32K_FLEXTIMER0_CAPTURE5_PTB17
+					bool "PTB17"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_CAPTURE6
+			bool "CAPTURE 6"
+			choice
+				prompt "CAPTURE 6"
+				depends on MACH_S32K_FLEXTIMER0_CAPTURE6
+				config MACH_S32K_FLEXTIMER0_CAPTURE6_PTA17
+					bool "PTA17"
+				config MACH_S32K_FLEXTIMER0_CAPTURE6_PTE8
+					bool "PTE8"
+			endchoice
+		config MACH_S32K_FLEXTIMER0_CAPTURE7
+			bool "CAPTURE 7"
+			choice
+				prompt "CAPTURE 7"
+				depends on MACH_S32K_FLEXTIMER0_CAPTURE7
+				config MACH_S32K_FLEXTIMER0_CAPTURE7_PTE9
+					bool "PTE9"
+				config MACH_S32K_FLEXTIMER0_CAPTURE7_PTE7
+					bool "PTE7"
+			endchoice
+	endif
 endif
 menuconfig MACH_S32K_FLEXTIMER1
 	bool "Flextimer 1"
@@ -221,6 +316,92 @@ if MACH_S32K_FLEXTIMER1
 				config MACH_S32K_FLEXTIMER1_PWM7_PTA13
 					bool "PTA13"
 				config MACH_S32K_FLEXTIMER1_PWM7_PTC1
+					bool "PTC1"
+			endchoice
+	endif
+	menuconfig MACH_S32K_FLEXTIMER1_CAPTURE
+		bool "Activate CAPTURE"
+		depends on CAPTURE
+		select NXP_FLEXTIMER_CAPTURE
+	if MACH_S32K_FLEXTIMER1_CAPTURE = y
+		config MACH_S32K_FLEXTIMER1_CAPTURE0
+			bool "CAPTURE 0"
+			choice
+				prompt "CAPTURE 0"
+				depends on MACH_S32K_FLEXTIMER1_CAPTURE0
+				config MACH_S32K_FLEXTIMER1_CAPTURE0_PTB2
+					bool "PTB2"
+				config MACH_S32K_FLEXTIMER1_CAPTURE0_PTC4
+					bool "PTC4"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_CAPTURE1
+			bool "CAPTURE 1"
+			choice
+				prompt "CAPTURE 1"
+				depends on MACH_S32K_FLEXTIMER1_CAPTURE1
+				config MACH_S32K_FLEXTIMER1_CAPTURE1_PTA1
+					bool "PTA1"
+				config MACH_S32K_FLEXTIMER1_CAPTURE1_PTB3
+					bool "PTB3"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_CAPTURE2
+			bool "CAPTURE 2"
+			choice
+				prompt "CAPTURE 2"
+				depends on MACH_S32K_FLEXTIMER1_CAPTURE2
+				config MACH_S32K_FLEXTIMER1_CAPTURE2_PTA15
+					bool "PTA15"
+				config MACH_S32K_FLEXTIMER1_CAPTURE2_PTC14
+					bool "PTC14"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_CAPTURE3
+			bool "CAPTURE 3"
+			choice
+				prompt "CAPTURE 3"
+				depends on MACH_S32K_FLEXTIMER1_CAPTURE3
+				config MACH_S32K_FLEXTIMER1_CAPTURE3_PTC15
+					bool "PTC15"
+				config MACH_S32K_FLEXTIMER1_CAPTURE3_PTA16
+					bool "PTA16"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_CAPTURE4
+			bool "CAPTURE 4"
+			choice
+				prompt "CAPTURE 4"
+				depends on MACH_S32K_FLEXTIMER1_CAPTURE4
+				config MACH_S32K_FLEXTIMER1_CAPTURE4_PTA10
+					bool "PTA10"
+				config MACH_S32K_FLEXTIMER1_CAPTURE4_PTD8
+					bool "PTD8"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_CAPTURE5
+			bool "CAPTURE 5"
+			choice
+				prompt "CAPTURE 5"
+				depends on MACH_S32K_FLEXTIMER1_CAPTURE5
+				config MACH_S32K_FLEXTIMER1_CAPTURE5_PTD9
+					bool "PTD9"
+				config MACH_S32K_FLEXTIMER1_CAPTURE5_PTA11
+					bool "PTA11"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_CAPTURE6
+			bool "CAPTURE 6"
+			choice
+				prompt "CAPTURE 6"
+				depends on MACH_S32K_FLEXTIMER1_CAPTURE6
+				config MACH_S32K_FLEXTIMER1_CAPTURE6_PTC0
+					bool "PTC0"
+				config MACH_S32K_FLEXTIMER1_CAPTURE6_PTA12
+					bool "PTA12"
+			endchoice
+		config MACH_S32K_FLEXTIMER1_CAPTURE7
+			bool "CAPTURE 7"
+			choice
+				prompt "CAPTURE 7"
+				depends on MACH_S32K_FLEXTIMER1_CAPTURE7
+				config MACH_S32K_FLEXTIMER1_CAPTURE7_PTA13
+					bool "PTA13"
+				config MACH_S32K_FLEXTIMER1_CAPTURE7_PTC1
 					bool "PTC1"
 			endchoice
 	endif
@@ -337,6 +518,96 @@ if MACH_S32K_FLEXTIMER2
 					bool "PTC13"
 			endchoice
 	endif
+	menuconfig MACH_S32K_FLEXTIMER2_CAPTURE
+		bool "Activate CAPTURE"
+		depends on CAPTURE
+		select NXP_FLEXTIMER_CAPTURE
+	if MACH_S32K_FLEXTIMER2_CAPTURE = y
+		config MACH_S32K_FLEXTIMER2_CAPTURE0
+			bool "CAPTURE 0"
+			choice
+				prompt "CAPTURE 0"
+				depends on MACH_S32K_FLEXTIMER2_CAPTURE0
+				config MACH_S32K_FLEXTIMER2_CAPTURE0_PTD0
+					bool "PTD0"
+				config MACH_S32K_FLEXTIMER2_CAPTURE0_PTD10
+					bool "PTD10"
+				config MACH_S32K_FLEXTIMER2_CAPTURE0_PTC5
+					bool "PTC5"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_CAPTURE1
+			bool "CAPTURE 1"
+			choice
+				prompt "CAPTURE 1"
+				depends on MACH_S32K_FLEXTIMER2_CAPTURE1
+				config MACH_S32K_FLEXTIMER2_CAPTURE1_PTD1
+					bool "PTD1"
+				config MACH_S32K_FLEXTIMER2_CAPTURE1_PTD11
+					bool "PTD11"
+				config MACH_S32K_FLEXTIMER2_CAPTURE1_PTA0
+					bool "PTA0"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_CAPTURE2
+			bool "CAPTURE 2"
+			choice
+				prompt "CAPTURE 2"
+				depends on MACH_S32K_FLEXTIMER2_CAPTURE2
+				config MACH_S32K_FLEXTIMER2_CAPTURE2_PTE4
+					bool "PTE4"
+				config MACH_S32K_FLEXTIMER2_CAPTURE2_PTD12
+					bool "PTD12"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_CAPTURE3
+			bool "CAPTURE 3"
+			choice
+				prompt "CAPTURE 3"
+				depends on MACH_S32K_FLEXTIMER2_CAPTURE3
+				config MACH_S32K_FLEXTIMER2_CAPTURE3_PTE5
+					bool "PTE5"
+				config MACH_S32K_FLEXTIMER2_CAPTURE3_PTD5
+					bool "PTD5"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_CAPTURE4
+			bool "CAPTURE 4"
+			choice
+				prompt "CAPTURE 4"
+				depends on MACH_S32K_FLEXTIMER2_CAPTURE4
+				config MACH_S32K_FLEXTIMER2_CAPTURE4_PTE10
+					bool "PTE10"
+				config MACH_S32K_FLEXTIMER2_CAPTURE4_PTD13
+					bool "PTD13"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_CAPTURE5
+			bool "CAPTURE 5"
+			choice
+				prompt "CAPTURE 5"
+				depends on MACH_S32K_FLEXTIMER2_CAPTURE5
+				config MACH_S32K_FLEXTIMER2_CAPTURE5_PTE11
+					bool "PTE11"
+				config MACH_S32K_FLEXTIMER2_CAPTURE5_PTD14
+					bool "PTD14"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_CAPTURE6
+			bool "CAPTURE 6"
+			choice
+				prompt "CAPTURE 6"
+				depends on MACH_S32K_FLEXTIMER2_CAPTURE6
+				config MACH_S32K_FLEXTIMER2_CAPTURE6_PTE15
+					bool "PTE15"
+				config MACH_S32K_FLEXTIMER2_CAPTURE6_PTC12
+					bool "PTC12"
+			endchoice
+		config MACH_S32K_FLEXTIMER2_CAPTURE7
+			bool "CAPTURE 7"
+			choice
+				prompt "CAPTURE 7"
+				depends on MACH_S32K_FLEXTIMER2_CAPTURE7
+				config MACH_S32K_FLEXTIMER2_CAPTURE7_PTE16
+					bool "PTE16"
+				config MACH_S32K_FLEXTIMER2_CAPTURE7_PTC13
+					bool "PTC13"
+			endchoice
+	endif
 endif
 menuconfig MACH_S32K_FLEXTIMER3
 	bool "Flextimer 3"
@@ -443,6 +714,92 @@ if MACH_S32K_FLEXTIMER3
 				config MACH_S32K_FLEXTIMER3_PWM7_PTE6
 					bool "PTE6"
 				config MACH_S32K_FLEXTIMER3_PWM7_PTC13
+					bool "PTC13"
+			endchoice
+	endif
+	menuconfig MACH_S32K_FLEXTIMER3_CAPTURE
+		bool "Activate CAPTURE"
+		depends on CAPTURE
+		select NXP_FLEXTIMER_CAPTURE
+	if MACH_S32K_FLEXTIMER3_CAPTURE = y
+		config MACH_S32K_FLEXTIMER3_CAPTURE0
+			bool "CAPTURE 0"
+			choice
+				prompt "CAPTURE 0"
+				depends on MACH_S32K_FLEXTIMER3_CAPTURE0
+				config MACH_S32K_FLEXTIMER3_CAPTURE0_PTA2
+					bool "PTA2"
+				config MACH_S32K_FLEXTIMER3_CAPTURE0_PTB8
+					bool "PTB8"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_CAPTURE1
+			bool "CAPTURE 1"
+			choice
+				prompt "CAPTURE 1"
+				depends on MACH_S32K_FLEXTIMER3_CAPTURE1
+				config MACH_S32K_FLEXTIMER3_CAPTURE1_PTB9
+					bool "PTB9"
+				config MACH_S32K_FLEXTIMER3_CAPTURE1_PTA3
+					bool "PTA3"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_CAPTURE2
+			bool "CAPTURE 2"
+			choice
+				prompt "CAPTURE 2"
+				depends on MACH_S32K_FLEXTIMER3_CAPTURE2
+				config MACH_S32K_FLEXTIMER3_CAPTURE2_PTC6
+					bool "PTC6"
+				config MACH_S32K_FLEXTIMER3_CAPTURE2_PTB10
+					bool "PTB10"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_CAPTURE3
+			bool "CAPTURE 3"
+			choice
+				prompt "CAPTURE 3"
+				depends on MACH_S32K_FLEXTIMER3_CAPTURE3
+				config MACH_S32K_FLEXTIMER3_CAPTURE3_PTB11
+					bool "PTB11"
+				config MACH_S32K_FLEXTIMER3_CAPTURE3_PTC7
+					bool "PTC7"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_CAPTURE4
+			bool "CAPTURE 4"
+			choice
+				prompt "CAPTURE 4"
+				depends on MACH_S32K_FLEXTIMER3_CAPTURE4
+				config MACH_S32K_FLEXTIMER3_CAPTURE4_PTC10
+					bool "PTC10"
+				config MACH_S32K_FLEXTIMER3_CAPTURE4_PTD2
+					bool "PTD2"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_CAPTURE5
+			bool "CAPTURE 5"
+			choice
+				prompt "CAPTURE 5"
+				depends on MACH_S32K_FLEXTIMER3_CAPTURE5
+				config MACH_S32K_FLEXTIMER3_CAPTURE5_PTD3
+					bool "PTD3"
+				config MACH_S32K_FLEXTIMER3_CAPTURE5_PTC11
+					bool "PTC11"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_CAPTURE6
+			bool "CAPTURE 6"
+			choice
+				prompt "CAPTURE 6"
+				depends on MACH_S32K_FLEXTIMER3_CAPTURE6
+				config MACH_S32K_FLEXTIMER3_CAPTURE6_PTE2
+					bool "PTE2"
+				config MACH_S32K_FLEXTIMER3_CAPTURE6_PTC12
+					bool "PTC12"
+			endchoice
+		config MACH_S32K_FLEXTIMER3_CAPTURE7
+			bool "CAPTURE 7"
+			choice
+				prompt "CAPTURE 7"
+				depends on MACH_S32K_FLEXTIMER3_CAPTURE7
+				config MACH_S32K_FLEXTIMER3_CAPTURE7_PTE6
+					bool "PTE6"
+				config MACH_S32K_FLEXTIMER3_CAPTURE7_PTC13
 					bool "PTC13"
 			endchoice
 	endif
