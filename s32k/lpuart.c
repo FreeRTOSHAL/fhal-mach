@@ -41,7 +41,7 @@ struct uart_pin {
 
 struct uart {
 	struct uart_generic gen;
-	LPUART_Type *base;
+	volatile LPUART_Type *base;
 	const uint32_t clkIndex;
 	const uint32_t clkMuxing;
 	const uint32_t clkID;
