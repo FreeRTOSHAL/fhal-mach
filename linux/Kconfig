@@ -26,3 +26,20 @@ config MACH_HAS_MALLOC
 config MACH_HAS_NO_LOCATION
 	bool
 	default y
+config MACH_HAS_CAN
+	bool
+	default y
+config LINUX_CAN
+	bool "Linux CAN"
+	depends on CAN
+	default n
+	if OS_DEFINE_QUEUE=y
+		config LINUX_CAN_QUEUE_LENGTH
+			int "Queue length"
+			default 3
+		config LINUX_CAN_QUEUE_COUNT
+			int "Queue count"
+			default 2
+		config LINUX_CAN_TASK_PRIO
+			int "CAN Task Prio"
+	endif
