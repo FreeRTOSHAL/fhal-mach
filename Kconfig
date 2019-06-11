@@ -32,6 +32,8 @@ choice
 			am57xx M4 Mach
 	config MACH_S32K
 		bool "NXP S32K"
+		depends on ARCH_ARM
+		depends on ARCH_ARM_CORTEX_M0 || ARCH_ARM_CORTEX_M3 ||  ARCH_ARM_CORTEX_M4F
 		help
 			NXP S32K Mach
 endchoice
