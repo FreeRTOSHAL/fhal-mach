@@ -11,6 +11,13 @@ menuconfig AM57xx_SPI1
 			D0 is Output and D1 is Input
 			else 
 			D0 is Input and D1 is Output
+		comment "SCLK on PAD_SPI1_SCLK"
+		comment "D0 on PAD_SPI1_D0"
+		comment "D1 on PAD_SPI1_D1"
+		comment "CS0 on PAD_VOUT1_D23"
+		comment "CS1 on PAD_VOUT1_D23"
+		comment "CS2 on PAD_VOUT1_D23"
+		comment "CS3 on PAD_VOUT1_D23"
 	endif
 menuconfig AM57xx_SPI3
 	bool "SPI 3"
@@ -21,6 +28,82 @@ menuconfig AM57xx_SPI3
 			D0 is Output and D1 is Input
 			else 
 			D0 is Input and D1 is Output
+	choice
+		prompt "SCLK"
+		config AM57xx_SPI3_SCLK_MCASP4_ACLKX
+			bool "SCLK on PAD_MCASP4_ACLKX"
+		config AM57xx_SPI3_SCLK_VIN1A_DE0
+			bool "SCLK on PAD_VIN1A_DE0"
+		config AM57xx_SPI3_SCLK_VOUT1_VSYNC
+			bool "SCLK on PAD_VOUT1_VSYNC"
+		config AM57xx_SPI3_SCLK_UART3_RXD
+			bool "SCLK on PAD_UART3_RXD"
+		config AM57xx_SPI3_SCLK_MCASP1_AXR8
+			bool "SCLK on PAD_MCASP1_AXR8"
+		config AM57xx_SPI3_SCLK_MMC3_CMD
+			bool "SCLK on PAD_MMC3_CMD"
+	endchoice
+
+	choice
+		prompt "D0"
+		config AM57xx_SPI3_D0_MCASP4_AXR0
+			bool "D0 on PAD_MCASP4_AXR0"
+		config AM57xx_SPI3_D0_VIN1A_HSYNC0
+			bool "D0 on PAD_VIN1A_HSYNC0"
+		config AM57xx_SPI3_D0_VOUT1_HSYNC
+			bool "D0 on PAD_VOUT1_HSYNC"
+		config AM57xx_SPI3_D0_RGMII0_TXC
+			bool "D0 on PAD_RGMII0_TXC"
+		config AM57xx_SPI3_D0_MCASP1_AXR10
+			bool "D0 on PAD_MCASP1_AXR10"
+		config AM57xx_SPI3_D0_MMC3_DAT1
+			bool "D0 on PAD_MMC3_DAT1"
+	endchoice
+
+	choice
+		prompt "D1"
+		config AM57xx_SPI3_D1_MCASP4_FSX
+			bool "D1 on PAD_MCASP4_FSX"
+		config AM57xx_SPI3_D1_VIN1A_FLD0
+			bool "D1 on PAD_VIN1A_FLD0"
+		config AM57xx_SPI3_D1_VOUT1_DE
+			bool "D1 on PAD_VOUT1_DE"
+		config AM57xx_SPI3_D1_UART3_TXD
+			bool "D1 on PAD_UART3_TXD"
+		config AM57xx_SPI3_D1_MCASP1_AXR9
+			bool "D1 on PAD_MCASP1_AXR9"
+		config AM57xx_SPI3_D1_MMC3_DAT0
+			bool "D1 on PAD_MMC3_DAT0"
+	endchoice
+
+	choice
+		prompt "CS0"
+		config AM57xx_SPI3_CS0_MCASP4_AXR1
+			bool "CS0 on PAD_MCASP4_AXR1"
+		config AM57xx_SPI3_CS0_VIN1A_VSYNC0
+			bool "CS0 on PAD_VIN1A_VSYNC0"
+		config AM57xx_SPI3_CS0_VOUT1_CLK
+			bool "CS0 on PAD_VOUT1_CLK"
+		config AM57xx_SPI3_CS0_RGMII0_TXCTL
+			bool "CS0 on PAD_RGMII0_TXCTL"
+		config AM57xx_SPI3_CS0_MCASP1_AXR11
+			bool "CS0 on PAD_MCASP1_AXR11"
+		config AM57xx_SPI3_CS0_MMC3_DAT2
+			bool "CS0 on PAD_MMC3_DAT2"
+	endchoice
+
+	choice
+		prompt "CS1"
+		config AM57xx_SPI3_CS1_MMC3_DAT3
+			bool "CS1 on PAD_MMC3_DAT3"
+		config AM57xx_SPI3_CS1_VOUT1_FLD
+			bool "CS1 on PAD_VOUT1_FLD"
+		config AM57xx_SPI3_CS1_MCASP1_AXR12
+			bool "CS1 on PAD_MCASP1_AXR12"
+	endchoice
+	comment "CS2 on PAD_VOUT1_D0"
+	comment "CS3 on PAD_VOUT1_D23"
+
 	endif
 menuconfig AM57xx_SPI4
 	bool "SPI 4"
@@ -31,5 +114,86 @@ menuconfig AM57xx_SPI4
 			D0 is Output and D1 is Input
 			else 
 			D0 is Input and D1 is Output
+	choice
+		prompt "SCLK"
+		config AM57xx_SPI4_SCLK_MCASP5_ACLKX
+			bool "SCLK on PAD_MCASP5_ACLKX"
+		config AM57xx_SPI4_SCLK_GPMC_A8
+			bool "SCLK on PAD_GPMC_A8"
+		config AM57xx_SPI4_SCLK_VIN2A_HSYNC0
+			bool "SCLK on PAD_VIN2A_HSYNC0"
+		config AM57xx_SPI4_SCLK_RGMII0_TXD3
+			bool "SCLK on PAD_RGMII0_TXD3"
+		config AM57xx_SPI4_SCLK_MMC3_DAT4
+			bool "SCLK on PAD_MMC3_DAT4"
+	endchoice
+
+	choice
+		prompt "D0"
+		config AM57xx_SPI4_D0_MCASP5_AXR0
+			bool "D0 on PAD_MCASP5_AXR0"
+		config AM57xx_SPI4_D0_GPMC_A10
+			bool "D0 on PAD_GPMC_A10"
+		config AM57xx_SPI4_D0_VIN2A_D0
+			bool "D0 on PAD_VIN2A_D0"
+		config AM57xx_SPI4_D0_RGMII0_TXD1
+			bool "D0 on PAD_RGMII0_TXD1"
+		config AM57xx_SPI4_D0_MMC3_DAT6
+			bool "D0 on PAD_MMC3_DAT6"
+	endchoice
+
+	choice
+		prompt "D1"
+		config AM57xx_SPI4_D1_MCASP5_FSX
+			bool "D1 on PAD_MCASP5_FSX"
+		config AM57xx_SPI4_D1_GPMC_A9
+			bool "D1 on PAD_GPMC_A9"
+		config AM57xx_SPI4_D1_VIN2A_VSYNC0
+			bool "D1 on PAD_VIN2A_VSYNC0"
+		config AM57xx_SPI4_D1_RGMII0_TXD2
+			bool "D1 on PAD_RGMII0_TXD2"
+		config AM57xx_SPI4_D1_MMC3_DAT5
+			bool "D1 on PAD_MMC3_DAT5"
+	endchoice
+
+	choice
+		prompt "CS0"
+		config AM57xx_SPI4_CS0_MCASP5_AXR1
+			bool "CS0 on PAD_MCASP5_AXR1"
+		config AM57xx_SPI4_CS0_GPMC_A11
+			bool "CS0 on PAD_GPMC_A11"
+		config AM57xx_SPI4_CS0_VIN2A_D1
+			bool "CS0 on PAD_VIN2A_D1"
+		config AM57xx_SPI4_CS0_RGMII0_TXD0
+			bool "CS0 on PAD_RGMII0_TXD0"
+		config AM57xx_SPI4_CS0_MMC3_DAT7
+			bool "CS0 on PAD_MMC3_DAT7"
+	endchoice
+
+	choice
+		prompt "CS1"
+		config AM57xx_SPI4_CS1_UART3_TXD
+			bool "CS1 on PAD_UART3_TXD"
+		config AM57xx_SPI4_CS1_GPMC_A12
+			bool "CS1 on PAD_GPMC_A12"
+	endchoice
+
+	choice
+		prompt "CS2"
+		config AM57xx_SPI4_CS2_GPMC_A13
+			bool "CS2 on PAD_GPMC_A13"
+		config AM57xx_SPI4_CS2_RGMII0_TXC
+			bool "CS2 on PAD_RGMII0_TXC"
+	endchoice
+
+	choice
+		prompt "CS3"
+		config AM57xx_SPI4_CS3_GPMC_A14
+			bool "CS3 on PAD_GPMC_A14"
+		config AM57xx_SPI4_CS3_RGMII0_TXCTL
+			bool "CS3 on PAD_RGMII0_TXCTL"
+	endchoice
 	endif
 endif
+
+

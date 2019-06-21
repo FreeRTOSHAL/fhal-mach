@@ -525,8 +525,11 @@ struct spi spi1_data = {
 	.irqhandler = am57xx_spi1IRQHandler,
 	.d0OutD1In = IS_ENABLED(CONFIG_AM57xx_SPI1_D0_OUT_D1_IN),
 	.pins = {
+		/* CLK */
 		{.pin = PAD_SPI1_SCLK, .cfg = MUX_CTL_MODE(0) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* D0 */
 		{.pin = PAD_SPI1_D0,   .cfg = MUX_CTL_MODE(0) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* D1 */
 		{.pin = PAD_SPI1_D1,   .cfg = MUX_CTL_MODE(0) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
 	},
 	.csPins = {
@@ -552,41 +555,104 @@ struct spi spi3_data = {
 	.irqhandler = am57xx_spi3IRQHandler,
 	.d0OutD1In = IS_ENABLED(CONFIG_AM57xx_SPI3_D0_OUT_D1_IN),
 	.pins = {
-		/*{.pin = PAD_VIN1A_DE0, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* CLK */
+# ifdef CONFIG_AM57xx_SPI3_SCLK_VIN1A_DE0
+		{.pin = PAD_VIN1A_DE0, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_SCLK_VOUT1_VSYNC
 		{.pin = PAD_VOUT1_VSYNC, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_SCLK_UART3_RXD
 		{.pin = PAD_UART3_RXD, .cfg = MUX_CTL_MODE(7) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		{.pin = PAD_MCASP1_AXR8, .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI3_SCLK_MCASP1_AXR8
+		{.pin = PAD_MCASP1_AXR8, .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_SCLK_MCASP4_ACLKX
 		{.pin = PAD_MCASP4_ACLKX, .cfg = MUX_CTL_MODE(2) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		/*{.pin = PAD_MMC3_CMD, .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI3_SCLK_MMC3_CMD
+		{.pin = PAD_MMC3_CMD, .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
 
-		/*{.pin = PAD_VIN1A_HSYNC0,   .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* D0 */
+# ifdef CONFIG_AM57xx_SPI3_D0_VIN1A_HSYNC0
+		{.pin = PAD_VIN1A_HSYNC0,   .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_D0_VOUT1_HSYNC
 		{.pin = PAD_VOUT1_HSYNC,   .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_D0_RGMII0_TXC
 		{.pin = PAD_RGMII0_TXC,   .cfg = MUX_CTL_MODE(7) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		{.pin = PAD_MCASP1_AXR10,   .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI3_D0_MCASP1_AXR10
+		{.pin = PAD_MCASP1_AXR10,   .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_D0_MCASP4_AXR0
 		{.pin = PAD_MCASP4_AXR0,   .cfg = MUX_CTL_MODE(2) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		/*{.pin = PAD_MMC3_DAT1,   .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI3_D0_MMC3_DAT1
+		{.pin = PAD_MMC3_DAT1,   .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
 
-		/*{.pin = PAD_VIN1A_FLD0,   .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* D1 */
+# ifdef CONFIG_AM57xx_SPI3_D1_VIN1A_FLD0
+		{.pin = PAD_VIN1A_FLD0,   .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_D1_VOUT1_DE
 		{.pin = PAD_VOUT1_DE,   .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_D1_UART3_TXD
 		{.pin = PAD_UART3_TXD,   .cfg = MUX_CTL_MODE(7) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		{.pin = PAD_MCASP1_AXR9,   .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI3_D1_MCASP1_AXR9
+		{.pin = PAD_MCASP1_AXR9,   .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+
+# ifdef CONFIG_AM57xx_SPI3_D1_MCASP4_FSX
 		{.pin = PAD_MCASP4_FSX,   .cfg = MUX_CTL_MODE(2) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		/*{.pin = PAD_MMC3_DAT0,   .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+
+# ifdef CONFIG_AM57xx_SPI3_D1_MMC3_DAT0
+		{.pin = PAD_MMC3_DAT0,   .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
 	},
 	.csPins = {
-		/*{.pin = PAD_VIN1A_VSYNC0, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* CS0 */
+# ifdef CONFIG_AM57xx_SPI3_CS0_VIN1A_VSYNC0
+		{.pin = PAD_VIN1A_VSYNC0, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_CS0_VOUT1_CLK
 		{.pin = PAD_VOUT1_CLK, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_CS0_RGMII0_TXCTL
 		{.pin = PAD_RGMII0_TXCTL, .cfg = MUX_CTL_MODE(7) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		{.pin = PAD_MCASP1_AXR11, .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI3_CS0_MCASP1_AXR11
+		{.pin = PAD_MCASP1_AXR11, .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_CS0_MCASP4_AXR1
 		{.pin = PAD_MCASP4_AXR1, .cfg = MUX_CTL_MODE(2) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		/*{.pin = PAD_MMC3_DAT2, .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI3_CS0_MMC3_DAT2
+		{.pin = PAD_MMC3_DAT2, .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
 
-		/*{.pin = PAD_VOUT1_FLD, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		{.pin = PAD_MCASP1_AXR12, .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+		/* CS1 */
+# ifdef CONFIG_AM57xx_SPI3_CS1_VOUT1_FLD
+		{.pin = PAD_VOUT1_FLD, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_CS1_MCASP1_AXR12
+		{.pin = PAD_MCASP1_AXR12, .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI3_CS1_MMC3_DAT3
 		{.pin = PAD_MMC3_DAT3, .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
 
+		/* CS2 */
 		{.pin = PAD_VOUT1_D0, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
 
+		/* CS3 */
 		{.pin = PAD_VOUT1_D23, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
 	},
 };
@@ -607,39 +673,98 @@ struct spi spi4_data = {
 	.d0OutD1In = IS_ENABLED(CONFIG_AM57xx_SPI4_D0_OUT_D1_IN),
 	/* TODO Muxing */
 	.pins = {
-		/*{.pin = PAD_GPMC_A8, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* CLK */
+# ifdef CONFIG_AM57xx_SPI4_SCLK_GPMC_A8
+		{.pin = PAD_GPMC_A8, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI4_SCLK_VIN2A_HSYNC0
 		{.pin = PAD_VIN2A_HSYNC0, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		{.pin = PAD_RGMII0_TXD3, .cfg = MUX_CTL_MODE(7) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI4_SCLK_RGMII0_TXD3
+		{.pin = PAD_RGMII0_TXD3, .cfg = MUX_CTL_MODE(7) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI4_SCLK_MCASP5_ACLKX
 		{.pin = PAD_MCASP5_ACLKX, .cfg = MUX_CTL_MODE(2) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		/*{.pin = PAD_MMC3_DAT4, .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI4_SCLK_MMC3_DAT4
+		{.pin = PAD_MMC3_DAT4, .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
 
-		/*{.pin = PAD_GPMC_A10,   .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},		
+		/* D0 */
+# ifdef CONFIG_AM57xx_SPI4_D0_GPMC_A10
+		{.pin = PAD_GPMC_A10,   .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI4_D0_VIN2A_D0
 		{.pin = PAD_VIN2A_D0,   .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		{.pin = PAD_RGMII0_TXD1,   .cfg = MUX_CTL_MODE(7) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI4_D0_RGMII0_TXD1
+		{.pin = PAD_RGMII0_TXD1,   .cfg = MUX_CTL_MODE(7) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI4_D0_MCASP5_AXR0
 		{.pin = PAD_MCASP5_AXR0,   .cfg = MUX_CTL_MODE(2) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		/*{.pin = PAD_MMC3_DAT6,   .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI4_D0_MMC3_DAT6
+		{.pin = PAD_MMC3_DAT6,   .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
 
-		/*{.pin = PAD_GPMC_A9,   .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* D1 */
+# ifdef CONFIG_AM57xx_SPI4_D1_GPMC_A9
+		{.pin = PAD_GPMC_A9,   .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI4_D1_VIN2A_VSYNC0
 		{.pin = PAD_VIN2A_VSYNC0,   .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		{.pin = PAD_RGMII0_TXD,   .cfg = MUX_CTL_MODE(7) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		{.pin = PAD_MCASP5_FSX,   .cfg = MUX_CTL_MODE(2) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI4_D1_RGMII0_TXD2
+		{.pin = PAD_RGMII0_TXD2,   .cfg = MUX_CTL_MODE(7) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI4_D1_MCASP5_FSX
+		{.pin = PAD_MCASP5_FSX,   .cfg = MUX_CTL_MODE(2) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI4_D1_MMC3_DAT5
 		{.pin = PAD_MMC3_DAT5,   .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
 	},
 	.csPins = {
-		/*{.pin = PAD_GPMC_A11, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* CS0 */
+# ifdef CONFIG_AM57xx_SPI4_CS0_GPMC_A11
+		{.pin = PAD_GPMC_A11, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI4_CS0_VIN2A_D1
 		{.pin = PAD_VIN2A_D1, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		{.pin = PAD_RGMII0_TXD0, .cfg = MUX_CTL_MODE(7) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI4_CS0_RGMII0_TXD0
+		{.pin = PAD_RGMII0_TXD0, .cfg = MUX_CTL_MODE(7) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI4_CS0_MCASP5_AXR1
 		{.pin = PAD_MCASP5_AXR1, .cfg = MUX_CTL_MODE(2) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		/*{.pin = PAD_MMC3_DAT7, .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI4_CS0_MMC3_DAT7
+		{.pin = PAD_MMC3_DAT7, .cfg = MUX_CTL_MODE(1) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
 
-		/*{.pin = PAD_GPMC_A12, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+		/* CS1 */
+# ifdef CONFIG_AM57xx_SPI4_CS1_GPMC_A12
+		{.pin = PAD_GPMC_A12, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
+# ifdef CONFIG_AM57xx_SPI4_CS1_UART3_TXD
 		{.pin = PAD_UART3_TXD, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
 
+		/* CS2 */
+# ifdef CONFIG_AM57xx_SPI4_CS2_GPMC_A13
 		{.pin = PAD_GPMC_A13, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		/*{.pin = PAD_RGMII0_TXC, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI4_CS2_RGMII0_TXC
+		{.pin = PAD_RGMII0_TXC, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
 
+		/* CS3 */
+# ifdef CONFIG_AM57xx_SPI4_CS3_GPMC_A14
 		{.pin = PAD_GPMC_A14, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
-		/*{.pin = PAD_RGMII0_TXCTL, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},*/
+# endif
+# ifdef CONFIG_AM57xx_SPI4_CS3_RGMII0_TXCTL
+		{.pin = PAD_RGMII0_TXCTL, .cfg = MUX_CTL_MODE(8) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+# endif
 	},
 };
 SPI_ADDDEV(am57xx, spi4_data);

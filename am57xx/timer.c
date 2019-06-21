@@ -540,19 +540,20 @@ struct pwm pwm1_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 1")
 	.timer = &timer1_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER1_GPMC_BEN1
 	.pin = {
 		.pin = PAD_GPMC_BEN1,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-#if 0
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER1_GPIO6_14
 	.pin = {
 		.pin = PAD_GPIO6_14,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-#endif
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm1_data);
 # endif
@@ -561,19 +562,20 @@ struct capture capture1_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 1")
 	.timer = &timer1_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER1_GPMC_BEN1
 	.pin = {
 		.pin = PAD_GPMC_BEN1,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-#if 0
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER1_GPIO6_14
 	.pin = {
 		.pin = PAD_GPIO6_14,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-#endif
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture1_data);
 # endif
@@ -603,19 +605,20 @@ struct pwm pwm2_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 2")
 	.timer = &timer2_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER2_GPIO6_15
 	.pin = {
 		.pin = PAD_GPIO6_15,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER2_GPMC_BEN0
 	.pin = {
 		.pin = PAD_GPMC_BEN0,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm2_data);
 # endif
@@ -624,19 +627,20 @@ struct capture capture2_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 2")
 	.timer = &timer2_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER2_GPIO6_15
 	.pin = {
 		.pin = PAD_GPIO6_15,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER2_GPMC_BEN0
 	.pin = {
 		.pin = PAD_GPMC_BEN0,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture2_data);
 # endif
@@ -666,19 +670,20 @@ struct pwm pwm3_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 3")
 	.timer = &timer3_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER3_GPMC_ADVN_ALE
 	.pin = {
 		.pin = PAD_GPMC_ADVN_ALE,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER3_GPIO6_16
 	.pin = {
 		.pin = PAD_GPIO6_16,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm3_data);
 # endif
@@ -687,19 +692,20 @@ struct capture capture3_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 3")
 	.timer = &timer3_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER3_GPMC_ADVN_ALE
 	.pin = {
 		.pin = PAD_GPMC_ADVN_ALE,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER3_GPIO6_16
 	.pin = {
 		.pin = PAD_GPIO6_16,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture3_data);
 # endif
@@ -729,19 +735,20 @@ struct pwm pwm4_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 4")
 	.timer = &timer4_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER4_GPMC_CLK
 	.pin = {
 		.pin = PAD_GPMC_CLK,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER4_MCASP1_AXR7
 	.pin = {
 		.pin = PAD_MCASP1_AXR7,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm4_data);
 # endif
@@ -750,19 +757,20 @@ struct capture capture4_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 4")
 	.timer = &timer4_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER4_GPMC_CLK
 	.pin = {
 		.pin = PAD_GPMC_CLK,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER4_MCASP1_AXR7
 	.pin = {
 		.pin = PAD_MCASP1_AXR7,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture4_data);
 # endif
@@ -792,19 +800,20 @@ struct pwm pwm5_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 5")
 	.timer = &timer5_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER5_GPMC_A15
 	.pin = {
 		.pin = PAD_GPMC_A15,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER5_MCASP1_AXR8
 	.pin = {
 		.pin = PAD_MCASP1_AXR8,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm5_data);
 # endif
@@ -813,19 +822,20 @@ struct capture capture5_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 5")
 	.timer = &timer5_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER5_GPMC_A15
 	.pin = {
 		.pin = PAD_GPMC_A15,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER5_MCASP1_AXR8
 	.pin = {
 		.pin = PAD_MCASP1_AXR8,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture5_data);
 # endif
@@ -855,19 +865,20 @@ struct pwm pwm6_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 6")
 	.timer = &timer6_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER6_GPMC_A14
 	.pin = {
 		.pin = PAD_GPMC_A14,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER6_MCASP1_AXR9
 	.pin = {
 		.pin = PAD_MCASP1_AXR9,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm6_data);
 # endif
@@ -876,20 +887,20 @@ struct capture capture6_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 6")
 	.timer = &timer6_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER6_GPMC_A14
 	.pin = {
 		.pin = PAD_GPMC_A14,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER6_MCASP1_AXR9
 	.pin = {
 		.pin = PAD_MCASP1_AXR9,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
-
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture6_data);
 # endif
@@ -919,19 +930,20 @@ struct pwm pwm7_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 7")
 	.timer = &timer7_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER7_GPMC_A13
 	.pin = {
 		.pin = PAD_GPMC_A13,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER7_MCASP1_AXR10
 	.pin = {
 		.pin = PAD_MCASP1_AXR10,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm7_data);
 # endif
@@ -940,20 +952,20 @@ struct capture capture7_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 7")
 	.timer = &timer7_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER7_GPMC_A13
 	.pin = {
 		.pin = PAD_GPMC_A13,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER7_MCASP1_AXR10
 	.pin = {
 		.pin = PAD_MCASP1_AXR10,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
-
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture7_data);
 # endif
@@ -983,19 +995,20 @@ struct pwm pwm8_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 8")
 	.timer = &timer8_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER8_GPMC_A12
 	.pin = {
 		.pin = PAD_GPMC_A12,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER8_MCASP1_AXR11
 	.pin = {
-		.pin = PAD_GPMC_A12,
+		.pin = PAD_MCASP1_AXR11,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm8_data);
 # endif
@@ -1004,19 +1017,20 @@ struct capture capture8_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 8")
 	.timer = &timer8_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER8_GPMC_A12
 	.pin = {
 		.pin = PAD_GPMC_A12,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER8_MCASP1_AXR11
 	.pin = {
-		.pin = PAD_GPMC_A12,
+		.pin = PAD_MCASP1_AXR11,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture8_data);
 # endif
@@ -1046,19 +1060,20 @@ struct pwm pwm9_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 9")
 	.timer = &timer9_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER9_MCASP1_AXR12
 	.pin = {
 		.pin = PAD_MCASP1_AXR12,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER9_GPMC_A11
 	.pin = {
 		.pin = PAD_GPMC_A11,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm9_data);
 # endif
@@ -1067,20 +1082,20 @@ struct capture capture9_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 9")
 	.timer = &timer9_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER9_MCASP1_AXR12
 	.pin = {
 		.pin = PAD_MCASP1_AXR12,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER9_GPMC_A11
 	.pin = {
 		.pin = PAD_GPMC_A11,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-*/
-
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture9_data);
 # endif
@@ -1110,19 +1125,20 @@ static struct pwm pwm10_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 10")
 	.timer = &timer10_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER10_MCASP1_AXR13
 	.pin = {
 		.pin = PAD_MCASP1_AXR13,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER10_GPMC_A10
 	.pin = {
 		.pin = PAD_GPMC_A10,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm10_data);
 # endif
@@ -1131,19 +1147,20 @@ struct capture capture10_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 10")
 	.timer = &timer10_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER10_MCASP1_AXR13
 	.pin = {
 		.pin = PAD_MCASP1_AXR13,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER10_GPMC_A10
 	.pin = {
 		.pin = PAD_GPMC_A10,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture10_data);
 # endif
@@ -1173,19 +1190,20 @@ struct pwm pwm11_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 11")
 	.timer = &timer11_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER11_MCASP1_AXR14
 	.pin = {
 		.pin = PAD_MCASP1_AXR14,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER11_GPMC_A9
 	.pin = {
 		.pin = PAD_GPMC_A9,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm11_data);
 # endif
@@ -1194,19 +1212,20 @@ struct capture capture11_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 11")
 	.timer = &timer11_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER11_MCASP1_AXR14
 	.pin = {
 		.pin = PAD_MCASP1_AXR14,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER11_GPMC_A9
 	.pin = {
 		.pin = PAD_GPMC_A9,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
-*/
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture11_data);
 # endif
@@ -1236,19 +1255,20 @@ struct pwm pwm12_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 12")
 	.timer = &timer12_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER12_MCASP1_AXR15
 	.pin = {
 		.pin = PAD_MCASP1_AXR15,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER12_GPMC_A8
 	.pin = {
 		.pin = PAD_GPMC_A8,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm12_data);
 # endif
@@ -1257,19 +1277,20 @@ struct capture capture12_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 12")
 	.timer = &timer12_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER12_GPMC_A8
 	.pin = {
 		.pin = PAD_GPMC_A8,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER12_MCASP1_AXR15
 	.pin = {
 		.pin = PAD_MCASP1_AXR15,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
-*/
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture12_data);
 # endif
@@ -1299,19 +1320,20 @@ struct pwm pwm13_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 13")
 	.timer = &timer13_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER13_VIN1A_VSYNC0
 	.pin = {
 		.pin = PAD_VIN1A_VSYNC0,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER13_XREF_CLK0
 	.pin = {
 		.pin = PAD_XREF_CLK0,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm13_data);
 # endif
@@ -1320,19 +1342,20 @@ struct capture capture13_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 13")
 	.timer = &timer13_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER13_VIN1A_VSYNC0
 	.pin = {
 		.pin = PAD_VIN1A_VSYNC0,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER13_XREF_CLK0
 	.pin = {
 		.pin = PAD_XREF_CLK0,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
-*/
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture13_data);
 # endif
@@ -1362,19 +1385,20 @@ struct pwm pwm14_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 14")
 	.timer = &timer14_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER14_XREF_CLK1
 	.pin = {
 		.pin = PAD_XREF_CLK1,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER14_VIN1A_HSYNC0
 	.pin = {
 		.pin = PAD_VIN1A_HSYNC0,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm14_data);
 # endif
@@ -1383,19 +1407,20 @@ struct capture capture14_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 14")
 	.timer = &timer14_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER14_XREF_CLK1
 	.pin = {
 		.pin = PAD_XREF_CLK1,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER14_VIN1A_HSYNC0
 	.pin = {
 		.pin = PAD_VIN1A_HSYNC0,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture14_data);
 # endif
@@ -1425,19 +1450,20 @@ struct pwm pwm15_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 15")
 	.timer = &timer15_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER15_VIN1A_FLD0
 	.pin = {
 		.pin = PAD_VIN1A_FLD0,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER15_USB2_DRVVBUS
 	.pin = {
 		.pin = PAD_USB2_DRVVBUS,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm15_data);
 # endif
@@ -1446,19 +1472,20 @@ struct capture capture15_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 15")
 	.timer = &timer15_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER15_VIN1A_FLD0
 	.pin = {
 		.pin = PAD_VIN1A_FLD0,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER15_USB2_DRVVBUS
 	.pin = {
 		.pin = PAD_USB2_DRVVBUS,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
-*/
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture15_data);
 # endif
@@ -1488,19 +1515,20 @@ struct pwm pwm16_data = {
 	PWM_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx PWM 16")
 	.timer = &timer16_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER16_XREF_CLK3
 	.pin = {
 		.pin = PAD_XREF_CLK3,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER16_VIN1A_DE0
 	.pin = {
 		.pin = PAD_VIN1A_DE0,
 		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-*/
+#  endif
 };
 PWM_ADDDEV(am57xx, pwm16_data);
 # endif
@@ -1509,19 +1537,20 @@ struct capture capture16_data = {
 	CAPTURE_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Capture 16")
 	.timer = &timer16_data,
-	/* TODO Muxing */
+#  ifdef CONFIG_AM57xx_TIMER16_VIN1A_DE0
 	.pin = {
 		.pin = PAD_VIN1A_DE0,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT,
 	},
-/*
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER16_VIN1A_DE0
 	.pin = {
 		.pin = PAD_VIN1A_DE0,
 		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
 		.extra = MUX_INPUT | MUX_WAKEUP,
 	},
-*/
+#  endif
 };
 CAPTURE_ADDDEV(am57xx, capture16_data);
 # endif

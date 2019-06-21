@@ -22,6 +22,17 @@ config AM57xx_TIMER1
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER1_PWM || AM57xx_TIMER1_CAPTURE
+			config AM57xx_TIMER1_GPMC_BEN1
+				bool "GPMC_BEN1"
+				depends on AM57xx_TIMER1_PWM || AM57xx_TIMER1_CAPTURE
+			config AM57xx_TIMER1_GPIO6_14
+				bool "GPIO6_14"
+				depends on AM57xx_TIMER1_PWM || AM57xx_TIMER1_CAPTURE
+
+		endchoice
 	endif
 config AM57xx_TIMER2
 	bool "Timer 2"
@@ -35,6 +46,16 @@ config AM57xx_TIMER2
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER2_PWM || AM57xx_TIMER2_CAPTURE
+			config AM57xx_TIMER2_GPIO6_15
+				bool "GPIO6_15"
+				depends on AM57xx_TIMER2_PWM || AM57xx_TIMER2_CAPTURE
+			config AM57xx_TIMER2_GPMC_BEN0
+				bool "GPMC_BEN0"
+				depends on AM57xx_TIMER2_PWM || AM57xx_TIMER2_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER3
 	bool "Timer 3"
@@ -48,6 +69,16 @@ config AM57xx_TIMER3
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER3_PWM || AM57xx_TIMER3_CAPTURE
+			config AM57xx_TIMER3_GPMC_ADVN_ALE
+				bool "GPMC_ADVN_ALE"
+				depends on AM57xx_TIMER3_PWM || AM57xx_TIMER3_CAPTURE
+			config AM57xx_TIMER3_GPIO6_16
+				bool "GPIO6_16"
+				depends on AM57xx_TIMER3_PWM || AM57xx_TIMER3_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER4
 	bool "Timer 4"
@@ -61,6 +92,16 @@ config AM57xx_TIMER4
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER4_PWM || AM57xx_TIMER4_CAPTURE
+			config AM57xx_TIMER4_GPMC_CLK
+				bool "GPMC_CLK"
+				depends on AM57xx_TIMER4_PWM || AM57xx_TIMER4_CAPTURE
+			config AM57xx_TIMER4_MCASP1_AXR7
+				bool "MCASP1_AXR7"
+				depends on AM57xx_TIMER4_PWM || AM57xx_TIMER4_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER5
 	bool "Timer 5"
@@ -74,6 +115,16 @@ config AM57xx_TIMER5
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER5_PWM || AM57xx_TIMER5_CAPTURE
+			config AM57xx_TIMER5_GPMC_A15
+				bool "GPMC_A15"
+				depends on AM57xx_TIMER5_PWM || AM57xx_TIMER5_CAPTURE
+			config AM57xx_TIMER5_MCASP1_AXR8
+				bool "MCASP1_AXR8"
+				depends on AM57xx_TIMER5_PWM || AM57xx_TIMER5_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER6
 	bool "Timer 6"
@@ -87,6 +138,16 @@ config AM57xx_TIMER6
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER6_PWM || AM57xx_TIMER6_CAPTURE
+			config AM57xx_TIMER6_GPMC_A14
+				bool "GPMC_A14"
+				depends on AM57xx_TIMER6_PWM || AM57xx_TIMER6_CAPTURE
+			config AM57xx_TIMER6_MCASP1_AXR9
+				bool "MCASP1_AXR9"
+				depends on AM57xx_TIMER6_PWM || AM57xx_TIMER6_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER7
 	bool "Timer 7"
@@ -100,6 +161,16 @@ config AM57xx_TIMER7
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER7_PWM || AM57xx_TIMER7_CAPTURE
+			config AM57xx_TIMER7_GPMC_A13
+				bool "GPMC_A13"
+				depends on AM57xx_TIMER7_PWM || AM57xx_TIMER7_CAPTURE
+			config AM57xx_TIMER7_MCASP1_AXR10
+				bool "MCASP1_AXR10"
+				depends on AM57xx_TIMER7_PWM || AM57xx_TIMER7_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER8
 	bool "Timer 8"
@@ -113,6 +184,16 @@ config AM57xx_TIMER8
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER8_PWM || AM57xx_TIMER8_CAPTURE
+			config AM57xx_TIMER8_GPMC_A12
+				bool "GPMC_A12"
+				depends on AM57xx_TIMER8_PWM || AM57xx_TIMER8_CAPTURE
+			config AM57xx_TIMER8_MCASP1_AXR11
+				bool "MCASP1_AXR11"
+				depends on AM57xx_TIMER8_PWM || AM57xx_TIMER8_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER9
 	bool "Timer 9"
@@ -126,6 +207,16 @@ config AM57xx_TIMER9
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER9_PWM || AM57xx_TIMER9_CAPTURE
+			config AM57xx_TIMER9_MCASP1_AXR12
+				bool "MCASP1_AXR12"
+				depends on AM57xx_TIMER9_PWM || AM57xx_TIMER9_CAPTURE
+			config AM57xx_TIMER9_GPMC_A11
+				bool "GPMC_A11"
+				depends on AM57xx_TIMER9_PWM || AM57xx_TIMER9_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER10
 	bool "Timer 10"
@@ -139,6 +230,16 @@ config AM57xx_TIMER10
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER10_PWM || AM57xx_TIMER10_CAPTURE
+			config AM57xx_TIMER10_MCASP1_AXR13
+				bool "MCASP1_AXR13"
+				depends on AM57xx_TIMER10_PWM || AM57xx_TIMER10_CAPTURE
+			config AM57xx_TIMER10_GPMC_A10
+				bool "GPMC_A10"
+				depends on AM57xx_TIMER10_PWM || AM57xx_TIMER10_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER11
 	bool "Timer 11"
@@ -152,6 +253,16 @@ config AM57xx_TIMER11
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER11_PWM || AM57xx_TIMER11_CAPTURE
+			config AM57xx_TIMER11_MCASP1_AXR14
+				bool "MCASP1_AXR14"
+				depends on AM57xx_TIMER11_PWM || AM57xx_TIMER11_CAPTURE
+			config AM57xx_TIMER11_GPMC_A9
+				bool "GPMC_A9"
+				depends on AM57xx_TIMER11_PWM || AM57xx_TIMER11_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER12
 	bool "Timer 12"
@@ -165,6 +276,16 @@ config AM57xx_TIMER12
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER12_PWM || AM57xx_TIMER12_CAPTURE
+			config AM57xx_TIMER12_MCASP1_AXR15
+				bool "MCASP1_AXR15"
+				depends on AM57xx_TIMER12_PWM || AM57xx_TIMER12_CAPTURE
+			config AM57xx_TIMER12_GPMC_A8
+				bool "GPMC_A8"
+				depends on AM57xx_TIMER12_PWM || AM57xx_TIMER12_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER13
 	bool "Timer 13"
@@ -178,6 +299,16 @@ config AM57xx_TIMER13
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER13_PWM || AM57xx_TIMER13_CAPTURE
+			config AM57xx_TIMER13_VIN1A_VSYNC0
+				bool "VIN1A_VSYNC0"
+				depends on AM57xx_TIMER13_PWM || AM57xx_TIMER13_CAPTURE
+			config AM57xx_TIMER13_XREF_CLK0
+				bool "XREF_CLK0"
+				depends on AM57xx_TIMER13_PWM || AM57xx_TIMER13_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER14
 	bool "Timer 14"
@@ -191,6 +322,16 @@ config AM57xx_TIMER14
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER14_PWM || AM57xx_TIMER14_CAPTURE
+			config AM57xx_TIMER14_XREF_CLK1
+				bool "XREF_CLK1"
+				depends on AM57xx_TIMER14_PWM || AM57xx_TIMER14_CAPTURE
+			config AM57xx_TIMER14_VIN1A_HSYNC0
+				bool "VIN1A_HSYNC0"
+				depends on AM57xx_TIMER14_PWM || AM57xx_TIMER14_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER15
 	bool "Timer 15"
@@ -204,6 +345,16 @@ config AM57xx_TIMER15
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER15_PWM || AM57xx_TIMER15_CAPTURE
+			config AM57xx_TIMER15_VIN1A_FLD0
+				bool "VIN1A_FLD0"
+				depends on AM57xx_TIMER15_PWM || AM57xx_TIMER15_CAPTURE
+			config AM57xx_TIMER15_USB2_DRVVBUS
+				bool "USB2_DRVVBUS"
+				depends on AM57xx_TIMER15_PWM || AM57xx_TIMER15_CAPTURE
+		endchoice
 	endif
 config AM57xx_TIMER16
 	bool "Timer 16"
@@ -217,5 +368,15 @@ config AM57xx_TIMER16
 			bool "Capture Support"
 			depends on AM57xx_TIMER_CAPTURE
 			default n
+		choice
+			prompt "PWM / Capture Pin"
+			depends on AM57xx_TIMER16_PWM || AM57xx_TIMER16_CAPTURE
+			config AM57xx_TIMER16_XREF_CLK3
+				bool "XREF_CLK3"
+				depends on AM57xx_TIMER16_PWM || AM57xx_TIMER16_CAPTURE
+			config AM57xx_TIMER16_VIN1A_DE0
+				bool "VIN1A_DE0"
+				depends on AM57xx_TIMER16_PWM || AM57xx_TIMER16_CAPTURE
+		endchoice
 	endif
 endif
