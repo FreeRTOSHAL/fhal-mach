@@ -324,18 +324,22 @@ SPI_SLAVE_INIT(am57xx, spi, options) {
 	}
 #endif
 	if (options->cs == SPI_OPT_CS_DIS) {
+		PRINTF("CS Dissable is not supported\n");
 		goto am57xx_spi_slave_init_error0;
 	}
 	if (spi->csPins[options->cs].pin == UINT32_MAX) {
+		PRINTF("CS Pin not exists\n");
 		goto am57xx_spi_slave_init_error0;
 	}
 	index = options->cs;
 	if (spi->slaves[index] != NULL) {
+		PRINTF("Slave not exists\n");
 		goto am57xx_spi_slave_init_error0;
 	}
 	PRINTF("Spi Slave init index: %ld\n", index);
 	slave = pvPortMalloc(sizeof(struct spi_slave));
 	if (slave == NULL) {
+		PRINTF("Malloc failed\n");
 		goto am57xx_spi_slave_init_error0;
 	}
 	slave->spi = spi;
