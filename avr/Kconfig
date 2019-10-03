@@ -1,0 +1,128 @@
+comment "Microchip AVR Settings"
+choice 
+	prompt "Select Processor Type"
+	config ATMEGA328PB
+		bool "Microchip ATmega328PB"
+		depends on ARCH_AVR
+	config AT90CAN128
+		bool "Microchip AT90CAN128"
+		depends on ARCH_AVR
+endchoice
+if ATMEGA328PB=y
+	config MACH_AFLAGS
+		string
+		default "-mmcu=atmega328pb"
+	config MACH_CFLAGS
+		string
+		default "-mmcu=atmega328pb"
+	config MACH_LDFLAGS
+		string
+		default "-mmcu=atmega328pb"
+	config MACH_GPIO_HAS_PORTB
+		bool
+		default y
+	config MACH_GPIO_HAS_PORTC
+		bool
+		default y
+	config MACH_GPIO_HAS_PORTD
+		bool
+		default y
+	config MACH_GPIO_HAS_PORTE
+		bool
+		default y
+endif
+if AT90CAN128=y
+	config MACH_AFLAGS
+		string
+		default "-mmcu=at90can128"
+	config MACH_CFLAGS
+		string
+		default "-mmcu=at90can128"
+	config MACH_LDFLAGS
+		string
+		default "-mmcu=at90can128"
+	config MACH_GPIO_HAS_PORTA
+		bool
+		default y
+	config MACH_GPIO_HAS_PORTB
+		bool
+		default y
+	config MACH_GPIO_HAS_PORTC
+		bool
+		default y
+	config MACH_GPIO_HAS_PORTD
+		bool
+		default y
+	config MACH_GPIO_HAS_PORTE
+		bool
+		default y
+	config MACH_GPIO_HAS_PORTF
+		bool
+		default y
+	config MACH_GPIO_HAS_PORTG
+		bool
+		default y
+endif
+config MAX_SYSCALL_INTERRUPT_PRIORITY
+	hex
+	default 0x20
+config KERNEL_INTERRUPT_PRIORITY 
+	hex
+	default 0xf0
+config MACH_INIT_STACK_SIZE
+	int "Init Stack Size"
+	default 600
+	help
+		Stack Size of Init Prozess. Stack size used by Interrupt and Init Prozess
+config MACH_INCLUDE
+	string
+	default "-Imach/avr/include"
+config MACH_DEFINE_HEAP
+	bool
+	default y
+config MACH_USE_GENERIC_FAULT_HANDLER
+	bool
+	default y
+config MACH_HAS_NEWLIB
+	bool
+	default y
+config MACH_HAS_GPIO
+	bool
+	default y
+config MACH_HAS_TIMER
+	bool
+	default y
+config MACH_HAS_PWM
+	bool
+	default y
+config MACH_HAS_CAPTURE
+	bool
+	default n
+config MACH_HAS_ADC
+	bool
+	default y
+config MACH_HAS_UART
+	bool
+	default y
+config MACH_HAS_NET
+	bool
+	default n
+config MACH_AVR_DISABLE_WDOG
+	bool "Disable Watchdog at startup"
+	default y
+config MACH_AVR_GPIO
+	bool
+	default y
+	select GPIO
+menuconfig MACH_AVR_UART
+	bool "UART"
+	depends on UART
+	default y
+menuconfig MACH_AVR_ADC
+	bool "ADC"
+	depends on ADC
+	default n
+menuconfig MACH_AVR_TIMER
+	depends on TIMER
+	bool "Timer"
+	default n

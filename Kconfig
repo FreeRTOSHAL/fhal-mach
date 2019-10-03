@@ -36,6 +36,11 @@ choice
 		depends on ARCH_ARM_CORTEX_M0 || ARCH_ARM_CORTEX_M3 ||  ARCH_ARM_CORTEX_M4F
 		help
 			NXP S32K Mach
+	config MACH_AVR
+		bool "Microchip AVR"
+		depends on ARCH_AVR
+		help
+			Microchip AVR/ATmega328PB Mach
 endchoice
 if MACH_VF610=y
 source mach/vf610/Kconfig
@@ -57,5 +62,8 @@ source mach/s32k/Kconfig
 endif
 if MACH_VF610=y || MACH_S32K=y
 source mach/nxp/Kconfig
+endif
+if MACH_AVR=y
+source mach/avr/Kconfig
 endif
 endmenu
