@@ -17,7 +17,7 @@
 #  error "crystal oscillator frequency only supported from 4Mhz to 40Mhz"
 # elif CONFIG_SOSC_HZ > 40000000
 #  error "crystal oscillator frequency only supported from 4Mhz to 40Mhz"
-# elif CONFIG_SOSC_HZ > 8000000
+# elif CONFIG_SOSC_HZ <= 8000000
 #  define SOSCCFG_RANGE 0x2
 # else
 #  define SOSCCFG_RANGE 0x3
