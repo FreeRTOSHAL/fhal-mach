@@ -14,10 +14,28 @@ menuconfig AM57xx_SPI1
 		comment "SCLK on PAD_SPI1_SCLK"
 		comment "D0 on PAD_SPI1_D0"
 		comment "D1 on PAD_SPI1_D1"
-		comment "CS0 on PAD_VOUT1_D23"
-		comment "CS1 on PAD_VOUT1_D23"
-		comment "CS2 on PAD_VOUT1_D23"
-		comment "CS3 on PAD_VOUT1_D23"
+		comment "CS0 on PAD_SPI1_CS0"
+		comment "CS1 on PAD_SPI1_CS1"
+		comment "CS2 on PAD_SPI1_CS2"
+		comment "CS3 on PAD_SPI1_CS3"
+	endif
+menuconfig AM57xx_SPI2
+	bool "SPI 2"
+	if AM57xx_SPI2=y
+	config AM57xx_SPI2_D0_OUT_D1_IN
+		bool "D0 is Out D1 is In"
+		help
+			D0 is Output and D1 is Input
+			else 
+			D0 is Input and D1 is Output
+		comment "SCLK on PAD_SPI2_SCLK"
+		comment "D0 on PAD_SPI2_D0"
+		comment "D1 on PAD_SPI2_D1"
+		comment "CS0 on PAD_SPI2_CS0"
+		comment "WARNING CS1 CS2 CS3 is sheard with SPI1!"
+		comment "CS1 on PAD_SPI2_CS1"
+		comment "CS2 on PAD_SPI1_CS2"
+		comment "CS3 on PAD_SPI1_CS3"
 	endif
 menuconfig AM57xx_SPI3
 	bool "SPI 3"

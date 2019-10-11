@@ -548,6 +548,41 @@ void am57xx_spi1IRQHandler() {
 	am57xx_spiIRQHandler(&spi1_data);
 }
 #endif
+#ifdef CONFIG_AM57xx_SPI2
+void am57xx_spi2IRQHandler();
+struct spi spi2_data = {
+	SPI_INIT_DEV(am57xx)
+	HAL_NAME("AM57xx SPI 3")
+	.base = (struct spi_reg *) 0x6809A000,
+	.irqBase = MCSPI2_IRQ,
+	.clkreg = (uint32_t *) 0x6A0097F8,
+	.irqhandler = am57xx_spi2IRQHandler,
+	.d0OutD1In = IS_ENABLED(CONFIG_AM57xx_SPI2_D0_OUT_D1_IN),
+	.pins = {
+		/* CLK */
+		{.pin = PAD_SPI2_SCLK, .cfg = MUX_CTL_MODE(0) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* D0 */
+		{.pin = PAD_SPI2_D0,   .cfg = MUX_CTL_MODE(0) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* D1 */
+		{.pin = PAD_SPI2_D1,   .cfg = MUX_CTL_MODE(0) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+	},
+	.csPins = {
+		/* CS0 */
+		{.pin = PAD_SPI2_CS0, .cfg = MUX_CTL_MODE(0) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* CS1 */
+		{.pin = PAD_SPI1_CS1, .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+
+		/* CS2 */
+		{.pin = PAD_SPI1_CS2, .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+		/* CS3 */
+		{.pin = PAD_SPI1_CS3, .cfg = MUX_CTL_MODE(3) | MUX_CTL_PULL_UP, .extra = MUX_INPUT},
+	},
+};
+SPI_ADDDEV(am57xx, spi2_data);
+void am57xx_spi2IRQHandler() {
+	am57xx_spiIRQHandler(&spi2_data);
+}
+#endif
 #ifdef CONFIG_AM57xx_SPI3
 void am57xx_spi3IRQHandler();
 struct spi spi3_data = {
