@@ -188,7 +188,7 @@ int32_t ctrl_setHandler(uint32_t irq_crossbar_nr, void (*handler)()) {
 	 * Mux Interrupt
 	 */
 	reg = IRQ_MAP_IPU1_BASE + ((i - 7) >> 1);
-	printf("IRQ Reg %p\n",reg);
+	//printf("IRQ Reg %p\n",reg);
 	if ((i - 7) & 0x1) {
 		*reg |= ((irq_crossbar_nr & 0x1FF) << 16);
 	} else {
