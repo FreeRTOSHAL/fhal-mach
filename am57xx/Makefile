@@ -2,6 +2,7 @@ obj-$(CONFIG_AM57xx_MAILBOX) += mailbox.o
 obj-$(CONFIG_AM57xx_GPIO) += gpio.o
 obj-$(CONFIG_AM57xx_SPI) += mcspi.o
 obj-$(CONFIG_AM57xx_TIMER) += timer.o
+obj-$(CONFIG_AM57xx_TEMP) += temp.o
 
 obj-y += mux.o 
 obj-y += debuger.o

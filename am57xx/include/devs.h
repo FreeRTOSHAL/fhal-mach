@@ -67,4 +67,10 @@ HAL_DEFINE_GLOBAL_ARRAY(capture);
 #define CAPTURE14_ID HAL_GET_ID(capture, am57xx, capture14_data)
 #define CAPTURE15_ID HAL_GET_ID(capture, am57xx, capture15_data)
 #define CAPTURE16_ID HAL_GET_ID(capture, am57xx, capture16_data)
+HAL_DEFINE_GLOBAL_ARRAY(temp);
+#define TEMP_MPU_ID HAL_GET_ID(temp, am57xx, temp_mpu)
+#define TEMP_GPU_ID HAL_GET_ID(temp, am57xx, temp_gpu)
+#define TEMP_CORE_ID HAL_GET_ID(temp, am57xx, temp_core)
+#define TEMP_IVA_ID HAL_GET_ID(temp, am57xx, temp_iva)
+#define TEMP_DSPEVE_ID HAL_GET_ID(temp, am57xx, temp_dspeve)
 #endif
