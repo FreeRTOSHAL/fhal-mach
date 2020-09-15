@@ -1,0 +1,15 @@
+comment "Selected payload size reduce the number of hadware filter!"
+choice 
+	prompt "Select Max Payload Size"
+	config NXP_FLEXCAN_MAX_DLEN_8
+		bool "8 Byte (CAN)"
+	config NXP_FLEXCAN_MAX_DLEN_16
+		bool "16 Byte (CAN FD)"
+		depends on CAN_FD
+	config NXP_FLEXCAN_MAX_DLEN_32
+		bool "32 Byte (CAN FD)"
+		depends on CAN_FD
+	config NXP_FLEXCAN_MAX_DLEN_64
+		bool "64 Byte (CAN FD)"
+		depends on CAN_FD
+endchoice

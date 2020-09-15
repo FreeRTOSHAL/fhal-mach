@@ -26,3 +26,6 @@ config NXP_GPIO
 config NXP_GPIO_MUX
 	bool
 	default n
+config NXP_FLEXCAN
+	bool
+	default n

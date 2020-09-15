@@ -2,10 +2,10 @@ comment "NXP S32K Settings"
 choice 
 	prompt "Select Prozessor Type"
 	config S32K116
-		bool "NXP S32K144"
+		bool "NXP S32K116"
 		depends on ARCH_ARM_CORTEX_M0
 	config S32K118
-		bool "NXP S32K144"
+		bool "NXP S32K118"
 		depends on ARCH_ARM_CORTEX_M0
 	config S32K142
 		bool "NXP S32K142"
@@ -606,4 +606,12 @@ menuconfig MACH_S32K_FLEXTIMER
 	default n
 	if MACH_S32K_FLEXTIMER
 	source mach/s32k/Kconfig.timer
+	endif
+menuconfig MACH_S32K_FLEXCAN
+	depends on CAN
+	select NXP_FLEXCAN
+	bool "Activate FlexCAN"
+	default n
+	if MACH_S32K_FLEXCAN
+	source mach/s32k/Kconfig.can
 	endif

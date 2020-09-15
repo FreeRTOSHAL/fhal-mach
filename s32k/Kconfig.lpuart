@@ -89,6 +89,7 @@ if MACH_S32K_LPUART1=y
 endif
 menuconfig MACH_S32K_LPUART2
 	bool "LPUART 2"
+	depends on S32K144 || S32K146 || S32K148
 if MACH_S32K_LPUART2=y
 	choice 
 		prompt "UART Clock"

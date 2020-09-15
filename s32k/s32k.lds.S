@@ -26,9 +26,32 @@
 ENTRY(reset_handler)
 
 MEM_START
-	/* Only Support S32K144 */
+#ifdef CONFIG_S32K116
+#error Mem Region not implemented by now
+	MEM_ADD(flash, 0x0, 128K)
+	MEM_ADD(sram, 0x1FFFFC00, 17K-2K)
+#endif
+#ifdef CONFIG_S32K118
+#error Mem Region not implemented by now
+	MEM_ADD(flash, 0x0, 265K)
+	MEM_ADD(sram, 0x1FFF8000, 25K-2K)
+#endif
+#ifdef CONFIG_S32K142
+	MEM_ADD(flash, 0x0, 256K)
+	MEM_ADD(sram, 0x1FFFC000, 32K-4K)
+#endif
+#ifdef CONFIG_S32K144
 	MEM_ADD(flash, 0x0, 512K)
-	MEM_ADD(sram, 0x1FFF8000, 60K)
+	MEM_ADD(sram, 0x1FFF8000, 64K-4K)
+#endif
+#ifdef CONFIG_S32K146
+	MEM_ADD(flash, 0x0, 1M)
+	MEM_ADD(sram, 0x1FFF0000, 128K-4K)
+#endif
+#ifdef CONFIG_S32K148
+	MEM_ADD(flash, 0x0, 2M)
+	MEM_ADD(sram, 0x1FFE0000, 256K-4K)
+#endif
 MEM_STOP
 
 SECTIONS_START
