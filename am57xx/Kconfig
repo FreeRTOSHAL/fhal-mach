@@ -97,3 +97,7 @@ menuconfig AM57xx_TIMER
 	bool "Am57xx General-Purpose Timers"
 	default n
 	source mach/am57xx/Kconfig.timer
+config AM57xx_TEMP
+	depends on TEMP
+	bool "Am57xx Temperature Sensors"
+	default n
