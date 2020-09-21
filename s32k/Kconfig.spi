@@ -1,0 +1,231 @@
+config MACH_S32K_LPSPI_MAX_SLAVES
+	int "Max Slaves"
+	default 1
+menuconfig MACH_S32K_LPSPI0
+	bool "LPSPI0"
+	default n
+if MACH_S32K_LPSPI0
+	choice 
+		prompt "SPI Clock"
+		config MACH_S32K_LPSPI0_SPLLDIV2
+			bool "SPLLDIV2"
+		config MACH_S32K_LPSPI0_SOSCDIV2
+			bool "SOSCDIV2"
+		config MACH_S32K_LPSPI0_SIRCDIV2
+			bool "SIRCDIV2"
+		config MACH_S32K_LPSPI0_FIRCDIV2
+			bool "FIRCDIV2"
+	endchoice
+	choice
+		prompt "LPSPI Serial Clock I/O"
+		config MACH_S32K_LPSPI0_SCK_PTB2
+			bool "PTB2"
+		config MACH_S32K_LPSPI0_SCK_PTC23
+			bool "PTC23"
+		config MACH_S32K_LPSPI0_SCK_PTD15
+			bool "PTD15"
+		config MACH_S32K_LPSPI0_SCK_PTE0
+			bool "PTE0"
+	endchoice
+	choice
+		prompt "LPSPI Serial Data Input"
+		config MACH_S32K_LPSPI0_SIN_PTB3
+			bool "PTB3"
+		config MACH_S32K_LPSPI0_SIN_PTD16
+			bool "PTD16"
+		config MACH_S32K_LPSPI0_SIN_PTE1
+			bool "PTE1"
+	endchoice
+	choice
+		prompt "LPSPI Serial Data Output"
+		config MACH_S32K_LPSPI0_SOUT_PTA30
+			bool "PTA30"
+		config MACH_S32K_LPSPI0_SOUT_PTB1
+			bool "PTB1"
+		config MACH_S32K_LPSPI0_SOUT_PTB4
+			bool "PTB4"
+		config MACH_S32K_LPSPI0_SOUT_PTE2
+			bool "PTE2"
+	endchoice
+	choice
+		prompt "Peripheral Chip Select 0"
+		config MACH_S32K_LPSPI0_PCS0_PTA26
+			bool "PTA26"
+		config MACH_S32K_LPSPI0_PCS0_PTB0
+			bool "PTB0"
+		config MACH_S32K_LPSPI0_PCS0_PTB5
+			bool "PTB5"
+	endchoice
+	choice
+		prompt "Peripheral Chip Select 1"
+		config MACH_S32K_LPSPI0_PCS1_PTA31
+			bool "PTA31"
+		config MACH_S32K_LPSPI0_PCS1_PTB5
+			bool "PTB5"
+	endchoice
+	choice
+		prompt "Peripheral Chip Select 2"
+		config MACH_S32K_LPSPI0_PCS2_PTE6
+			bool "PTE6"
+	endchoice
+	choice
+		prompt "Peripheral Chip Select 3"
+		config MACH_S32K_LPSPI0_PCS3_PTA15
+			bool "PTA15"
+	endchoice
+endif
+
+menuconfig MACH_S32K_LPSPI1
+	bool "LPSPI1"
+	default n
+if MACH_S32K_LPSPI1
+	choice 
+		prompt "SPI Clock"
+		config MACH_S32K_LPSPI1_SPLLDIV2
+			bool "SPLLDIV2"
+		config MACH_S32K_LPSPI1_SOSCDIV2
+			bool "SOSCDIV2"
+		config MACH_S32K_LPSPI1_SIRCDIV2
+			bool "SIRCDIV2"
+		config MACH_S32K_LPSPI1_FIRCDIV2
+			bool "FIRCDIV2"
+	endchoice
+	choice
+		prompt "LPSPI Serial Clock I/O"
+		config MACH_S32K_LPSPI1_SCK_PTA19
+			bool "PTA19"
+		config MACH_S32K_LPSPI1_SCK_PTA28
+			bool "PTA28"
+		config MACH_S32K_LPSPI1_SCK_PTB14
+			bool "PTB14"
+		config MACH_S32K_LPSPI1_SCK_PTD0
+			bool "PTD0"
+	endchoice
+	choice
+		prompt "LPSPI Serial Data Input"
+		config MACH_S32K_LPSPI1_SIN_PTA20
+			bool "PTA20"
+		config MACH_S32K_LPSPI1_SIN_PTA29
+			bool "PTA29"
+		config MACH_S32K_LPSPI1_SIN_PTB15
+			bool "PTB15"
+		config MACH_S32K_LPSPI1_SIN_PTD1
+			bool "PTD1"
+	endchoice
+	choice
+		prompt "LPSPI Serial Data Output"
+		config MACH_S32K_LPSPI1_SOUT_PTA18
+			bool "PTA18"
+		config MACH_S32K_LPSPI1_SOUT_PTA27
+			bool "PTA27"
+		config MACH_S32K_LPSPI1_SOUT_PTB16
+			bool "PTB16"
+		config MACH_S32K_LPSPI1_SOUT_PTD2
+			bool "PTD2"
+		config MACH_S32K_LPSPI1_SOUT_PTE0
+			bool "PTE0"
+	endchoice
+	choice
+		prompt "Peripheral Chip Select 0"
+		config MACH_S32K_LPSPI1_PCS0_PTA21
+			bool "PTA21"
+		config MACH_S32K_LPSPI1_PCS0_PTA26
+			bool "PTA26"
+		config MACH_S32K_LPSPI1_PCS0_PTD3
+			bool "PTD3"
+		config MACH_S32K_LPSPI1_PCS0_PTE1
+			bool "PTE1"
+	endchoice
+	choice
+		prompt "Peripheral Chip Select 1"
+		config MACH_S32K_LPSPI1_PCS1_PTA22
+			bool "PTA22"
+		config MACH_S32K_LPSPI1_PCS1_PTA6
+			bool "PTA6"
+		config MACH_S32K_LPSPI1_PCS1_PTB18
+			bool "PTB18"
+	endchoice
+	choice
+		prompt "Peripheral Chip Select 2"
+		config MACH_S32K_LPSPI1_PCS2_PTA16
+			bool "PTA16"
+	endchoice
+	choice
+		prompt "Peripheral Chip Select 3"
+		config MACH_S32K_LPSPI1_PCS3_PTB17
+			bool "PTB17"
+	endchoice
+endif
+
+menuconfig MACH_S32K_LPSPI2
+	bool "LPSPI2"
+	default n
+if MACH_S32K_LPSPI2
+	choice 
+		prompt "SPI Clock"
+		config MACH_S32K_LPSPI2_SPLLDIV2
+			bool "SPLLDIV2"
+		config MACH_S32K_LPSPI2_SOSCDIV2
+			bool "SOSCDIV2"
+		config MACH_S32K_LPSPI2_SIRCDIV2
+			bool "SIRCDIV2"
+		config MACH_S32K_LPSPI2_FIRCDIV2
+			bool "FIRCDIV2"
+	endchoice
+	choice
+		prompt "LPSPI Serial Clock I/O"
+		config MACH_S32K_LPSPI2_SCK_PTB29
+			bool "PTB29"
+		config MACH_S32K_LPSPI2_SCK_PTC15
+			bool "PTC15"
+		config MACH_S32K_LPSPI2_SCK_PTE15
+			bool "PTE15"
+	endchoice
+	choice
+		prompt "LPSPI Serial Data Input"
+		config MACH_S32K_LPSPI2_SIN_PTB28
+			bool "PTB28"
+		config MACH_S32K_LPSPI2_SIN_PTC0
+			bool "PTC0"
+		config MACH_S32K_LPSPI2_SIN_PTE16
+			bool "PTE16"
+	endchoice
+	choice
+		prompt "LPSPI Serial Data Output"
+		config MACH_S32K_LPSPI2_SOUT_PTA8
+			bool "PTA8"
+		config MACH_S32K_LPSPI2_SOUT_PTB27
+			bool "PTB27"
+		config MACH_S32K_LPSPI2_SOUT_PTC1
+			bool "PTC1"
+	endchoice
+	choice
+		prompt "Peripheral Chip Select 0"
+		config MACH_S32K_LPSPI2_PCS0_PTA9
+			bool "PTA9"
+		config MACH_S32K_LPSPI2_PCS0_PTB25
+			bool "PTB25"
+		config MACH_S32K_LPSPI2_PCS0_PTC14
+			bool "PTC14"
+		config MACH_S32K_LPSPI2_PCS0_PTE11
+			bool "PTE11"
+	endchoice
+	choice
+		prompt "Peripheral Chip Select 1"
+		config MACH_S32K_LPSPI2_PCS1_PTC19
+			bool "PTC19"
+		config MACH_S32K_LPSPI2_PCS1_PTE10
+			bool "PTE10"
+	endchoice
+	choice
+		prompt "Peripheral Chip Select 2"
+		config MACH_S32K_LPSPI2_PCS2_PTE13
+			bool "PTE13"
+	endchoice
+	choice
+		prompt "Peripheral Chip Select 3"
+		config MACH_S32K_LPSPI2_PCS3_PTA15
+			bool "PTA15"
+	endchoice
+endif
+

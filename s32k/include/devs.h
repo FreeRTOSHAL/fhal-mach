@@ -643,4 +643,14 @@ HAL_DEFINE_GLOBAL_ARRAY(capture);
 #ifdef CONFIG_MACH_S32K_FLEXTIMER3_CAPTURE7_PTC13
 # define FLEXTIMER3_CAPTURE7_PTC13_ID HAL_GET_ID(capture, ftm, ftm_capture_3_7)
 #endif
+HAL_DEFINE_GLOBAL_ARRAY(spi);
+#ifdef CONFIG_MACH_S32K_LPSPI0
+# define LPSPI0_ID HAL_GET_ID(spi, nxp, nxp_lpspi0)
+#endif
+#ifdef CONFIG_MACH_S32K_LPSPI1
+# define LPSPI1_ID HAL_GET_ID(spi, nxp, nxp_lpspi1)
+#endif
+#ifdef CONFIG_MACH_S32K_LPSPI2
+# define LPSPI2_ID HAL_GET_ID(spi, nxp, nxp_lpspi2)
+#endif
 #endif

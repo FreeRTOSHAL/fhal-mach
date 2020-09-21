@@ -64,6 +64,9 @@ config MACH_HAS_CAPTURE
 config MACH_HAS_ADC
 	bool
 	default y
+config MACH_HAS_SPI
+	bool
+	default y
 config USE_NXP_LIB
 	bool
 	default y
@@ -614,4 +617,11 @@ menuconfig MACH_S32K_FLEXCAN
 	default n
 	if MACH_S32K_FLEXCAN
 	source mach/s32k/Kconfig.can
+	endif
+menuconfig MACH_S32K_LPSPI
+	depends on SPI
+	bool "Activate LPSPI"
+	default n
+	if MACH_S32K_LPSPI
+	source mach/s32k/Kconfig.spi
 	endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Andreas Werner <kernel@andy89.org>
+ * Copyright (c) 2020 Andreas Werner <kernel@andy89.org>
  * 
  * Permission is hereby granted, free of charge, to any person 
  * obtaining a copy of this software and associated documentation 
