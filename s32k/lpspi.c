@@ -34,6 +34,7 @@
 #include <iomux.h>
 #include <nxp/mux.h>
 #include <S32K144.h>
+#include <irq.h>
 #define LPSPI_FIFO_SIZE 4
 #define LPSPI_FIFO_HARF_SIZE 2
 
@@ -105,6 +106,12 @@ SPI_INIT(nxp, index, mode, opt) {
 	if (spi->irqLock == NULL) {
 		goto nxp_spi_init_error2;
 	}
+	/* 
+	 * Semaphore shall give after init and then Lock it irq 
+	 * unlock the semaphore
+	 */
+	xSemaphoreGive(spi->irqLock);
+	xSemaphoreTake(spi->irqLock, 0);
 
 	/* Enable Module */
 	spi->base->CR = LPSPI_CR_MEN_MASK;
@@ -146,6 +153,11 @@ SPI_INIT(nxp, index, mode, opt) {
 		reg |= LPSPI_CFGR1_PCSCFG(0); /* PCS[3:2] are configured for chip select function. Not aviable on S32K */
 		spi->base->CFGR1 = reg;
 	}
+	/* Disable all interrupts */
+	spi->base->IER = 0;
+	 /* Enable IRQ */
+	irq_setPrio(spi->irqnr, 0xFF);
+	irq_enable(spi->irqnr);
 
 nxp_spi_init_exit:
 	return spi;
@@ -330,16 +342,27 @@ SPI_SLAVE_DEINIT(nxp, slave) {
 	return 0;
 }
 void nxp_lpspi_handleIRQ(struct spi *spi) {
+	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+	if (spi->base->SR & (LPSPI_SR_RDF_MASK | LPSPI_SR_TDF_MASK | LPSPI_SR_TCF_MASK)) {
+		xSemaphoreGiveFromISR(spi->irqLock, &pxHigherPriorityTaskWoken);
+		/* Disable Recvice Interrupt */
+		/* Userspace handel intterupt disable the interrupts again */
+		spi->base->IER &= ~(LPSPI_IER_RDIE_MASK | LPSPI_IER_TDIE_MASK | LPSPI_IER_TCIE_MASK);
+	}
+	/* wake task if needed */
+	portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
 
 }
-SPI_SLAVE_TRANSVER(nxp, slave, sendData, recvData, len, waitime) {
+int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, uint16_t *recvData, uint32_t len, TickType_t waittime, bool useISR) {
 	int recved = 0;
 	struct spi *spi = slave->spi;
 	struct spi_opt *options = &slave->options;
 	int i;
 	int j;
 	uint32_t bitmask = ((1 << options->size) - 1);
-	spi_lock(spi, waitime, -1);
+	if (useISR) {
+		spi_lock(spi, waittime, -1);
+	}
 	/* Configure SPI Device for this slave */
 	spi->base->CCR = slave->CCR;
 	/* Send Config Command and start Data Transfer */
@@ -359,8 +382,22 @@ SPI_SLAVE_TRANSVER(nxp, slave, sendData, recvData, len, waitime) {
 		/* Send until FIFO is Full or RX FIFO quickly full */
 		if (!(spi->base->SR & LPSPI_SR_TDF_MASK) || LPSPI_FIFO_RXCOUNT(spi->base->FSR) >= (LPSPI_FIFO_SIZE - 1)) {
 			uint32_t count;
+			
 			/* Wait until the harf of the FIFO is full */ 
-			while(!(spi->base->SR & LPSPI_SR_RDF_MASK));
+			if (useISR) {
+				/* Nothing to read sleep until something is in the recv query */
+				if (!(spi->base->SR & LPSPI_SR_RDF_MASK)) {
+
+					int lret;
+					spi->base->IER |= LPSPI_IER_RDIE_MASK;
+					lret = xSemaphoreTake(spi->irqLock, waittime);
+					if (lret != pdTRUE) {
+						goto nxp_spi_transver_error0;
+					}
+				}
+			} else {
+				while(!(spi->base->SR & LPSPI_SR_RDF_MASK));
+			}
 			count = LPSPI_FIFO_RXCOUNT(spi->base->FSR);
 			/* recv the compled FIFO */
 			for (j = 0; j < count; j++) {
@@ -371,30 +408,62 @@ SPI_SLAVE_TRANSVER(nxp, slave, sendData, recvData, len, waitime) {
 	}
 	spi_gpioClear(slave);
 	/* wait until one more slot is in FIFO, TCR use the TX-FIFO! */
-	while(!(spi->base->SR & LPSPI_SR_TDF_MASK));
+	if (useISR) {
+		if(!(spi->base->SR & LPSPI_SR_TDF_MASK)) {
+			int lret;
+			spi->base->IER |= LPSPI_IER_TDIE_MASK;
+			lret = xSemaphoreTake(spi->irqLock, waittime);
+			if (lret != pdTRUE) {
+				goto nxp_spi_transver_error0;
+			}
+		}
+	} else {
+		while(!(spi->base->SR & LPSPI_SR_TDF_MASK));
+	}
 	/* End the Datatransfer send Commant into FIFO */
 	spi->base->TCR = slave->TCR & ~(LPSPI_TCR_CONTC(1));
 	/* Wait until all bytes are send */
-	while(!(spi->base->SR & LPSPI_SR_TCF_MASK));
+	if (useISR) {
+		if(!(spi->base->SR & LPSPI_SR_TCF_MASK)) {
+			int lret;
+			spi->base->IER |= LPSPI_IER_TCIE_MASK;
+			lret = xSemaphoreTake(spi->irqLock, waittime);
+			if (lret != pdTRUE) {
+				goto nxp_spi_transver_error0;
+			}
+		}
+	} else {
+		while(!(spi->base->SR & LPSPI_SR_TCF_MASK));
+	}
 
 	/* recv remaning bytes */
 	for (;recved < len; recved++) {
 		recvData[recved] = (uint16_t) (spi->base->RDR & bitmask);
 	}
-	spi_unlock(spi, -1);
+	if (useISR) {
+		spi_unlock(spi, -1);
+	}
 	return 0;
+nxp_spi_transver_error0:
+	if (useISR) {
+		spi_unlock(spi, -1);
+	}
+	return -1;
 }
-SPI_SLAVE_SEND(nxp, slave, data, len, waitime) {
+SPI_SLAVE_TRANSVER(nxp, slave, sendData, recvData, len, waittime) {
+	return nxp_slave_transver_intern(slave, sendData, recvData, len, waittime, true);
+}
+SPI_SLAVE_SEND(nxp, slave, data, len, waittime) {
 	uint16_t recvData[len];
-	return spiSlave_transver(slave, data, recvData, len, waitime);
+	return spiSlave_transver(slave, data, recvData, len, waittime);
 }
-SPI_SLAVE_RECV(nxp, slave, data, len, waitime) {
+SPI_SLAVE_RECV(nxp, slave, data, len, waittime) {
 	uint16_t sendData[len];
 	memset(sendData, 0xFF, len);
-	return spiSlave_transver(slave, sendData, data, len, waitime);
+	return spiSlave_transver(slave, sendData, data, len, waittime);
 }
 SPI_SLAVE_TRANSVER_ISR(nxp, slave, sendData, recvData, len) {
-	return -1; /* TODO */
+	return nxp_slave_transver_intern(slave, sendData, recvData, len, 0, false);
 }
 SPI_SLAVE_SEND_ISR(nxp, slave, data, len) {
 	uint16_t recvData[len];
