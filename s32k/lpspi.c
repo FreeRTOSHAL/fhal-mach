@@ -326,11 +326,14 @@ SPI_SLAVE_DEINIT(nxp, slave) {
 }
 void nxp_lpspi_handleIRQ(struct spi *spi) {
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
-	if (spi->base->SR & (LPSPI_SR_RDF_MASK | LPSPI_SR_TDF_MASK | LPSPI_SR_TCF_MASK)) {
+	int32_t sr = spi->base->SR & (LPSPI_SR_RDF_MASK | LPSPI_SR_TDF_MASK | LPSPI_SR_TCF_MASK);
+	if (sr) {
 		xSemaphoreGiveFromISR(spi->irqLock, &pxHigherPriorityTaskWoken);
 		/* Disable Recvice Interrupt */
 		/* Userspace handel intterupt disable the interrupts again */
-		spi->base->IER &= ~(LPSPI_IER_RDIE_MASK | LPSPI_IER_TDIE_MASK | LPSPI_IER_TCIE_MASK);
+		//spi->base->IER &= ~(LPSPI_IER_RDIE_MASK | LPSPI_IER_TDIE_MASK | LPSPI_IER_TCIE_MASK);
+		/* Disable only the interrupt which is ocured */
+		spi->base->IER &= ~sr;
 	}
 	/* wake task if needed */
 	portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
@@ -343,18 +346,28 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 	int i;
 	int j;
 	uint32_t bitmask = ((1 << options->size) - 1);
+	uint32_t TCR;
 	if (useISR) {
 		spi_lock(spi, waittime, -1);
 	}
 	/* Configure SPI Device for this slave */
 	spi->base->CCR = slave->CCR;
+	TCR = slave->TCR;
 	/* Send Config Command and start Data Transfer */
-	spi->base->TCR = slave->TCR;
+	if (len == 1) {
+		/* for 1 byte CONTC is not needed */
+		TCR &= ~(LPSPI_TCR_CONTC(1) | LPSPI_TCR_CONT_MASK);
+	}
+	spi->base->TCR = TCR;
+	/* check TCR Register, remove TXMSK will be cleared by writing */
+	while (spi->base->TCR != TCR);
 	
 	/* 
 	 * Set GPIO CS if exits
 	 */
 	spi_gpioSet(slave);
+	/* make sure the sempahore is taken */
+	xSemaphoreTake(spi->irqLock, 0);
 	/* 
 	 * This loop is designed to send until the send FIFO is full
 	 * Then the harf of the recv FIFO is read,
@@ -366,18 +379,20 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 		if (!(spi->base->SR & LPSPI_SR_TDF_MASK) || LPSPI_FIFO_RXCOUNT(spi->base->FSR) >= (LPSPI_FIFO_SIZE - 1)) {
 			uint32_t count;
 			
-			/* Wait until the harf of the FIFO is full */ 
+			/* Wait until the half of the FIFO is full */ 
 			if (useISR) {
+				/* Enable Interrupt */
+				spi->base->IER |= LPSPI_IER_RDIE_MASK;
 				/* Nothing to read sleep until something is in the recv query */
-				if (!(spi->base->SR & LPSPI_SR_RDF_MASK)) {
-
+				/* may run twice */
+				while (!(spi->base->SR & LPSPI_SR_RDF_MASK)) {
 					int lret;
-					spi->base->IER |= LPSPI_IER_RDIE_MASK;
 					lret = xSemaphoreTake(spi->irqLock, waittime);
 					if (lret != pdTRUE) {
 						goto nxp_spi_transver_error0;
 					}
 				}
+				spi->base->IER &= ~LPSPI_IER_RDIE_MASK;
 			} else {
 				while(!(spi->base->SR & LPSPI_SR_RDF_MASK));
 			}
@@ -392,36 +407,44 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 	spi_gpioClear(slave);
 	/* wait until one more slot is in FIFO, TCR use the TX-FIFO! */
 	if (useISR) {
-		if(!(spi->base->SR & LPSPI_SR_TDF_MASK)) {
+		spi->base->IER |= LPSPI_IER_TDIE_MASK;
+		while(!(spi->base->SR & LPSPI_SR_TDF_MASK)) {
 			int lret;
-			spi->base->IER |= LPSPI_IER_TDIE_MASK;
 			lret = xSemaphoreTake(spi->irqLock, waittime);
 			if (lret != pdTRUE) {
 				goto nxp_spi_transver_error0;
 			}
 		}
+		/* safe disable the interrupt */
+		spi->base->IER &= ~LPSPI_IER_TDIE_MASK;
 	} else {
 		while(!(spi->base->SR & LPSPI_SR_TDF_MASK));
 	}
-	/* End the Datatransfer send Commant into FIFO */
-	spi->base->TCR = slave->TCR & ~(LPSPI_TCR_CONTC(1));
+	if (len != 1) {
+		/* End the Datatransfer send Commant into FIFO */
+		spi->base->TCR = slave->TCR & ~(LPSPI_TCR_CONTC(1));
+	}
 	/* Wait until all bytes are send */
 	if (useISR) {
-		if(!(spi->base->SR & LPSPI_SR_TCF_MASK)) {
+		spi->base->IER |= LPSPI_IER_TCIE_MASK;
+		while (!(spi->base->SR & LPSPI_SR_TCF_MASK)) {
 			int lret;
-			spi->base->IER |= LPSPI_IER_TCIE_MASK;
 			lret = xSemaphoreTake(spi->irqLock, waittime);
 			if (lret != pdTRUE) {
 				goto nxp_spi_transver_error0;
 			}
 		}
+		spi->base->IER &= ~LPSPI_IER_TCIE_MASK;
 	} else {
 		while(!(spi->base->SR & LPSPI_SR_TCF_MASK));
 	}
 
 	/* recv remaning bytes */
-	for (;recved < len; recved++) {
-		recvData[recved] = (uint16_t) (spi->base->RDR & bitmask);
+	while (recved < len) {
+		if (!(spi->base->RSR & LPSPI_RSR_RXEMPTY_MASK)) {
+			recvData[recved] = (uint16_t) (spi->base->RDR & bitmask);
+			recved++;
+		}
 	}
 	if (useISR) {
 		spi_unlock(spi, -1);
