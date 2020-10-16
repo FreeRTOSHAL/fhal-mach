@@ -40,7 +40,11 @@ struct spi {
 	const struct spi_pin pins[7];
 	volatile LPSPI_Type *base;
 	enum spi_mode mode;
+#ifndef CONFIG_USE_TASK_NOTIFICATIONS
 	OS_DEFINE_SEMARPHORE_BINARAY(irqLock);
+#else
+	TaskHandle_t task;
+#endif
 	uint32_t freq;
 	struct spi_slave *slaves[CONFIG_MACH_S32K_LPSPI_MAX_SLAVES];
 };
@@ -85,6 +89,7 @@ SPI_INIT(nxp, index, mode, opt) {
 	spi->base->CR &= ~LPSPI_CR_RST_MASK;
 
 
+#ifndef CONFIG_USE_TASK_NOTIFICATIONS
 	spi->irqLock = OS_CREATE_SEMARPHORE_BINARAY(spi->irqLock);
 	if (spi->irqLock == NULL) {
 		goto nxp_spi_init_error2;
@@ -95,6 +100,9 @@ SPI_INIT(nxp, index, mode, opt) {
 	 */
 	xSemaphoreGive(spi->irqLock);
 	xSemaphoreTake(spi->irqLock, 0);
+#else
+	spi->task = NULL; /* no Task is wating */
+#endif
 
 	/* Enable Module */
 	spi->base->CR = LPSPI_CR_MEN_MASK;
@@ -328,7 +336,13 @@ void nxp_lpspi_handleIRQ(struct spi *spi) {
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
 	int32_t sr = spi->base->SR & (LPSPI_SR_RDF_MASK | LPSPI_SR_TDF_MASK | LPSPI_SR_TCF_MASK);
 	if (sr) {
+#ifndef CONFIG_USE_TASK_NOTIFICATIONS
 		xSemaphoreGiveFromISR(spi->irqLock, &pxHigherPriorityTaskWoken);
+#else
+		if (spi->task) {
+			vTaskNotifyGiveIndexedFromISR(spi->task, 0, &pxHigherPriorityTaskWoken);
+		}
+#endif
 		/* Disable Recvice Interrupt */
 		/* Userspace handel intterupt disable the interrupts again */
 		//spi->base->IER &= ~(LPSPI_IER_RDIE_MASK | LPSPI_IER_TDIE_MASK | LPSPI_IER_TCIE_MASK);
@@ -350,6 +364,10 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 	if (useISR) {
 		spi_lock(spi, waittime, -1);
 	}
+#ifdef CONFIG_USE_TASK_NOTIFICATIONS
+	/* get Task Handle */
+	spi->task = xTaskGetCurrentTaskHandle();
+#endif
 	/* Configure SPI Device for this slave */
 	spi->base->CCR = slave->CCR;
 	TCR = slave->TCR;
@@ -366,8 +384,13 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 	 * Set GPIO CS if exits
 	 */
 	spi_gpioSet(slave);
+#ifndef CONFIG_USE_TASK_NOTIFICATIONS
 	/* make sure the sempahore is taken */
 	xSemaphoreTake(spi->irqLock, 0);
+#else
+	/* Clear Notification */
+	xTaskNotifyStateClearIndexed(NULL, 0);
+#endif
 	/* 
 	 * This loop is designed to send until the send FIFO is full
 	 * Then the harf of the recv FIFO is read,
@@ -387,7 +410,11 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 				/* may run twice */
 				while (!(spi->base->SR & LPSPI_SR_RDF_MASK)) {
 					int lret;
+#ifndef CONFIG_USE_TASK_NOTIFICATIONS
 					lret = xSemaphoreTake(spi->irqLock, waittime);
+#else
+					lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
+#endif
 					if (lret != pdTRUE) {
 						goto nxp_spi_transver_error0;
 					}
@@ -410,7 +437,11 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 		spi->base->IER |= LPSPI_IER_TDIE_MASK;
 		while(!(spi->base->SR & LPSPI_SR_TDF_MASK)) {
 			int lret;
-			lret = xSemaphoreTake(spi->irqLock, waittime);
+#ifndef CONFIG_USE_TASK_NOTIFICATIONS
+					lret = xSemaphoreTake(spi->irqLock, waittime);
+#else
+					lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
+#endif
 			if (lret != pdTRUE) {
 				goto nxp_spi_transver_error0;
 			}
@@ -429,7 +460,11 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 		spi->base->IER |= LPSPI_IER_TCIE_MASK;
 		while (!(spi->base->SR & LPSPI_SR_TCF_MASK)) {
 			int lret;
-			lret = xSemaphoreTake(spi->irqLock, waittime);
+#ifndef CONFIG_USE_TASK_NOTIFICATIONS
+					lret = xSemaphoreTake(spi->irqLock, waittime);
+#else
+					lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
+#endif
 			if (lret != pdTRUE) {
 				goto nxp_spi_transver_error0;
 			}
@@ -446,6 +481,9 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 			recved++;
 		}
 	}
+#ifdef CONFIG_USE_TASK_NOTIFICATIONS
+	spi->task = NULL;
+#endif
 	if (useISR) {
 		spi_unlock(spi, -1);
 	}

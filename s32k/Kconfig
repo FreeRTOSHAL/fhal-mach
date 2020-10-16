@@ -620,6 +620,8 @@ menuconfig MACH_S32K_FLEXCAN
 	endif
 menuconfig MACH_S32K_LPSPI
 	depends on SPI
+	select USE_TASK_NOTIFICATIONS
+	select INCLUDE_xTaskGetCurrentTaskHandle
 	bool "Activate LPSPI"
 	default n
 	if MACH_S32K_LPSPI
