@@ -5,3 +5,4 @@ obj-$(CONFIG_MACH_S32K_LPUART) += lpuart.o
 obj-$(CONFIG_MACH_S32K_ADC) += adc.o
 obj-$(CONFIG_MACH_S32K_FLEXTIMER) += flextimer.o
 obj-$(CONFIG_MACH_S32K_LPSPI) += lpspi.o
+obj-$(CONFIG_MACH_S32K_FLEXCAN) += flexcan.o

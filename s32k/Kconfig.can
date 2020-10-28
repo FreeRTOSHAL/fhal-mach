@@ -1,6 +1,142 @@
+comment "Waring: Loopback Mode disable physical connection to the CAN Bus!"
+	depends on NXP_FLEXCAN_LOOP_BACK_MODE
+config NXP_FLEXCAN_LOOP_BACK_MODE
+	bool "Activate Loopback Mode (Debug Mode)"
+	default n
+	help
+		Activate Loopback Debug Mode
+		All sended messages are also recived
+		The real bus is disconeded in this mode!
+menuconfig MACH_S32K_FLEXCAN_CAN0
+	bool "CAN 0"
+	default n
+if MACH_S32K_FLEXCAN_CAN0=y
+	choice 
+		prompt "RX Pin"
+		config MACH_S32K_FLEXCAN_CAN0_RX_PTB0
+			bool "PTB0"
+		config MACH_S32K_FLEXCAN_CAN0_RX_PTC2
+			bool "PTC2"
+		config MACH_S32K_FLEXCAN_CAN0_RX_PTE4
+			bool "PTE4"
+		config MACH_S32K_FLEXCAN_CAN0_RX_PTA28
+			bool "PTA28"
+	endchoice
+	choice 
+		prompt "TX Pin"
+		config MACH_S32K_FLEXCAN_CAN0_TX_PTB1
+			bool "PTB1"
+		config MACH_S32K_FLEXCAN_CAN0_TX_PTC3
+			bool "PTC3"
+		config MACH_S32K_FLEXCAN_CAN0_TX_PTE5
+			bool "PTE5"
+		config MACH_S32K_FLEXCAN_CAN0_TX_PTA27
+			bool "PTA27"
+	endchoice
+	comment "Waring: More than 31 Filter are not posible"
+		depends on MACH_S32K_FLEXCAN_CAN0_MAX_FILTER > 31
+	config MACH_S32K_FLEXCAN_CAN0_MAX_FILTER
+		int "Max Input Filters"
+		default 2
+	config MACH_S32K_FLEXCAN_CAN0_FILTER_QUEUE_ENTRIES
+		int "Max Filter Software Queue Entries"
+		default 2
+		help
+			The Hardware has only one entrie per filter
+			so we need a software queue to store the messages
+
+			How manny CAN Frames can be stored in this software queue?
+endif
+menuconfig MACH_S32K_FLEXCAN_CAN1
+	bool "CAN 1"
+	default n
+	depends on !S32K116
+	depends on !S32K118
+if MACH_S32K_FLEXCAN_CAN1=y
+	choice 
+		prompt "RX Pin"
+		config MACH_S32K_FLEXCAN_CAN1_RX_PTC6
+			bool "PTC6"
+		config MACH_S32K_FLEXCAN_CAN1_RX_PTA12
+			bool "PTA12"
+	endchoice
+	choice 
+		prompt "TX Pin"
+		config MACH_S32K_FLEXCAN_CAN1_TX_PTC7
+			bool "PTC7"
+		config MACH_S32K_FLEXCAN_CAN1_TX_PTA13
+			bool "PTA13"
+	endchoice
+	comment "Waring: More than 31 Filter are not posible"
+		depends on MACH_S32K_FLEXCAN_CAN1_MAX_FILTER > 31
+		depends on S32K146 || S32K148
+	comment "Waring: More than 15 Filter are not posible"
+		depends on MACH_S32K_FLEXCAN_CAN1_MAX_FILTER > 15
+		depends on !S32K146
+		depends on !S32K148
+		depends on S32K144 || S32K142
+	config MACH_S32K_FLEXCAN_CAN1_MAX_FILTER
+		int "Max Input Filters"
+		default 2
+	config MACH_S32K_FLEXCAN_CAN1_FILTER_QUEUE_ENTRIES
+		int "Max Filter Software Queue Entries"
+		default 2
+		help
+			The Hardware has only one entrie per filter
+			so we need a software queue to store the messages
+
+			How manny CAN Frames can be stored in this software queue?
+endif
+menuconfig MACH_S32K_FLEXCAN_CAN2
+	bool "CAN 2"
+	default n
+	depends on !S32K116
+	depends on !S32K118
+	depends on !S32K142
+if MACH_S32K_FLEXCAN_CAN2=y
+	choice 
+		prompt "RX Pin"
+		config MACH_S32K_FLEXCAN_CAN2_RX_PTB12
+			bool "PTB12"
+		config MACH_S32K_FLEXCAN_CAN2_RX_PTC16
+			bool "PTC16"
+		config MACH_S32K_FLEXCAN_CAN2_RX_PTE25
+			bool "PTE25"
+	endchoice
+	choice 
+		prompt "TX Pin"
+		config MACH_S32K_FLEXCAN_CAN2_TX_PTB13
+			bool "PTB13"
+		config MACH_S32K_FLEXCAN_CAN2_TX_PTC17
+			bool "PTC17"
+		config MACH_S32K_FLEXCAN_CAN2_TX_PTE24
+			bool "PTE24"
+	endchoice
+	comment "Waring: More than 31 Filter are not posible"
+		depends on MACH_S32K_FLEXCAN_CAN2_MAX_FILTER > 31
+		depends on S32K148
+	comment "Waring: More than 15 Filter are not posible"
+		depends on MACH_S32K_FLEXCAN_CAN2_MAX_FILTER > 15
+		depends on !S32K148
+		depends on S32K144 || S32K146
+	config MACH_S32K_FLEXCAN_CAN2_MAX_FILTER
+		int "Max Input Filters"
+		default 2
+	config MACH_S32K_FLEXCAN_CAN2_FILTER_QUEUE_ENTRIES
+		int "Max Filter Software Queue Entries"
+		default 2
+		help
+			The Hardware has only one entrie per filter
+			so we need a software queue to store the messages
+
+			How manny CAN Frames can be stored in this software queue?
+endif
+
 comment "Selected payload size reduce the number of hadware filter!"
+	depends on DISABLED
 choice 
 	prompt "Select Max Payload Size"
+	depends on DISABLED
 	config NXP_FLEXCAN_MAX_DLEN_8
 		bool "8 Byte (CAN)"
 	config NXP_FLEXCAN_MAX_DLEN_16

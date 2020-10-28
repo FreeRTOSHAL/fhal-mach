@@ -67,6 +67,9 @@ config MACH_HAS_ADC
 config MACH_HAS_SPI
 	bool
 	default y
+config MACH_HAS_CAN
+	bool
+	default y
 config USE_NXP_LIB
 	bool
 	default y

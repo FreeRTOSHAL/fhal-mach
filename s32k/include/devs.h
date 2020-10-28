@@ -653,4 +653,14 @@ HAL_DEFINE_GLOBAL_ARRAY(spi);
 #ifdef CONFIG_MACH_S32K_LPSPI2
 # define LPSPI2_ID HAL_GET_ID(spi, nxp, nxp_lpspi2)
 #endif
+HAL_DEFINE_GLOBAL_ARRAY(can);
+#ifdef CONFIG_MACH_S32K_FLEXCAN_CAN0
+# define FLEXCAN0_ID HAL_GET_ID(can, nxp, flexcan0)
+#endif
+#ifdef CONFIG_MACH_S32K_FLEXCAN_CAN1
+# define FLEXCAN1_ID HAL_GET_ID(can, nxp, flexcan1)
+#endif
+#ifdef CONFIG_MACH_S32K_FLEXCAN_CAN2
+# define FLEXCAN2_ID HAL_GET_ID(can, nxp, flexcan2)
+#endif
 #endif
