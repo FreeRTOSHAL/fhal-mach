@@ -81,8 +81,16 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh) {
 	/* Enter Freeze Mode and Halt Mode until can_up is called */
 	can->base->mcr |= FLEXCAN_MCR_FRZ_MASK | FLEXCAN_MCR_HALT_MASK;
 
-	/* Access by userpsace is premieded */
+	/* Access by userpsace is permitted */
 	can->base->mcr &= ~FLEXCAN_MCR_SUPV_MASK;
+	/* Message Abort is permitted */
+	can->base->mcr |= FLEXCAN_MCR_AEN_MASK;
+	/* individual masks are enabled */
+	can->base->mcr |= FLEXCAN_MCR_IRMQ_MASK;
+	if (can->mb_count > 16) {
+		/* enable 32 MBs */
+		can->base->mcr |= FLEXCAN_MCR_MAXMB(0xFF);
+	}
 #ifdef CONFIG_NXP_FLEXCAN_LOOP_BACK_MODE
 	/* Activate Loop Back Mode */
 	can->base->ctrl1 |= FLEXCAN_CTRL1_LPB_MASK;
@@ -111,7 +119,8 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh) {
 			FLEXCAN_CTRL1_PSEG1(can->bt.phase_seg1 - 1) |
 			FLEXCAN_CTRL1_PSEG2(can->bt.phase_seg2 - 1) |
 			FLEXCAN_CTRL1_RJW(can->bt.sjw - 1) |
-			FLEXCAN_CTRL1_PROPSEG(can->bt.prop_seg - 1);
+			FLEXCAN_CTRL1_PROPSEG(can->bt.prop_seg - 1) |
+			FLEXCAN_CTRL1_SMP_MASK; /* use 3 bits per CAN sample */
 		can->base->ctrl1 = reg;
 		PRINTF("Target bus speed: %lu\n", bitrate);
 		PRINTF("Calculated bus speed: %lu\n", can->bt.bitrate);
@@ -145,7 +154,7 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh) {
 	{
 		int32_t i;
 		/* enable all Interrupts and set prio */
-		for (i = 0; i < 5; i++) {
+		for (i = 0; i < can->irqNum; i++) {
 			irq_enable(can->irqIDs[i]);
 			irq_setPrio(can->irqIDs[i], 0xFF);
 		}
@@ -307,11 +316,11 @@ CAN_SEND(flexcan, can, msg, waittime) {
 	if (msg->req) {
 		/* TODO Implement request and recv */
 		/* CAN Requests has a complex MB state machine */
-		return -1;
+		goto flexcan_send_error0;
 	}
 	if (msg->length > 8) {
 		/* TODO CAN FD is not supported */
-		return -1;
+		goto flexcan_send_error0;
 	}
 	can_lock(can, waittime, -1);
 	mb = &can->base->mb[0];
@@ -335,11 +344,23 @@ CAN_SEND(flexcan, can, msg, waittime) {
 	/* and sleep until it is send */
 	lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
 	if (lret != pdTRUE) {
-		can_unlock(can, -1);
-		return -1;
+		/* we request a abort */
+		mb->ctrl = (mb->ctrl & ~FLEXCAN_MB_CTRL_CODE_MASK) | FLEXCAN_MB_CTRL_CODE_ABORT;
+		/* wait for confirm */
+		lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, 1 / portTICK_PERIOD_MS);
+		/* if code is not abort frame is send out, if timeout error may in HW? */
+		if ((mb->ctrl & FLEXCAN_MB_CTRL_CODE_ABORT) != 0 || lret != pdTRUE) {
+			/* Set to inactive */
+			mb->ctrl = FLEXCAN_MB_CTRL_CODE_TX_INACTIVE;
+			goto flexcan_send_error1;
+		}
 	}
 	can_unlock(can, -1);
 	return 0;
+flexcan_send_error1:
+	can_unlock(can, -1);
+flexcan_send_error0:
+	return -1;
 }
 CAN_RECV(flexcan, can, filterID, msg, waittime) {
 	BaseType_t ret;

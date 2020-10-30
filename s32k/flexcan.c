@@ -56,7 +56,7 @@ static const struct can_bittiming_const flexcan_bittimings = {
 #define FLEXCAN_PIN_RX(_pin, _mode) \
 	{ \
 		.pin = _pin, \
-		.ctl = MUX_CTL_MODE(_mode), \
+		.ctl = MUX_CTL_MODE(_mode) | MUX_CTL_PULL_UP, \
 		.extra = 0, \
 	}
 
@@ -113,6 +113,7 @@ struct can flexcan0 = {
 	.filterCount = CONFIG_MACH_S32K_FLEXCAN_CAN0_MAX_FILTER,
 	.mb_count = 32,
 	.filter = can_flexcan0_filter,
+	.irqNum = 5,
 	.irqIDs = {CAN0_ORed_IRQn, CAN0_Error_IRQn, CAN0_Wake_Up_IRQn, CAN0_ORed_0_15_MB_IRQn, CAN0_ORed_16_31_MB_IRQn},
 };
 CAN_ADDDEV(nxp, flexcan0);
@@ -159,7 +160,7 @@ struct flexcan_filter can_flexcan1_filter[CONFIG_MACH_S32K_FLEXCAN_CAN1_MAX_FILT
 struct can flexcan1 = {
 	CAN_INIT_DEV(flexcan)
 	HAL_NAME("FlexCAN 1")
-	.clkData = &can0_clk,
+	.clkData = &can1_clk,
 	.pins = &can1_pins,
 	.base = S32K_FLEXCAN_1,
 	.btc = &flexcan_bittimings,
@@ -171,9 +172,27 @@ struct can flexcan1 = {
 	.mb_count = 16,
 #endif
 	.filter = can_flexcan1_filter,
-	.irqIDs = {CAN0_ORed_IRQn, CAN0_Error_IRQn, CAN0_Wake_Up_IRQn, CAN0_ORed_0_15_MB_IRQn, CAN0_ORed_16_31_MB_IRQn},
+	.irqNum = 3,
+	/* TODO Missing CAN1_ORed_16_31_MB_IRQn */
+	.irqIDs = {CAN1_ORed_IRQn, CAN1_Error_IRQn, CAN1_ORed_0_15_MB_IRQn},
 };
 CAN_ADDDEV(nxp, flexcan1);
+/* Bus Off OR Transmit Warning OR Receive Warning */
+void CAN1_ORed_isr() {
+	flexcan_handleWarnIRQ(&flexcan1);
+}
+/* Interrupt indicating that errors were detected on the CAN bus */
+void CAN1_Error_isr() {
+	flexcan_handleErrorIRQ(&flexcan1);
+}
+/* Message buffer (0-15) */
+void CAN1_ORed_0_15_MB_isr() {
+	flexcan_handleMBIRQ(&flexcan1);
+}
+/* Message buffer (16-31) */
+void CAN1_ORed_16_31_MB_isr() {
+	flexcan_handleMBIRQ(&flexcan1);
+}
 #endif
 #ifdef CONFIG_MACH_S32K_FLEXCAN_CAN2
 const struct flexcan_clk can2_clk= {
@@ -215,7 +234,25 @@ struct can flexcan2 = {
 	.mb_count = 16,
 #endif
 	.filter = can_flexcan2_filter,
-	.irqIDs = {CAN0_ORed_IRQn, CAN0_Error_IRQn, CAN0_Wake_Up_IRQn, CAN0_ORed_0_15_MB_IRQn, CAN0_ORed_16_31_MB_IRQn},
+	.irqNum = 3,
+	/* TODO missing CAN2_ORed_16_31_MB_IRQn */
+	.irqIDs = {CAN0_ORed_IRQn, CAN2_Error_IRQn, CAN2_ORed_0_15_MB_IRQn},
 };
 CAN_ADDDEV(nxp, flexcan2);
+/* Bus Off OR Transmit Warning OR Receive Warning */
+void CAN2_ORed_isr() {
+	flexcan_handleWarnIRQ(&flexcan2);
+}
+/* Interrupt indicating that errors were detected on the CAN bus */
+void CAN2_Error_isr() {
+	flexcan_handleErrorIRQ(&flexcan2);
+}
+/* Message buffer (0-15) */
+void CAN2_ORed_0_15_MB_isr() {
+	flexcan_handleMBIRQ(&flexcan2);
+}
+/* Message buffer (16-31) */
+void CAN2_ORed_16_31_MB_isr() {
+	flexcan_handleMBIRQ(&flexcan2);
+}
 #endif

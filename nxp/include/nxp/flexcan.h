@@ -123,6 +123,7 @@ struct can {
 	const uint32_t filterLength;
 	const uint32_t filterCount;
 	const uint32_t irqIDs[5];
+	const uint32_t irqNum;
 	struct gpio_pin *enablePin;
 	bool pinHigh;
 	struct can_bittiming bt;
@@ -219,6 +220,7 @@ extern const struct can_ops flexcan_can_ops;
  */
 #define FLEXCAN_MB_CTRL_CODE(x) (((x) & 0xF) << 24)
 #define FLEXCAN_MB_CTRL_CODE_GET(reg) (((reg) >> 24) & 0xF)
+#define FLEXCAN_MB_CTRL_CODE_MASK FLEXCAN_MB_CTRL_CODE(0xF)
 /**
  * MB is not active
  *
