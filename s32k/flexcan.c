@@ -56,7 +56,7 @@ static const struct can_bittiming_const flexcan_bittimings = {
 #define FLEXCAN_PIN_RX(_pin, _mode) \
 	{ \
 		.pin = _pin, \
-		.ctl = MUX_CTL_MODE(_mode) | MUX_CTL_PULL_UP, \
+		.ctl = MUX_CTL_MODE(_mode), \
 		.extra = 0, \
 	}
 
