@@ -130,13 +130,20 @@ struct can {
 	int64_t freq;
 	uint32_t mb_count;
 	TaskHandle_t task;
+	bool (*errorCallback)(struct can *can, can_error_t error, can_errorData_t data);
+	void *userData;
 	struct flexcan_filter *filter;
 };
 int32_t flexcan_setupClock(struct can *can);
 int32_t flexcan_setupPins(struct can *can);
+/* Interrupt asserted when Pretended Networking operation is enabled, and a valid message matches the selected filter criteria during Low Power mode*/
 void flexcan_handleWakeUpIRQ(struct can *can);
+/* Bus Off OR Transmit Warning OR Receive Warning */
 void flexcan_handleWarnIRQ(struct can *can);
+/* Interrupt indicating that errors were detected on the CAN bus */
 void flexcan_handleErrorIRQ(struct can *can);
+/* Message buffer (0-15) IRQ */
+/* Message buffer (16-31) IRQ */
 void flexcan_handleMBIRQ(struct can *can);
 
 #ifdef CONFIG_CAN_MULTI

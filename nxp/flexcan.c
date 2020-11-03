@@ -41,7 +41,7 @@ static void nxp_flexcan_unfreeze(struct can *can) {
 }
 
 
-CAN_INIT(flexcan, index, bitrate, pin, pinHigh) {
+CAN_INIT(flexcan, index, bitrate, pin, pinHigh, callback, data) {
 	int32_t ret;
 	struct can *can;
 	can = CAN_GET_DEV(index);
@@ -72,6 +72,8 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh) {
 		return NULL;
 	}
 	can->task = NULL;
+	can->errorCallback = callback;
+	can->userData = data;
 	/* Select Clock Source contoller must be disabled! */
 	nxp_flexcan_disable(can);
 	/* Select SOSCDIV2 as clock src */
@@ -87,6 +89,8 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh) {
 	can->base->mcr |= FLEXCAN_MCR_AEN_MASK;
 	/* individual masks are enabled */
 	can->base->mcr |= FLEXCAN_MCR_IRMQ_MASK;
+	/* enable Warn IRQ */
+	can->base->mcr |= FLEXCAN_MCR_WRNEN_MASK;
 	if (can->mb_count > 16) {
 		/* enable 32 MBs */
 		can->base->mcr |= FLEXCAN_MCR_MAXMB(0xFF);
@@ -95,6 +99,8 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh) {
 	/* Activate Loop Back Mode */
 	can->base->ctrl1 |= FLEXCAN_CTRL1_LPB_MASK;
 #endif
+	/* Enable automatically Bus Off recovery */
+	can->base->ctrl1 &= ~FLEXCAN_CTRL1_BOFFREC_MASK;
 
 	/* Setup Bautrate */
 	{
@@ -114,13 +120,18 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh) {
 		if (ret < 0) {
 			return NULL;
 		}
-		/* use bittiming */
+		/* setup bittiming */
 		reg |= FLEXCAN_CTRL1_PRESDIV(can->bt.brp - 1) | 
 			FLEXCAN_CTRL1_PSEG1(can->bt.phase_seg1 - 1) |
 			FLEXCAN_CTRL1_PSEG2(can->bt.phase_seg2 - 1) |
 			FLEXCAN_CTRL1_RJW(can->bt.sjw - 1) |
 			FLEXCAN_CTRL1_PROPSEG(can->bt.prop_seg - 1) |
 			FLEXCAN_CTRL1_SMP_MASK; /* use 3 bits per CAN sample */
+		/* enable IRQs */
+		reg |= FLEXCAN_CTRL1_BOFFMSK_MASK;
+		reg |= FLEXCAN_CTRL1_ERRMSK_MASK;
+		reg |= FLEXCAN_CTRL1_RWRNMSK_MASK;
+		reg |= FLEXCAN_CTRL1_TWRNMSK_MASK;
 		can->base->ctrl1 = reg;
 		PRINTF("Target bus speed: %lu\n", bitrate);
 		PRINTF("Calculated bus speed: %lu\n", can->bt.bitrate);
@@ -165,14 +176,80 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh) {
 
 CAN_DEINIT(flexcan, can) {
 	can->gen.init = false;
+	/* reset controller */
+	can->base->mcr |= FLEXCAN_MCR_SOFTRST_MASK;
+	/* disable controller */
 	nxp_flexcan_disable(can);
 	return true;
 }
+
+static void handle_err_or_warn(struct can *can) {
+	/* copy esr1 */
+	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+	uint32_t esr = can->base->esr1;
+	can_error_t err = 0;
+	can_errorData_t data = 0;
+	/* Error Interrupt */
+	if (esr == FLEXCAN_ESR1_ERRINT_MASK) {
+		err |= CAN_ERR_BUSERROR;
+	}
+	/* We are in Bus off */
+	if (esr == FLEXCAN_ESR1_BOFFINT_MASK) {
+		err |= CAN_ERR_BUSOFF;
+	}
+	/* RX Waring */
+	if (esr == FLEXCAN_ESR1_RWRNINT_MASK) {
+		err |= CAN_ERR_CRTL;
+		data |= CAN_ERR_CRTL_RX_WARNING;
+	}
+	if (esr == FLEXCAN_ESR1_TWRNINT_MASK) {
+		err |= CAN_ERR_CRTL;
+		data |= CAN_ERR_CRTL_TX_WARNING;
+	}
+	if (esr == FLEXCAN_ESR1_BIT1ERR_MASK) {
+		err |= CAN_ERR_PROT;
+		data |= CAN_ERR_PROT_BIT1;
+	}
+	if (esr == FLEXCAN_ESR1_BIT0ERR_MASK) {
+		err |= CAN_ERR_PROT;
+		data |= CAN_ERR_PROT_BIT0;
+	}
+	if (esr == FLEXCAN_ESR1_ACKERR_MASK) {
+		err |= CAN_ERR_PROT;
+		err |= CAN_ERR_ACK;
+		data |= CAN_ERR_PROT_LOC_ACK;
+	}
+	if (esr == FLEXCAN_ESR1_CRCERR_MASK) {
+		err |= CAN_ERR_PROT;
+		data |= CAN_ERR_PROT_BIT;
+		data |= CAN_ERR_PROT_LOC_CRC_SEQ;
+	}
+	if (esr == FLEXCAN_ESR1_FRMERR_MASK) {
+		err |= CAN_ERR_PROT;
+		data |= CAN_ERR_PROT_FORM;
+	}
+	if (esr == FLEXCAN_ESR1_STFERR_MASK) {
+		err |= CAN_ERR_PROT;
+		data |= CAN_ERR_PROT_STUFF;
+	}
+	/* if err is happened call userspace */
+	if (err != 0) {
+		if (can->errorCallback) {
+			pxHigherPriorityTaskWoken |= can->errorCallback(can, err, data);
+		}
+	}
+	/* clear all flags */
+	can->base->esr1 = esr;
+	portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
+}
+
 void flexcan_handleWarnIRQ(struct can *can) {
-	/* handle warings */
+	/* handle warnings */
+	handle_err_or_warn(can);
 }
 void flexcan_handleErrorIRQ(struct can *can) {
 	/* handle error */
+	handle_err_or_warn(can);
 }
 void flexcan_handleWakeUpIRQ(struct can *can) {
 	/* not used */
