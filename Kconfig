@@ -36,6 +36,12 @@ choice
 		depends on ARCH_ARM_CORTEX_M0 || ARCH_ARM_CORTEX_M3 ||  ARCH_ARM_CORTEX_M4F
 		help
 			NXP S32K Mach
+	config MACH_C28X
+		bool "C28x"
+		depends on ARCH_C2000
+		depends on ARCH_C2000_C28x
+		help
+			TI C2000 DSP
 endchoice
 if MACH_VF610=y
 source mach/vf610/Kconfig
@@ -57,5 +63,8 @@ source mach/s32k/Kconfig
 endif
 if MACH_VF610=y || MACH_S32K=y
 source mach/nxp/Kconfig
+endif
+if MACH_C28X=y
+source mach/c28x/Kconfig
 endif
 endmenu

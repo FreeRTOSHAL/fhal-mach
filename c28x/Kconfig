@@ -1,0 +1,31 @@
+comment "NXP S32K Settings"
+config MACH_INIT_STACK_SIZE
+	int "Init Stack Size"
+	default 600
+	help
+		Stack Size of Init Prozess. Stack size used by Interrupt and Init Prozess
+#config MACH_LD_SCRIPT
+#	string 
+#	default "mach/s32k/s32k.lds"
+config MACH_INCLUDE
+	string
+	default "-Imach/c28x/include"
+config MACH_DEFINE_HEAP
+	bool
+	default y
+config EXTRA_MACH_LINKFLAGS
+	string
+	default "-z -i$(shell dirname $(shell which $(CC)))/../lib --disable_auto_rts --priority --reread_libs --diag_suppress=16002 --diag_suppress=10063-D --xml_link_info='projekt_linkInfo.xml' --entry_point=code_start --rom_model --warn_sections --stack_size=$(CONFIG_MACH_INIT_STACK_SIZE)"
+config MACH_LIBS
+	string
+	default "-lrts2800_ml.lib mach/c28x/F28069F.cmd"
+config MACH_HAS_UART
+	bool
+	default y
+menuconfig MACH_C28X_SCI
+	bool "SCI Driver"
+	depends on UART
+	default y
+	if MACH_C28X_SCI = y
+		source mach/c28x/Kconfig.sci
+	endif
