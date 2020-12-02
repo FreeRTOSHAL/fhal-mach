@@ -48,12 +48,12 @@ static void setActiveWaitCount(struct clock *clk, const uint16_t count) {
 	clk->flash->FSTDBYWAIT = count;
 }
 
-extern uint16_t *RamfuncsLoadStart, *RamfuncsLoadEnd, *RamfuncsRunStart;
 struct clock *clock_init() {
 	volatile CLK_Obj *clk = clock.clk;
 	volatile PLL_Obj *pll = clock.pll;
-	uintptr_t len = (((uintptr_t) &RamfuncsLoadEnd) - ((uintptr_t) &RamfuncsLoadStart));
-	memcpy(&RamfuncsRunStart, &RamfuncsLoadStart, (size_t) len);
+	if (clock.gen.init) {
+		return &clk;
+	}
 
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	// enable internal oscillator 1
@@ -118,6 +118,7 @@ struct clock *clock_init() {
 
 	// disable the crystal oscillator
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+	clock.gen.init = true;
 	
 	return &clock;	
 }

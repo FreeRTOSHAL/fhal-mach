@@ -31,7 +31,8 @@ CONST_COPY	.set 0
 	.global  __args_main, _exit, _copy_in
         .global  __system_pre_init, __system_post_cinit
 	.global  __stack
-	.global  _clock_init
+	.global  _cpu_init
+	.global  _irq_init
 
 ****************************************************************************
 * Declare the stack.  Size is determined by the linker option -stack.  The *
@@ -223,7 +224,7 @@ BYPASS_AUTO_INIT:
 ****************************************************************************
 *  CALL USER'S PROGRAM                                                     *
 ****************************************************************************
-	LCR     _clock_init                     ; execute clock_init
+	LCR     _cpu_init                       ; execute cpu_init
 	LCR     __args_main			; execute main()
 	LCR  	_exit
 	.endasmfunc

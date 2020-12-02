@@ -22,10 +22,25 @@ config MACH_LIBS
 config MACH_HAS_UART
 	bool
 	default y
+config MACH_HAS_TIMER
+	bool
+	default y
+	select TIMER
+	select MACH_C28X_CPU_TIMER
+	select MACH_C28X_CPU_TIMER2
+	help
+		Timer is needed by this port!
 menuconfig MACH_C28X_SCI
 	bool "SCI Driver"
 	depends on UART
 	default y
 	if MACH_C28X_SCI = y
 		source mach/c28x/Kconfig.sci
+	endif
+menuconfig MACH_C28X_CPU_TIMER
+	bool "Timer"
+	depends on TIMER
+	default y
+	if MACH_C28X_CPU_TIMER
+		source mach/c28x/Kconfig.timer
 	endif
