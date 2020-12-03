@@ -57,8 +57,8 @@ struct uart_regs {
 
 #define SCICTL2_TXINTENA BIT(0)
 #define SCICTL2_RXBKINTENA BIT(1)
-#define SCICTL2_TXEMPTY BIT(2)
-#define SCICTL2_TXRDY BIT(3)
+#define SCICTL2_TXEMPTY BIT(6)
+#define SCICTL2_TXRDY BIT(7)
 
 #define SCIRXST_RXWAKE BIT(1)
 #define SCIRXST_PE BIT(2)
