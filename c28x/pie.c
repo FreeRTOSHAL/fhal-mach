@@ -5,6 +5,7 @@
 #include <cpu.h>
 
 PIE_Obj * const pie = (PIE_Obj *) PIE_BASE_ADDR;
+static bool init = false;
 
 void defaultISR() {
 	CONFIG_ASSERT(0);
@@ -12,6 +13,9 @@ void defaultISR() {
 
 int32_t irq_init() {
 	int i;
+	if (init) {
+		return 0;
+	}
 	/* Disable PIE */
 	pie->PIECTRL &= ~PIE_PIECTRL_ENPIE_BITS;
 	for (i = 0; i < 12; i++) {
@@ -30,6 +34,7 @@ int32_t irq_init() {
 	}
 	/* enable ISRs */
 	pie->PIECTRL |= PIE_PIECTRL_ENPIE_BITS;
+	init = true;
 	return 0;
 }
 int32_t irq_enable(int32_t irqnr) {

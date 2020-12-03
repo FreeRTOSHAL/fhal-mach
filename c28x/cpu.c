@@ -6,6 +6,8 @@ void vApplicationSetupTimerInterrupt(void) {
 	int32_t ret;
 	struct timer *timer = timer_init(CPU_TIMER2_ID, 1, 0, 0);
 	CONFIG_ASSERT(timer);
+	ret = irq_init();
+	CONFIG_ASSERT(ret == 0);
 	ret = timer_periodic(timer, 1000000 / configTICK_RATE_HZ);
 	CONFIG_ASSERT(ret >= 0);
 }
