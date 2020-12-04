@@ -58,4 +58,7 @@ endif
 if MACH_VF610=y || MACH_S32K=y
 source mach/nxp/Kconfig
 endif
+if MACH_AM57xx=y
+source mach/ti/Kconfig
+endif
 endmenu

@@ -1,0 +1,3 @@
+config TI_CARCAN
+    bool
+    default n

@@ -1,0 +1,6 @@
+menuconfig MACH_AM57xx_CARCAN_CAN1
+    bool "CAN 1"
+    default n
+menuconfig MACH_AM57xx_CARCAN_CAN2
+    bool "CAN 2"
+    default n
