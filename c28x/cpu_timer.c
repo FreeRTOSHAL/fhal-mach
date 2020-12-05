@@ -42,6 +42,7 @@ struct timer_reg {
 
 struct timer_const {
 	int32_t irq;
+	uint16_t hwIrq;
 	void (*irqHandler)();
 };
 
@@ -90,6 +91,11 @@ TIMER_INIT(c28x, index, prescaler, basetime, adjust) {
 	/* Set prescaler to 1 */
 	timer->base->TPR = 0;
 	timer->base->TPRH = 0;
+
+	if (timer->config->hwIrq) {
+		/* enable Timer IRQ */
+		IER |= timer->config->hwIrq;
+	}
 
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 
@@ -194,11 +200,13 @@ extern void cpu_timer0_irqHandler();
 struct timer_const const cpu_timer0_config = {
 	.irq = TINT0_IRQn,
 	.irqHandler = cpu_timer0_irqHandler,
+	.hwIrq = 0,
 };
 struct timer cpu_timer0 = {
 	TIMER_INIT_DEV(c28x)
 	HAL_NAME("CPU Timer 0")
 	.base = (struct timer_reg *) 0x0C00,
+	.config = &cpu_timer0_config,
 };
 TIMER_ADDDEV(c28x, cpu_timer0);
 void cpu_timer0_irqHandler() {
@@ -208,13 +216,15 @@ void cpu_timer0_irqHandler() {
 #ifdef CONFIG_MACH_C28X_CPU_TIMER1
 extern void cpu_timer1_irqHandler();
 struct timer_const const cpu_timer1_config = {
-	.irq = TINT0_IRQn,
+	.irq = TINT2_IRQn,
 	.irqHandler = cpu_timer1_irqHandler,
+	.hwIrq = M_INT13,
 };
 struct timer cpu_timer1 = {
 	TIMER_INIT_DEV(c28x)
 	HAL_NAME("CPU Timer 1")
 	.base = (struct timer_reg *) 0x0C08,
+	.config = &cpu_timer1_config,
 };
 TIMER_ADDDEV(c28x, cpu_timer1);
 void cpu_timer1_irqHandler() {
@@ -226,11 +236,13 @@ struct timer_const const cpu_timer2_config = {
 	.irq = TINT2_IRQn,
 	/* This Timer is used by FreeRTOS Port call portTICK_ISR directly */
 	.irqHandler = portTICK_ISR,
+	.hwIrq = M_INT14,
 };
 struct timer cpu_timer2 = {
 	TIMER_INIT_DEV(c28x)
 	HAL_NAME("CPU Timer 2")
 	.base = (struct timer_reg *) 0x0C10,
+	.config = &cpu_timer2_config,
 };
 TIMER_ADDDEV(c28x, cpu_timer2);
 #endif
