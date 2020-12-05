@@ -1,6 +1,7 @@
 #include <mux.h>
 #include <iomux.h>
 #include <c2000/gpio.h>
+#include <cpu.h>
 
 struct mux {
 	struct gpio *gpio;
@@ -27,6 +28,7 @@ int32_t mux_pinctl(struct mux* mux, uint32_t pin, uint32_t ctl, uint32_t extra) 
 	volatile struct gpio_regs_ctrl *ctrl = &mux->gpio->base->ctrl[b];
 	uint32_t tmp = ctrl->GPxMUX[reg];
 
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 
 	if (ctl & MUX_CTL_PULL_UP) {
 		ctrl->GPxPUD |= GPxPUD_PULL_UP(p);
@@ -44,9 +46,11 @@ int32_t mux_pinctl(struct mux* mux, uint32_t pin, uint32_t ctl, uint32_t extra) 
 		/* clear Value */
 		tmp &= ~GPxMUX_MUX(0x3, (p & 0xF));
 		/* Set Value */
-		tmp |= GPxMUX_MUX((ctl >> 8 ) & 0xF, (p & 0xF));
+		tmp |= GPxMUX_MUX((ctl >> 8) & 0xF, (p & 0xF));
 	}
 	ctrl->GPxMUX[reg] = tmp;
+
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
 int32_t mux_deinit(struct mux *mux) {
