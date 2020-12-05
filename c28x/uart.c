@@ -131,7 +131,7 @@ UART_INIT(sci, port, baudrate) {
 	struct uart *uart = (struct uart *) UART_GET_DEV(port);
 	struct mux *mux = mux_init();
 	int32_t ret;
-	uint32_t CPUSpeed = (uint32_t) clock_getCPUSpeed(clock_init());
+	uint32_t PeriSpeed = (uint32_t) clock_getPeripherySpeed(clock_init(), 0);
 	if (uart == NULL) {
 		return NULL;
 	}
@@ -151,7 +151,7 @@ UART_INIT(sci, port, baudrate) {
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	obj->PCLKCR0 |= uart->config->clockBit;
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
-	baudrate = (CPUSpeed / (baudrate * 8)) - 1;
+	baudrate = (PeriSpeed / (baudrate * 8)) - 1;
 	/* Software Reset */
 	uart->base->SCICTL1 &= SCICTL1_SWRESET;
 	uart->base->SCICTL1 |= ~SCICTL1_SWRESET;
