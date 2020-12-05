@@ -14,6 +14,8 @@
 #include <semphr.h>
 #include <clk.h>
 #include <iomux.h>
+#include <clock.h>
+#include <cpu.h>
 
 struct uart_pin {
 	uint32_t pin;
@@ -30,14 +32,16 @@ struct uart_regs {
 	uint16_t SCIRXST; /* 0x5 Receive status register */
 	uint16_t SCIRXEMU; /* 0x6 Receive emulation buffer register */
 	uint16_t SCIRXBUF; /* 0x7 Receive data buffer */
+	uint16_t rsvd_1;
 	uint16_t SCITXBUF; /* 0x9 Transmit data buffer */
 	uint16_t SCIFFTX; /* 0xA FIFO transmit register */
 	uint16_t SCIFFRX; /* 0xB FIFO receive register */
 	uint16_t SCIFFCT; /* 0xC FIFO control register */
+	uint16_t rsvd_2[2];
 	uint16_t SCIPRI; /* 0xF SCI priority control */
 };
 
-#define SCICCR_SCICHAR(x) (((x) & 0x3) << 0)
+#define SCICCR_SCICHAR(x) (((x) & 0x7) << 0)
 #define SCICCR_ADDRIDLE_MODE BIT(3)
 #define SCICCR_LOOPBKENA BIT(4)
 #define SCICCR_PARITYENA BIT(5)
@@ -127,6 +131,7 @@ UART_INIT(sci, port, baudrate) {
 	struct uart *uart = (struct uart *) UART_GET_DEV(port);
 	struct mux *mux = mux_init();
 	int32_t ret;
+	uint32_t CPUSpeed = (uint32_t) clock_getCPUSpeed(clock_init());
 	if (uart == NULL) {
 		return NULL;
 	}
@@ -143,26 +148,13 @@ UART_INIT(sci, port, baudrate) {
 	if (baudrate == 0) {
 		return NULL;
 	}
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	obj->PCLKCR0 |= uart->config->clockBit;
-	switch (baudrate) {
-		case 9600:
-			baudrate = 194;
-			break;
-		case 19200:
-			baudrate = 97;
-			break;
-		case 57600:
-			baudrate = 33;
-			break;
-		case 115200:
-			baudrate = 15;
-			break;
-		default:
-			goto sci_uart_init_error1;
-	}
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+	baudrate = (CPUSpeed / (baudrate * 8)) - 1;
 	/* Software Reset */
-	uart->base->SCICTL1 |= SCICTL1_SWRESET;
-	uart->base->SCICTL1 &= ~SCICTL1_SWRESET;
+	uart->base->SCICTL1 &= SCICTL1_SWRESET;
+	uart->base->SCICTL1 |= ~SCICTL1_SWRESET;
 
 	/* Set Bautdate */
 	uart->base->SCIHBAUD = SCIHBAUD_BAUD(baudrate >> 8);
@@ -184,9 +176,12 @@ UART_INIT(sci, port, baudrate) {
 	/* TODO Setup Interrutp Level */
 	//uart->bsae->SCIFFTX = SCIFFTX_TXFFIL();
 	//uart->base->SCIFFRX = SCIFFRX_RXFFIL();
+	//
+	uart->base->SCIFFTX |= SCIFFTX_SCIFFENA | SCIFFTX_TXFIFORESET;
+	uart->base->SCIFFRX |= SCIFFRX_RXFIFORESET;
 	
 	/* Enable Recv and Send */
-	uart->base->SCICTL1 = SCICTL1_RXENA | SCICTL1_RXENA;
+	uart->base->SCICTL1 |= SCICTL1_RXENA | SCICTL1_RXENA;
 
 	return uart;
 sci_uart_init_error1:

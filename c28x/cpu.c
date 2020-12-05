@@ -1,6 +1,8 @@
 #include <devs.h>
 #include <timer.h>
 #include <clock.h>
+#include <vector.h>
+#include <irq.h>
 void vApplicationSetupTimerInterrupt(void) {
 	/* Setup Tick Timer */
 	int32_t ret;
@@ -19,5 +21,7 @@ void cpu_init() {
 		uintptr_t len = (((uintptr_t) &RamfuncsLoadEnd) - ((uintptr_t) &RamfuncsLoadStart));
 		memcpy(&RamfuncsRunStart, &RamfuncsLoadStart, (size_t) len);
 	}
+	IER = 0;
+	IFR = 0;
 	clock_init();
 }

@@ -9,6 +9,7 @@
 #include <vector.h>
 #include <iomux.h>
 #include <clock.h>
+#include <cpu.h>
 
 struct timer_reg {
 	/**
@@ -81,12 +82,16 @@ TIMER_INIT(c28x, index, prescaler, basetime, adjust) {
 	timer->basetime = basetime;
 	timer->adjust = adjust;
 
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+
 	timer->base->PRD = 0xFFFFFFFF;
 	timer->base->TCR |= TCR_TSS;
 	timer->base->TCR |= TCR_TRB;
 	/* Set prescaler to 1 */
 	timer->base->TPR = 0;
 	timer->base->TPRH = 0;
+
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 
 	/* set IRQ Handler (vector table is in PIE RAM */
 	irq_setHandler(timer->config->irq, timer->config->irqHandler);
@@ -119,17 +124,21 @@ TIMER_SET_OVERFLOW_CALLBACK(c28x, timer, callback, data) {
 	return 0;
 }
 TIMER_START(c28x, timer) {
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	/* Stop Timer */
 	timer->base->TCR |= TCR_TSS;
 	/* reload timer */
 	timer->base->TCR |= TCR_TRB;
 	/* Start Timer */
 	timer->base->TCR &= ~TCR_TSS;
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
 TIMER_STOP(c28x, timer) {
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	/* Stop Timer */
 	timer->base->TCR |= TCR_TSS;
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
 TIMER_ONESHOT(c28x, timer, us) {
@@ -137,9 +146,11 @@ TIMER_ONESHOT(c28x, timer, us) {
 	/* get CPU Freq in MHz */
 	int64_t freq = clock_getCPUSpeed(clock_init()) / 1000000;
 	ticks = freq * us;
-	timer->base->PRD = ticks - 1;
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	/* Stop Timer */
 	timer->base->TCR |= TCR_TSS;
+	/* Set Reaload Value */
+	timer->base->PRD = ticks - 1;
 	/* reload timer */
 	timer->base->TCR |= TCR_TRB;
 	/* Oneshot  */
@@ -150,6 +161,7 @@ TIMER_ONESHOT(c28x, timer, us) {
 	timer->base->TCR |= TCR_TIE;
 	/* Start Timer */
 	timer->base->TCR &= ~TCR_TSS;
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
 TIMER_PERIODIC(c28x, timer, us) {
@@ -157,9 +169,11 @@ TIMER_PERIODIC(c28x, timer, us) {
 	/* get CPU Freq in MHz */
 	int64_t freq = clock_getCPUSpeed(clock_init()) / 1000000;
 	ticks = freq * us;
-	timer->base->PRD = ticks - 1;
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	/* Stop Timer */
 	timer->base->TCR |= TCR_TSS;
+	/* Set Reaload Value */
+	timer->base->PRD = ticks - 1;
 	/* reload timer */
 	timer->base->TCR |= TCR_TRB;
 	/* Periodic  */
@@ -170,6 +184,7 @@ TIMER_PERIODIC(c28x, timer, us) {
 	timer->base->TCR |= TCR_TIE;
 	/* Start Timer */
 	timer->base->TCR &= ~TCR_TSS;
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
 TIMER_OPS(c28x);
