@@ -107,6 +107,7 @@ struct clock *clock_init() {
 		pll->PLLSTS |= PLL_DivideSelect_ClkIn_by_2;
 	}
 	/* Flash Setup */
+#if 0
 	{
 		enablePipelineMode(&clock);
 		setNumPagedReadWaitStates(&clock, FLASH_NumPagedWaitStates_3);
@@ -115,8 +116,9 @@ struct clock *clock_init() {
 		setStandbyWaitCount(&clock, FLASH_STANDBY_WAIT_COUNT_DEFAULT);
 		setActiveWaitCount(&clock, FLASH_ACTIVE_WAIT_COUNT_DEFAULT);
 	}
+#endif
+	clk->LOSPCP = CLK_LowSpdPreScaler_SysClkOut_by_2;
 
-	// disable the crystal oscillator
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	clock.gen.init = true;
 	
@@ -126,7 +128,8 @@ int64_t clock_getCPUSpeed(struct clock *clk) {
 	return 90000000;
 }
 int64_t clock_getPeripherySpeed(struct clock *clk, uint32_t id) {
-	return -1;
+	/* clock_getCPUSpeed / 2 */
+	return clock_getCPUSpeed(clk) >> 1;
 }
 int32_t clock_deinit(struct clock *clk) {
 	return 0;
