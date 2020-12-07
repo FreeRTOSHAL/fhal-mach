@@ -16,7 +16,7 @@ void *memcpy(void *d, const void *s, size_t n) {
 	if (((n & 0x3) == 0) && ((((uintptr_t) d) & 0x3) == 0) && ((((uintptr_t) s) & 0x3) == 0)) {
 		const uint32_t *src;
 		uint32_t *dest;
-		n >>= 2;
+		n >>= 1; /* on c2000 1 byte == 16 bit  */
 		for(src = s, dest = d; n > 0; dest++, src++, n--) {
 			*dest = *src;
 		}
@@ -24,19 +24,13 @@ void *memcpy(void *d, const void *s, size_t n) {
 	 * If n,s and d power of 2
 	 * copy with 16 Bit
 	 */
-	} else if (((n & 0x1) == 0) && ((((uintptr_t) d) & 0x1) == 0) && ((((uintptr_t) s) & 0x1) == 0)) {
+	} else {
 		const uint16_t *src;
 		uint16_t *dest;
-		n >>= 1;
+		//n >>= 1; /* on c2000 1 byte == 16 bit  */
 		for (dest = d, src = s; n > 0; dest++, src++, n--) {
 			*dest = *src;
 		}
-	/*
-	 * Else 
-	 * copy with 8 Bit is not supported!
-	 */
-	} else {
-		CONFIG_ASSERT(0);
 	}
 	return d;
 }

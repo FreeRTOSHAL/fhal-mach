@@ -33,6 +33,17 @@ config MACH_HAS_TIMER
 	select MACH_C28X_CPU_TIMER2
 	help
 		Timer is needed by this port!
+menu "Clock Configuation"
+	choice 
+		prompt "Low Speed Pre Scaler"
+		config MACH_C28X_CLOCK_LOPCP_BY_4
+			bool "/4"
+		config MACH_C28X_CLOCK_LOPCP_BY_1
+			bool "/1"
+		config MACH_C28X_CLOCK_LOPCP_BY_2
+			bool "/2"
+	endchoice
+endmenu
 menuconfig MACH_C28X_SCI
 	bool "SCI Driver"
 	depends on UART
