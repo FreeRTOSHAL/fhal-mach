@@ -60,6 +60,15 @@ void setStandbyWaitCount(struct clock *clk, const uint16_t count) {
 void setActiveWaitCount(struct clock *clk, const uint16_t count) {
 	clk->flash->FSTDBYWAIT = count;
 }
+#pragma CODE_SECTION(flashInit, "ramfuncs");
+void flashInit(struct clock *clk) {
+	enablePipelineMode(&clock);
+	setNumPagedReadWaitStates(&clock, FLASH_NumPagedWaitStates_3);
+	setNumRandomReadWaitStates(&clock, FLASH_NumRandomWaitStates_3);
+	setOtpWaitStates(&clock, FLASH_NumOtpWaitStates_5);
+	setStandbyWaitCount(&clock, FLASH_STANDBY_WAIT_COUNT_DEFAULT);
+	setActiveWaitCount(&clock, FLASH_ACTIVE_WAIT_COUNT_DEFAULT);
+}
 
 struct clock *clock_init() {
 	volatile CLK_Obj *clk = clock.clk;
@@ -85,8 +94,8 @@ struct clock *clock_init() {
 		// disable oscillator 2
 		clk->CLKCTL |= CLK_CLKCTL_INTOSC2OFF_BITS;
 		
-		// set the low speed clock prescaler to /4 first
-		clk->LOSPCP = CLK_LowSpdPreScaler_SysClkOut_by_4;
+		// set the low speed clock prescaler to /1 first
+		clk->LOSPCP = CLK_LowSpdPreScaler_SysClkOut_by_1;
 
 		// set the clock out prescaler
 		clk->XCLK &= (~CLK_XCLK_XCLKOUTDIV_BITS);
@@ -121,14 +130,7 @@ struct clock *clock_init() {
 	}
 	/* Flash Setup */
 #if 1
-	{
-		enablePipelineMode(&clock);
-		setNumPagedReadWaitStates(&clock, FLASH_NumPagedWaitStates_3);
-		setNumRandomReadWaitStates(&clock, FLASH_NumRandomWaitStates_3);
-		setOtpWaitStates(&clock, FLASH_NumOtpWaitStates_5);
-		setStandbyWaitCount(&clock, FLASH_STANDBY_WAIT_COUNT_DEFAULT);
-		setActiveWaitCount(&clock, FLASH_ACTIVE_WAIT_COUNT_DEFAULT);
-	}
+	flashInit(&clock);
 #endif
 	clk->LOSPCP = CLOCK_LOPCP_DIV;
 

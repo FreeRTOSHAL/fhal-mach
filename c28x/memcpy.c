@@ -13,7 +13,7 @@ void *memcpy(void *d, const void *s, size_t n) {
 	 * If n,s and d power of 4
 	 * copy with 32 Bit
 	 */
-	if (((n & 0x3) == 0) && ((((uintptr_t) d) & 0x3) == 0) && ((((uintptr_t) s) & 0x3) == 0)) {
+	if (((n & 0x1) == 0) && ((((uintptr_t) d) & 0x1) == 0) && ((((uintptr_t) s) & 0x1) == 0)) {
 		const uint32_t *src;
 		uint32_t *dest;
 		n >>= 1; /* on c2000 1 byte == 16 bit  */
