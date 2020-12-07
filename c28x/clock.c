@@ -18,7 +18,30 @@ struct clock clock = {
 	.pll = (volatile PLL_Obj *) PLL_BASE_ADDR,
 	.flash = (volatile FLASH_Obj *) FLASH_BASE_ADDR, 
 };
-#define PERIPHERY_SPEED_SORUCE (10000000)
+
+#ifdef CONFIG_MACH_C28X_PLL_DIV_BY_1
+# define PLL_DIV 1
+# define PLL_DIV_SETTING PLL_DivideSelect_ClkIn_by_1
+#endif
+#ifdef CONFIG_MACH_C28X_PLL_DIV_BY_2
+# define PLL_DIV 2
+# define PLL_DIV_SETTING PLL_DivideSelect_ClkIn_by_2
+#endif
+#ifdef CONFIG_MACH_C28X_PLL_DIV_BY_4
+# define PLL_DIV 4
+# define PLL_DIV_SETTING PLL_DivideSelect_ClkIn_by_4
+#endif
+
+#if CONFIG_MACH_C28X_PLL_MULL > 18
+# error MACH_C28X_PLL_MULL > 18 is invalid
+#endif
+
+#define CPU_SPEED ((CONFIG_MACH_C28X_OSCILLATOR_SPEED * CONFIG_MACH_C28X_PLL_MULL) / PLL_DIV)
+#if CPU_SPEED > 90000000
+# error "Max CPU Clock Speed exceeded the limed of 90Mhz!"
+#endif
+
+#define PERIPHERY_SPEED_SORUCE CONFIG_MACH_C28X_OSCILLATOR_SPEED
 #ifdef CONFIG_MACH_C28X_CLOCK_LOPCP_BY_1
 # define CLOCK_LOPCP_DIV CLK_LowSpdPreScaler_SysClkOut_by_1
 # define PERIPHERY_SPEED (PERIPHERY_SPEED_SORUCE)
@@ -89,17 +112,26 @@ struct clock *clock_init() {
 
 		// disable the external clock in
 		clk->CLKCTL |= CLK_CLKCTL_XCLKINOFF_BITS;
-		clk->CLKCTL |= CLK_CLKCTL_XTALOSCOFF_BITS;
+		// enable the external clock in over Oscillator
+		clk->CLKCTL &= ~CLK_CLKCTL_XTALOSCOFF_BITS;
+		//clk->CLKCTL |= CLK_CLKCTL_XTALOSCOFF_BITS;
 
 		// disable oscillator 2
 		clk->CLKCTL |= CLK_CLKCTL_INTOSC2OFF_BITS;
 		
-		// set the low speed clock prescaler to /1 first
-		clk->LOSPCP = CLK_LowSpdPreScaler_SysClkOut_by_1;
+		// set the low speed clock prescaler to /4 first
+		clk->LOSPCP = CLK_LowSpdPreScaler_SysClkOut_by_4;
 
 		// set the clock out prescaler
 		clk->XCLK &= (~CLK_XCLK_XCLKOUTDIV_BITS);
 		clk->XCLK |= CLK_ClkOutPreScaler_SysClkOut_by_1;
+
+		/* byparse pll */
+		pll->PLLSTS |= PLL_DivideSelect_ClkIn_by_4;
+		pll->PLLCR &= ~PLL_PLLCR_DIV_BITS;
+
+		// Select External Oscillator as clock source
+		clk->CLKCTL |= CLK_CLKCTL_OSCCLKSRCSEL_BITS;
 	}
 
 	/* Setup PLL */
@@ -110,11 +142,11 @@ struct clock *clock_init() {
 			pll->PLLSTS &= (~PLL_PLLSTS_DIVSEL_BITS);
 			pll->PLLSTS |= PLL_DivideSelect_ClkIn_by_4;
 		}
-		if ((pll->PLLCR & PLL_PLLCR_DIV_BITS) != PLL_ClkFreq_90_MHz) {
+		if ((pll->PLLCR & PLL_PLLCR_DIV_BITS) != CONFIG_MACH_C28X_PLL_MULL) {
 			// disable the clock detect
 			pll->PLLSTS |= PLL_PLLSTS_MCLKOFF_BITS;
 			// set the clock rate
-			pll->PLLCR = PLL_ClkFreq_90_MHz;
+			pll->PLLCR = CONFIG_MACH_C28X_PLL_MULL;
 
 		}
 		// wait until locked
@@ -126,7 +158,7 @@ struct clock *clock_init() {
 		// set divide select to ClkIn/2 to get desired clock rate
 		// NOTE: clock must be locked before setting this register
 		pll->PLLSTS &= (~PLL_PLLSTS_DIVSEL_BITS);
-		pll->PLLSTS |= PLL_DivideSelect_ClkIn_by_2;
+		pll->PLLSTS |= PLL_DIV_SETTING;
 	}
 	/* Flash Setup */
 #if 1
@@ -140,7 +172,7 @@ struct clock *clock_init() {
 	return &clock;	
 }
 int64_t clock_getCPUSpeed(struct clock *clk) {
-	return 90000000;
+	return CPU_SPEED;
 }
 int64_t clock_getPeripherySpeed(struct clock *clk, uint32_t id) {
 	return PERIPHERY_SPEED;

@@ -43,6 +43,23 @@ menu "Clock Configuation"
 		config MACH_C28X_CLOCK_LOPCP_BY_2
 			bool "/2"
 	endchoice
+	config MACH_C28X_OSCILLATOR_SPEED
+		int "Quartz Oscillator Speed"
+		default 20000000
+	comment "Waring Invalid Setting!"
+	depends on MACH_C28X_PLL_MULL > 18
+	config MACH_C28X_PLL_MULL
+		int "PLL Multiplier"
+		default 18
+	choice 
+		prompt "PLL Div"
+		config MACH_C28X_PLL_DIV_BY_1
+			bool "/1"
+		config MACH_C28X_PLL_DIV_BY_2
+			bool "/3"
+		config MACH_C28X_PLL_DIV_BY_4
+			bool "/4"
+	endchoice
 endmenu
 choice 
 	prompt "DMA RAM Setup"
