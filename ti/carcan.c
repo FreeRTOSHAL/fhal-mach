@@ -49,6 +49,8 @@ void ti_carcan_mo_readmsg(struct can *can, uint8_t msg_num, struct carcan_mo *mo
 
 CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
 
+    PRINTF("CAN_INIT Started");
+
     int32_t ret;    
     struct can *can;
     can = CAN_GET_DEV(index);
@@ -116,7 +118,21 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
     
     while(can->base->ctl & CARCAN_CTL_INIT_MASK);
 
+    /* DCAN RAM Hardware Initialisation */
 
+    uint32_t *ctrlcore_control_io_2 = CTRL_CORE_CONTROL_IO_2_ADR;
+#ifdef CONFIG_MACH_AM57xx_CARCAN_CAN1
+    *ctrlcore_control_io_2 |= DCAN1_RAMINIT_START_MSK;
+    while(!(*ctrlcore_control_io_2 & DCAN1_RAMINIT_DONE_MSK));
+
+#endif 
+
+
+#ifdef CONFIG_MACH_AM57xx_CARCAN_CAN2
+    *ctrlcore_control_io_2 |= DCAN2_RAMINIT_START_MSK;
+    while(!(*ctrlcore_control_io_2 & DCAN2_RAMINIT_DONE_MSK));
+
+#endif 
 
 
 
@@ -126,6 +142,7 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
     //ti_carcan_mo_configuration(can, msg_num, mo);
 
 
+    PRINTF("CAN_INIT finished");
 
     return can;
 
@@ -133,6 +150,7 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
 }
 
 CAN_DEINIT(carcan, can) {
+    PRINTF("CAN_DEINIT called");
     can->gen.init = false;
     /* Set INIT bit to shut down CAN communication */
     can->base->ctl |= CARCAN_CTL_INIT_MASK;

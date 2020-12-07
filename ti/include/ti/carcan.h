@@ -188,5 +188,10 @@ void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_
 #define CARCAN_IF1CMD_WR_RD(x)                  (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_WR_RD_SHIFT))&CARCAN_IF1CMD_WR_RD_MASK)
 
 
+#define CTRL_CORE_CONTROL_IO_2_ADR              (void *)0x4A002558u
+#define DCAN1_RAMINIT_START_MSK                 0x00000008u
+#define DCAN1_RAMINIT_DONE_MSK                  0x00000002u
+#define DCAN2_RAMINIT_START_MSK                 0x00000020u
+#define DCAN2_RAMINIT_DONE_MSK                  0x00000004u
 
 #endif
