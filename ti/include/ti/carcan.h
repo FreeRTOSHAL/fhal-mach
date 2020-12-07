@@ -86,7 +86,7 @@ struct carcan_regs{
 
 struct can {
     struct can_generic gen;
-    void const *clkData;
+    //void const *clkData;
     void const *pins;
     volatile struct carcan_regs *base;
     struct can_bittiming_const const *btc;
@@ -101,6 +101,25 @@ struct can {
 
 int32_t carcan_setupClock(struct can *can);
 int32_t carcan_setupPins(struct can *can);
+
+void ti_carcan_mo_readmsg(struct can *can, uint8_t msg_num, struct carcan_mo *mo);
+void ti_carcan_mo_readdata(struct can *can, uint8_t msg_num, uint8_t *data);
+void ti_carcan_mo_newtrans(struct can *can, uint8_t msg_num, uint8_t *data);
+void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_mo *mo);
+
+#define CARCAN_CTL_INIT_MASK            0x00000001u
+#define CARCAN_CTL_INIT_SHIFT           0u
+#define CARCAN_CTL_INIT_WIDTH           1u
+#define CARCAN_CTL_INIT(x)              (((uint32_t)(((uint32_t)(x))<<CARCAN_CTL_INIT_SHIFT))&CARCAN_CTL_INIT_MASK)
+#define CARCAN_CTL_CCE_MASK             0x00000040u
+#define CARCAN_CTL_CCE_SHIFT            6u
+#define CARCAN_CTL_CCE_WIDTH            1u
+#define CARCAN_CTL_CCE(x)               (((uint32_t)(((uint32_t)(x))<<CARCAN_CTL_CCE_SHIFT))&CARCAN_CTL_CCE_MASK)
+#define CARCAN_CTL_SWR_MASK             0x00008000u
+#define CARCAN_CTL_SWR_SHIFT            15u
+#define CARCAN_CTL_SWR_WIDTH            1u
+#define CARCAN_CTL_SWR(x)               (((uint32_t)(((uint32_t)(x))<<CARCAN_CTL_SWR_SHIFT))&CARCAN_CTL_SWR_MASK)
+
 
 #define CARCAN_BTR_BRP_MASK             0x0000003Fu
 #define CARCAN_BTR_BRP_SHIFT            0u

@@ -65,13 +65,13 @@ struct can carcan1 = {
     .btc = &carcan_bittimings,
     //.filterLength = ,
     //.filterCount = ,
-    .mb_count = 32 ,
+    //.mb_count = 32 ,
     //.filter = ,
     //.irqNum = ,
     //irqIDs = ,
 };
 
-CAN_ADDEV(ti, carcan1);
+CAN_ADDDEV(ti, carcan1);
 
 
 struct can carcan2 = {
@@ -83,9 +83,9 @@ struct can carcan2 = {
     .btc = &carcan_bittimings,
     //.filterLength = ,
     //.filterCount = ,
-    .mb_count = 32 ,
+    //.mb_count = 32 ,
     //.filter = ,
     //.irqNum = ,
     //irqIDs = ,
 };
-CAN_ADDEV(ti, carcan2);
+CAN_ADDDEV(ti, carcan2);

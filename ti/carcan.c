@@ -14,35 +14,35 @@
 
 
 /* Transfer a complete message structure into a message object. (Configuration)*/
-static void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct mo *mo) {
+void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_mo *mo) {
     // Checking if IF1 is busy
     while(can->base->if1cmd & CARCAN_IF1CMD_BUSY_MASK);
     can->base->if1msk = mo->msk;
     can->base->if1arb = mo->arb;
     can->base->if1mctl = mo->mctl;
-    memcpy(&can->base->if1data, mo->data, sizeof(mo->data));
+    memcpy((void *) &can->base->if1data, mo->data, sizeof(mo->data));
     uint32_t cmd = CARCAN_IF1CMD_WR_RD(1) | CARCAN_IF1CMD_MASK(1) | CARCAN_IF1CMD_ARB(1) |
         CARCAN_IF1CMD_CONTROL(1) | CARCAN_IF1CMD_TXRQST_NEWDAT(0) |CARCAN_IF1CMD_DATA_A(1) |
         CARCAN_IF1CMD_DATA_B(1) | CARCAN_IF1CMD_DMAACTIVE(0) | CARCAN_IF1CMD_MESSAGE_NUMBER(msg_num);
 
-    uint32_t can->base->if1cmd = cmd;
+    can->base->if1cmd = cmd;
 
 
 }
 
 /* Transfer the data bytes of a message into a message object adn set TxRqst and NewDat.
  * (start a new transmission) */
-static void ti_carcan_mo_newtrans(struct can *can, uint8_t msg_num, uint8_t *data) {
+void ti_carcan_mo_newtrans(struct can *can, uint8_t msg_num, uint8_t *data) {
 }
 
 /* Get the data bytes of a message from a message object and clear NewDat (and IntPnd).
  * (Read recieved data) */
-static void ti_carcan_mo_readdata(struct can *can, uint8_t msg_num, uint8_t *data) {
+void ti_carcan_mo_readdata(struct can *can, uint8_t msg_num, uint8_t *data) {
 }
 
 /* Get the complete message from a message object and clear NewDat (and IntPnd).
  * (Read a received message, including identifier, from a message object with UMask = '1') */
-static void ti_carcan_mo_readmsg(struct can *can, uint8_t msg_num, struct mo *mo){
+void ti_carcan_mo_readmsg(struct can *can, uint8_t msg_num, struct carcan_mo *mo){
 }
 
 
@@ -83,16 +83,16 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
 
     can->task = NULL;
     can->errorCallback = callback;
-    can->usrData = data;
+    can->userData = data;
 
     // configure CAN bit timing
 
 
-    can->base->ctl |= 0x1u;
+    can->base->ctl |= CARCAN_CTL_INIT_MASK;
 
-    can->base->ctl |= 0x40u;
+    can->base->ctl |= CARCAN_CTL_CCE_MASK;
 
-    while(! can->base->ctl & 1);
+    while(! can->base->ctl & CARCAN_CTL_INIT_MASK);
 
 
     /* clear bt*/
@@ -112,9 +112,9 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
     PRINTF("Target bus speed: %lu\n", bitrate);
     PRINTF("Calculated bus speed: %lu\n", can->bt.bitrate);
 
-    can->base->ctl &= ~(0x1u | 0x40u);
+    can->base->ctl &= ~(CARCAN_CTL_INIT_MASK | CARCAN_CTL_CCE_MASK);
     
-    while(can->base->ctl & 1);
+    while(can->base->ctl & CARCAN_CTL_INIT_MASK);
 
 
 
@@ -133,7 +133,15 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
 }
 
 CAN_DEINIT(carcan, can) {
-    return -1;
+    can->gen.init = false;
+    /* Set INIT bit to shut down CAN communication */
+    can->base->ctl |= CARCAN_CTL_INIT_MASK;
+
+    /* Set SWR bit additionally to INIT bit */
+    can->base->ctl |= CARCAN_CTL_SWR_MASK;
+
+    while(! can->base->ctl & CARCAN_CTL_INIT_MASK);
+    return true;
 }
 
 CAN_SET_CALLBACK(carcan, can, filterID, callback, data) {

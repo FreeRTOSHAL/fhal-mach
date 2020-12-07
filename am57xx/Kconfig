@@ -37,7 +37,7 @@ config MACH_LD_SCRIPT
 
 config MACH_INCLUDE
 	string
-	default "-Imach/am57xx/include"
+	default "-Imach/am57xx/include -Imach/ti/include"
 config MACH_DEFINE_HEAP
 	bool
 	default y
@@ -59,6 +59,12 @@ config MACH_HAS_GPIO
 config MACH_HAS_SPI
 	bool
 	default y
+config MACH_HAS_CAN
+    bool
+    default y
+config USE_TI_LIB
+    bool
+    default y
 config MACH_HAS_TIMER
 	bool
 	default y

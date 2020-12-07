@@ -4,6 +4,7 @@ obj-$(CONFIG_MACH_STM32)+=stm32/
 obj-$(CONFIG_MACH_IMX6)+=imx6/
 obj-$(CONFIG_MACH_AM57xx)+=am57xx/
 obj-$(CONFIG_USE_NXP_LIB)+=nxp/
+obj-$(CONFIG_USE_TI_LIB)+=ti/
 obj-$(CONFIG_MACH_S32K)+=s32k/
 
 obj-$(CONFIG_GEN_VERSION) += version.o
