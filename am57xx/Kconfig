@@ -108,7 +108,7 @@ menuconfig MACH_AM57xx_CARCAN
     select TI_CARCAN
     bool "Activate CarCAN"
     default n
-    if AM57xx_CARCAN
+    if MACH_AM57xx_CARCAN
     source mach/am57xx/Kconfig.can
     endif
 config AM57xx_TEMP
