@@ -95,12 +95,21 @@ PAGE 1 :   /* Data Memory */
    BOOT_RSVD   : origin = 0x000000, length = 0x000050     /* Part of M0, BOOT rom will use this for stack */
    RAMM0       : origin = 0x000050, length = 0x0003B0     /* on-chip RAM block M0 */
    RAMM1       : origin = 0x000400, length = 0x000400     /* on-chip RAM block M1 */
+#ifdef CONFIG_MACH_C28X_RAM_DMA_4
    RAML2_3     : origin = 0x008C00, length = 0x001400     /* on-chip RAM block L2 */
    RAML4       : origin = 0x00A000, length = 0x002000     /* on-chip RAM block L4 */
    RAML5       : origin = 0x00C000, length = 0x002000     /* on-chip RAM block L5 */
    RAML6       : origin = 0x00E000, length = 0x002000     /* on-chip RAM block L6 */
    RAML7       : origin = 0x010000, length = 0x002000     /* on-chip RAM block L7 */
    RAML8       : origin = 0x012000, length = 0x001800     /* on-chip RAM block L8. From 0x13800 to 0x14000 is reserved for InstaSPIN */
+#endif
+#ifdef CONFIG_MACH_C28X_RAM_DMA_1
+   RAML2_3     : origin = 0x008C00, length = 0x009400     /* on-chip RAM block L2 */
+   RAML8       : origin = 0x012000, length = 0x001800     /* on-chip RAM block L8. From 0x13800 to 0x14000 is reserved for InstaSPIN */
+#endif
+#ifdef CONFIG_MACH_C28X_RAM_DMA_OFF
+   RAML2_3     : origin = 0x008C00, length = 0x00AC00     /* on-chip RAM block L2 */
+#endif
    USB_RAM     : origin = 0x040000, length = 0x000800     /* USB RAM		  */   
 }
 
@@ -170,10 +179,15 @@ SECTIONS
    /* Allocate FPU math areas: */
    FPUmathTables       : > FPUTABLES,  PAGE = 0, TYPE = NOLOAD
    
+#ifdef CONFIG_MACH_C28X_RAM_DMA_4
    DMARAML5	           : > RAML5,      PAGE = 1
    DMARAML6	           : > RAML6,      PAGE = 1
    DMARAML7	           : > RAML7,      PAGE = 1
    DMARAML8	           : > RAML8,      PAGE = 1   
+#endif
+#ifdef CONFIG_MACH_C28X_RAM_DMA_1
+   DMARAML8	           : > RAML8,      PAGE = 1   
+#endif
 
   /* Uncomment the section below if calling the IQNexp() or IQexp()
       functions from the IQMath.lib library in order to utilize the

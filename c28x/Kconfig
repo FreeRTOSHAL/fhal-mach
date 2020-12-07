@@ -44,6 +44,15 @@ menu "Clock Configuation"
 			bool "/2"
 	endchoice
 endmenu
+choice 
+	prompt "DMA RAM Setup"
+	config MACH_C28X_RAM_DMA_OFF
+		bool "0 DMA Sections (43Kb for Application)"
+	config MACH_C28X_RAM_DMA_4
+		bool "4 DMA Section RAML5-8 (5kb for Application)"
+	config MACH_C28X_RAM_DMA_1
+		bool "1 DMA Section RAM8 only (37kb for Application)"
+endchoice
 menuconfig MACH_C28X_SCI
 	bool "SCI Driver"
 	depends on UART
