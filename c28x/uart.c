@@ -154,8 +154,11 @@ UART_INIT(sci, port, baudrate) {
 	baudrate = (PeriSpeed / (baudrate * 8)) - 1;
 	/* Get SCI in Software Reset disable all */
 	uart->base->SCICTL1 = 0;
-	/* Get SCI out of Software Reset */
-	uart->base->SCICTL1 |= ~SCICTL1_SWRESET;
+	/* Get SCI out of Software Reset and disable all */
+	uart->base->SCICTL1 = SCICTL1_SWRESET;
+
+	/* Disable Auto Bautdate deteaction and no delay */
+	uart->base->SCIFFCT = 0;
 
 	/* Set Bautdate */
 	uart->base->SCIHBAUD = SCIHBAUD_BAUD(baudrate >> 8);
