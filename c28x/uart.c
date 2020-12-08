@@ -152,8 +152,9 @@ UART_INIT(sci, port, baudrate) {
 	obj->PCLKCR0 |= uart->config->clockBit;
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	baudrate = (PeriSpeed / (baudrate * 8)) - 1;
-	/* Software Reset */
-	uart->base->SCICTL1 &= SCICTL1_SWRESET;
+	/* Get SCI in Software Reset disable all */
+	uart->base->SCICTL1 = 0;
+	/* Get SCI out of Software Reset */
 	uart->base->SCICTL1 |= ~SCICTL1_SWRESET;
 
 	/* Set Bautdate */
@@ -176,16 +177,18 @@ UART_INIT(sci, port, baudrate) {
 	/* TODO Setup Interrutp Level */
 	//uart->bsae->SCIFFTX = SCIFFTX_TXFFIL();
 	//uart->base->SCIFFRX = SCIFFRX_RXFFIL();
-	//
+	/* Enable Fifo and reset FIFO */
+	uart->base->SCIFFTX &= ~SCIFFTX_TXFIFORESET;
+	uart->base->SCIFFRX &= ~SCIFFRX_RXFIFORESET;
 	uart->base->SCIFFTX |= SCIFFTX_SCIFFENA | SCIFFTX_TXFIFORESET;
 	uart->base->SCIFFRX |= SCIFFRX_RXFIFORESET;
 	
 	/* Enable Recv and Send */
-	uart->base->SCICTL1 |= SCICTL1_RXENA | SCICTL1_RXENA;
+	uart->base->SCICTL1 |= SCICTL1_RXENA | SCICTL1_TXENA;
 
 	return uart;
 sci_uart_init_error1:
-	uart->base->SCICTL1 &= ~(SCICTL1_RXENA | SCICTL1_RXENA);
+	uart->base->SCICTL1 &= ~(SCICTL1_RXENA | SCICTL1_TXENA);
 	obj->PCLKCR0 &= ~uart->config->clockBit;
 //sci_uart_init_error0:
 	return NULL;
@@ -194,7 +197,7 @@ sci_uart_init_error1:
 
 UART_DEINIT(sci, uart) {
 	CLK_Obj *obj = (CLK_Obj *) CLK_BASE_ADDR;
-	uart->base->SCICTL1 &= ~(SCICTL1_RXENA | SCICTL1_RXENA);
+	uart->base->SCICTL1 &= ~(SCICTL1_RXENA | SCICTL1_TXENA);
 	uart->gen.init = false;
 	/* diable clock */
 	obj->PCLKCR0 &= ~uart->config->clockBit;
