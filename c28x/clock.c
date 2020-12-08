@@ -91,6 +91,10 @@ void flashInit(struct clock *clk) {
 	setOtpWaitStates(&clock, FLASH_NumOtpWaitStates_5);
 	setStandbyWaitCount(&clock, FLASH_STANDBY_WAIT_COUNT_DEFAULT);
 	setActiveWaitCount(&clock, FLASH_ACTIVE_WAIT_COUNT_DEFAULT);
+
+	//Force a pipeline flush to ensure that the write to
+	//the last register configured occurs before returning.
+	__asm(" RPT #7 || NOP");
 }
 
 struct clock *clock_init() {
