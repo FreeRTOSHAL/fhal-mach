@@ -41,7 +41,7 @@ struct clock clock = {
 # error "Max CPU Clock Speed exceeded the limed of 90Mhz!"
 #endif
 
-#define PERIPHERY_SPEED_SORUCE CONFIG_MACH_C28X_OSCILLATOR_SPEED
+#define PERIPHERY_SPEED_SORUCE CPU_SPEED
 #ifdef CONFIG_MACH_C28X_CLOCK_LOPCP_BY_1
 # define CLOCK_LOPCP_DIV CLK_LowSpdPreScaler_SysClkOut_by_1
 # define PERIPHERY_SPEED (PERIPHERY_SPEED_SORUCE)
@@ -52,7 +52,7 @@ struct clock clock = {
 #endif
 #ifdef CONFIG_MACH_C28X_CLOCK_LOPCP_BY_4
 # define CLOCK_LOPCP_DIV CLK_LowSpdPreScaler_SysClkOut_by_4
-# define PERIPHERY_SPEED (PERIPHERY_SPEED_SORUCE0 >> 2)
+# define PERIPHERY_SPEED (PERIPHERY_SPEED_SORUCE >> 2)
 #endif
 
 #pragma CODE_SECTION(enablePipelineMode, "ramfuncs");
