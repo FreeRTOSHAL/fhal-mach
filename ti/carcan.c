@@ -20,7 +20,10 @@ void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_
     can->base->if1msk = mo->msk;
     can->base->if1arb = mo->arb;
     can->base->if1mctl = mo->mctl;
-    memcpy((void *) &can->base->if1data, mo->data, sizeof(mo->data));
+    uint16_t data_length = (mo->mctl & CARCAN_IF1MCTL_DLC_MASK);
+    if(data_length >8)
+        data_length = 8;
+    memcpy((void *) &can->base->if1data, mo->data, data_length);
     uint32_t cmd = CARCAN_IF1CMD_WR_RD(1) | CARCAN_IF1CMD_MASK(1) | CARCAN_IF1CMD_ARB(1) |
         CARCAN_IF1CMD_CONTROL(1) | CARCAN_IF1CMD_TXRQST_NEWDAT(0) |CARCAN_IF1CMD_DATA_A(1) |
         CARCAN_IF1CMD_DATA_B(1) | CARCAN_IF1CMD_DMAACTIVE(0) | CARCAN_IF1CMD_MESSAGE_NUMBER(msg_num);
@@ -30,19 +33,49 @@ void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_
 
 }
 
-/* Transfer the data bytes of a message into a message object adn set TxRqst and NewDat.
+/* Transfer the data bytes of a message into a message object and set TxRqst and NewDat.
  * (start a new transmission) */
 void ti_carcan_mo_newtrans(struct can *can, uint8_t msg_num, uint8_t *data) {
+    while(can->base->if1cmd & CARCAN_IF1CMD_BUSY_MASK);
+    memcpy((void *) &can->base->if1data, data, 8);
+    uint32_t cmd = CARCAN_IF1CMD_WR_RD_MASK | CARCAN_IF1CMD_CONTROL_MASK | CARCAN_IF1CMD_TXRQST_NEWDAT_MASK | 
+        CARCAN_IF1CMD_DATA_A_MASK | CARCAN_IF1CMD_DATA_B_MASK | CARCAN_IF1CMD_MESSAGE_NUMBER(msg_num);
+    can->base->if1cmd = cmd;
+
 }
 
 /* Get the data bytes of a message from a message object and clear NewDat (and IntPnd).
  * (Read recieved data) */
 void ti_carcan_mo_readdata(struct can *can, uint8_t msg_num, uint8_t *data) {
+    while(can->base->if2cmd & CARCAN_IF2CMD_BUSY_MASK);
+    uint32_t cmd = CARCAN_IF2CMD_CONTROL_MASK | CARCAN_IF2CMD_TXRQST_NEWDAT_MASK| CARCAN_IF2CMD_DATA_A_MASK |
+        CARCAN_IF2CMD_DATA_B_MASK| CARCAN_IF2CMD_MESSAGE_NUMBER(msg_num);
+    can->base->if2cmd = cmd;
+    while(can->base->if2cmd & CARCAN_IF2CMD_BUSY_MASK);
+
+    memcpy(data, (void *) &can->base->if2data, 8);
+    
 }
 
 /* Get the complete message from a message object and clear NewDat (and IntPnd).
  * (Read a received message, including identifier, from a message object with UMask = '1') */
 void ti_carcan_mo_readmsg(struct can *can, uint8_t msg_num, struct carcan_mo *mo){
+    while(can->base->if2cmd & CARCAN_IF2CMD_BUSY_MASK);
+    uint32_t cmd = CARCAN_IF2CMD_MASK_MASK | CARCAN_IF2CMD_ARB_MASK | CARCAN_IF2CMD_CONTROL_MASK |
+        CARCAN_IF2CMD_TXRQST_NEWDAT_MASK | CARCAN_IF2CMD_DATA_A_MASK | CARCAN_IF2CMD_DATA_B_MASK |
+        CARCAN_IF2CMD_MESSAGE_NUMBER(msg_num);
+    can->base->if2cmd = cmd;
+    while(can->base->if2cmd & CARCAN_IF2CMD_BUSY_MASK);
+
+    mo->msk = can->base->if2msk;
+    mo->arb = can->base->if2arb;
+    mo->mctl = can->base->if2mctl;
+    uint16_t data_length = (mo->mctl & CARCAN_IF1MCTL_DLC_MASK);
+    if(data_length >8)
+        data_length = 8;
+    memcpy(mo->data, (void *) &can->base->if2data, data_length);
+
+
 }
 
 
@@ -88,26 +121,26 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
     volatile uint32_t *ctrlcore_control_io_2 = CTRL_CORE_CONTROL_IO_2_ADR;
 #ifdef CONFIG_MACH_AM57xx_CARCAN_CAN1
     PRINTF("check RAMINIT DCAN1\n");
-    if(*ctrlcore_control_io_2 & DCAN1_RAMINIT_START_MSK){
-        *ctrlcore_control_io_2 &= !DCAN1_RAMINIT_START_MSK;
-        while(*ctrlcore_control_io_2 & DCAN1_RAMINIT_START_MSK);
+    if(*ctrlcore_control_io_2 & DCAN1_RAMINIT_START_MASK){
+        *ctrlcore_control_io_2 &= !DCAN1_RAMINIT_START_MASK;
+        while(*ctrlcore_control_io_2 & DCAN1_RAMINIT_START_MASK);
     }
     PRINTF("RAMMINIT DCAN1\n");
-    *ctrlcore_control_io_2 |= DCAN1_RAMINIT_START_MSK;
-    //while(!(*ctrlcore_control_io_2 & DCAN1_RAMINIT_DONE_MSK));
+    *ctrlcore_control_io_2 |= DCAN1_RAMINIT_START_MASK;
+    //while(!(*ctrlcore_control_io_2 & DCAN1_RAMINIT_DONE_MASK));
 
 #endif 
 
 
 #ifdef CONFIG_MACH_AM57xx_CARCAN_CAN2
     PRINTF("check RAMINIT DCAN2\n");
-    if(*ctrlcore_control_io_2 & DCAN2_RAMINIT_START_MSK){
-        *ctrlcore_control_io_2 &= !DCAN2_RAMINIT_START_MSK;
-        while(*ctrlcore_control_io_2 & DCAN2_RAMINIT_START_MSK);
+    if(*ctrlcore_control_io_2 & DCAN2_RAMINIT_START_MASK){
+        *ctrlcore_control_io_2 &= !DCAN2_RAMINIT_START_MASK;
+        while(*ctrlcore_control_io_2 & DCAN2_RAMINIT_START_MASK);
     }
     PRINTF("RAMMINIT DCAN2\n");
-    *ctrlcore_control_io_2 |= DCAN2_RAMINIT_START_MSK;
-    //while(!(*ctrlcore_control_io_2 & DCAN2_RAMINIT_DONE_MSK));
+    *ctrlcore_control_io_2 |= DCAN2_RAMINIT_START_MASK;
+    //while(!(*ctrlcore_control_io_2 & DCAN2_RAMINIT_DONE_MASK));
 
 #endif 
 

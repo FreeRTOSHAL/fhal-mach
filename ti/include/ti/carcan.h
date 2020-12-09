@@ -187,11 +187,65 @@ void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_
 #define CARCAN_IF1CMD_WR_RD_WIDTH               1u
 #define CARCAN_IF1CMD_WR_RD(x)                  (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_WR_RD_SHIFT))&CARCAN_IF1CMD_WR_RD_MASK)
 
+#define CARCAN_IF1MCTL_DLC_MASK                 0x00000003u
+#define CARCAN_IF1MCTL_TXRQST_MASK              0x00000100u
+#define CARCAN_IF1MCTL_NEWDAT_MASK              0x00008000u
+
+
+#define CARCAN_IF2CMD_MESSAGE_NUMBER_MASK       0x000000FFu
+#define CARCAN_IF2CMD_MESSAGE_NUMBER_SHIFT      0u
+#define CARCAN_IF2CMD_MESSAGE_NUMBER_width      8u
+#define CARCAN_IF2CMD_MESSAGE_NUMBER(x)         (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_MESSAGE_NUMBER_SHIFT))&CARCAN_IF1CMD_MESSAGE_NUMBER_MASK)
+#define CARCAN_IF2CMD_DMAACTIVE_MASK            0x00004000u
+#define CARCAN_IF2CMD_DMAACTIVE_SHIFT           14u
+#define CARCAN_IF2CMD_DMAACTIVE_WIDTH           1u
+#define CARCAN_IF2CMD_DMAACTIVE(x)              (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_DMAACTIVE_SHIFT))&CARCAN_IF1CMD_DMAACTIVE_MASK)
+#define CARCAN_IF2CMD_BUSY_MASK                 0x00008000u
+#define CARCAN_IF2CMD_BUSY_SHIFT                15u
+#define CARCAN_IF2CMD_BUSY_WIDTH                1u
+#define CARCAN_IF2CMD_BUSY(x)                   (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_BUSY_SHIFT))&CARCAN_IF1CMD_BUSY_MASK)
+#define CARCAN_IF2CMD_DATA_B_MASK               0x00010000u
+#define CARCAN_IF2CMD_DATA_B_SHIFT              16u
+#define CARCAN_IF2CMD_DATA_B_WIDTH              1u
+#define CARCAN_IF2CMD_DATA_B(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_DATA_B_SHIFT))&CARCAN_IF1CMD_DATA_B_MASK)
+#define CARCAN_IF2CMD_DATA_A_MASK               0x00020000u
+#define CARCAN_IF2CMD_DATA_A_SHIFT              17u
+#define CARCAN_IF2CMD_DATA_A_WIDTH              1u
+#define CARCAN_IF2CMD_DATA_A(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_DATA_A_SHIFT))&CARCAN_IF1CMD_DATA_A_MASK)
+#define CARCAN_IF2CMD_TXRQST_NEWDAT_MASK        0x00040000u
+#define CARCAN_IF2CMD_TXRQST_NEWDAT_SHIFT       18u
+#define CARCAN_IF2CMD_TXRQST_NEWDAT_WIDTH              1u
+#define CARCAN_IF2CMD_TXRQST_NEWDAT(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_TXRQST_NEWDAT_SHIFT))&CARCAN_IF1CMD_TXRQST_NEWDAT_MASK)
+#define CARCAN_IF2CMD_CLRINTPND_MASK            0x00080000u
+#define CARCAN_IF2CMD_CLRINTPND_SHIFT           19u
+#define CARCAN_IF2CMD_CLRINTPND_WIDTH           1u
+#define CARCAN_IF2CMD_CLRINTPND(x)              (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_CLRINTPND_SHIFT))&CARCAN_IF1CMD_CLRINTPND_MASK)
+#define CARCAN_IF2CMD_CONTROL_MASK              0x00100000u
+#define CARCAN_IF2CMD_CONTROL_SHIFT             20u
+#define CARCAN_IF2CMD_CONTROL_WIDTH             1u
+#define CARCAN_IF2CMD_CONTROL(x)                (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_CONTROL_SHIFT))&CARCAN_IF1CMD_CONTROL_MASK)
+#define CARCAN_IF2CMD_ARB_MASK                  0x00200000u
+#define CARCAN_IF2CMD_ARB_SHIFT                 20u
+#define CARCAN_IF2CMD_ARB_WIDTH                 1u
+#define CARCAN_IF2CMD_ARB(x)                    (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_ARB_SHIFT))&CARCAN_IF1CMD_ARB_MASK)
+#define CARCAN_IF2CMD_MASK_MASK                 0x00400000u
+#define CARCAN_IF2CMD_MASK_SHIFT                20u
+#define CARCAN_IF2CMD_MASK_WIDTH                1u
+#define CARCAN_IF2CMD_MASK(x)                   (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_MASK_SHIFT))&CARCAN_IF1CMD_MASK_MASK)
+#define CARCAN_IF2CMD_WR_RD_MASK                0x00800000u
+#define CARCAN_IF2CMD_WR_RD_SHIFT               20u
+#define CARCAN_IF2CMD_WR_RD_WIDTH               1u
+#define CARCAN_IF2CMD_WR_RD(x)                  (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_WR_RD_SHIFT))&CARCAN_IF1CMD_WR_RD_MASK)
+
+#define CARCAN_IF2MCTL_DLC_MASK                 0x00000003u
+#define CARCAN_IF2MCTL_TXRQST_MASK              0x00000100u
+#define CARCAN_IF2MCTL_NEWDAT_MASK              0x00008000u
+
 
 #define CTRL_CORE_CONTROL_IO_2_ADR              (volatile void *)0x6A002558u
-#define DCAN1_RAMINIT_START_MSK                 0x00000008u
-#define DCAN1_RAMINIT_DONE_MSK                  0x00000002u
-#define DCAN2_RAMINIT_START_MSK                 0x00000020u
-#define DCAN2_RAMINIT_DONE_MSK                  0x00000004u
+#define DCAN1_RAMINIT_START_MASK                 0x00000008u
+#define DCAN1_RAMINIT_DONE_MASK                  0x00000002u
+#define DCAN2_RAMINIT_START_MASK                 0x00000020u
+#define DCAN2_RAMINIT_DONE_MASK                  0x00000004u
 
 #endif
