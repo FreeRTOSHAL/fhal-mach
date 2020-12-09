@@ -6,7 +6,10 @@
 #include <mux.h>
 #include <iomux.h>
 #include <vector.h>
+#include <stdio.h>
 
+#define CM_WKUPAON_DCAN1_CLKCTRL_ADR        (volatile void *) 0x6ae07888u
+#define CM_L4PER2_DCAN2_CLKCLTR_ADR         (volatile void *) 0x6a0098f0u
 
 struct carcan_pins {
 	const uint32_t pin;
@@ -19,15 +22,40 @@ struct carcan_pins {
 int32_t carcan_setupClock(struct can *can){
     struct clock *clock = clock_init();
     can->freq = clock_getPeripherySpeed(clock, 0);
+
+    volatile uint32_t *clkreg;
+#ifdef CONFIG_MACH_AM57xx_CARCAN_CAN1
+    clkreg = (volatile void *) CM_WKUPAON_DCAN1_CLKCTRL_ADR;
+    /* Check DCAN1 Clock is enabled */
+    if((*clkreg >> 16) & 0x3u){
+        /* enable clock */
+        *clkreg |= 0x2u;
+        /* wait clock came stable */
+        while((*clkreg >> 16) & 0x3u);
+    }
+#endif
+
+#ifdef CONFIG_MACH_AM57xx_CARCAN_CAN2
+    clkreg = (volatile void *) CM_L4PER2_DCAN2_CLKCLTR_ADR;
+    /* Check DCAN2 Clock is enabled */
+    if((*clkreg >> 16) & 0x3u){
+        /* enable clock */
+        *clkreg |= 0x2u;
+        /* wait clock came stable */
+        while((*clkreg >> 16) & 0x3u);
+    }
+#endif
     return 0;
 }
 
 int32_t carcan_setupPins(struct can *can) {
 	int32_t ret;
 	struct mux *mux = mux_init();
+    printf("*pins = can->pins\n");
 	struct carcan_pins const *pins = can->pins;
 	int i;
 	for (i = 0; i < 2; i++) {
+        printf("ret = mux_pinctl, i= %i\n", i);
 		ret = mux_pinctl(mux, pins[i].pin, pins[i].ctl, pins[i].extra);
 		if (ret < 0) {
 			return -1;
@@ -52,9 +80,10 @@ static const struct can_bittiming_const carcan_bittimings = {
 
 
 
-#define AM57_CARCAN_1 ((volatile struct carcan_regs *) 0x4ae3c000)
-#define AM57_CARCAN_2 ((volatile struct carcan_regs *) 0x48480000)
+#define AM57_CARCAN_1 ((volatile struct carcan_regs *) 0x6ae3c000u)
+#define AM57_CARCAN_2 ((volatile struct carcan_regs *) 0x68480000u)
 
+#ifdef CONFIG_MACH_AM57xx_CARCAN_CAN1
 
 struct can carcan1 = {
     CAN_INIT_DEV(carcan)
@@ -73,6 +102,10 @@ struct can carcan1 = {
 
 CAN_ADDDEV(ti, carcan1);
 
+#endif
+
+
+#ifdef CONFIG_MACH_AM57xx_CARCAN_CAN2
 
 struct can carcan2 = {
     CAN_INIT_DEV(carcan)
@@ -88,4 +121,7 @@ struct can carcan2 = {
     //.irqNum = ,
     //irqIDs = ,
 };
+
 CAN_ADDDEV(ti, carcan2);
+
+#endif
