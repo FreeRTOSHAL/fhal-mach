@@ -42,11 +42,13 @@ int32_t mux_pinctl(struct mux* mux, uint32_t pin, uint32_t ctl, uint32_t extra) 
 	} else {
 		ctrl->GPxDIR &= ~GPxDIR_DIR(p);
 	}
-	if ((ctl >> 8 ) & 0xF) {
+	{
+		uint32_t muxValue = (ctl >> 8);
+		uint32_t bit = (p & 0xF);
 		/* clear Value */
-		tmp &= ~GPxMUX_MUX(0x3, (p & 0xF));
+		tmp &= ~GPxMUX_MUX(0x3, bit);
 		/* Set Value */
-		tmp |= GPxMUX_MUX((ctl >> 8) & 0xF, (p & 0xF));
+		tmp |= GPxMUX_MUX(muxValue & 0xF, bit);
 	}
 	ctrl->GPxMUX[reg] = tmp;
 

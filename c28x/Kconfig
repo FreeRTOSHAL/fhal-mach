@@ -61,6 +61,15 @@ menu "Clock Configuation"
 			bool "/4"
 	endchoice
 endmenu
+menu "GPIO Subsystem"
+	config MACH_C28x_GPIO
+		bool
+		select GPIO
+		default y
+	config MACH_C28X_GPIO_PINS
+		int "Count of GPIO Pins"
+		default 2
+endmenu
 choice 
 	prompt "DMA RAM Setup"
 	config MACH_C28X_RAM_DMA_OFF

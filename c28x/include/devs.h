@@ -1,6 +1,8 @@
 #ifndef DEVS_H_
 #define DEVS_H_
 #include <hal.h>
+HAL_DEFINE_GLOBAL_ARRAY(gpio);
+#define GPIO_ID HAL_GET_ID(gpio, c2000, gpio0)
 HAL_DEFINE_GLOBAL_ARRAY(uart);
 #ifdef CONFIG_MACH_C28X_SCI0
 # define SCI0_ID HAL_GET_ID(uart, sci, sci0)
