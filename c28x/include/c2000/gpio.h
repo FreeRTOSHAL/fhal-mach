@@ -1,5 +1,8 @@
 #ifndef C2000_GPIO_H_
 #define C2000_GPIO_H_
+#include <stdint.h>
+#include <stdbool.h>
+#include <gpio.h>
 
 struct gpio_regs_ctrl {
 	uint32_t GPxCTRL;         //!< GPIO A Control Register
@@ -10,7 +13,10 @@ struct gpio_regs_ctrl {
 	uint32_t usb;             //!< USB I/O Control only in A
 };
 
-#define GPxMUX_MUX(mux, pin) (((mux) & 0x3) << (((pin & 0xF)) << 1))
+#undef BIT
+#define BIT(x) (1UL << (x))
+
+#define GPxMUX_MUX(mux, pin) (((mux) & 0x3UL) << (((pin & 0xFUL)) * 2UL))
 #define GPxPUD_PULL_UP(pin) BIT(pin)
 #define GPxDIR_DIR(pin) BIT(pin)
 
@@ -38,9 +44,47 @@ struct gpio_regs {
 	uint16_t rsvd_8[5];       //!< Reserved
 	uint32_t GPIOLPMSEL;      //!< GPIO Low Power Mode Wakeup Select Register
 };
+struct gpio_pin {
+	/**
+	 * GPIO
+	 */
+	struct gpio *gpio;
+	bool used;
+	uint32_t index;
+	uint32_t pin;
+	uint32_t bank;
+	volatile struct gpio_regs_data *dataReg;
+	/**
+	 * Direction
+	 */
+	enum gpio_direction dir;
+	/**
+	 * Setting
+	 */
+	enum gpio_setting setting;
+	/**
+	 * Oldvalue
+	 */
+	bool oldvalue;
+	/**
+	 * Callback
+	 */
+	bool (*callback)(struct gpio_pin *pin, uint32_t pinID, void *data);
+	/**
+	 * User data for Callback
+	 */
+	void *data;
+	/**
+	 * Interrupt Settings
+	 */
+	enum gpio_interrupt inter;
+};
 
 struct gpio {
+	struct gpio_generic gen;
 	volatile struct gpio_regs *base;
+	/* TODO IRQ */
+	struct gpio_pin pins[CONFIG_MACH_C28X_GPIO_PINS];
 };
 
 extern struct gpio gpio0;
