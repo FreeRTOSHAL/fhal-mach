@@ -187,8 +187,38 @@ void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_
 #define CARCAN_IF1CMD_WR_RD_WIDTH               1u
 #define CARCAN_IF1CMD_WR_RD(x)                  (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_WR_RD_SHIFT))&CARCAN_IF1CMD_WR_RD_MASK)
 
+
+#define CARCAN_IF1MSK_MXTD_MASK                 0x80000000u
+#define CARCAN_IF1MSK_MDIR_MASK                 0x40000000u
+#define CARCAN_IF1MSK_MSK_MASK                  0x1FFFFFFFu
+#define CARCAN_IF1MSK_MSK_SHIFT                 0u
+#define CARCAN_IF1MSK_MSK_WIDTH                 29u
+#define CARCAN_IF1MSK_MSK(x)                    (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1MSK_MSK_SHIFT))&CARCAN_IF1MSK_MSK_MASK)
+
+#define CARCAN_IF1ARB_MSGVAL_MASK               0x80000000u
+#define CARCAN_IF1ARB_XTD_MASK                  0x40000000u
+#define CARCAN_IF1ARB_DIR_MASK                  0x20000000u
+#define CARCAN_IF1ARB_ID_EXT_MASK               0x1FFFFFFFu
+#define CARCAN_IF1ARB_ID_EXT_SHIFT              0u
+#define CARCAN_IF1ARB_ID_EXT_WIDTH              29u
+#define CARCAN_IF1ARB_ID_EXT(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1ARB_ID_EXT_SHIFT))&CARCAN_IF1ARB_ID_EXT_MASK)
+#define CARCAN_IF1ARB_ID_STD_MASK               0x1FFC0000u
+#define CARCAN_IF1ARB_ID_STD_SHIFT              18u
+#define CARCAN_IF1ARB_ID_STD_WIDTH              11u
+#define CARCAN_IF1ARB_ID_STD(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1ARB_ID_STD_SHIFT))&CARCAN_IF1ARB_ID_STD_MASK)
+
 #define CARCAN_IF1MCTL_DLC_MASK                 0x00000003u
+#define CARCAN_IF1MCTL_DLC_SHIFT                0u
+#define CARCAN_IF1MCTL_DLC_WIDTH                4u
+#define CARCAN_IF1MCTL_DLC(x)                   (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_WR_RD_SHIFT))&CARCAN_IF1CMD_WR_RD_MASK)
+#define CARCAN_IF1MCTL_EOB_MASK                 0x00000080u
 #define CARCAN_IF1MCTL_TXRQST_MASK              0x00000100u
+#define CARCAN_IF1MCTL_RMTEN_MASK               0x00000200u
+#define CARCAN_IF1MCTL_RXIE_MASK                0x00000400u
+#define CARCAN_IF1MCTL_TXIE_MASK                0x00000800u
+#define CARCAN_IF1MCTL_UMASK_MASK               0x00001000u
+#define CARCAN_IF1MCTL_INTPND_MASK              0x00002000u
+#define CARCAN_IF1MCTL_MSGLST_MASK              0x00004000u
 #define CARCAN_IF1MCTL_NEWDAT_MASK              0x00008000u
 
 
@@ -237,9 +267,40 @@ void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_
 #define CARCAN_IF2CMD_WR_RD_WIDTH               1u
 #define CARCAN_IF2CMD_WR_RD(x)                  (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_WR_RD_SHIFT))&CARCAN_IF1CMD_WR_RD_MASK)
 
+
+#define CARCAN_IF2MSK_MXTD_MASK                 0x80000000u
+#define CARCAN_IF2MSK_MDIR_MASK                 0x40000000u
+#define CARCAN_IF2MSK_MSK_MASK                  0x1FFFFFFFu
+#define CARCAN_IF2MSK_MSK_SHIFT                 0u
+#define CARCAN_IF2MSK_MSK_WIDTH                 29u
+#define CARCAN_IF2MSK_MSK(x)                    (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1MSK_MSK_SHIFT))&CARCAN_IF1MSK_MSK_MASK)
+
+#define CARCAN_IF2ARB_MSGVAL_MASK               0x80000000u
+#define CARCAN_IF2ARB_XTD_MASK                  0x40000000u
+#define CARCAN_IF2ARB_DIR_MASK                  0x20000000u
+#define CARCAN_IF2ARB_ID_EXT_MASK               0x1FFFFFFFu
+#define CARCAN_IF2ARB_ID_EXT_SHIFT              0u
+#define CARCAN_IF2ARB_ID_EXT_WIDTH              29u
+#define CARCAN_IF2ARB_ID_EXT(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1ARB_ID_EXT_SHIFT))&CARCAN_IF1ARB_ID_EXT_MASK)
+#define CARCAN_IF2ARB_ID_STD_MASK               0x1FFC0000u
+#define CARCAN_IF2ARB_ID_STD_SHIFT              18u
+#define CARCAN_IF2ARB_ID_STD_WIDTH              11u
+#define CARCAN_IF2ARB_ID_STD(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1ARB_ID_STD_SHIFT))&CARCAN_IF1ARB_ID_STD_MASK)
+
 #define CARCAN_IF2MCTL_DLC_MASK                 0x00000003u
+#define CARCAN_IF2MCTL_DLC_SHIFT                0u
+#define CARCAN_IF2MCTL_DLC_WIDTH                4u
+#define CARCAN_IF2MCTL_DLC(x)                   (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_WR_RD_SHIFT))&CARCAN_IF1CMD_WR_RD_MASK)
+#define CARCAN_IF2MCTL_EOB_MASK                 0x00000080u
 #define CARCAN_IF2MCTL_TXRQST_MASK              0x00000100u
+#define CARCAN_IF2MCTL_RMTEN_MASK               0x00000200u
+#define CARCAN_IF2MCTL_RXIE_MASK                0x00000400u
+#define CARCAN_IF2MCTL_TXIE_MASK                0x00000800u
+#define CARCAN_IF2MCTL_UMASK_MASK               0x00001000u
+#define CARCAN_IF2MCTL_INTPND_MASK              0x00002000u
+#define CARCAN_IF2MCTL_MSGLST_MASK              0x00004000u
 #define CARCAN_IF2MCTL_NEWDAT_MASK              0x00008000u
+
 
 
 #define CTRL_CORE_CONTROL_IO_2_ADR              (volatile void *)0x6A002558u

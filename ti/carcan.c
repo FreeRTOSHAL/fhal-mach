@@ -122,7 +122,7 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
 #ifdef CONFIG_MACH_AM57xx_CARCAN_CAN1
     PRINTF("check RAMINIT DCAN1\n");
     if(*ctrlcore_control_io_2 & DCAN1_RAMINIT_START_MASK){
-        *ctrlcore_control_io_2 &= !DCAN1_RAMINIT_START_MASK;
+        *ctrlcore_control_io_2 &= ~(DCAN1_RAMINIT_START_MASK);
         while(*ctrlcore_control_io_2 & DCAN1_RAMINIT_START_MASK);
     }
     PRINTF("RAMMINIT DCAN1\n");
@@ -135,7 +135,7 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
 #ifdef CONFIG_MACH_AM57xx_CARCAN_CAN2
     PRINTF("check RAMINIT DCAN2\n");
     if(*ctrlcore_control_io_2 & DCAN2_RAMINIT_START_MASK){
-        *ctrlcore_control_io_2 &= !DCAN2_RAMINIT_START_MASK;
+        *ctrlcore_control_io_2 &= ~(DCAN2_RAMINIT_START_MASK);
         while(*ctrlcore_control_io_2 & DCAN2_RAMINIT_START_MASK);
     }
     PRINTF("RAMMINIT DCAN2\n");
@@ -247,6 +247,44 @@ CAN_DEREGISTER_FILTER(carcan, can, filterID) {
 }
 
 CAN_SEND(carcan, can, msg, waittime) {
+    PRINTF("CAN_SEND start\n");
+    struct carcan_mo mo;
+    if(msg->req){
+        /* TODO Implement request and rcv */
+        /* CAN Requests has a complex MB state machine*/
+        goto carcan_send_error0;
+    }
+    if(msg->length >8) {
+        /* TODO CAN FD is not supported */
+        goto carcan_send_error0;
+    }
+
+
+    mo.msk = 0;
+    if(msg->id > 0x200) {
+        mo.arb = CARCAN_IF1ARB_MSGVAL_MASK | CARCAN_IF1ARB_XTD_MASK | CARCAN_IF1ARB_DIR_MASK | 
+            CARCAN_IF1ARB_ID_EXT(msg->id);
+    }
+    else {
+        mo.arb = CARCAN_IF1ARB_MSGVAL_MASK | CARCAN_IF1ARB_DIR_MASK | CARCAN_IF1ARB_ID_STD(msg->id);
+    }
+
+    mo.mctl = CARCAN_IF1MCTL_NEWDAT_MASK | CARCAN_IF1MCTL_TXRQST_MASK | 
+        CARCAN_IF1MCTL_DLC(msg->length);
+
+    mo.msk = 0;
+
+    memcpy(mo.data, msg->data, msg->length);
+
+    PRINTF("Configuating mo\n");
+    can_lock(can, waittime, -1);
+    ti_carcan_mo_configuration(can, 1, &mo);
+    
+    can_unlock(can, -1);
+    PRINTF("CAN_SEND finished\n");
+    return 0;
+carcan_send_error0:
+    PRINTF("carcan_send_error0\n");
     return -1;
 }
 
