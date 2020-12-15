@@ -84,12 +84,23 @@ struct carcan_regs{
     uint32_t roic;          // 0x1e4
 };
 
+struct carcan_filter {
+    bool used;
+    struct can_filter filter;
+    uint32_t id;
+    bool (*callback)(struct can *can, struct can_msg *msg, void *data);
+    void *data;
+    OS_DEFINE_QUEUE(queue, CONFIG_MACH_AM57xx_CARCAN_CAN0_FILTER_QUEUE_ENTRIES, sizeif(struct can_msg));
+};
+
 struct can {
     struct can_generic gen;
     //void const *clkData;
     void const *pins;
     volatile struct carcan_regs *base;
     struct can_bittiming_const const *btc;
+    const uint32_t filterLength;
+    const uint32_t filterCount;
     struct gpio_pin *enablePin;
     bool pinHigh;
     struct can_bittiming bt;
@@ -97,6 +108,7 @@ struct can {
     TaskHandle_t task;
     bool (*errorCallback)(struct can *can, can_error_t error, can_errorData_t data);
     void *userData;
+    struct carcan_filter *filter;
 };
 
 int32_t carcan_setupClock(struct can *can);

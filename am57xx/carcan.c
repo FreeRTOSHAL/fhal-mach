@@ -84,7 +84,7 @@ static const struct can_bittiming_const carcan_bittimings = {
 #define AM57_CARCAN_2 ((volatile struct carcan_regs *) 0x68480000u)
 
 #ifdef CONFIG_MACH_AM57xx_CARCAN_CAN1
-
+struct carcan_filter can_carcan1_filter[CONFIG_MACH_AM57xx_CARCAN_CAN1_MAX_FILTER];
 struct can carcan1 = {
     CAN_INIT_DEV(carcan)
     HAL_NAME("CarCAN 1")
@@ -92,10 +92,10 @@ struct can carcan1 = {
     //.pins = ,
     .base = AM57_CARCAN_1,
     .btc = &carcan_bittimings,
-    //.filterLength = ,
-    //.filterCount = ,
+    .filterLength = CONFIG_MACH_AM57xx_CARCAN_CAN1_FILTER_QUEUE_ENTRIES,
+    .filterCount = CONFIG_MACH_AM57xx_CARCAN_CAN1_MAX_FILTER,
     //.mb_count = 32 ,
-    //.filter = ,
+    .filter = can_carcan1_filter,
     //.irqNum = ,
     //irqIDs = ,
 };
@@ -107,6 +107,7 @@ CAN_ADDDEV(ti, carcan1);
 
 #ifdef CONFIG_MACH_AM57xx_CARCAN_CAN2
 
+struct carcan_filter can_carcan2_filter[CONFIG_MACH_AM57xx_CARCAN_CAN2_MAX_FILTER];
 struct can carcan2 = {
     CAN_INIT_DEV(carcan)
     HAL_NAME("CarCAN 2")
@@ -114,10 +115,10 @@ struct can carcan2 = {
     //.pins = ,
     .base = AM57_CARCAN_2,
     .btc = &carcan_bittimings,
-    //.filterLength = ,
-    //.filterCount = ,
+    .filterLength = CONFIG_MACH_AM57xx_CARCAN_CAN2_FILTER_QUEUE_ENTRIES,
+    .filterCount = CONFIG_MACH_AM57xx_CARCAN_CAN2_MAX_FILTER,
     //.mb_count = 32 ,
-    //.filter = ,
+    .filter = can_carcan2_filter,
     //.irqNum = ,
     //irqIDs = ,
 };

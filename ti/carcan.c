@@ -207,11 +207,24 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
 
 
 
-    //configure Message Objects
     PRINTF("Point: %i\n", i);
     ++i;
 
-    //ti_carcan_mo_configuration(can, msg_num, mo);
+    {
+        int32_t i;
+        /* init all filter and create software queue */
+        for(i = 0; i < can->filterCount; i++) {
+            can->filter[i].used = false;
+            /* id 0 is reserved for send MB */
+            can->filter[i].id = i +1;
+            can->filter[i].filter.id = 0;
+            can->filter[i].filter.id = 0x1FFF;
+            can->filter[i].callback = NULL;
+            can->filter[i].data = NULL;
+            can->filter[i].queue = OS_CREATE_QUEUE(can->filterLength, sizeof(struct can_msg), can->filter[i].queue);
+        }
+    }
+
 
 
     PRINTF("CAN_INIT finished\n");
@@ -239,11 +252,71 @@ CAN_SET_CALLBACK(carcan, can, filterID, callback, data) {
 }
 
 CAN_REGISTER_FILTER(carcan, can, filter) {
-    return -1;
+    struct carcan_mo mo;
+    int i;
+    struct carcan_filter *hwFilter;
+    can_lock(can, portMAX_DELAY, -1);
+
+    for(i = 0; i< can->filterCount; i++) {
+        if(!can->filter[i].used) {
+            break;
+        }
+    }
+    if (i == can->filterCount) {
+        can_unlock(can, -1);
+        return -1;
+    }
+    hwFilter = &can->filter[i];
+    hwFilter->used = true;
+    memcpy(&hwFilter->filter, filter, sizeof(struct can_filter));
+
+
+    mo.msk = CARCAN_IF1MSK_MSK(hwFilter->filter.mask);
+
+    if(hwFilter->filter.id > 0x200) {
+        mo.arb = CARCAN_IF1ARB_MSGVAL_MASK | CARCAN_IF1ARB_XTD_MASK | 
+            CARCAN_IF1ARB_ID_EXT(hwFilter->filter.id);
+    } else {
+        mo.arb = CARCAN_IF1ARB_MSGVAL_MASK | CARCAN_IF1ARB_ID_STD(hwFilter->filter.id);
+    }
+
+    mo.mctl = CARCAN_IF1MCTL_UMASK_MASK;
+    ti_carcan_mo_configuration(can, hwFilter->id, &mo);
+
+    can_unlock(can, -1);
+    return i;
+    
+
+
 }
 
 CAN_DEREGISTER_FILTER(carcan, can, filterID) {
-    return -1;
+    struct carcan_filter *filter;
+    struct carcan_mo mo;
+
+    mo.msk = 0;
+    mo.arb = 0;
+    mo.mctl = 0;
+
+    if(filterID >= can->filterCount) {
+        return -1;
+    }
+
+
+    can_lock(can, portMAX_DELAY, -1);
+    filter= &can->filter[filterID];
+    if(!filter->used) {
+        return -1;
+    }
+    ti_carcan_mo_configuration(can, filterID, &mo);
+    filter->used = false;
+    filter->filter.id = 0;
+    filter->filter.mask = 0x1FFF;
+    filter->callback = NULL;
+    filter->data = NULL;
+    can_unlock(can, -1);
+    return 0;
+
 }
 
 CAN_SEND(carcan, can, msg, waittime) {
@@ -289,7 +362,19 @@ carcan_send_error0:
 }
 
 CAN_RECV(carcan, can, filterID, msg, waittime) {
-    return -1;
+    BaseType_t ret;
+    struct carcan_filter *filter;
+
+    if(filterID >= can->filterCount) {
+        return -1;
+    }
+    filter = &can->filter[filterID];
+
+    ret = xQueueReceive(filter->queue, msg, waittime);
+    if(ret != pdTRUE) {
+        return -1;
+    }
+    return 0;
 }
 
 CAN_SEND_ISR(carcan, can, msg) {
