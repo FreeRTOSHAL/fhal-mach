@@ -1,0 +1,8 @@
+config MACH_C28X_CPU_TIMER0
+	bool "Timer 0"
+config MACH_C28X_CPU_TIMER1
+	bool "Timer 1"
+config MACH_C28X_CPU_TIMER2
+	bool "Timer 2"
+	help
+		Can't be dissabled used by port

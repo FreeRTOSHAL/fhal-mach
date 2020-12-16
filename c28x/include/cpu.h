@@ -1,0 +1,5 @@
+#ifndef CPU_H_
+#define CPU_H_
+#define ENABLE_PROTECTED_REGISTER_WRITE_MODE  asm(" EALLOW")
+#define DISABLE_PROTECTED_REGISTER_WRITE_MODE asm(" EDIS")
+#endif
