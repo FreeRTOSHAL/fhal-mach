@@ -1,3 +1,13 @@
+comment "Waring: Loopback Mode disable physical connection to the CAN Bus!"
+	depends on TI_CARCAN_LOOP_BACK_MODE
+config TI_CARCAN_LOOP_BACK_MODE
+	bool "Activate Loopback Mode (Debug Mode)"
+	default n
+	help
+		Activate Loopback Debug Mode
+		All sended messages are also recived
+		The real bus is disconeded in this mode!
+
 menuconfig MACH_AM57xx_CARCAN_CAN1
     bool "CAN 1"
     default n

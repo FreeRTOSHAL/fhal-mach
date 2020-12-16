@@ -132,6 +132,7 @@ void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_
 #define CARCAN_CTL_SWR_WIDTH            1u
 #define CARCAN_CTL_SWR(x)               (((uint32_t)(((uint32_t)(x))<<CARCAN_CTL_SWR_SHIFT))&CARCAN_CTL_SWR_MASK)
 
+#define CARCAN_TEST_LBACK_MASK          0x00000010u
 
 #define CARCAN_BTR_BRP_MASK             0x0000003Fu
 #define CARCAN_BTR_BRP_SHIFT            0u

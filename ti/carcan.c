@@ -204,6 +204,10 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
     PRINTF("Point: %i\n", i);
     ++i;
 
+#ifdef CONFIG_TI_CARCAN_LOOP_BACK_MODE
+    /* Activate Loop Back Mode */
+    can->base->test |= CARCAN_TEST_LBACK_MASK;
+#endif
 
 
 
@@ -218,7 +222,7 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
             /* id 0 is reserved for send MB */
             can->filter[i].id = i +1;
             can->filter[i].filter.id = 0;
-            can->filter[i].filter.id = 0x1FFF;
+            can->filter[i].filter.id = 0x1FFFFFFFu;
             can->filter[i].callback = NULL;
             can->filter[i].data = NULL;
             can->filter[i].queue = OS_CREATE_QUEUE(can->filterLength, sizeof(struct can_msg), can->filter[i].queue);
@@ -252,6 +256,7 @@ CAN_SET_CALLBACK(carcan, can, filterID, callback, data) {
 }
 
 CAN_REGISTER_FILTER(carcan, can, filter) {
+    PRINTF("CAN_REGISTER_FILTER caled\n");
     struct carcan_mo mo;
     int i;
     struct carcan_filter *hwFilter;
@@ -264,6 +269,7 @@ CAN_REGISTER_FILTER(carcan, can, filter) {
     }
     if (i == can->filterCount) {
         can_unlock(can, -1);
+        PRINTF("CAN_REGISTER_FILTER failed\n");
         return -1;
     }
     hwFilter = &can->filter[i];
@@ -273,7 +279,7 @@ CAN_REGISTER_FILTER(carcan, can, filter) {
 
     mo.msk = CARCAN_IF1MSK_MSK(hwFilter->filter.mask);
 
-    if(hwFilter->filter.id > 0x200) {
+    if(hwFilter->filter.id >= 0x200) {
         mo.arb = CARCAN_IF1ARB_MSGVAL_MASK | CARCAN_IF1ARB_XTD_MASK | 
             CARCAN_IF1ARB_ID_EXT(hwFilter->filter.id);
     } else {
@@ -284,6 +290,7 @@ CAN_REGISTER_FILTER(carcan, can, filter) {
     ti_carcan_mo_configuration(can, hwFilter->id, &mo);
 
     can_unlock(can, -1);
+    PRINTF("CAN_REGISTER_FILTER returns: %i\n", i);
     return i;
     
 
@@ -291,6 +298,7 @@ CAN_REGISTER_FILTER(carcan, can, filter) {
 }
 
 CAN_DEREGISTER_FILTER(carcan, can, filterID) {
+    PRINTF("CAN_DEREGISTER_FILTER called\n");
     struct carcan_filter *filter;
     struct carcan_mo mo;
 
@@ -299,6 +307,7 @@ CAN_DEREGISTER_FILTER(carcan, can, filterID) {
     mo.mctl = 0;
 
     if(filterID >= can->filterCount) {
+        PRINTF("CAN_DEREGISTER_FILTER, filterID too big \n");
         return -1;
     }
 
@@ -306,15 +315,17 @@ CAN_DEREGISTER_FILTER(carcan, can, filterID) {
     can_lock(can, portMAX_DELAY, -1);
     filter= &can->filter[filterID];
     if(!filter->used) {
+        PRINTF("CAN_DEREGISTER_FILTER, filter not in use\n");
         return -1;
     }
     ti_carcan_mo_configuration(can, filterID, &mo);
     filter->used = false;
     filter->filter.id = 0;
-    filter->filter.mask = 0x1FFF;
+    filter->filter.mask = 0x1FFFFFFFu;
     filter->callback = NULL;
     filter->data = NULL;
     can_unlock(can, -1);
+    PRINTF("CAN_DEREGISTER_FILTER finished\n");
     return 0;
 
 }
@@ -334,7 +345,7 @@ CAN_SEND(carcan, can, msg, waittime) {
 
 
     mo.msk = 0;
-    if(msg->id > 0x200) {
+    if(msg->id >= 0x200) {
         mo.arb = CARCAN_IF1ARB_MSGVAL_MASK | CARCAN_IF1ARB_XTD_MASK | CARCAN_IF1ARB_DIR_MASK | 
             CARCAN_IF1ARB_ID_EXT(msg->id);
     }
@@ -362,6 +373,8 @@ carcan_send_error0:
 }
 
 CAN_RECV(carcan, can, filterID, msg, waittime) {
+    PRINTF("CAN_RECV called\n");
+    /*
     BaseType_t ret;
     struct carcan_filter *filter;
 
@@ -375,6 +388,18 @@ CAN_RECV(carcan, can, filterID, msg, waittime) {
         return -1;
     }
     return 0;
+    */
+    struct carcan_mo mo;
+    ti_carcan_mo_readmsg(can, filterID, &mo);
+    if(mo.arb & CARCAN_IF1ARB_XTD_MASK){
+        msg->id = mo.arb & CARCAN_IF1ARB_XTD_MASK;
+    } else {
+        msg->id = ((mo.arb & CARCAN_IF1ARB_ID_STD_MASK) >> CARCAN_IF1ARB_ID_STD_SHIFT);
+    }
+    msg->length = mo.mctl & CARCAN_IF1MCTL_DLC_MASK;
+    memcpy(msg->data, mo.data, msg->length);
+    return 0;
+
 }
 
 CAN_SEND_ISR(carcan, can, msg) {
