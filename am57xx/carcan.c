@@ -21,9 +21,9 @@ struct carcan_pins {
 
 int32_t carcan_setupClock(struct can *can){
     struct clock *clock = clock_init();
+    volatile uint32_t *clkreg;
     can->freq = clock_getPeripherySpeed(clock, 0);
 
-    volatile uint32_t *clkreg;
 #ifdef CONFIG_MACH_AM57xx_CARCAN_CAN1
     clkreg = (volatile void *) CM_WKUPAON_DCAN1_CLKCTRL_ADR;
     /* Check DCAN1 Clock is enabled */
@@ -51,7 +51,6 @@ int32_t carcan_setupClock(struct can *can){
 int32_t carcan_setupPins(struct can *can) {
 	int32_t ret;
 	struct mux *mux = mux_init();
-    printf("*pins = can->pins\n");
 	struct carcan_pins const *pins = can->pins;
 	int i;
 	for (i = 0; i < 2; i++) {
