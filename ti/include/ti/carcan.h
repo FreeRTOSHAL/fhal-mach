@@ -27,7 +27,7 @@ struct carcan_regs{
     uint32_t reserved1;     // 0x18
     uint32_t perr;          // 0x1C
     uint32_t rel;           // 0x20
-    uint32_t reserved2[24]; // 0x24
+    uint32_t reserved2[23]; // 0x24
     uint32_t abotr;         // 0x80
     uint32_t txrq_x;        // 0x84
     uint32_t txrq12;        // 0x88
@@ -49,11 +49,12 @@ struct carcan_regs{
     uint32_t msgval34;      // 0xc8
     uint32_t msgval56;      // 0xcc
     uint32_t msgval78;      // 0xd0
+    uint32_t reserved8;     // 0xd4
     uint32_t intmux12;      // 0xd8
     uint32_t intmux34;      // 0xdc
     uint32_t intmux56;      // 0xe0
     uint32_t intmux78;      // 0xe4
-    uint32_t reserved3[2];  // 0xe8
+    uint32_t reserved3[6];  // 0xe8
     uint32_t if1cmd;        // 0x100
     uint32_t if1msk;        // 0x104
     uint32_t if1arb;        // 0x108
@@ -220,10 +221,10 @@ void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_
 #define CARCAN_IF1ARB_ID_STD_WIDTH              11u
 #define CARCAN_IF1ARB_ID_STD(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1ARB_ID_STD_SHIFT))&CARCAN_IF1ARB_ID_STD_MASK)
 
-#define CARCAN_IF1MCTL_DLC_MASK                 0x00000003u
+#define CARCAN_IF1MCTL_DLC_MASK                 0x0000000Fu
 #define CARCAN_IF1MCTL_DLC_SHIFT                0u
 #define CARCAN_IF1MCTL_DLC_WIDTH                4u
-#define CARCAN_IF1MCTL_DLC(x)                   (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_WR_RD_SHIFT))&CARCAN_IF1CMD_WR_RD_MASK)
+#define CARCAN_IF1MCTL_DLC(x)                   (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1MCTL_DLC_SHIFT))&CARCAN_IF1MCTL_DLC_MASK)
 #define CARCAN_IF1MCTL_EOB_MASK                 0x00000080u
 #define CARCAN_IF1MCTL_TXRQST_MASK              0x00000100u
 #define CARCAN_IF1MCTL_RMTEN_MASK               0x00000200u
@@ -238,47 +239,47 @@ void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_
 #define CARCAN_IF2CMD_MESSAGE_NUMBER_MASK       0x000000FFu
 #define CARCAN_IF2CMD_MESSAGE_NUMBER_SHIFT      0u
 #define CARCAN_IF2CMD_MESSAGE_NUMBER_width      8u
-#define CARCAN_IF2CMD_MESSAGE_NUMBER(x)         (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_MESSAGE_NUMBER_SHIFT))&CARCAN_IF1CMD_MESSAGE_NUMBER_MASK)
+#define CARCAN_IF2CMD_MESSAGE_NUMBER(x)         (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2CMD_MESSAGE_NUMBER_SHIFT))&CARCAN_IF2CMD_MESSAGE_NUMBER_MASK)
 #define CARCAN_IF2CMD_DMAACTIVE_MASK            0x00004000u
 #define CARCAN_IF2CMD_DMAACTIVE_SHIFT           14u
 #define CARCAN_IF2CMD_DMAACTIVE_WIDTH           1u
-#define CARCAN_IF2CMD_DMAACTIVE(x)              (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_DMAACTIVE_SHIFT))&CARCAN_IF1CMD_DMAACTIVE_MASK)
+#define CARCAN_IF2CMD_DMAACTIVE(x)              (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2CMD_DMAACTIVE_SHIFT))&CARCAN_IF2CMD_DMAACTIVE_MASK)
 #define CARCAN_IF2CMD_BUSY_MASK                 0x00008000u
 #define CARCAN_IF2CMD_BUSY_SHIFT                15u
 #define CARCAN_IF2CMD_BUSY_WIDTH                1u
-#define CARCAN_IF2CMD_BUSY(x)                   (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_BUSY_SHIFT))&CARCAN_IF1CMD_BUSY_MASK)
+#define CARCAN_IF2CMD_BUSY(x)                   (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2CMD_BUSY_SHIFT))&CARCAN_IF2CMD_BUSY_MASK)
 #define CARCAN_IF2CMD_DATA_B_MASK               0x00010000u
 #define CARCAN_IF2CMD_DATA_B_SHIFT              16u
 #define CARCAN_IF2CMD_DATA_B_WIDTH              1u
-#define CARCAN_IF2CMD_DATA_B(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_DATA_B_SHIFT))&CARCAN_IF1CMD_DATA_B_MASK)
+#define CARCAN_IF2CMD_DATA_B(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2CMD_DATA_B_SHIFT))&CARCAN_IF2CMD_DATA_B_MASK)
 #define CARCAN_IF2CMD_DATA_A_MASK               0x00020000u
 #define CARCAN_IF2CMD_DATA_A_SHIFT              17u
 #define CARCAN_IF2CMD_DATA_A_WIDTH              1u
-#define CARCAN_IF2CMD_DATA_A(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_DATA_A_SHIFT))&CARCAN_IF1CMD_DATA_A_MASK)
+#define CARCAN_IF2CMD_DATA_A(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2CMD_DATA_A_SHIFT))&CARCAN_IF2CMD_DATA_A_MASK)
 #define CARCAN_IF2CMD_TXRQST_NEWDAT_MASK        0x00040000u
 #define CARCAN_IF2CMD_TXRQST_NEWDAT_SHIFT       18u
 #define CARCAN_IF2CMD_TXRQST_NEWDAT_WIDTH              1u
-#define CARCAN_IF2CMD_TXRQST_NEWDAT(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_TXRQST_NEWDAT_SHIFT))&CARCAN_IF1CMD_TXRQST_NEWDAT_MASK)
+#define CARCAN_IF2CMD_TXRQST_NEWDAT(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2CMD_TXRQST_NEWDAT_SHIFT))&CARCAN_IF2CMD_TXRQST_NEWDAT_MASK)
 #define CARCAN_IF2CMD_CLRINTPND_MASK            0x00080000u
 #define CARCAN_IF2CMD_CLRINTPND_SHIFT           19u
 #define CARCAN_IF2CMD_CLRINTPND_WIDTH           1u
-#define CARCAN_IF2CMD_CLRINTPND(x)              (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_CLRINTPND_SHIFT))&CARCAN_IF1CMD_CLRINTPND_MASK)
+#define CARCAN_IF2CMD_CLRINTPND(x)              (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2CMD_CLRINTPND_SHIFT))&CARCAN_IF2CMD_CLRINTPND_MASK)
 #define CARCAN_IF2CMD_CONTROL_MASK              0x00100000u
 #define CARCAN_IF2CMD_CONTROL_SHIFT             20u
 #define CARCAN_IF2CMD_CONTROL_WIDTH             1u
-#define CARCAN_IF2CMD_CONTROL(x)                (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_CONTROL_SHIFT))&CARCAN_IF1CMD_CONTROL_MASK)
+#define CARCAN_IF2CMD_CONTROL(x)                (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2CMD_CONTROL_SHIFT))&CARCAN_IF2CMD_CONTROL_MASK)
 #define CARCAN_IF2CMD_ARB_MASK                  0x00200000u
 #define CARCAN_IF2CMD_ARB_SHIFT                 20u
 #define CARCAN_IF2CMD_ARB_WIDTH                 1u
-#define CARCAN_IF2CMD_ARB(x)                    (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_ARB_SHIFT))&CARCAN_IF1CMD_ARB_MASK)
+#define CARCAN_IF2CMD_ARB(x)                    (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2CMD_ARB_SHIFT))&CARCAN_IF2CMD_ARB_MASK)
 #define CARCAN_IF2CMD_MASK_MASK                 0x00400000u
 #define CARCAN_IF2CMD_MASK_SHIFT                20u
 #define CARCAN_IF2CMD_MASK_WIDTH                1u
-#define CARCAN_IF2CMD_MASK(x)                   (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_MASK_SHIFT))&CARCAN_IF1CMD_MASK_MASK)
+#define CARCAN_IF2CMD_MASK(x)                   (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2CMD_MASK_SHIFT))&CARCAN_IF2CMD_MASK_MASK)
 #define CARCAN_IF2CMD_WR_RD_MASK                0x00800000u
 #define CARCAN_IF2CMD_WR_RD_SHIFT               20u
 #define CARCAN_IF2CMD_WR_RD_WIDTH               1u
-#define CARCAN_IF2CMD_WR_RD(x)                  (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_WR_RD_SHIFT))&CARCAN_IF1CMD_WR_RD_MASK)
+#define CARCAN_IF2CMD_WR_RD(x)                  (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2CMD_WR_RD_SHIFT))&CARCAN_IF2CMD_WR_RD_MASK)
 
 
 #define CARCAN_IF2MSK_MXTD_MASK                 0x80000000u
@@ -286,7 +287,7 @@ void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_
 #define CARCAN_IF2MSK_MSK_MASK                  0x1FFFFFFFu
 #define CARCAN_IF2MSK_MSK_SHIFT                 0u
 #define CARCAN_IF2MSK_MSK_WIDTH                 29u
-#define CARCAN_IF2MSK_MSK(x)                    (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1MSK_MSK_SHIFT))&CARCAN_IF1MSK_MSK_MASK)
+#define CARCAN_IF2MSK_MSK(x)                    (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2MSK_MSK_SHIFT))&CARCAN_IF2MSK_MSK_MASK)
 
 #define CARCAN_IF2ARB_MSGVAL_MASK               0x80000000u
 #define CARCAN_IF2ARB_XTD_MASK                  0x40000000u
@@ -294,16 +295,16 @@ void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_
 #define CARCAN_IF2ARB_ID_EXT_MASK               0x1FFFFFFFu
 #define CARCAN_IF2ARB_ID_EXT_SHIFT              0u
 #define CARCAN_IF2ARB_ID_EXT_WIDTH              29u
-#define CARCAN_IF2ARB_ID_EXT(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1ARB_ID_EXT_SHIFT))&CARCAN_IF1ARB_ID_EXT_MASK)
+#define CARCAN_IF2ARB_ID_EXT(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2ARB_ID_EXT_SHIFT))&CARCAN_IF2ARB_ID_EXT_MASK)
 #define CARCAN_IF2ARB_ID_STD_MASK               0x1FFC0000u
 #define CARCAN_IF2ARB_ID_STD_SHIFT              18u
 #define CARCAN_IF2ARB_ID_STD_WIDTH              11u
-#define CARCAN_IF2ARB_ID_STD(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1ARB_ID_STD_SHIFT))&CARCAN_IF1ARB_ID_STD_MASK)
+#define CARCAN_IF2ARB_ID_STD(x)                 (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2ARB_ID_STD_SHIFT))&CARCAN_IF2ARB_ID_STD_MASK)
 
-#define CARCAN_IF2MCTL_DLC_MASK                 0x00000003u
+#define CARCAN_IF2MCTL_DLC_MASK                 0x0000000Fu
 #define CARCAN_IF2MCTL_DLC_SHIFT                0u
 #define CARCAN_IF2MCTL_DLC_WIDTH                4u
-#define CARCAN_IF2MCTL_DLC(x)                   (((uint32_t)(((uint32_t)(x))<<CARCAN_IF1CMD_WR_RD_SHIFT))&CARCAN_IF1CMD_WR_RD_MASK)
+#define CARCAN_IF2MCTL_DLC(x)                   (((uint32_t)(((uint32_t)(x))<<CARCAN_IF2MCTL_DLC_SHIFT))&CARCAN_IF2MCTL_DLC_MASK)
 #define CARCAN_IF2MCTL_EOB_MASK                 0x00000080u
 #define CARCAN_IF2MCTL_TXRQST_MASK              0x00000100u
 #define CARCAN_IF2MCTL_RMTEN_MASK               0x00000200u

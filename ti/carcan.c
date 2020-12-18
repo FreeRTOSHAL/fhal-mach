@@ -26,11 +26,14 @@ void ti_carcan_mo_configuration(struct can *can, uint8_t msg_num, struct carcan_
     if(data_length >8)
         data_length = 8;
     memcpy((void *) &can->base->if1data, mo->data, data_length);
-    cmd = CARCAN_IF1CMD_WR_RD(1) | CARCAN_IF1CMD_MASK(1) | CARCAN_IF1CMD_ARB(1) |
-        CARCAN_IF1CMD_CONTROL(1) | CARCAN_IF1CMD_TXRQST_NEWDAT(0) |CARCAN_IF1CMD_DATA_A(1) |
-        CARCAN_IF1CMD_DATA_B(1) | CARCAN_IF1CMD_DMAACTIVE(0) | CARCAN_IF1CMD_MESSAGE_NUMBER(msg_num);
+    cmd = CARCAN_IF1CMD_WR_RD_MASK | CARCAN_IF1CMD_MASK_MASK | CARCAN_IF1CMD_ARB_MASK |
+        CARCAN_IF1CMD_CONTROL_MASK | CARCAN_IF1CMD_DATA_A_MASK |
+        CARCAN_IF1CMD_DATA_B_MASK | CARCAN_IF1CMD_MESSAGE_NUMBER(msg_num);
+    PRINTF("mo_configuration\ncmd: %#08x\nmsk: %#08x\narb: %#08x\nmctl: %#08x\n", cmd, mo->msk, mo->arb, mo->mctl);
 
     can->base->if1cmd = cmd;
+    PRINTF("mo_configuration if1cmd: %#08x\n", can->base->if1cmd);
+    while(can->base->if1cmd & CARCAN_IF1CMD_BUSY_MASK);
 
 
 }
@@ -44,6 +47,7 @@ void ti_carcan_mo_newtrans(struct can *can, uint8_t msg_num, uint8_t *data) {
     cmd = CARCAN_IF1CMD_WR_RD_MASK | CARCAN_IF1CMD_CONTROL_MASK | CARCAN_IF1CMD_TXRQST_NEWDAT_MASK | 
         CARCAN_IF1CMD_DATA_A_MASK | CARCAN_IF1CMD_DATA_B_MASK | CARCAN_IF1CMD_MESSAGE_NUMBER(msg_num);
     can->base->if1cmd = cmd;
+    while(can->base->if2cmd & CARCAN_IF2CMD_BUSY_MASK);
 
 }
 
@@ -68,7 +72,7 @@ void ti_carcan_mo_readmsg(struct can *can, uint8_t msg_num, struct carcan_mo *mo
     uint16_t data_length;
     while(can->base->if2cmd & CARCAN_IF2CMD_BUSY_MASK);
     cmd = CARCAN_IF2CMD_MASK_MASK | CARCAN_IF2CMD_ARB_MASK | CARCAN_IF2CMD_CONTROL_MASK |
-        CARCAN_IF2CMD_TXRQST_NEWDAT_MASK | CARCAN_IF2CMD_DATA_A_MASK | CARCAN_IF2CMD_DATA_B_MASK |
+        CARCAN_IF2CMD_DATA_A_MASK | CARCAN_IF2CMD_DATA_B_MASK |
         CARCAN_IF2CMD_MESSAGE_NUMBER(msg_num);
     can->base->if2cmd = cmd;
     while(can->base->if2cmd & CARCAN_IF2CMD_BUSY_MASK);
@@ -80,6 +84,7 @@ void ti_carcan_mo_readmsg(struct can *can, uint8_t msg_num, struct carcan_mo *mo
     if(data_length >8)
         data_length = 8;
     memcpy(mo->data, (void *) &can->base->if2data, data_length);
+    PRINTF("mo_readmsg\ncmd: %#08x\nmsk: %#08x\narb: %#08x\nmctl: %#08x\n", cmd, mo->msk, mo->arb, mo->mctl);
 
 
 }
@@ -226,7 +231,7 @@ CAN_INIT(carcan, index, bitrate, pin, pinHigh, callback, data) {
         for(i = 0; i < can->filterCount; i++) {
             can->filter[i].used = false;
             /* id 0 is reserved for send MB */
-            can->filter[i].id = i +1;
+            can->filter[i].id = i +2;
             can->filter[i].filter.id = 0;
             can->filter[i].filter.id = 0x1FFFFFFFu;
             can->filter[i].callback = NULL;
@@ -324,7 +329,7 @@ CAN_DEREGISTER_FILTER(carcan, can, filterID) {
         PRINTF("CAN_DEREGISTER_FILTER, filter not in use\n");
         return -1;
     }
-    ti_carcan_mo_configuration(can, filterID, &mo);
+    ti_carcan_mo_configuration(can, filter->id, &mo);
     filter->used = false;
     filter->filter.id = 0;
     filter->filter.mask = 0x1FFFFFFFu;
@@ -361,6 +366,7 @@ CAN_SEND(carcan, can, msg, waittime) {
 
     mo.mctl = CARCAN_IF1MCTL_NEWDAT_MASK | CARCAN_IF1MCTL_TXRQST_MASK | 
         CARCAN_IF1MCTL_DLC(msg->length);
+    PRINTF("CAN_SEND: mo.mctl: %#08x\n", mo.mctl );
 
     mo.msk = 0;
 
@@ -395,8 +401,22 @@ CAN_RECV(carcan, can, filterID, msg, waittime) {
     return 0;
     */
     struct carcan_mo mo;
+    struct carcan_filter *filter;
+    int i;
     PRINTF("CAN_RECV called\n");
-    ti_carcan_mo_readmsg(can, filterID, &mo);
+    if(filterID >= can->filterCount) {
+        return -1;
+    }
+    filter = &can->filter[filterID];
+    for(i = 0; i <= waittime; ++i){
+        if(can->base->nwdat_x){
+            break;
+        }
+    }
+    PRINTF("NWDAT_X: %#08x\n", can->base->nwdat_x);
+
+
+    ti_carcan_mo_readmsg(can, filter->id, &mo);
     if(mo.arb & CARCAN_IF1ARB_XTD_MASK){
         msg->id = mo.arb & CARCAN_IF1ARB_XTD_MASK;
     } else {
