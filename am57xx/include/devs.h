@@ -74,10 +74,10 @@ HAL_DEFINE_GLOBAL_ARRAY(temp);
 #define TEMP_IVA_ID HAL_GET_ID(temp, am57xx, temp_iva)
 #define TEMP_DSPEVE_ID HAL_GET_ID(temp, am57xx, temp_dspeve)
 HAL_DEFINE_GLOBAL_ARRAY(can);
-#ifdef CONFIG_MACH_AM57xx_CARCAN_CAN1
-#define CARCAN1_ID HAL_GET_ID(can, ti, carcan1)
+#ifdef CONFIG_MACH_AM57xx_DCAN_CAN1
+#define DCAN1_ID HAL_GET_ID(can, ti, dcan1)
 #endif
-#ifdef CONFIG_MACH_AM57xx_CARCAN_CAN2
-#define CARCAN2_ID HAL_GET_ID(can, ti, carcan2)
+#ifdef CONFIG_MACH_AM57xx_DCAN_CAN2
+#define DCAN2_ID HAL_GET_ID(can, ti, dcan2)
 #endif
 #endif

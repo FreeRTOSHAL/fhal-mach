@@ -103,12 +103,12 @@ menuconfig AM57xx_TIMER
 	bool "Am57xx General-Purpose Timers"
 	default n
 	source mach/am57xx/Kconfig.timer
-menuconfig MACH_AM57xx_CARCAN
+menuconfig MACH_AM57xx_DCAN
     depends on CAN
-    select TI_CARCAN
-    bool "Activate CarCAN"
+    select TI_DCAN
+    bool "Activate DCAN"
     default n
-    if MACH_AM57xx_CARCAN
+    if MACH_AM57xx_DCAN
     source mach/am57xx/Kconfig.can
     endif
 config AM57xx_TEMP

@@ -1,6 +1,6 @@
 comment "Waring: Loopback Mode disable physical connection to the CAN Bus!"
-	depends on TI_CARCAN_LOOP_BACK_MODE
-config TI_CARCAN_LOOP_BACK_MODE
+	depends on TI_DCAN_LOOP_BACK_MODE
+config TI_DCAN_LOOP_BACK_MODE
 	bool "Activate Loopback Mode (Debug Mode)"
 	default n
 	help
@@ -8,16 +8,16 @@ config TI_CARCAN_LOOP_BACK_MODE
 		All sended messages are also recived
 		The real bus is disconeded in this mode!
 
-menuconfig MACH_AM57xx_CARCAN_CAN1
+menuconfig MACH_AM57xx_DCAN_CAN1
     bool "CAN 1"
     default n
-if MACH_AM57xx_CARCAN_CAN1=y
+if MACH_AM57xx_DCAN_CAN1=y
     comment "Waring: More than 63 Filter are not posible"
-        depends on MACH_AM57xx_CARCAN_CAN1_MAX_FILTER >63
-    config MACH_AM57xx_CARCAN_CAN1_MAX_FILTER
+        depends on MACH_AM57xx_DCAN_CAN1_MAX_FILTER >63
+    config MACH_AM57xx_DCAN_CAN1_MAX_FILTER
         int "Max Input Filters"
         default 2
-    config MACH_AM57xx_CARCAN_CAN1_FILTER_QUEUE_ENTRIES
+    config MACH_AM57xx_DCAN_CAN1_FILTER_QUEUE_ENTRIES
         int "Max Filter Software Queue Entries"
         default 2
         help
@@ -28,16 +28,16 @@ if MACH_AM57xx_CARCAN_CAN1=y
 endif
 
 
-menuconfig MACH_AM57xx_CARCAN_CAN2
+menuconfig MACH_AM57xx_DCAN_CAN2
     bool "CAN 2"
     default n
-if MACH_AM57xx_CARCAN_CAN2=y
+if MACH_AM57xx_DCAN_CAN2=y
     comment "Waring: More than 63 Filter are not posible"
-        depends on MACH_AM57xx_CARCAN_CAN2_MAX_FILTER >63
-    config MACH_AM57xx_CARCAN_CAN2_MAX_FILTER
+        depends on MACH_AM57xx_DCAN_CAN2_MAX_FILTER >63
+    config MACH_AM57xx_DCAN_CAN2_MAX_FILTER
         int "Max Input Filters"
         default 2
-    config MACH_AM57xx_CARCAN_CAN2_FILTER_QUEUE_ENTRIES
+    config MACH_AM57xx_DCAN_CAN2_FILTER_QUEUE_ENTRIES
         int "Max Filter Software Queue Entries"
         default 2
         help
