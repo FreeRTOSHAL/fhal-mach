@@ -198,14 +198,19 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     ret = can_calcBittiming(&can->bt, can->btc, can->freq);
     if (ret < 0)
         return NULL;
+    if(can->bt.brp -1 > 0x3F){
+        can->base->btr = DCAN_BTR_BRP((can->bt.brp -1) & 0x3F) | 
+            DCAN_BTR_BRPE(((can->bt.brp -1) & 0x3C0) >> 6);
+    } else {
+        can->base->btr = DCAN_BTR_BRP(can->bt.brp -1);
+    }
     /* setup bittining */
     PRINTF("Point: %i\n", i);
     ++i;
 
     can->base->btr |= DCAN_BTR_TSEG2(can->bt.phase_seg2 -1) |
         DCAN_BTR_TSEG1(can->bt.phase_seg1 + can->bt.prop_seg -1) |
-        DCAN_BTR_SJW(can->bt.sjw -1) |
-        DCAN_BTR_BRP(can->bt.brp -1);
+        DCAN_BTR_SJW(can->bt.sjw -1);
     PRINTF("Target bus speed: %lu\n", bitrate);
     PRINTF("Calculated bus speed: %lu\n", can->bt.bitrate);
 
@@ -218,6 +223,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 #ifdef CONFIG_TI_DCAN_LOOP_BACK_MODE
     /* Activate Loop Back Mode */
     can->base->test |= DCAN_TEST_LBACK_MASK;
+    PRINTF("Loop back mode activated\n");
 #endif
 
 
@@ -230,7 +236,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
         /* init all filter and create software queue */
         for(i = 0; i < can->filterCount; i++) {
             can->filter[i].used = false;
-            /* id 0 is reserved for send MB */
+            /* id 1 is reserved for send MB */
             can->filter[i].id = i +2;
             can->filter[i].filter.id = 0;
             can->filter[i].filter.id = 0x1FFFFFFFu;
