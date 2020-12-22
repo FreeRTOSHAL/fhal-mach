@@ -25,7 +25,7 @@ int32_t dcan_setupClock(struct can *can){
     can->freq = clock_getPeripherySpeed(clock, 0);
 
 #ifdef CONFIG_MACH_AM57xx_DCAN_CAN1
-    clkreg = (volatile void *) CM_WKUPAON_DCAN1_CLKCTRL_ADR;
+    clkreg = (volatile uint32_t *) CM_WKUPAON_DCAN1_CLKCTRL_ADR;
     /* Check DCAN1 Clock is enabled */
     if((*clkreg >> 16) & 0x3u){
         /* enable clock */
@@ -36,7 +36,7 @@ int32_t dcan_setupClock(struct can *can){
 #endif
 
 #ifdef CONFIG_MACH_AM57xx_DCAN_CAN2
-    clkreg = (volatile void *) CM_L4PER2_DCAN2_CLKCLTR_ADR;
+    clkreg = (volatile uint32_t *) CM_L4PER2_DCAN2_CLKCLTR_ADR;
     /* Check DCAN2 Clock is enabled */
     if((*clkreg >> 16) & 0x3u){
         /* enable clock */
