@@ -185,7 +185,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
     can->base->ctl |= DCAN_CTL_CCE_MASK;
 
-    while(! can->base->ctl & DCAN_CTL_INIT_MASK);
+    while(! (can->base->ctl & DCAN_CTL_INIT_MASK));
     PRINTF("Point: %i\n", i);
     ++i;
 
@@ -198,8 +198,12 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     ret = can_calcBittiming(&can->bt, can->btc, can->freq);
     if (ret < 0)
         return NULL;
-    if(can->bt.brp -1 > 0x3F){
-        can->base->btr = DCAN_BTR_BRP((can->bt.brp -1) & 0x3F) | 
+    if(can->bt.brp -1 > 0x3FF){
+        PRINTF("BRP too big\n");
+        return NULL;
+    }
+    if(can->bt.brp -1 > DCAN_BTR_BRP_MASK){
+        can->base->btr = DCAN_BTR_BRP(can->bt.brp -1) | 
             DCAN_BTR_BRPE(((can->bt.brp -1) & 0x3C0) >> 6);
     } else {
         can->base->btr = DCAN_BTR_BRP(can->bt.brp -1);
@@ -264,7 +268,7 @@ CAN_DEINIT(dcan, can) {
     /* Set SWR bit additionally to INIT bit */
     can->base->ctl |= DCAN_CTL_SWR_MASK;
 
-    while(! can->base->ctl & DCAN_CTL_INIT_MASK);
+    while(! (can->base->ctl & DCAN_CTL_INIT_MASK));
     return true;
 }
 
