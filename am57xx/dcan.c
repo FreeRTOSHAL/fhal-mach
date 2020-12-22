@@ -8,8 +8,8 @@
 #include <vector.h>
 #include <stdio.h>
 
-#define CM_WKUPAON_DCAN1_CLKCTRL_ADR        (volatile void *) 0x6ae07888u
-#define CM_L4PER2_DCAN2_CLKCLTR_ADR         (volatile void *) 0x6a0098f0u
+#define CM_WKUPAON_DCAN1_CLKCTRL_ADR        (volatile void *) 0x6ae07888ul
+#define CM_L4PER2_DCAN2_CLKCLTR_ADR         (volatile void *) 0x6a0098f0ul
 
 struct dcan_pins {
 	const uint32_t pin;
@@ -79,8 +79,8 @@ static const struct can_bittiming_const dcan_bittimings = {
 
 
 
-#define AM57_DCAN_1 ((volatile struct dcan_regs *) 0x6ae3c000u)
-#define AM57_DCAN_2 ((volatile struct dcan_regs *) 0x68480000u)
+#define AM57_DCAN_1 ((volatile struct dcan_regs *) 0x6ae3c000ul)
+#define AM57_DCAN_2 ((volatile struct dcan_regs *) 0x68480000ul)
 
 #ifdef CONFIG_MACH_AM57xx_DCAN_CAN1
 struct dcan_filter can_dcan1_filter[CONFIG_MACH_AM57xx_DCAN_CAN1_MAX_FILTER];
