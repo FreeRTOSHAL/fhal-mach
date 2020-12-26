@@ -24,7 +24,7 @@ if MACH_AM57xx_DCAN_CAN1=y
             The Hardware has only one entrie per filter
             so we need a software queue to store the messages
  
-            How manny CAN Frames can be stored in this software queue?
+            How many CAN Frames can be stored in this software queue?
 endif
 
 
@@ -44,5 +44,5 @@ if MACH_AM57xx_DCAN_CAN2=y
             The Hardware has only one entrie per filter
             so we need a software queue to store the messages
  
-            How manny CAN Frames can be stored in this software queue?
+            How many CAN Frames can be stored in this software queue?
 endif

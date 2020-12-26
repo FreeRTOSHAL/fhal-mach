@@ -226,6 +226,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
 #ifdef CONFIG_TI_DCAN_LOOP_BACK_MODE
     /* Activate Loop Back Mode */
+    can->base->ctl |= DCAN_CTL_TEST_MASK;
     can->base->test |= DCAN_TEST_LBACK_MASK;
     PRINTF("Loop back mode activated\n");
 #endif

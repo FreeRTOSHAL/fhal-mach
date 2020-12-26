@@ -91,7 +91,7 @@ struct dcan_filter {
     uint32_t id;
     bool (*callback)(struct can *can, struct can_msg *msg, void *data);
     void *data;
-    OS_DEFINE_QUEUE(queue, CONFIG_MACH_AM57xx_DCAN_CAN0_FILTER_QUEUE_ENTRIES, sizeif(struct can_msg));
+    OS_DEFINE_QUEUE(queue, CONFIG_MACH_AM57xx_DCAN_CAN1_FILTER_QUEUE_ENTRIES, sizeof(struct can_msg));
 };
 
 struct can {
@@ -128,6 +128,7 @@ void ti_dcan_mo_configuration(struct can *can, uint8_t msg_num, struct dcan_mo *
 #define DCAN_CTL_CCE_SHIFT            6u
 #define DCAN_CTL_CCE_WIDTH            1u
 #define DCAN_CTL_CCE(x)               (((uint32_t)(((uint32_t)(x))<<DCAN_CTL_CCE_SHIFT))&DCAN_CTL_CCE_MASK)
+#define DCAN_CTL_TEST_MASK            0x00000080ul
 #define DCAN_CTL_SWR_MASK             0x00008000ul
 #define DCAN_CTL_SWR_SHIFT            15u
 #define DCAN_CTL_SWR_WIDTH            1u
