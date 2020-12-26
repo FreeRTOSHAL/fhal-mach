@@ -77,18 +77,35 @@ static const struct can_bittiming_const dcan_bittimings = {
 
 
 
+#define DCAN_PIN_RX(_pin, _mode) \
+	{ \
+		.pin = _pin, \
+		.ctl = MUX_CTL_MODE(_mode), \
+		.extra = 0, \
+	}
+
+#define DCAN_PIN_TX(_pin, _mode) \
+	{ \
+		.pin = _pin, \
+		.ctl = MUX_CTL_MODE(_mode) | MUX_CTL_PULL_UP, \
+		.extra = 0, \
+	}
 
 
 #define AM57_DCAN_1 ((volatile struct dcan_regs *) 0x6ae3c000ul)
 #define AM57_DCAN_2 ((volatile struct dcan_regs *) 0x68480000ul)
 
 #ifdef CONFIG_MACH_AM57xx_DCAN_CAN1
+const struct dcan_pins can1_pins[2] = {
+    DCAN_PIN_RX(PAD_DCAN1_RX, 0x0),
+    DCAN_PIN_TX(PAD_DCAN1_TX, 0x0),
+};
 struct dcan_filter can_dcan1_filter[CONFIG_MACH_AM57xx_DCAN_CAN1_MAX_FILTER];
 struct can dcan1 = {
     CAN_INIT_DEV(dcan)
     HAL_NAME("DCAN 1")
     //.clkData = ,
-    //.pins = ,
+    .pins = &can1_pins,
     .base = AM57_DCAN_1,
     .btc = &dcan_bittimings,
     .filterLength = CONFIG_MACH_AM57xx_DCAN_CAN1_FILTER_QUEUE_ENTRIES,

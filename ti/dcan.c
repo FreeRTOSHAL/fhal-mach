@@ -166,9 +166,9 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
     PRINTF("Point: %i\nsetupPins(can)\n", i);
     ++i;
-    //ret = dcan_setupPins(can);
-    //if(ret < 0)
-        //return NULL;
+    ret = dcan_setupPins(can);
+    if(ret < 0)
+        return NULL;
     PRINTF("Point: %i\n", i);
     ++i;
 
