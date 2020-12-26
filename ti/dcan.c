@@ -231,6 +231,13 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     PRINTF("Loop back mode activated\n");
 #endif
 
+#ifdef CONFIG_TI_DCAN_EXTERNAL_LOOP_BACK_MODE
+    /* Activate External Loop Back Mode */
+    can->base->ctl |= DCAN_CTL_TEST_MASK;
+    can->base->test |= DCAN_TEST_EXL_MASK;
+    PRINTF("External loop back mode activated\n");
+#endif
+
 
 
     PRINTF("Point: %i\n", i);
