@@ -81,14 +81,14 @@ static const struct can_bittiming_const dcan_bittimings = {
 	{ \
 		.pin = _pin, \
 		.ctl = MUX_CTL_MODE(_mode), \
-		.extra = 0, \
+		.extra = MUX_INPUT, \
 	}
 
 #define DCAN_PIN_TX(_pin, _mode) \
 	{ \
 		.pin = _pin, \
 		.ctl = MUX_CTL_MODE(_mode) | MUX_CTL_PULL_UP, \
-		.extra = 0, \
+		.extra = MUX_INPUT, \
 	}
 
 
