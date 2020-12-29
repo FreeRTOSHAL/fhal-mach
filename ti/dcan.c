@@ -23,8 +23,9 @@ void ti_dcan_mo_configuration(struct can *can, uint8_t msg_num, struct dcan_mo *
     can->base->if1arb = mo->arb;
     can->base->if1mctl = mo->mctl;
     data_length = (mo->mctl & DCAN_IF1MCTL_DLC_MASK);
-    if(data_length >8)
+    if(data_length >8){
         data_length = 8;
+    }
     memcpy((void *) &can->base->if1data, mo->data, data_length);
     cmd = DCAN_IF1CMD_WR_RD_MASK | DCAN_IF1CMD_MASK_MASK | DCAN_IF1CMD_ARB_MASK |
         DCAN_IF1CMD_CONTROL_MASK | DCAN_IF1CMD_DATA_A_MASK |
@@ -81,8 +82,9 @@ void ti_dcan_mo_readmsg(struct can *can, uint8_t msg_num, struct dcan_mo *mo){
     mo->arb = can->base->if2arb;
     mo->mctl = can->base->if2mctl;
     data_length = (mo->mctl & DCAN_IF1MCTL_DLC_MASK);
-    if(data_length >8)
+    if(data_length >8){
         data_length = 8;
+    }
     memcpy(mo->data, (void *) &can->base->if2data, data_length);
     PRINTF("mo_readmsg\ncmd: %#08x\nmsk: %#08x\narb: %#08x\nmctl: %#08x\n", cmd, mo->msk, mo->arb, mo->mctl);
 
@@ -161,14 +163,16 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
     //TODO causes HardFault
     ret = dcan_setupClock(can);
-    if(ret < 0) 
+    if(ret < 0) {
         return NULL;
+    }
 
     PRINTF("Point: %i\nsetupPins(can)\n", i);
     ++i;
     ret = dcan_setupPins(can);
-    if(ret < 0)
+    if(ret < 0){
         return NULL;
+    }
     PRINTF("Point: %i\n", i);
     ++i;
 
@@ -196,8 +200,9 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     can->bt.bitrate = bitrate;
     /* calc bittiming settings */
     ret = can_calcBittiming(&can->bt, can->btc, can->freq);
-    if (ret < 0)
+    if (ret < 0){
         return NULL;
+    }
     if(can->bt.brp -1 > 0x3FF){
         PRINTF("BRP too big\n");
         return NULL;
