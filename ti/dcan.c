@@ -10,6 +10,7 @@
 
 
 #define PRINTF(fmt, ...) printf("DCAN: " fmt, ##__VA_ARGS__)
+#define PRINTDEBUG PRINTF("File: %s, Function: %s, Line: %i\n", __FILE__, __FUNCTION__, __LINE__)
 
 
 
@@ -94,31 +95,27 @@ void ti_dcan_mo_readmsg(struct can *can, uint8_t msg_num, struct dcan_mo *mo){
 
 
 CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
-    int i = 0;
     int32_t ret;    
     struct can *can;
     volatile uint32_t *ctrlcore_control_io_2;
 
-    PRINTF("CAN_INIT Started\n");
+    PRINTF("%s called\n", __FUNCTION__);
 
     can = CAN_GET_DEV(index);
     if (can==NULL) {
         return NULL;
     }
 
-    PRINTF("Point: %i\n", i);
-    ++i;
+    PRINTDEBUG;
     ret = can_genericInit(can);
     if(ret < 0){
         return can;
     }
-    PRINTF("Point: %i\n", i);
-    ++i;
+    PRINTDEBUG;
     can->gen.init = true;
     can->enablePin = pin;
     can-> pinHigh = pinHigh;
-    PRINTF("Point: %i\nenablePin\n", i);
-    ++i;
+    PRINTDEBUG;
     if (can-> enablePin) {
         /* High is disable can transiver */
         if (can->pinHigh) {
@@ -128,8 +125,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
         }
     }
     /* DCAN RAM Hardware Initialisation */
-    PRINTF("Point: %i\nHardware RAM Initialisation\n", i);
-    ++i;
+    PRINTDEBUG;
 
     ctrlcore_control_io_2 = CTRL_CORE_CONTROL_IO_2_ADR;
 #ifdef CONFIG_MACH_AM57xx_DCAN_CAN1
@@ -157,8 +153,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
 #endif 
 
-    PRINTF("Point: %i\nsetupClock(can)\n", i);
-    ++i;
+    PRINTDEBUG;
 
 
     //TODO causes HardFault
@@ -167,20 +162,17 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
         return NULL;
     }
 
-    PRINTF("Point: %i\nsetupPins(can)\n", i);
-    ++i;
+    PRINTDEBUG;
     ret = dcan_setupPins(can);
     if(ret < 0){
         return NULL;
     }
-    PRINTF("Point: %i\n", i);
-    ++i;
+    PRINTDEBUG;
 
     can->task = NULL;
     can->errorCallback = callback;
     can->userData = data;
-    PRINTF("Point: %i\n", i);
-    ++i;
+    PRINTDEBUG;
 
     // configure CAN bit timing
 
@@ -190,8 +182,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     can->base->ctl |= DCAN_CTL_CCE_MASK;
 
     while(! (can->base->ctl & DCAN_CTL_INIT_MASK));
-    PRINTF("Point: %i\n", i);
-    ++i;
+    PRINTDEBUG;
 
 
     /* clear bt*/
@@ -214,8 +205,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
         can->base->btr = DCAN_BTR_BRP(can->bt.brp -1);
     }
     /* setup bittining */
-    PRINTF("Point: %i\n", i);
-    ++i;
+    PRINTDEBUG;
 
     can->base->btr |= DCAN_BTR_TSEG2(can->bt.phase_seg2 -1) |
         DCAN_BTR_TSEG1(can->bt.phase_seg1 + can->bt.prop_seg -1) |
@@ -226,8 +216,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     can->base->ctl &= ~(DCAN_CTL_INIT_MASK | DCAN_CTL_CCE_MASK);
     
     while(can->base->ctl & DCAN_CTL_INIT_MASK);
-    PRINTF("Point: %i\n", i);
-    ++i;
+    PRINTDEBUG;
 
 #ifdef CONFIG_TI_DCAN_SILENT_MODE
     /* Activate Silent Mode */
@@ -252,8 +241,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
 
 
-    PRINTF("Point: %i\n", i);
-    ++i;
+    PRINTDEBUG;
 
     {
         int32_t i;
@@ -280,7 +268,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 }
 
 CAN_DEINIT(dcan, can) {
-    PRINTF("CAN_DEINIT called\n");
+    PRINTF("%s called\n", __FUNCTION__);
     can->gen.init = false;
     /* Set INIT bit to shut down CAN communication */
     can->base->ctl |= DCAN_CTL_INIT_MASK;
@@ -293,6 +281,7 @@ CAN_DEINIT(dcan, can) {
 }
 
 CAN_SET_CALLBACK(dcan, can, filterID, callback, data) {
+    PRINTF("%s called\n", __FUNCTION__);
     return -1;
 }
 
@@ -300,7 +289,7 @@ CAN_REGISTER_FILTER(dcan, can, filter) {
     struct dcan_mo mo;
     int i;
     struct dcan_filter *hwFilter;
-    PRINTF("%s caled\n", __FUNCTION__);
+    PRINTF("%s called\n", __FUNCTION__);
     can_lock(can, portMAX_DELAY, -1);
 
     for(i = 0; i< can->filterCount; i++) {
@@ -341,7 +330,7 @@ CAN_REGISTER_FILTER(dcan, can, filter) {
 CAN_DEREGISTER_FILTER(dcan, can, filterID) {
     struct dcan_filter *filter;
     struct dcan_mo mo;
-    PRINTF("CAN_DEREGISTER_FILTER called\n");
+    PRINTF("%s called\n", __FUNCTION__);
 
     mo.msk = 0;
     mo.arb = 0;
@@ -373,7 +362,7 @@ CAN_DEREGISTER_FILTER(dcan, can, filterID) {
 
 CAN_SEND(dcan, can, msg, waittime) {
     struct dcan_mo mo;
-    PRINTF("CAN_SEND start\n");
+    PRINTF("%s called\n", __FUNCTION__);
     if(msg->req){
         /* TODO Implement request and rcv */
         /* CAN Requests has a complex MB state machine*/
@@ -433,7 +422,7 @@ CAN_RECV(dcan, can, filterID, msg, waittime) {
     struct dcan_mo mo;
     struct dcan_filter *filter;
     int i;
-    PRINTF("CAN_RECV called\n");
+    PRINTF("%s called\n", __FUNCTION__);
     if(filterID >= can->filterCount) {
         return -1;
     }
@@ -459,18 +448,22 @@ CAN_RECV(dcan, can, filterID, msg, waittime) {
 }
 
 CAN_SEND_ISR(dcan, can, msg) {
+    PRINTF("%s called\n", __FUNCTION__);
     return -1;
 }
 
 CAN_RECV_ISR(dcan, can, filterID, msg) {
+    PRINTF("%s called\n", __FUNCTION__);
     return -1;
 }
 
 CAN_UP(dcan, can) {
+    PRINTF("%s called\n", __FUNCTION__);
     return -1;
 }
 
 CAN_DOWN(dcan, can) {
+    PRINTF("%s called\n", __FUNCTION__);
     return -1;
 }
 
