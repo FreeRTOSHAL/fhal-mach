@@ -96,7 +96,7 @@ struct dcan_filter {
 
 struct can {
     struct can_generic gen;
-    //void const *clkData;
+    void const *clkData;
     void const *pins;
     volatile struct dcan_regs *base;
     struct can_bittiming_const const *btc;

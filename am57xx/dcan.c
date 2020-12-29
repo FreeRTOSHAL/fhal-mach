@@ -17,34 +17,26 @@ struct dcan_pins {
 	const uint32_t extra;
 };
 
+struct dcan_clk {
+    volatile uint32_t *clkreg;
+};
+
+
 
 
 int32_t dcan_setupClock(struct can *can){
     struct clock *clock = clock_init();
-    volatile uint32_t *clkreg;
+    struct dcan_clk const *clk = can->clkData;
     can->freq = clock_getPeripherySpeed(clock, 0);
 
-#ifdef CONFIG_MACH_AM57xx_DCAN_CAN1
-    clkreg = (volatile uint32_t *) CM_WKUPAON_DCAN1_CLKCTRL_ADR;
-    /* Check DCAN1 Clock is enabled */
-    if((*clkreg >> 16) & 0x3u){
+    /* Check DCAN Clock is enabled */
+    if((*clk->clkreg >> 16) & 0x3u){
         /* enable clock */
-        *clkreg |= 0x2u;
+        *clk->clkreg |= 0x2u;
         /* wait clock came stable */
-        while((*clkreg >> 16) & 0x3u);
+        while((*clk->clkreg >> 16) & 0x3u);
     }
-#endif
 
-#ifdef CONFIG_MACH_AM57xx_DCAN_CAN2
-    clkreg = (volatile uint32_t *) CM_L4PER2_DCAN2_CLKCLTR_ADR;
-    /* Check DCAN2 Clock is enabled */
-    if((*clkreg >> 16) & 0x3u){
-        /* enable clock */
-        *clkreg |= 0x2u;
-        /* wait clock came stable */
-        while((*clkreg >> 16) & 0x3u);
-    }
-#endif
     return 0;
 }
 
@@ -100,11 +92,14 @@ const struct dcan_pins can1_pins[2] = {
     DCAN_PIN_RX(PAD_DCAN1_RX, 0x0),
     DCAN_PIN_TX(PAD_DCAN1_TX, 0x0),
 };
+const struct dcan_clk can1_clk = {
+    .clkreg = (volatile uint32_t *) CM_WKUPAON_DCAN1_CLKCTRL_ADR,
+};
 struct dcan_filter can_dcan1_filter[CONFIG_MACH_AM57xx_DCAN_CAN1_MAX_FILTER];
 struct can dcan1 = {
     CAN_INIT_DEV(dcan)
     HAL_NAME("DCAN 1")
-    //.clkData = ,
+    .clkData = &can1_clk,
     .pins = &can1_pins,
     .base = AM57_DCAN_1,
     .btc = &dcan_bittimings,
@@ -123,11 +118,14 @@ CAN_ADDDEV(ti, dcan1);
 
 #ifdef CONFIG_MACH_AM57xx_DCAN_CAN2
 
+const struct dcan_clk can2_clk = {
+    .clkreg = (volatile uint32_t *) CM_L4PER2_DCAN2_CLKCLTR_ADR,
+};
 struct dcan_filter can_dcan2_filter[CONFIG_MACH_AM57xx_DCAN_CAN2_MAX_FILTER];
 struct can dcan2 = {
     CAN_INIT_DEV(dcan)
     HAL_NAME("DCAN 2")
-    //.clkData = ,
+    .clkData = &can2_clk,
     //.pins = ,
     .base = AM57_DCAN_2,
     .btc = &dcan_bittimings,

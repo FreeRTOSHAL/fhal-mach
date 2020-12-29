@@ -295,7 +295,7 @@ CAN_REGISTER_FILTER(dcan, can, filter) {
     struct dcan_mo mo;
     int i;
     struct dcan_filter *hwFilter;
-    PRINTF("CAN_REGISTER_FILTER caled\n");
+    PRINTF("%s caled\n", __FUNCTION__);
     can_lock(can, portMAX_DELAY, -1);
 
     for(i = 0; i< can->filterCount; i++) {
