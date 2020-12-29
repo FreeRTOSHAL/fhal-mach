@@ -245,7 +245,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
 
 
-    PRINTF("CAN_INIT finished\n");
+    PRINTF("%s finished\n", __FUNCTION__);
 
     return can;
 
@@ -305,7 +305,7 @@ CAN_REGISTER_FILTER(dcan, can, filter) {
     ti_dcan_mo_configuration(can, hwFilter->id, &mo);
 
     can_unlock(can, -1);
-    PRINTF("CAN_REGISTER_FILTER returns: %i\n", i);
+    PRINTF("%s returns: %i\n", __FUNCTION__,i);
     return i;
     
 
@@ -322,7 +322,7 @@ CAN_DEREGISTER_FILTER(dcan, can, filterID) {
     mo.mctl = 0;
 
     if(filterID >= can->filterCount) {
-        PRINTF("CAN_DEREGISTER_FILTER, filterID too big \n");
+        PRINTF("%s, filterID too big \n", __FUNCTION__);
         return -1;
     }
 
@@ -330,7 +330,7 @@ CAN_DEREGISTER_FILTER(dcan, can, filterID) {
     can_lock(can, portMAX_DELAY, -1);
     filter= &can->filter[filterID];
     if(!filter->used) {
-        PRINTF("CAN_DEREGISTER_FILTER, filter not in use\n");
+        PRINTF("%s, filter not in use\n", __FUNCTION__);
         return -1;
     }
     ti_dcan_mo_configuration(can, filter->id, &mo);
@@ -340,7 +340,7 @@ CAN_DEREGISTER_FILTER(dcan, can, filterID) {
     filter->callback = NULL;
     filter->data = NULL;
     can_unlock(can, -1);
-    PRINTF("CAN_DEREGISTER_FILTER finished\n");
+    PRINTF("%s finished\n", __FUNCTION__);
     return 0;
 
 }
@@ -370,7 +370,7 @@ CAN_SEND(dcan, can, msg, waittime) {
 
     mo.mctl = DCAN_IF1MCTL_NEWDAT_MASK | DCAN_IF1MCTL_TXRQST_MASK | 
         DCAN_IF1MCTL_DLC(msg->length);
-    PRINTF("CAN_SEND: mo.mctl: %#08x\n", mo.mctl );
+    PRINTF("%s: mo.mctl: %#08x\n",__FUNCTION__, mo.mctl );
 
     mo.msk = 0;
 
@@ -381,7 +381,7 @@ CAN_SEND(dcan, can, msg, waittime) {
     ti_dcan_mo_configuration(can, 1, &mo);
     
     can_unlock(can, -1);
-    PRINTF("CAN_SEND finished\n");
+    PRINTF("%s finished\n", __FUNCTION__);
     return 0;
 dcan_send_error0:
     PRINTF("dcan_send_error0\n");
