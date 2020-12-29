@@ -110,6 +110,8 @@ struct can {
     bool (*errorCallback)(struct can *can, can_error_t error, can_errorData_t data);
     void *userData;
     struct dcan_filter *filter;
+    const uint32_t raminit_start_mask;
+    const uint32_t raminit_done_mask;
 };
 
 int32_t dcan_setupClock(struct can *can);

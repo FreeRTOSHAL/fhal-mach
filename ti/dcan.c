@@ -124,43 +124,28 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
             gpioPin_setPin(can->enablePin);
         }
     }
-    /* DCAN RAM Hardware Initialisation */
-    PRINTDEBUG;
-
-    ctrlcore_control_io_2 = CTRL_CORE_CONTROL_IO_2_ADR;
-#ifdef CONFIG_MACH_AM57xx_DCAN_CAN1
-    PRINTF("check RAMINIT DCAN1\n");
-    if(*ctrlcore_control_io_2 & DCAN1_RAMINIT_START_MASK){
-        *ctrlcore_control_io_2 &= ~(DCAN1_RAMINIT_START_MASK);
-        while(*ctrlcore_control_io_2 & DCAN1_RAMINIT_START_MASK);
-    }
-    PRINTF("RAMMINIT DCAN1\n");
-    *ctrlcore_control_io_2 |= DCAN1_RAMINIT_START_MASK;
-    //while(!(*ctrlcore_control_io_2 & DCAN1_RAMINIT_DONE_MASK));
-
-#endif 
-
-
-#ifdef CONFIG_MACH_AM57xx_DCAN_CAN2
-    PRINTF("check RAMINIT DCAN2\n");
-    if(*ctrlcore_control_io_2 & DCAN2_RAMINIT_START_MASK){
-        *ctrlcore_control_io_2 &= ~(DCAN2_RAMINIT_START_MASK);
-        while(*ctrlcore_control_io_2 & DCAN2_RAMINIT_START_MASK);
-    }
-    PRINTF("RAMMINIT DCAN2\n");
-    *ctrlcore_control_io_2 |= DCAN2_RAMINIT_START_MASK;
-    //while(!(*ctrlcore_control_io_2 & DCAN2_RAMINIT_DONE_MASK));
-
-#endif 
-
     PRINTDEBUG;
 
 
-    //TODO causes HardFault
     ret = dcan_setupClock(can);
     if(ret < 0) {
         return NULL;
     }
+
+    PRINTDEBUG;
+
+    /* DCAN RAM Hardware Initialisation */
+    ctrlcore_control_io_2 = CTRL_CORE_CONTROL_IO_2_ADR;
+    PRINTF("check RAMINIT DCAN\n");
+    if(*ctrlcore_control_io_2 & can->raminit_start_mask){
+        *ctrlcore_control_io_2 &= ~(can->raminit_start_mask);
+        while(*ctrlcore_control_io_2 & can->raminit_start_mask);
+    }
+    PRINTF("RAMMINIT DCAN\n");
+    *ctrlcore_control_io_2 |= can->raminit_start_mask;
+    while(!(*ctrlcore_control_io_2 & can->raminit_done_mask));
+
+
 
     PRINTDEBUG;
     ret = dcan_setupPins(can);

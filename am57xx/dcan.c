@@ -109,6 +109,8 @@ struct can dcan1 = {
     .filter = can_dcan1_filter,
     //.irqNum = ,
     //irqIDs = ,
+    .raminit_start_mask = DCAN1_RAMINIT_START_MASK,
+    .raminit_done_mask = DCAN1_RAMINIT_DONE_MASK,
 };
 
 CAN_ADDDEV(ti, dcan1);
@@ -135,6 +137,8 @@ struct can dcan2 = {
     .filter = can_dcan2_filter,
     //.irqNum = ,
     //irqIDs = ,
+    .raminit_start_mask = DCAN2_RAMINIT_START_MASK,
+    .raminit_done_mask = DCAN2_RAMINIT_DONE_MASK,
 };
 
 CAN_ADDDEV(ti, dcan2);
