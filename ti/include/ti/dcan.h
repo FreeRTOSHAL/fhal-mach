@@ -134,6 +134,7 @@ void ti_dcan_mo_configuration(struct can *can, uint8_t msg_num, struct dcan_mo *
 #define DCAN_CTL_SWR_WIDTH            1u
 #define DCAN_CTL_SWR(x)               (((uint32_t)(((uint32_t)(x))<<DCAN_CTL_SWR_SHIFT))&DCAN_CTL_SWR_MASK)
 
+#define DCAN_TEST_SILENT_MASK         0x00000008ul
 #define DCAN_TEST_LBACK_MASK          0x00000010ul
 #define DCAN_TEST_EXL_MASK            0x00000100ul
 

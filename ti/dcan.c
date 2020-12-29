@@ -224,6 +224,13 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     PRINTF("Point: %i\n", i);
     ++i;
 
+#ifdef CONFIG_TI_DCAN_SILENT_MODE
+    /* Activate Silent Mode */
+    can->base->ctl |= DCAN_CTL_TEST_MASK;
+    can->base->test |= DCAN_TEST_SILENT_MASK;
+    PRINTF("Silent mode activated\n");
+#endif
+
 #ifdef CONFIG_TI_DCAN_LOOP_BACK_MODE
     /* Activate Loop Back Mode */
     can->base->ctl |= DCAN_CTL_TEST_MASK;

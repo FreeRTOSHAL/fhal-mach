@@ -1,21 +1,43 @@
-comment "Waring: Loopback Mode disable physical connection to the CAN Bus!"
+
+comment "Warning: Silent mode disables physical connection of CAN_TX to the CAN Bus"
+    depends on TI_DCAN_SILENT_MODE
+config TI_DCAN_SILENT_MODE
+    bool "Activate Silent Mode"
+    default n
+    help
+        Activate Silent mode
+        All sent messages are also received
+        No dominant Bits are sent on the real bus!
+        The DCAN is still able to receive valid data from the real bus
+        Silent mode and loopback mode can be activated together
+
+choice
+    prompt "loopback mode"
+    optional
+
+comment "Waring: Loopback Mode disables physical connection of CAN_RX to the CAN Bus!"
 	depends on TI_DCAN_LOOP_BACK_MODE
 config TI_DCAN_LOOP_BACK_MODE
 	bool "Activate Loopback Mode (Debug Mode)"
-	default n
 	help
-		Activate Loopback Debug Mode
-		All sended messages are also recived
-		The real bus is disconeded in this mode!
-comment "Waring: Loopback Mode disable physical connection to the CAN Bus!"
+        Activate Loopback Debug Mode
+        All sent messages are also received
+        The CAN_RX is disconnected in this mode!
+        The DCAN is still able to send dominant bits to the real bus
+        Loopback mode and silent mode can be activated together
+
+comment "Waring: Loopback Mode disables physical connection of CAN_RX to the CAN Bus!"
 	depends on TI_DCAN_EXTERNAL_LOOP_BACK_MODE
 config TI_DCAN_EXTERNAL_LOOP_BACK_MODE
 	bool "Activate external Loopback Mode (Debug Mode)"
-	default n
 	help
-		Activate external Loopback Debug Mode
-		All sended messages are also recived
-		The real bus is disconeded in this mode!
+        Activate external Loopback Debug Mode
+        All sent messages are also received
+        CAN_TX pin is connected to the Rx and Tx of the CAN Core
+        The CAN_RX is disconnected in this mode!
+
+endchoice
+
 
 menuconfig MACH_AM57xx_DCAN_CAN1
     bool "CAN 1"
