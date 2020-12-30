@@ -266,8 +266,19 @@ CAN_DEINIT(dcan, can) {
 }
 
 CAN_SET_CALLBACK(dcan, can, filterID, callback, data) {
+    struct dcan_filter *filter;
     PRINTF("%s called\n", __FUNCTION__);
-    return -1;
+    /* this is a constant so we can read it without lock */
+    if(filterID >= can->filterCount){
+        return -1;
+    }
+
+    can_lock(can, portMAX_DELAY, -1);
+    filter = &can->filter[filterID];
+    filter->callback = callback;
+    filter->data = data;
+    can_unlock(can, -1);
+    return 0;
 }
 
 CAN_REGISTER_FILTER(dcan, can, filter) {
