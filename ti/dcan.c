@@ -7,6 +7,7 @@
 #include <gpio.h>
 #include <irq.h>
 #include <ti/dcan.h>
+#include <ctrl.h>
 
 
 #define PRINTF(fmt, ...) printf("DCAN: " fmt, ##__VA_ARGS__)
@@ -58,7 +59,7 @@ void ti_dcan_mo_newtrans(struct can *can, uint8_t msg_num, uint8_t *data) {
 void ti_dcan_mo_readdata(struct can *can, uint8_t msg_num, uint8_t *data) {
     uint32_t cmd;
     while(can->base->if2cmd & DCAN_IF2CMD_BUSY_MASK);
-    cmd = DCAN_IF2CMD_CONTROL_MASK | DCAN_IF2CMD_TXRQST_NEWDAT_MASK| DCAN_IF2CMD_DATA_A_MASK |
+    cmd = DCAN_IF2CMD_CONTROL_MASK | DCAN_IF1CMD_CLRINTPND_MASK | DCAN_IF2CMD_TXRQST_NEWDAT_MASK| DCAN_IF2CMD_DATA_A_MASK |
         DCAN_IF2CMD_DATA_B_MASK| DCAN_IF2CMD_MESSAGE_NUMBER(msg_num);
     can->base->if2cmd = cmd;
     while(can->base->if2cmd & DCAN_IF2CMD_BUSY_MASK);
@@ -74,7 +75,7 @@ void ti_dcan_mo_readmsg(struct can *can, uint8_t msg_num, struct dcan_mo *mo){
     uint16_t data_length;
     while(can->base->if2cmd & DCAN_IF2CMD_BUSY_MASK);
     cmd = DCAN_IF2CMD_MASK_MASK | DCAN_IF2CMD_ARB_MASK | DCAN_IF2CMD_CONTROL_MASK |
-        DCAN_IF2CMD_DATA_A_MASK | DCAN_IF2CMD_DATA_B_MASK |
+        DCAN_IF2CMD_DATA_A_MASK | DCAN_IF1CMD_CLRINTPND_MASK | DCAN_IF2CMD_DATA_B_MASK |
         DCAN_IF2CMD_MESSAGE_NUMBER(msg_num);
     can->base->if2cmd = cmd;
     while(can->base->if2cmd & DCAN_IF2CMD_BUSY_MASK);
@@ -197,8 +198,12 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
         DCAN_BTR_SJW(can->bt.sjw -1);
     PRINTF("Target bus speed: %lu\n", bitrate);
     PRINTF("Calculated bus speed: %lu\n", can->bt.bitrate);
-
-    can->base->ctl &= ~(DCAN_CTL_INIT_MASK | DCAN_CTL_CCE_MASK);
+    {
+        uint32_t tmp = can->base->ctl;
+        tmp &= ~(DCAN_CTL_INIT_MASK | DCAN_CTL_CCE_MASK);
+        tmp |= (DCAN_CTL_IE0_MASK | DCAN_CTL_IE1_MASK);
+        can->base->ctl = tmp;
+    }
     
     while(can->base->ctl & DCAN_CTL_INIT_MASK);
     PRINTDEBUG;
@@ -233,8 +238,9 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
         /* init all filter and create software queue */
         for(i = 0; i < can->filterCount; i++) {
             can->filter[i].used = false;
-            /* id 1 is reserved for send MB */
-            can->filter[i].id = i +2;
+            /* id 0 is illegal
+             * id 1 is reserved for send MB */
+            can->filter[i].id = i +DCAN_FILTER_MO_OFFSET;
             can->filter[i].filter.id = 0;
             can->filter[i].filter.id = 0x1FFFFFFFu;
             can->filter[i].callback = NULL;
@@ -242,6 +248,22 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
             can->filter[i].queue = OS_CREATE_QUEUE(can->filterLength, sizeof(struct can_msg), can->filter[i].queue);
         }
     }
+    
+    PRINTDEBUG;
+    {
+        int32_t i;
+        /* set ISRs, enable all Interrupts and set prio */ 
+        for(i = 0; i < can->irqNum; ++i){
+            ret = ctrl_setHandler(can->irqIDs[i], can->ISRs[i]);
+            if(ret < 0){
+                return NULL;
+            }
+            irq_enable(ret);
+            irq_setPrio(ret, 0xFF);
+        }
+    }
+
+
 
 
 
@@ -250,6 +272,67 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     return can;
 
 
+}
+
+void dcan_handleInt0IRQ(struct can *can) {
+    PRINTDEBUG;
+}
+
+void dcan_handleInt1IRQ(struct can *can) {
+    BaseType_t tmp;
+    BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+    PRINTDEBUG;
+    /*
+
+    if(1){
+        if(can->task){
+            vTaskNotifyGiveIndexedFromISR(can->task, 0, &tmp);
+            pxHigherPriorityTaskWoken |= tmp;
+        }
+    }
+    */
+
+    while(can->base->intr & DCAN_INT_INT1ID_MASK){
+        struct can_msg msg;
+        uint32_t intid = (can->base->intr & DCAN_INT_INT1ID_MASK) >> DCAN_INT_INT1ID_SHIFT;
+        uint32_t filterID = intid - DCAN_FILTER_MO_OFFSET;
+        struct dcan_filter *filter;
+        struct dcan_mo mo;
+        if(filterID >= can->filterCount){
+            return ;
+        }
+        filter = &can->filter[filterID];
+        if(!filter->used){
+            return ;
+        }
+        can_lock(can, portMAX_DELAY, -1);
+        ti_dcan_mo_readmsg(can, filter->id, &mo);
+        can_unlock(can, -1);
+        if(mo.arb & DCAN_IF1ARB_XTD_MASK){
+            msg.id = mo.arb & DCAN_IF1ARB_XTD_MASK;
+        } else {
+            msg.id = ((mo.arb & DCAN_IF1ARB_ID_STD_MASK) >> DCAN_IF1ARB_ID_STD_SHIFT);
+        }
+        msg.length = mo.mctl & DCAN_IF1MCTL_DLC_MASK;
+        memcpy(msg.data, mo.data, msg.length);
+
+        /* Send msg to userspace, we ignore the overflow error for now */
+        /* TODO Handle overflow */
+        (void) xQueueSendToBackFromISR(filter->queue, &msg, &tmp);
+        pxHigherPriorityTaskWoken |= tmp;
+        if(filter->callback){
+            bool ret;
+            ret = filter->callback(can, &msg, filter->data);
+            pxHigherPriorityTaskWoken |= ret;
+        }
+    }
+
+    portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
+
+}
+
+void dcan_handleParityIRQ(struct can *can) {
+    PRINTDEBUG;
 }
 
 CAN_DEINIT(dcan, can) {
@@ -312,7 +395,7 @@ CAN_REGISTER_FILTER(dcan, can, filter) {
         mo.arb = DCAN_IF1ARB_MSGVAL_MASK | DCAN_IF1ARB_ID_STD(hwFilter->filter.id);
     }
 
-    mo.mctl = DCAN_IF1MCTL_UMASK_MASK;
+    mo.mctl = DCAN_IF1MCTL_UMASK_MASK | DCAN_IF1MCTL_TXIE_MASK;
     ti_dcan_mo_configuration(can, hwFilter->id, &mo);
 
     can_unlock(can, -1);
@@ -400,7 +483,6 @@ dcan_send_error0:
 }
 
 CAN_RECV(dcan, can, filterID, msg, waittime) {
-    /*
     BaseType_t ret;
     struct dcan_filter *filter;
 
@@ -414,7 +496,7 @@ CAN_RECV(dcan, can, filterID, msg, waittime) {
         return -1;
     }
     return 0;
-    */
+    /*
     struct dcan_mo mo;
     struct dcan_filter *filter;
     int i;
@@ -440,6 +522,7 @@ CAN_RECV(dcan, can, filterID, msg, waittime) {
     msg->length = mo.mctl & DCAN_IF1MCTL_DLC_MASK;
     memcpy(msg->data, mo.data, msg->length);
     return 0;
+    */
 
 }
 
@@ -449,8 +532,26 @@ CAN_SEND_ISR(dcan, can, msg) {
 }
 
 CAN_RECV_ISR(dcan, can, filterID, msg) {
+    BaseType_t ret;
+    struct dcan_filter *filter;
     PRINTF("%s called\n", __FUNCTION__);
-    return -1;
+    /* this is a constant so we can read it without lock */
+    if(filterID >= can->filterCount){
+        return -1;
+    }
+
+    filter = &can->filter[filterID];
+    /*
+     * we recieve a message from the queue
+     * no task is writing on queue, so we can ignore the pxHigherPriorityTaskWoken parameter
+     *
+     * We did not perform busy waiting, let the userspace do this
+     */
+    ret = xQueueReceiveFromISR(filter->queue, msg, NULL);
+    if(ret != pdTRUE){
+        return -1;
+    }
+    return 0;
 }
 
 CAN_UP(dcan, can) {

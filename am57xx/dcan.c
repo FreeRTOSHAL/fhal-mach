@@ -105,6 +105,9 @@ struct can dcan1 = {
     .btc = &dcan_bittimings,
     .filterLength = CONFIG_MACH_AM57xx_DCAN_CAN1_FILTER_QUEUE_ENTRIES,
     .filterCount = CONFIG_MACH_AM57xx_DCAN_CAN1_MAX_FILTER,
+    .irqIDs = {DCAN1_IRQ_INT0, DCAN1_IRQ_INT1, DCAN1_IRQ_PARITY},
+    .irqNum = 3,
+    .ISRs = {CAN1_INT0_ISR, CAN1_INT1_ISR, CAN1_PARITY_ISR},
     //.mb_count = 32 ,
     .filter = can_dcan1_filter,
     //.irqNum = ,
@@ -114,6 +117,16 @@ struct can dcan1 = {
 };
 
 CAN_ADDDEV(ti, dcan1);
+
+void CAN1_INT0_ISR(){
+    dcan_handleInt0IRQ(&dcan1);
+}
+void CAN1_INT1_ISR(){
+    dcan_handleInt1IRQ(&dcan1);
+}
+void CAN1_PARITY_ISR(){
+    dcan_handleParityIRQ(&dcan1);
+}
 
 #endif
 
@@ -133,6 +146,9 @@ struct can dcan2 = {
     .btc = &dcan_bittimings,
     .filterLength = CONFIG_MACH_AM57xx_DCAN_CAN2_FILTER_QUEUE_ENTRIES,
     .filterCount = CONFIG_MACH_AM57xx_DCAN_CAN2_MAX_FILTER,
+    .irqIDs = {DCAN2_IRQ_INT0, DCAN2_IRQ_INT1, DCAN2_IRQ_PARITY},
+    .irqNum = 3,
+    .ISRs = {CAN2_INT0_ISR, CAN2_INT1_ISR, CAN2_PARITY_ISR},
     //.mb_count = 32 ,
     .filter = can_dcan2_filter,
     //.irqNum = ,
@@ -142,5 +158,15 @@ struct can dcan2 = {
 };
 
 CAN_ADDDEV(ti, dcan2);
+
+void CAN2_INT0_ISR(){
+    dcan_handleInt0IRQ(&dcan2);
+}
+void CAN2_INT1_ISR(){
+    dcan_handleInt1IRQ(&dcan2);
+}
+void CAN2_PARITY_ISR(){
+    dcan_handleParityIRQ(&dcan2);
+}
 
 #endif

@@ -102,6 +102,9 @@ struct can {
     struct can_bittiming_const const *btc;
     const uint32_t filterLength;
     const uint32_t filterCount;
+    const uint32_t irqIDs[3];
+    const uint32_t irqNum;
+    const void *ISRs[3];
     struct gpio_pin *enablePin;
     bool pinHigh;
     struct can_bittiming bt;
@@ -122,9 +125,21 @@ void ti_dcan_mo_readdata(struct can *can, uint8_t msg_num, uint8_t *data);
 void ti_dcan_mo_newtrans(struct can *can, uint8_t msg_num, uint8_t *data);
 void ti_dcan_mo_configuration(struct can *can, uint8_t msg_num, struct dcan_mo *mo);
 
+void dcan_handleInt0IRQ(struct can *can);
+void dcan_handleInt1IRQ(struct can *can);
+void dcan_handleParityIRQ(struct can *can);
+
+void CAN1_INT0_ISR();
+void CAN1_INT1_ISR();
+void CAN1_PARITY_ISR();
+void CAN2_INT0_ISR();
+void CAN2_INT1_ISR();
+void CAN2_PARITY_ISR();
+
 #define DCAN_CTL_INIT_MASK            0x00000001ul
 #define DCAN_CTL_INIT_SHIFT           0u
 #define DCAN_CTL_INIT_WIDTH           1u
+#define DCAN_CTL_IE0_MASK             0x00000002ul
 #define DCAN_CTL_INIT(x)              (((uint32_t)(((uint32_t)(x))<<DCAN_CTL_INIT_SHIFT))&DCAN_CTL_INIT_MASK)
 #define DCAN_CTL_CCE_MASK             0x00000040ul
 #define DCAN_CTL_CCE_SHIFT            6u
@@ -135,6 +150,16 @@ void ti_dcan_mo_configuration(struct can *can, uint8_t msg_num, struct dcan_mo *
 #define DCAN_CTL_SWR_SHIFT            15u
 #define DCAN_CTL_SWR_WIDTH            1u
 #define DCAN_CTL_SWR(x)               (((uint32_t)(((uint32_t)(x))<<DCAN_CTL_SWR_SHIFT))&DCAN_CTL_SWR_MASK)
+#define DCAN_CTL_IE1_MASK             0x00020000ul
+
+#define DCAN_INT_INT0ID_MASK          0x0000FFFFul
+#define DCAN_INT_INT0ID_SHIFT         0u
+#define DCAN_INT_INT0ID_WIDTH         16u
+#define DCAN_INT_INT0ID(x)            (((uint32_t)(((uint32_t)(x))<<DCAN_INT_INT0ID_SHIFT))&DCAN_INT_INT0ID_MASK)
+#define DCAN_INT_INT1ID_MASK          0x00FF0000ul
+#define DCAN_INT_INT1ID_SHIFT         16u
+#define DCAN_INT_INT1ID_WIDTH         8u
+#define DCAN_INT_INT1ID(x)            (((uint32_t)(((uint32_t)(x))<<DCAN_INT_INT1ID_SHIFT))&DCAN_INT_INT1ID_MASK)
 
 #define DCAN_TEST_SILENT_MASK         0x00000008ul
 #define DCAN_TEST_LBACK_MASK          0x00000010ul
@@ -327,5 +352,8 @@ void ti_dcan_mo_configuration(struct can *can, uint8_t msg_num, struct dcan_mo *
 #define DCAN1_RAMINIT_DONE_MASK                  0x00000002ul
 #define DCAN2_RAMINIT_START_MASK                 0x00000020ul
 #define DCAN2_RAMINIT_DONE_MASK                  0x00000004ul
+
+
+#define DCAN_FILTER_MO_OFFSET                   2
 
 #endif
