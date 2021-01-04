@@ -93,6 +93,8 @@ struct dcan_filter {
     void *data;
     OS_DEFINE_QUEUE(queue, CONFIG_MACH_AM57xx_DCAN_CAN1_FILTER_QUEUE_ENTRIES, sizeof(struct can_msg));
 };
+typedef void (*vector_table_entry_t)(void);
+
 
 struct can {
     struct can_generic gen;
@@ -104,7 +106,7 @@ struct can {
     const uint32_t filterCount;
     const uint32_t irqIDs[3];
     const uint32_t irqNum;
-    const void *ISRs[3];
+    const void  *ISRs[3];
     struct gpio_pin *enablePin;
     bool pinHigh;
     struct can_bittiming bt;

@@ -201,7 +201,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     {
         uint32_t tmp = can->base->ctl;
         tmp &= ~(DCAN_CTL_INIT_MASK | DCAN_CTL_CCE_MASK);
-        tmp |= (DCAN_CTL_IE0_MASK | DCAN_CTL_IE1_MASK);
+        tmp |= (DCAN_CTL_IE1_MASK);
         can->base->ctl = tmp;
     }
     
@@ -250,18 +250,33 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     }
     
     PRINTDEBUG;
+    can->base->intmux12 = 0xFFFFFFFFul;
+    can->base->intmux34 = 0xFFFFFFFFul;
+    can->base->intmux56 = 0xFFFFFFFFul;
+    can->base->intmux78 = 0xFFFFFFFFul;
     {
         int32_t i;
+        uint32_t irq;
         /* set ISRs, enable all Interrupts and set prio */ 
         for(i = 0; i < can->irqNum; ++i){
             ret = ctrl_setHandler(can->irqIDs[i], can->ISRs[i]);
             if(ret < 0){
                 return NULL;
             }
-            irq_enable(ret);
-            irq_setPrio(ret, 0xFF);
+            irq = (uint32_t) ret;
+            PRINTF("%i. IRQNr: %lu\n", i, irq);
+            ret = irq_setPrio(irq, 0xFF);
+            if(ret < 0){
+                return NULL;
+            }
+            ret = irq_enable(irq);
+            if(ret < 0){
+                return NULL;
+            }
         }
     }
+
+
 
 
 
@@ -395,7 +410,7 @@ CAN_REGISTER_FILTER(dcan, can, filter) {
         mo.arb = DCAN_IF1ARB_MSGVAL_MASK | DCAN_IF1ARB_ID_STD(hwFilter->filter.id);
     }
 
-    mo.mctl = DCAN_IF1MCTL_UMASK_MASK | DCAN_IF1MCTL_TXIE_MASK;
+    mo.mctl = DCAN_IF1MCTL_UMASK_MASK | DCAN_IF1MCTL_RXIE_MASK;
     ti_dcan_mo_configuration(can, hwFilter->id, &mo);
 
     can_unlock(can, -1);
@@ -483,18 +498,31 @@ dcan_send_error0:
 }
 
 CAN_RECV(dcan, can, filterID, msg, waittime) {
+    
     BaseType_t ret;
+    int i;
     struct dcan_filter *filter;
+    PRINTF("%s called\n", __FUNCTION__);
 
     if(filterID >= can->filterCount) {
         return -1;
     }
     filter = &can->filter[filterID];
+    for(i = 0; i <= waittime; ++i){
+        if(can->base->nwdat_x){
+            break;
+        }
+    }
+
+    PRINTF("%s: DCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n",__FUNCTION__, can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
+    PRINTDEBUG;
 
     ret = xQueueReceive(filter->queue, msg, waittime);
     if(ret != pdTRUE) {
+        PRINTF("%s failed\n", __FUNCTION__);
         return -1;
     }
+    PRINTF("%s finished\n", __FUNCTION__);
     return 0;
     /*
     struct dcan_mo mo;
@@ -510,7 +538,8 @@ CAN_RECV(dcan, can, filterID, msg, waittime) {
             break;
         }
     }
-    PRINTF("NWDAT_X: %#08x\n", can->base->nwdat_x);
+    PRINTF("%s: DCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n",__FUNCTION__, can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
+    PRINTF("INTMUX12: %#08x\n", can->base->intmux12);
 
 
     ti_dcan_mo_readmsg(can, filter->id, &mo);
