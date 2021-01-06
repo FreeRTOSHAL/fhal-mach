@@ -19,6 +19,7 @@
 void ti_dcan_mo_configuration(struct can *can, uint8_t msg_num, struct dcan_mo *mo) {
     uint32_t cmd;
     uint16_t data_length;
+    PRINTDEBUG;
     // Checking if IF1 is busy
     while(can->base->if1cmd & DCAN_IF1CMD_BUSY_MASK);
     can->base->if1msk = mo->msk;
@@ -34,6 +35,7 @@ void ti_dcan_mo_configuration(struct can *can, uint8_t msg_num, struct dcan_mo *
         DCAN_IF1CMD_DATA_B_MASK | DCAN_IF1CMD_MESSAGE_NUMBER(msg_num);
     PRINTF("mo_configuration\ncmd: %#08x\nmsk: %#08x\narb: %#08x\nmctl: %#08x\n", cmd, mo->msk, mo->arb, mo->mctl);
 
+    while(can->base->if1cmd & DCAN_IF1CMD_BUSY_MASK);
     can->base->if1cmd = cmd;
     PRINTF("mo_configuration if1cmd: %#08x\n", can->base->if1cmd);
     while(can->base->if1cmd & DCAN_IF1CMD_BUSY_MASK);
@@ -73,10 +75,10 @@ void ti_dcan_mo_readdata(struct can *can, uint8_t msg_num, uint8_t *data) {
 void ti_dcan_mo_readmsg(struct can *can, uint8_t msg_num, struct dcan_mo *mo){
     uint32_t cmd;
     uint16_t data_length;
-    while(can->base->if2cmd & DCAN_IF2CMD_BUSY_MASK);
     cmd = DCAN_IF2CMD_MASK_MASK | DCAN_IF2CMD_ARB_MASK | DCAN_IF2CMD_CONTROL_MASK |
         DCAN_IF2CMD_DATA_A_MASK | DCAN_IF1CMD_CLRINTPND_MASK | DCAN_IF2CMD_DATA_B_MASK |
-        DCAN_IF2CMD_MESSAGE_NUMBER(msg_num);
+        DCAN_IF2CMD_MESSAGE_NUMBER(msg_num) | DCAN_IF2CMD_TXRQST_NEWDAT_MASK;
+    while(can->base->if2cmd & DCAN_IF2CMD_BUSY_MASK);
     can->base->if2cmd = cmd;
     while(can->base->if2cmd & DCAN_IF2CMD_BUSY_MASK);
 
@@ -297,6 +299,7 @@ void dcan_handleInt1IRQ(struct can *can) {
     BaseType_t tmp;
     BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
     PRINTDEBUG;
+    PRINTF("%s: DCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n",__FUNCTION__, can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
     /*
 
     if(1){
@@ -313,16 +316,21 @@ void dcan_handleInt1IRQ(struct can *can) {
         uint32_t filterID = intid - DCAN_FILTER_MO_OFFSET;
         struct dcan_filter *filter;
         struct dcan_mo mo;
+        PRINTDEBUG;
+        PRINTF("intid: %#08x, filterID: %#08x\n", intid, filterID);
         if(filterID >= can->filterCount){
-            return ;
+            PRINTF("%s: failed, filterID(%#08x) too big\n", __FUNCTION__, filterID);
+            //return ;
         }
         filter = &can->filter[filterID];
         if(!filter->used){
-            return ;
+            PRINTF("%s: failed, unused filter\n", __FUNCTION__);
+            //return ;
         }
         can_lock(can, portMAX_DELAY, -1);
         ti_dcan_mo_readmsg(can, filter->id, &mo);
         can_unlock(can, -1);
+        PRINTF("after readmsg: \nDCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n", can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
         if(mo.arb & DCAN_IF1ARB_XTD_MASK){
             msg.id = mo.arb & DCAN_IF1ARB_XTD_MASK;
         } else {
