@@ -31,11 +31,11 @@ int32_t mux_pinctl(struct mux* mux, uint32_t pin, uint32_t ctl, uint32_t extra) 
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 
 	if (ctl & MUX_CTL_PULL_UP) {
-		ctrl->GPxPUD |= GPxPUD_PULL_UP(p);
+		ctrl->GPxPUD &= ~GPxPUD_PULL_UP(p);
 	} else {
 		/* Pull Down not supported */
 		/* Disable Nothing is Muxed */
-		ctrl->GPxPUD &= ~GPxPUD_PULL_UP(p);
+		ctrl->GPxPUD |= GPxPUD_PULL_UP(p);
 	}
 	if (extra & MUX_EXTRA_OUTPUT) {
 		ctrl->GPxDIR |= GPxDIR_DIR(p);
