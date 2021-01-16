@@ -25,6 +25,9 @@ config MACH_LIBS
 config MACH_HAS_UART
 	bool
 	default y
+config MACH_HAS_CAN
+	bool
+	default y
 config MACH_HAS_TIMER
 	bool
 	default y
@@ -92,4 +95,11 @@ menuconfig MACH_C28X_CPU_TIMER
 	default y
 	if MACH_C28X_CPU_TIMER
 		source mach/c28x/Kconfig.timer
+	endif
+menuconfig MACH_C28X_CAN
+	bool "CAN Driver"
+	depends on CAN
+	default y
+	if MACH_C28X_CAN = y
+		source mach/c28x/Kconfig.can
 	endif
