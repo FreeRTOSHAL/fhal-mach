@@ -1,4 +1,4 @@
-comment "NXP S32K Settings"
+comment "C28X Settings"
 config MACH_INIT_STACK_SIZE
 	int "Init Stack Size"
 	default 600
@@ -23,6 +23,9 @@ config MACH_LIBS
 	string
 	default "-lrts2800_ml.lib mach/c28x/F28069F.cmd"
 config MACH_HAS_UART
+	bool
+	default y
+config MACH_HAS_GPIO
 	bool
 	default y
 config MACH_HAS_CAN
