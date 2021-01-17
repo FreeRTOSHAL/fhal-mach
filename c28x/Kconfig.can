@@ -1,14 +1,14 @@
-config MACH_C28X_CAN0
-	bool "CAN0"
-if MACH_C28X_CAN0=y
+config MACH_C28X_ECAN0
+	bool "eCAN0"
+if MACH_C28X_ECAN0=y
 	choice
 		prompt "RX Pin"
-		config MACH_C28X_CAN0_GPIO_30
+		config MACH_C28X_ECAN0_GPIO_30
 			bool "GPIO_30"
 	endchoice
 	choice
 		prompt "TX Pin"
-		config MACH_C28X_CAN0_GPIO_31
+		config MACH_C28X_ECAN0_GPIO_31
 			bool "GPIO_31"
 	endchoice
 endif

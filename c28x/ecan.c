@@ -9,20 +9,21 @@
 #include <can_prv.h>
 #include <iomux.h>
 
-struct can_pin {
+
+struct ecan_pin {
     uint32_t pin;
     uint32_t cfg;
     uint32_t extra;
 };
 
-struct can_mailbox {
+struct ecan_mailbox {
     uint32_t MSGID;         /* 0x00 Mesage Identifier register */
     uint32_t MSGCTRL;       /* 0x01 Message Control register */
     uint32_t CANMDL;        /* 0x02 Message Data Low register */
     uint32_t CANMDH;        /* 0x03 Message Data High register */
 };
 
-struct can_regs {
+struct ecan_regs {
     uint32_t CANME;         /* 0x00 Mailbox Enable register */
     uint32_t CANMD;         /* 0x01 Mailbox Direction 1 */
     uint32_t CANTRS;        /* 0x02 Transmission Request Set register */
@@ -54,114 +55,137 @@ struct can_regs {
     uint32_t MOTS[32];      /* Message Object Time Stamps */
     uint32_t MOTO[32];      /* Message Object Time-Out */
 
-    struct can_mailbox MBOXES[32];      /* Mailbox Registers */
+    struct ecan_mailbox MBOXES[32];     /* Mailbox Registers */
 };
 
 /**
  * Save RAM move const to Flash
  */
-struct can_const {
-    const struct can_pin *pins;
+struct ecan_const {
+    const struct ecan_pin *pins;
 };
 
 struct can {
     struct can_generic gen;
-    struct can_const const * const config;
-    volatile struct can_regs *base;
+    struct ecan_const const * const config;
+    volatile struct ecan_regs *base;
 };
 
 
 
-CAN_INIT(ns, index, bitrate, pin, pinHigh, callback, data) {
+CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
+    int32_t ret;
+    struct can *can;
+
+    can = CAN_GET_DEV(index);
+    if (can == NULL) {
+        return NULL;
+    }
+
+    ret = can_genericInit(can);
+    if (ret < 0) {
+        return NULL;
+    }
+
+    if (ret == CAN_ALREDY_INITED) {
+        return can;
+    }
+
+
     // TODO
-    return NULL;
+
+
+    return can;
 }
 
-CAN_DEINIT(ns, c) {
+CAN_DEINIT(ecan, can) {
+    can->gen.init = false;
+
     // TODO
-    return -1;
+
+    return 0;
 }
 
-CAN_SET_CALLBACK(ns, c, filterID, callback, data) {
-    // TODO
-    return -1;
-}
-
-CAN_REGISTER_FILTER(ns, c, filter) {
-    // TODO
-    return -1;
-}
-
-CAN_DEREGISTER_FILTER(ns, c, filterID) {
-    // TODO
-    return -1;
-}
-
-CAN_SEND(ns, c, msg, waittime) {
-    // TODO
-    return -1;
-}
-
-CAN_RECV(ns, c, filterID, msg, waittime) {
-    // TODO
-    return -1;
-}
-
-CAN_SEND_ISR(ns, c, msg) {
+CAN_SET_CALLBACK(ecan, can, filterID, callback, data) {
     // TODO
     return -1;
 }
 
-CAN_RECV_ISR(ns, c, filterID, msg) {
+CAN_REGISTER_FILTER(ecan, can, filter) {
     // TODO
     return -1;
 }
 
-CAN_UP(ns, c) {
+CAN_DEREGISTER_FILTER(ecan, can, filterID) {
     // TODO
     return -1;
 }
 
-CAN_DOWN(ns, c) {
+CAN_SEND(ecan, can, msg, waittime) {
+    // TODO
+    return -1;
+}
+
+CAN_RECV(ecan, can, filterID, msg, waittime) {
+    // TODO
+    return -1;
+}
+
+CAN_SEND_ISR(ecan, can, msg) {
+    // TODO
+    return -1;
+}
+
+CAN_RECV_ISR(ecan, can, filterID, msg) {
+    // TODO
+    return -1;
+}
+
+CAN_UP(ecan, can) {
+    // TODO
+    return -1;
+}
+
+CAN_DOWN(ecan, can) {
     // TODO
     return -1;
 }
 
 
 
-CAN_OPS(can);
+CAN_OPS(ecan);
 
 
-#define CAN_TX(p, mux) { \
+#define ECAN_TX(p, mux) { \
     .pin = (p), \
     .cfg = MUX_CTL_MODE(mux) | MUX_CTL_PULL_UP, \
     .extra = MUX_EXTRA_OUTPUT, \
 }
 
-#define CAN_RX(p, mux) { \
+#define ECAN_RX(p, mux) { \
     .pin = (p), \
     .cfg = MUX_CTL_MODE(mux) | MUX_CTL_PULL_UP, \
     .extra = 0, \
 }
 
-#ifdef CONFIG_MACH_C28X_CAN0
-const struct can_pin can0_pins[2] = {
-# ifdef CONFIG_MACH_C28X_CAN0_GPIO_30
-    CAN_RX(GPIO_30, MODE1), /* A */
+#ifdef CONFIG_MACH_C28X_ECAN0
+const struct ecan_pin ecan0_pins[2] = {
+# ifdef CONFIG_MACH_C28X_ECAN0_GPIO_30
+    ECAN_RX(GPIO_30, MODE1),
 # endif
-# ifdef CONFIG_MACH_C28X_CAN0_GPIO_31
-    CAN_TX(GPIO_31, MODE1), /* A */
+# ifdef CONFIG_MACH_C28X_ECAN0_GPIO_31
+    ECAN_TX(GPIO_31, MODE1),
 # endif
 };
-const struct can_const can0_const = {
-    .pins = can0_pins,
+const struct ecan_const ecan0_const = {
+    .pins = ecan0_pins,
 };
-struct can can0 = {
-    CAN_INIT_DEV(can)
-    HAL_NAME("CAN 0")
-    .config = &can0_const,
-    .base = (volatile struct can_regs *) 0x00006000,
+struct can ecan0 = {
+    CAN_INIT_DEV(ecan)
+    HAL_NAME("eCAN 0")
+    .config = &ecan0_const,
+    .base = (volatile struct ecan_regs *) 0x00006000,
 };
-CAN_ADDDEV(can, can0);
+CAN_ADDDEV(ecan, ecan0);
 #endif
 

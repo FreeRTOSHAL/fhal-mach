@@ -7,7 +7,7 @@ obj-y += pie.o
 obj-y += cpu.o
 obj-$(CONFIG_MACH_C28X_SCI) += uart.o
 obj-$(CONFIG_MACH_C28X_CPU_TIMER) += cpu_timer.o
-obj-$(CONFIG_MACH_C28X_CAN) += can.o
+obj-$(CONFIG_MACH_C28X_ECAN) += ecan.o
 extra-y += F28069F.cmd
 
 $(obj)/%.o: $(src)/%.asm FORCE
