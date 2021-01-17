@@ -33,14 +33,18 @@
 #define ECAN_REG32_CLEAR_BITS(reg, data)            ECAN_REG32_UPDATE(reg, data, 0)
 
 
-#define ECAN_BITS(x, mask, shift)       ((shift) >= 0 ? (((uint32_t) ((x) & (mask)))<<(shift)) : (((x) & (mask))>>(-(shift))))
+#define ECAN_BITS(x, mask, shift)       ((((uint32_t) (x))<<(shift)) & (mask))
+#define ECAN_MASK(bits, shift)          ((~(0xFFFFFFFFUL << (bits))) << (shift))
 
 
-#define ECAN_CANGAM_GAM150(x)           ECAN_BITS((x), 0x0000FFFFUL, 0)
-#define ECAN_CANGAM_GAM2816(x)          ECAN_BITS((x), 0x00001FFFUL, 16)
+#define ECAN_CANGAM_GAM150_MASK         ECAN_MASK(16, 0)
+#define ECAN_CANGAM_GAM150(x)           ECAN_BITS((x), ECAN_CANGAM_GAM150_MASK, 0)
+#define ECAN_CANGAM_GAM2816_MASK        ECAN_MASK(13, 16)
+#define ECAN_CANGAM_GAM2816(x)          ECAN_BITS((x), ECAN_CANGAM_GAM2816_MASK, 16)
 #define ECAN_CANGAM_AMI                 BIT(31)
 
-#define ECAN_CANMC_MBNR(x)              ECAN_BITS((x), 0x0000001FUL, 0)
+#define ECAN_CANMC_MBNR_MASK            ECAN_MASK(5, 0)
+#define ECAN_CANMC_MBNR(x)              ECAN_BITS((x), ECAN_CANMC_MBNR_MASK, 0)
 #define ECAN_CANMC_SRES                 BIT(5)
 #define ECAN_CANMC_STM                  BIT(6)
 #define ECAN_CANMC_ABO                  BIT(7)
@@ -54,25 +58,33 @@
 #define ECAN_CANMC_MBCC                 BIT(15)
 #define ECAN_CANMC_SUSP                 BIT(16)
 
-#define ECAN_CANBTC_TSEG2REG(x)         ECAN_BITS((x), 0x00000007UL, 0)
-#define ECAN_CANBTC_TSEG1REG(x)         ECAN_BITS((x), 0x0000000FUL, 3)
+#define ECAN_CANBTC_TSEG2REG_MASK       ECAN_MASK(3, 0)
+#define ECAN_CANBTC_TSEG2REG(x)         ECAN_BITS((x), ECAN_CANBTC_TSEG2REG_MASK, 0)
+#define ECAN_CANBTC_TSEG1REG_MASK       ECAN_MASK(4, 3)
+#define ECAN_CANBTC_TSEG1REG(x)         ECAN_BITS((x), ECAN_CANBTC_TSEG1REG_MASK, 3)
 #define ECAN_CANBTC_SAM                 BIT(7)
-#define ECAN_CANBTC_SJWREG(x)           ECAN_BITS((x), 0x00000003UL, 8)
-#define ECAN_CANBTC_BRPREG(x)           ECAN_BITS((x), 0x000000FFUL, 16)
+#define ECAN_CANBTC_SJWREG_MASK         ECAN_MASK(2, 8)
+#define ECAN_CANBTC_SJWREG(x)           ECAN_BITS((x), ECAN_CANBTC_SJWREG_MASK, 8)
+#define ECAN_CANBTC_BRPREG_MASK         ECAN_MASK(8, 16)
+#define ECAN_CANBTC_BRPREG(x)           ECAN_BITS((x), ECAN_CANBTC_BRPREG_MASK, 16)
 
 #define ECAN_CANTIOC_TXFUNC             BIT(3)
 
 #define ECAN_CANRIOC_RXFUNC             BIT(3)
 
-#define ECAN_MBOX_CANMSGID_EXTMSGID(x)  ECAN_BITS((x), 0x0003FFFFUL, 0)
-#define ECAN_MBOX_CANMSGID_STDMSGID(x)  ECAN_BITS((x), 0x000007FFUL, 18)
-#define ECAN_MBOX_CANMSGID_AAM          BIT(29)
-#define ECAN_MBOX_CANMSGID_AME          BIT(30)
-#define ECAN_MBOX_CANMSGID_IDE          BIT(31)
+#define ECAN_MBOX_CANMSGID_EXTMSGID_MASK    ECAN_MASK(18, 0)
+#define ECAN_MBOX_CANMSGID_EXTMSGID(x)      ECAN_BITS((x), ECAN_MBOX_CANMSGID_EXTMSGID_MASK, 0)
+#define ECAN_MBOX_CANMSGID_STDMSGID_MASK    ECAN_MASK(11, 18)
+#define ECAN_MBOX_CANMSGID_STDMSGID(x)      ECAN_BITS((x), ECAN_MBOX_CANMSGID_STDMSGID_MASK, 18)
+#define ECAN_MBOX_CANMSGID_AAM              BIT(29)
+#define ECAN_MBOX_CANMSGID_AME              BIT(30)
+#define ECAN_MBOX_CANMSGID_IDE              BIT(31)
 
-#define ECAN_MBOX_CANMSGCTRL_DLC(x)     ECAN_BITS((x), 0x0000000FUL, 0)
-#define ECAN_MBOX_CANMSGCTRL_RTR        BIT(4)
-#define ECAN_MBOX_CANMSGCTRL_TPL(x)     ECAN_BITS((x), 0x0000001FUL, 8)
+#define ECAN_MBOX_CANMSGCTRL_DLC_MASK       ECAN_MASK(4, 0)
+#define ECAN_MBOX_CANMSGCTRL_DLC(x)         ECAN_BITS((x), ECAN_MBOX_CANMSGCTRL_DLC_MASK, 0)
+#define ECAN_MBOX_CANMSGCTRL_RTR            BIT(4)
+#define ECAN_MBOX_CANMSGCTRL_TPL_MASK       ECAN_MASK(5, 8)
+#define ECAN_MBOX_CANMSGCTRL_TPL(x)         ECAN_BITS((x), ECAN_MBOX_CANMSGCTRL_TPL_MASK, 8)
 
 #define ECAN_CANES_TM                   BIT(0)
 #define ECAN_CANES_RM                   BIT(1)
