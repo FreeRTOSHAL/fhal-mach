@@ -8,6 +8,89 @@
 #define CAN_PRV
 #include <can_prv.h>
 #include <iomux.h>
+#include <cpu.h>
+#include <clk.h>
+#include <mux.h>
+
+
+#undef BIT
+#define BIT(x) (1UL << (x))
+
+
+#define ECAN_REG32_SET(reg, data)                   reg = ((uint32_t) (data))
+#define ECAN_REG32_GET(reg)                         ((uint32_t) (reg))
+
+#define ECAN_REG32_UPDATE(reg, mask, data)          \
+    do {                                            \
+        uint32_t tmp = ECAN_REG32_GET(reg);         \
+        tmp &= ~(mask);                             \
+        tmp |= (data) & (mask);                     \
+        ECAN_REG32_SET(reg, tmp);                   \
+    } while (0)
+
+#define ECAN_REG32_SET_BITS(reg, data)              ECAN_REG32_UPDATE(reg, data, data)
+#define ECAN_REG32_CLEAR_BITS(reg, data)            ECAN_REG32_UPDATE(reg, data, 0)
+
+
+#define ECAN_BITS(x, mask, shift)       ((shift) >= 0 ? (((uint32_t) ((x) & (mask)))<<(shift)) : (((x) & (mask))>>(-(shift))))
+
+
+#define ECAN_CANGAM_GAM150(x)           ECAN_BITS((x), 0x0000FFFFUL, 0)
+#define ECAN_CANGAM_GAM2816(x)          ECAN_BITS((x), 0x00001FFFUL, 16)
+#define ECAN_CANGAM_AMI                 BIT(31)
+
+#define ECAN_CANMC_MBNR(x)              ECAN_BITS((x), 0x0000001FUL, 0)
+#define ECAN_CANMC_SRES                 BIT(5)
+#define ECAN_CANMC_STM                  BIT(6)
+#define ECAN_CANMC_ABO                  BIT(7)
+#define ECAN_CANMC_CDR                  BIT(8)
+#define ECAN_CANMC_WUBA                 BIT(9)
+#define ECAN_CANMC_DBO                  BIT(10)
+#define ECAN_CANMC_PDR                  BIT(11)
+#define ECAN_CANMC_CCR                  BIT(12)
+#define ECAN_CANMC_SCB                  BIT(13)
+#define ECAN_CANMC_TCC                  BIT(14)
+#define ECAN_CANMC_MBCC                 BIT(15)
+#define ECAN_CANMC_SUSP                 BIT(16)
+
+#define ECAN_CANBTC_TSEG2REG(x)         ECAN_BITS((x), 0x00000007UL, 0)
+#define ECAN_CANBTC_TSEG1REG(x)         ECAN_BITS((x), 0x0000000FUL, 3)
+#define ECAN_CANBTC_SAM                 BIT(7)
+#define ECAN_CANBTC_SJWREG(x)           ECAN_BITS((x), 0x00000003UL, 8)
+#define ECAN_CANBTC_BRPREG(x)           ECAN_BITS((x), 0x000000FFUL, 16)
+
+#define ECAN_CANTIOC_TXFUNC             BIT(3)
+
+#define ECAN_CANRIOC_RXFUNC             BIT(3)
+
+#define ECAN_MBOX_CANMSGID_EXTMSGID(x)  ECAN_BITS((x), 0x0003FFFFUL, 0)
+#define ECAN_MBOX_CANMSGID_STDMSGID(x)  ECAN_BITS((x), 0x000007FFUL, 18)
+#define ECAN_MBOX_CANMSGID_AAM          BIT(29)
+#define ECAN_MBOX_CANMSGID_AME          BIT(30)
+#define ECAN_MBOX_CANMSGID_IDE          BIT(31)
+
+#define ECAN_MBOX_CANMSGCTRL_DLC(x)     ECAN_BITS((x), 0x0000000FUL, 0)
+#define ECAN_MBOX_CANMSGCTRL_RTR        BIT(4)
+#define ECAN_MBOX_CANMSGCTRL_TPL(x)     ECAN_BITS((x), 0x0000001FUL, 8)
+
+#define ECAN_CANES_TM                   BIT(0)
+#define ECAN_CANES_RM                   BIT(1)
+
+#define ECAN_CANES_PDA                  BIT(3)
+#define ECAN_CANES_CCE                  BIT(4)
+#define ECAN_CANES_SMA                  BIT(5)
+
+#define ECAN_CANES_EW                   BIT(16)
+#define ECAN_CANES_EP                   BIT(17)
+#define ECAN_CANES_BO                   BIT(18)
+#define ECAN_CANES_ACKE                 BIT(19)
+#define ECAN_CANES_SE                   BIT(20)
+#define ECAN_CANES_CRCE                 BIT(21)
+#define ECAN_CANES_SA1                  BIT(22)
+#define ECAN_CANES_BE                   BIT(23)
+#define ECAN_CANES_FE                   BIT(24)
+
+
 
 
 struct ecan_pin {
@@ -17,8 +100,8 @@ struct ecan_pin {
 };
 
 struct ecan_mailbox {
-    uint32_t MSGID;         /* 0x00 Mesage Identifier register */
-    uint32_t MSGCTRL;       /* 0x01 Message Control register */
+    uint32_t CANMSGID;      /* 0x00 Mesage Identifier register */
+    uint32_t CANMSGCTRL;    /* 0x01 Message Control register */
     uint32_t CANMDL;        /* 0x02 Message Data Low register */
     uint32_t CANMDH;        /* 0x03 Message Data High register */
 };
@@ -75,7 +158,11 @@ struct can {
 
 CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
     int32_t ret;
-    struct can *can;
+    struct can *can = NULL;
+	CLK_Obj *clk = (CLK_Obj *) CLK_BASE_ADDR;
+    int i;
+    uint32_t btc;
+    struct mux *mux = NULL;
 
     can = CAN_GET_DEV(index);
     if (can == NULL) {
@@ -92,7 +179,70 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
     }
 
 
-    // TODO
+
+    ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+
+
+    // enable eCAN clock
+    clk->PCLKCR0 |= CLK_PCLKCR0_ECANAENCLK_BITS;
+
+    // configure eCAN RX and TX pins for CAN operation
+    ECAN_REG32_SET_BITS(can->base->CANTIOC, ECAN_CANTIOC_TXFUNC);
+    ECAN_REG32_SET_BITS(can->base->CANRIOC, ECAN_CANRIOC_RXFUNC);
+
+    // enable enhanced mode
+    ECAN_REG32_SET_BITS(can->base->CANMC, ECAN_CANMC_SCB);
+
+    // initialize all mailboxes to zero
+    for (i=0; i<ARRAY_SIZE(can->base->MBOXES); i++) {
+        volatile struct ecan_mailbox *mbox = &can->base->MBOXES[i];
+
+        mbox->CANMSGID = 0;
+        mbox->CANMSGCTRL = 0;
+        mbox->CANMDH = 0;
+        mbox->CANMDL = 0;
+    }
+
+    // reset CANTA, CANRMP, CANGIF0, CANGIF1
+    ECAN_REG32_SET_BITS(can->base->CANTA, 0xFFFFFFFFUL);
+    ECAN_REG32_SET_BITS(can->base->CANRMP, 0xFFFFFFFFUL);
+    ECAN_REG32_SET_BITS(can->base->CANGIF0, 0xFFFFFFFFUL);
+    ECAN_REG32_SET_BITS(can->base->CANGIF1, 0xFFFFFFFFUL);
+
+    // request configuration mode
+    ECAN_REG32_SET_BITS(can->base->CANMC, ECAN_CANMC_CCR);
+
+    // wait until the CPU has been granted permission to change the configuration registers
+    while(!(ECAN_REG32_GET(can->base->CANES) & ECAN_CANES_CCE));
+
+
+    // TODO: calculate
+    btc = 0;
+    btc |= ECAN_CANBTC_TSEG1REG(10);
+    btc |= ECAN_CANBTC_TSEG2REG(2);
+    btc |= ECAN_CANBTC_BRPREG(2);
+
+    ECAN_REG32_SET(can->base->CANBTC, btc);
+
+
+    // request normal mode
+    ECAN_REG32_CLEAR_BITS(can->base->CANMC, ECAN_CANMC_CCR);
+
+    // wait until the CPU no longer has permission to change the configuration registers
+    while(ECAN_REG32_GET(can->base->CANES) & ECAN_CANES_CCE);
+
+    // disable all mailboxes
+    ECAN_REG32_CLEAR_BITS(can->base->CANME, 0xFFFFFFFFUL);
+
+
+    DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+
+
+    // setup muxing
+
+    mux = mux_init();
+    mux_pinctl(mux, can->config->pins[0].pin, can->config->pins[0].cfg, can->config->pins[0].extra);
+    mux_pinctl(mux, can->config->pins[1].pin, can->config->pins[1].cfg, can->config->pins[1].extra);
 
 
     return can;
@@ -101,6 +251,8 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 CAN_DEINIT(ecan, can) {
     can->gen.init = false;
 
+    // clock
+    // mux
     // TODO
 
     return 0;
@@ -167,6 +319,7 @@ CAN_OPS(ecan);
     .cfg = MUX_CTL_MODE(mux) | MUX_CTL_PULL_UP, \
     .extra = 0, \
 }
+// TODO: async
 
 #ifdef CONFIG_MACH_C28X_ECAN0
 const struct ecan_pin ecan0_pins[2] = {
