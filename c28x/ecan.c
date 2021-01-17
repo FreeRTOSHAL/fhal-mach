@@ -260,6 +260,7 @@ CAN_DEINIT(ecan, can) {
     mux_pinctl(mux, can->config->pins[0].pin, MUX_CTL_MODE(MODE0) | MUX_CTL_OPEN, 0);
     mux_pinctl(mux, can->config->pins[1].pin, MUX_CTL_MODE(MODE0) | MUX_CTL_OPEN, 0);
 
+    (void) clk;
     /*
     // TODO: see TMS320 reference manual 16.7.5.3 "Enabling or Disabling Clock to the CAN Module"
     // disable eCAN clock
