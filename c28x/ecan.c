@@ -11,6 +11,7 @@
 #include <cpu.h>
 #include <clk.h>
 #include <mux.h>
+#include <iomux.h>
 
 
 #undef BIT
@@ -249,11 +250,23 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 }
 
 CAN_DEINIT(ecan, can) {
+    struct mux *mux = NULL;
+	CLK_Obj *clk = (CLK_Obj *) CLK_BASE_ADDR;
+
     can->gen.init = false;
 
-    // clock
-    // mux
-    // TODO
+    // set to input GPIO
+    mux = mux_init();
+    mux_pinctl(mux, can->config->pins[0].pin, MUX_CTL_MODE(MODE0) | MUX_CTL_OPEN, 0);
+    mux_pinctl(mux, can->config->pins[1].pin, MUX_CTL_MODE(MODE0) | MUX_CTL_OPEN, 0);
+
+    /*
+    // TODO: see TMS320 reference manual 16.7.5.3 "Enabling or Disabling Clock to the CAN Module"
+    // disable eCAN clock
+    ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+    clk->PCLKCR0 &= ~CLK_PCLKCR0_ECANAENCLK_BITS;
+    DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+    */
 
     return 0;
 }
@@ -317,9 +330,8 @@ CAN_OPS(ecan);
 #define ECAN_RX(p, mux) { \
     .pin = (p), \
     .cfg = MUX_CTL_MODE(mux) | MUX_CTL_PULL_UP, \
-    .extra = 0, \
+    .extra = MUX_EXTRA_ASYNC, \
 }
-// TODO: async
 
 #ifdef CONFIG_MACH_C28X_ECAN0
 const struct ecan_pin ecan0_pins[2] = {
