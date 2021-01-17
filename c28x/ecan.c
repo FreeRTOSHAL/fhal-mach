@@ -105,6 +105,9 @@
 
 
 
+#define ECAN_TX_MBOX_ID                 (31)
+
+
 
 struct ecan_pin {
     uint32_t pin;
@@ -300,7 +303,62 @@ CAN_DEREGISTER_FILTER(ecan, can, filterID) {
 }
 
 CAN_SEND(ecan, can, msg, waittime) {
-    // TODO
+    volatile struct ecan_mailbox *mbox = &can->base->MBOXES[ECAN_TX_MBOX_ID];
+    TimeOut_t timeout;
+
+    if (msg->length > 8) {
+        return -1;
+    }
+
+	can_lock(can, waittime, -1);
+
+    // disable mailbox for configuration
+    ECAN_REG32_CLEAR_BITS(can->base->CANME, BIT(ECAN_TX_MBOX_ID));
+
+    // configure mailbox as transmit mailbox
+    ECAN_REG32_CLEAR_BITS(can->base->CANMD, BIT(ECAN_TX_MBOX_ID));
+
+    // reset ack flag
+    ECAN_REG32_SET_BITS(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
+
+    // set message length
+    ECAN_REG32_UPDATE(mbox->CANMSGCTRL, ECAN_MBOX_CANMSGCTRL_DLC_MASK, ECAN_MBOX_CANMSGCTRL_DLC(msg->length));
+
+    // set message id
+    ECAN_REG32_SET(mbox->CANMSGID, ECAN_MBOX_CANMSGID_STDMSGID(msg->id));
+
+    // set message
+    ECAN_REG32_SET(mbox->CANMDL, ((msg->data[0] & 0xFFUL)<<24) | ((msg->data[1] & 0xFFUL)<<16) | ((msg->data[2] & 0xFFUL)<<8) | ((msg->data[3] & 0xFFUL)<<0));
+    ECAN_REG32_SET(mbox->CANMDH, ((msg->data[4] & 0xFFUL)<<24) | ((msg->data[5] & 0xFFUL)<<16) | ((msg->data[6] & 0xFFUL)<<8) | ((msg->data[7] & 0xFFUL)<<0));
+
+    // enable mailbox
+    ECAN_REG32_SET_BITS(can->base->CANME, BIT(ECAN_TX_MBOX_ID));
+
+    // start transmission
+    ECAN_REG32_SET_BITS(can->base->CANTRS, BIT(ECAN_TX_MBOX_ID));
+
+    // wait for ack
+    vTaskSetTimeOutState(&timeout);
+    while (!(ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID))) {
+        if (xTaskCheckForTimeOut(&timeout, &waittime) != pdFALSE) {
+            break;
+        }
+    }
+
+    // no ack received after timeout?
+    if (!(ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID))) {
+        goto ecan_send_error0;
+    }
+
+    // reset ack flag
+    ECAN_REG32_SET_BITS(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
+
+	can_unlock(can, -1);
+
+    return 0;
+
+ecan_send_error0:
+	can_unlock(can, -1);
     return -1;
 }
 
