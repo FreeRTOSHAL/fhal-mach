@@ -47,7 +47,7 @@ struct ecan_regs {
     uint32_t CANOPC;        /* 0x14 Overwrite Protection Control register */
     uint32_t CANTIOC;       /* 0x15 TX I/O Control register */
     uint32_t CANRIOC;       /* 0x16 RX I/O Control register */
-    uint32_t CANTSC;        /* 0x17 Time-Stamp Counterj register */
+    uint32_t CANTSC;        /* 0x17 Time-Stamp Counter register */
     uint32_t CANTOC;        /* 0x18 Time-Out Control register */
     uint32_t CANTOS;        /* 0x19 Time-Out Status register */
     uint32_t rsvd_0[6];
