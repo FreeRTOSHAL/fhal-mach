@@ -3,6 +3,7 @@
 
 /* 0 = Input 1 = OUTPUT */
 #define MUX_EXTRA_OUTPUT BIT(0)
+#define MUX_EXTRA_ASYNC  BIT(1)
 
 #define MODE0 0
 #define MODE1 1

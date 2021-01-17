@@ -19,6 +19,7 @@ struct gpio_regs_ctrl {
 #define GPxMUX_MUX(mux, pin) (((mux) & 0x3UL) << (((pin & 0xFUL)) * 2UL))
 #define GPxPUD_PULL_UP(pin) BIT(pin)
 #define GPxDIR_DIR(pin) BIT(pin)
+#define GPxQSEL_QSEL(mux, pin) (((mux) & 0x3UL) << (((pin & 0xFUL)) * 2UL))
 
 struct gpio_regs_data {
 	uint32_t GPxDAT;          //!< GPIO A Data Register
