@@ -175,7 +175,7 @@ struct can {
 CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
     int32_t ret;
     struct can *can = NULL;
-	CLK_Obj *clk = (CLK_Obj *) CLK_BASE_ADDR;
+    CLK_Obj *clk = (CLK_Obj *) CLK_BASE_ADDR;
     int i;
     uint32_t btc;
     struct mux *mux = NULL;
@@ -266,7 +266,7 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 
 CAN_DEINIT(ecan, can) {
     struct mux *mux = NULL;
-	CLK_Obj *clk = (CLK_Obj *) CLK_BASE_ADDR;
+    CLK_Obj *clk = (CLK_Obj *) CLK_BASE_ADDR;
 
     can->gen.init = false;
 
@@ -310,7 +310,7 @@ CAN_SEND(ecan, can, msg, waittime) {
         return -1;
     }
 
-	can_lock(can, waittime, -1);
+    can_lock(can, waittime, -1);
 
     // disable mailbox for configuration
     ECAN_REG32_CLEAR_BITS(can->base->CANME, BIT(ECAN_TX_MBOX_ID));
@@ -353,12 +353,12 @@ CAN_SEND(ecan, can, msg, waittime) {
     // reset ack flag
     ECAN_REG32_SET_BITS(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
 
-	can_unlock(can, -1);
+    can_unlock(can, -1);
 
     return 0;
 
 ecan_send_error0:
-	can_unlock(can, -1);
+    can_unlock(can, -1);
     return -1;
 }
 
