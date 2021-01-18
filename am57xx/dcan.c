@@ -55,15 +55,15 @@ int32_t dcan_setupPins(struct can *can) {
 	return 0;
 }
 
-// TODO Check values
+// values from c_can linux kernel driver
 static const struct can_bittiming_const dcan_bittimings = {
-	.tseg1_min = 4,
+	.tseg1_min = 2,
 	.tseg1_max = 16,
-	.tseg2_min = 2,
+	.tseg2_min = 1,
 	.tseg2_max = 8,
 	.sjw_max = 4,
 	.brp_min = 1,
-	.brp_max = 256,
+	.brp_max = 1024,
 	.brp_inc = 1,
 };
 
@@ -73,14 +73,14 @@ static const struct can_bittiming_const dcan_bittimings = {
 	{ \
 		.pin = _pin, \
 		.ctl = MUX_CTL_MODE(_mode), \
-		.extra = MUX_INPUT, \
+		.extra = MUX_INPUT , \
 	}
 
 #define DCAN_PIN_TX(_pin, _mode) \
 	{ \
 		.pin = _pin, \
 		.ctl = MUX_CTL_MODE(_mode) | MUX_CTL_PULL_UP, \
-		.extra = MUX_INPUT, \
+		.extra = MUX_INPUT  , \
 	}
 
 

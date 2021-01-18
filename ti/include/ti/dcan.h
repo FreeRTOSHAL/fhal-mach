@@ -148,6 +148,10 @@ void CAN2_PARITY_ISR();
 #define DCAN_CTL_CCE_WIDTH            1u
 #define DCAN_CTL_CCE(x)               (((uint32_t)(((uint32_t)(x))<<DCAN_CTL_CCE_SHIFT))&DCAN_CTL_CCE_MASK)
 #define DCAN_CTL_TEST_MASK            0x00000080ul
+#define DCAN_CTL_PMD_MASK             0x00003c00ul
+#define DCAN_CTL_PMD_SHIFT            10u
+#define DCAN_CTL_PMD_WIDTH            4u
+#define DCAN_CTL_PMD(x)               (((uint32_t)(((uint32_t)(x))<<DCAN_CTL_PMD_SHIFT))&DCAN_CTL_PMD_MASK)
 #define DCAN_CTL_SWR_MASK             0x00008000ul
 #define DCAN_CTL_SWR_SHIFT            15u
 #define DCAN_CTL_SWR_WIDTH            1u

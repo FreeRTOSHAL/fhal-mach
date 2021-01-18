@@ -17,28 +17,28 @@
 
 /* Transfer a complete message structure into a message object. (Configuration)*/
 void ti_dcan_mo_configuration(struct can *can, uint8_t msg_num, struct dcan_mo *mo) {
-    uint32_t cmd;
+    uint32_t cmd = DCAN_IF1CMD_WR_RD_MASK | DCAN_IF1CMD_MASK_MASK | DCAN_IF1CMD_ARB_MASK |
+        DCAN_IF1CMD_CONTROL_MASK | DCAN_IF1CMD_DATA_A_MASK |
+        DCAN_IF1CMD_DATA_B_MASK | DCAN_IF1CMD_MESSAGE_NUMBER(msg_num);
     uint16_t data_length;
     PRINTDEBUG;
+    PRINTF("mo_configuration\ncmd: %#08x\nmsk: %#08x\narb: %#08x\nmctl: %#08x\n", cmd, mo->msk, mo->arb, mo->mctl);
+    if(data_length >8){
+        data_length = 8;
+    }
     // Checking if IF1 is busy
     while(can->base->if1cmd & DCAN_IF1CMD_BUSY_MASK);
     can->base->if1msk = mo->msk;
     can->base->if1arb = mo->arb;
     can->base->if1mctl = mo->mctl;
     data_length = (mo->mctl & DCAN_IF1MCTL_DLC_MASK);
-    if(data_length >8){
-        data_length = 8;
-    }
     memcpy((void *) &can->base->if1data, mo->data, data_length);
-    cmd = DCAN_IF1CMD_WR_RD_MASK | DCAN_IF1CMD_MASK_MASK | DCAN_IF1CMD_ARB_MASK |
-        DCAN_IF1CMD_CONTROL_MASK | DCAN_IF1CMD_DATA_A_MASK |
-        DCAN_IF1CMD_DATA_B_MASK | DCAN_IF1CMD_MESSAGE_NUMBER(msg_num);
-    PRINTF("mo_configuration\ncmd: %#08x\nmsk: %#08x\narb: %#08x\nmctl: %#08x\n", cmd, mo->msk, mo->arb, mo->mctl);
 
     while(can->base->if1cmd & DCAN_IF1CMD_BUSY_MASK);
     can->base->if1cmd = cmd;
     PRINTF("mo_configuration if1cmd: %#08x\n", can->base->if1cmd);
     while(can->base->if1cmd & DCAN_IF1CMD_BUSY_MASK);
+    PRINTF("mo_configuration if1mctl : %#08x\n", can->base->if1mctl);
 
 
 }
@@ -91,9 +91,25 @@ void ti_dcan_mo_readmsg(struct can *can, uint8_t msg_num, struct dcan_mo *mo){
     }
     memcpy(mo->data, (void *) &can->base->if2data, data_length);
     PRINTF("mo_readmsg\ncmd: %#08x\nmsk: %#08x\narb: %#08x\nmctl: %#08x\n", cmd, mo->msk, mo->arb, mo->mctl);
-
-
 }
+
+
+
+void ti_dcan_mo_readmsg_debug(struct can *can, uint8_t msg_num){
+    uint32_t cmd;
+    uint16_t data_length;
+    cmd = DCAN_IF2CMD_MASK_MASK | DCAN_IF2CMD_ARB_MASK | DCAN_IF2CMD_CONTROL_MASK |
+        DCAN_IF2CMD_DATA_A_MASK | DCAN_IF2CMD_DATA_B_MASK |
+        DCAN_IF2CMD_MESSAGE_NUMBER(msg_num);
+    while(can->base->if2cmd & DCAN_IF2CMD_BUSY_MASK);
+    can->base->if2cmd = cmd;
+    while(can->base->if2cmd & DCAN_IF2CMD_BUSY_MASK);
+
+    PRINTF("mo_readmsg_debug\ncmd: %#08x\nmsk: %#08x\narb: %#08x\nmctl: %#08x\ndata: %#08x\ndatb: %#08x\n", cmd, can->base->if2msk, can->base->if2arb, can->base->if2mctl, can->base->if2data, can->base->if2datb);
+}
+
+
+
 
 
 
@@ -161,6 +177,8 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     can->errorCallback = callback;
     can->userData = data;
     PRINTDEBUG;
+    // reset DCAN_CTL
+    can->base->ctl = DCAN_CTL_PMD(0x5);
 
     // configure CAN bit timing
 
@@ -178,6 +196,9 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     /* set target bitrate*/
     can->bt.bitrate = bitrate;
     /* calc bittiming settings */
+    PRINTF("can->btc\ntseg1_min: %ld\ntseg1_max: %ld\ntseg2_min: %ld\ntseg2_max %ld\nsjw_max: %ld\nbrp_min: %ld\nbrp_max: %ld\nbrp_inc: %ld\n",
+            can->btc->tseg1_min, can->btc->tseg1_max, can->btc->tseg2_min, can->btc->tseg2_max, can->btc->sjw_max, can->btc->brp_min,
+            can->btc->brp_max, can->btc->brp_inc);
     ret = can_calcBittiming(&can->bt, can->btc, can->freq);
     if (ret < 0){
         return NULL;
@@ -186,29 +207,42 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
         PRINTF("BRP too big\n");
         return NULL;
     }
-    if(can->bt.brp -1 > DCAN_BTR_BRP_MASK){
-        can->base->btr = DCAN_BTR_BRP(can->bt.brp -1) | 
-            DCAN_BTR_BRPE(((can->bt.brp -1) & 0x3C0) >> 6);
-    } else {
-        can->base->btr = DCAN_BTR_BRP(can->bt.brp -1);
-    }
-    /* setup bittining */
-    PRINTDEBUG;
+    {
+        /* setup bittining */
+        uint32_t btr;
 
-    can->base->btr |= DCAN_BTR_TSEG2(can->bt.phase_seg2 -1) |
-        DCAN_BTR_TSEG1(can->bt.phase_seg1 + can->bt.prop_seg -1) |
-        DCAN_BTR_SJW(can->bt.sjw -1);
-    PRINTF("Target bus speed: %lu\n", bitrate);
-    PRINTF("Calculated bus speed: %lu\n", can->bt.bitrate);
+        if(can->bt.brp -1 > DCAN_BTR_BRP_MASK){
+            btr = DCAN_BTR_BRP(can->bt.brp -1) | 
+                DCAN_BTR_BRPE(((can->bt.brp -1) & 0x3C0) >> 6);
+        } else {
+            btr = DCAN_BTR_BRP(can->bt.brp -1);
+            btr &= ~(DCAN_BTR_BRPE_MASK);
+        }
+
+        PRINTDEBUG;
+
+        btr |= DCAN_BTR_TSEG2(can->bt.phase_seg2 -1) |
+            DCAN_BTR_TSEG1(can->bt.phase_seg1 + can->bt.prop_seg -1) |
+            DCAN_BTR_SJW(can->bt.sjw -1);
+        can->base->btr = btr;
+        PRINTF("freq: %#016llx\n", (long long)can->freq);
+        PRINTF("bt.brp: %#08x\nbt.phase_seg1: %#08x\nbt.phase_seg2: %#08x\nbt.sjw: %#08x\nbt.prop_seg: %#08x\n", 
+                can->bt.brp, can->bt.phase_seg1, can->bt.phase_seg2, can->bt.sjw, can->bt.prop_seg);
+        PRINTF("DCAN_BTR: %#08x\n", can->base->btr);
+        PRINTF("Target bus speed: %lu\n", bitrate);
+        PRINTF("Calculated bus speed: %lu\n", can->bt.bitrate);
+    }
     {
         uint32_t tmp = can->base->ctl;
         tmp &= ~(DCAN_CTL_INIT_MASK | DCAN_CTL_CCE_MASK);
         tmp |= (DCAN_CTL_IE1_MASK);
         can->base->ctl = tmp;
     }
-    
+
     while(can->base->ctl & DCAN_CTL_INIT_MASK);
     PRINTDEBUG;
+    can->base->ctl &= ~(DCAN_CTL_TEST_MASK);
+    can->base->test = 0;
 
 #ifdef CONFIG_TI_DCAN_SILENT_MODE
     /* Activate Silent Mode */
@@ -230,6 +264,8 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     can->base->test |= DCAN_TEST_EXL_MASK;
     PRINTF("External loop back mode activated\n");
 #endif
+
+
 
 
 
@@ -285,6 +321,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
 
     PRINTF("%s finished\n", __FUNCTION__);
+    PRINTF("%s DCAN_CTL: %#08x\n", __FUNCTION__, can->base->ctl);
 
     return can;
 
@@ -468,15 +505,15 @@ CAN_SEND(dcan, can, msg, waittime) {
     if(msg->req){
         /* TODO Implement request and rcv */
         /* CAN Requests has a complex MB state machine*/
+        PRINTF("%s error, request\n", __FUNCTION__);
         goto dcan_send_error0;
     }
     if(msg->length >8) {
         /* TODO CAN FD is not supported */
+        PRINTF("%s error, CAN FD\n", __FUNCTION__);
         goto dcan_send_error0;
     }
 
-
-    mo.msk = 0;
     if(msg->id >= 0x200) {
         mo.arb = DCAN_IF1ARB_MSGVAL_MASK | DCAN_IF1ARB_XTD_MASK | DCAN_IF1ARB_DIR_MASK | 
             DCAN_IF1ARB_ID_EXT(msg->id);
@@ -498,6 +535,7 @@ CAN_SEND(dcan, can, msg, waittime) {
     ti_dcan_mo_configuration(can, 1, &mo);
     
     can_unlock(can, -1);
+    PRINTF("%s TXRQ_X: %#08x\n", can->base->txrq_x);
     PRINTF("%s finished\n", __FUNCTION__);
     return 0;
 dcan_send_error0:
