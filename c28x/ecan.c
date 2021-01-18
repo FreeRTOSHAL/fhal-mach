@@ -4,6 +4,7 @@
  * Date: 2020
  */
 #include <stdint.h>
+#include <string.h>
 #include <can.h>
 #define CAN_PRV
 #include <can_prv.h>
@@ -162,12 +163,15 @@ struct ecan_regs {
  */
 struct ecan_const {
     const struct ecan_pin *pins;
+    struct can_bittiming_const const *btc;
 };
 
 struct can {
     struct can_generic gen;
     struct ecan_const const * const config;
     volatile struct ecan_regs *base;
+    struct can_bittiming bt;
+    int64_t clk_freq;
 };
 
 
@@ -175,10 +179,11 @@ struct can {
 CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
     int32_t ret;
     struct can *can = NULL;
-    CLK_Obj *clk = (CLK_Obj *) CLK_BASE_ADDR;
+    CLK_Obj *clk_obj = (CLK_Obj *) CLK_BASE_ADDR;
     int i;
     uint32_t btc;
     struct mux *mux = NULL;
+    struct clock *clk = NULL;
 
     can = CAN_GET_DEV(index);
     if (can == NULL) {
@@ -195,12 +200,23 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
     }
 
 
+    clk = clock_init();
+    can->clk_freq = clock_getCPUSpeed(clk)/2;
+
+    memset(&can->bt, 0, sizeof(can->bt));
+    can->bt.bitrate = bitrate;
+
+    ret = can_calcBittiming(&can->bt, can->config->btc, can->clk_freq);
+    if (ret < 0 || (can->bt.prop_seg+can->bt.phase_seg1) > can->config->btc->tseg1_max) {
+        goto ecan_init_error0;
+    }
+
 
     ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 
 
     // enable eCAN clock
-    clk->PCLKCR0 |= CLK_PCLKCR0_ECANAENCLK_BITS;
+    clk_obj->PCLKCR0 |= CLK_PCLKCR0_ECANAENCLK_BITS;
 
     // configure eCAN RX and TX pins for CAN operation
     ECAN_REG32_SET_BITS(can->base->CANTIOC, ECAN_CANTIOC_TXFUNC);
@@ -232,11 +248,12 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
     while(!(ECAN_REG32_GET(can->base->CANES) & ECAN_CANES_CCE));
 
 
-    // TODO: calculate
+    // set bit timing parameters
     btc = 0;
-    btc |= ECAN_CANBTC_TSEG1REG(10);
-    btc |= ECAN_CANBTC_TSEG2REG(2);
-    btc |= ECAN_CANBTC_BRPREG(2);
+    btc |= ECAN_CANBTC_TSEG1REG(can->bt.prop_seg+can->bt.phase_seg1-1);
+    btc |= ECAN_CANBTC_TSEG2REG(can->bt.phase_seg2-1);
+    btc |= ECAN_CANBTC_SJWREG(can->bt.sjw-1);
+    btc |= ECAN_CANBTC_BRPREG(can->bt.brp-1);
 
     ECAN_REG32_SET(can->base->CANBTC, btc);
 
@@ -262,6 +279,10 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 
 
     return can;
+
+ecan_init_error0:
+    can->gen.init = false;
+    return NULL;
 }
 
 CAN_DEINIT(ecan, can) {
@@ -404,6 +425,17 @@ CAN_OPS(ecan);
     .extra = MUX_EXTRA_ASYNC, \
 }
 
+const struct can_bittiming_const ecan_btc = {
+    .tseg1_min = 1,
+    .tseg1_max = 16,        // TODO: this is propseg+tseg1 max
+    .tseg2_min = 1,
+    .tseg2_max = 8,
+    .sjw_max = 4,
+    .brp_min = 1,
+    .brp_max = 256,
+    .brp_inc = 1
+};
+
 #ifdef CONFIG_MACH_C28X_ECAN0
 const struct ecan_pin ecan0_pins[2] = {
 # ifdef CONFIG_MACH_C28X_ECAN0_GPIO_30
@@ -415,6 +447,7 @@ const struct ecan_pin ecan0_pins[2] = {
 };
 const struct ecan_const ecan0_const = {
     .pins = ecan0_pins,
+    .btc = &ecan_btc,
 };
 struct can ecan0 = {
     CAN_INIT_DEV(ecan)
