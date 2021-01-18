@@ -207,7 +207,7 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
     can->bt.bitrate = bitrate;
 
     ret = can_calcBittiming(&can->bt, can->config->btc, can->clk_freq);
-    if (ret < 0 || (can->bt.prop_seg+can->bt.phase_seg1) > can->config->btc->tseg1_max) {
+    if (ret < 0) {
         goto ecan_init_error0;
     }
 
@@ -427,7 +427,7 @@ CAN_OPS(ecan);
 
 const struct can_bittiming_const ecan_btc = {
     .tseg1_min = 1,
-    .tseg1_max = 16,        // TODO: this is propseg+tseg1 max
+    .tseg1_max = 16,
     .tseg2_min = 1,
     .tseg2_max = 8,
     .sjw_max = 4,
