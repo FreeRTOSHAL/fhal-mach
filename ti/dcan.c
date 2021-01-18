@@ -133,9 +133,9 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     PRINTDEBUG;
     can->gen.init = true;
     can->enablePin = pin;
-    can-> pinHigh = pinHigh;
+    can->pinHigh = pinHigh;
     PRINTDEBUG;
-    if (can-> enablePin) {
+    if (can->enablePin) {
         /* High is disable can transiver */
         if (can->pinHigh) {
             gpioPin_clearPin(can->enablePin);
@@ -180,6 +180,20 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     // reset DCAN_CTL
     can->base->ctl = DCAN_CTL_PMD(0x5);
 
+    
+    PRINTF("TXRQ_X: %#08lx\nNWDAT_X: %#08lx\nMSGVAL_X: %#08lx\n", can->base->txrq_x, can->base->nwdat_x, can->base->msgval_x);
+    PRINTF("TXRQ12: %#08lx\nNWDAT12: %#08lx\nMSGVAL12: %#08lx\n", can->base->txrq12, can->base->nwdat12, can->base->msgval12);
+    // reset sending message object
+    {
+        struct dcan_mo mo;
+        mo.msk = 0;
+        mo.arb = 0;
+        mo.mctl = 0;
+        ti_dcan_mo_configuration(can, 1, &mo);
+
+    }
+
+
     // configure CAN bit timing
 
 
@@ -195,10 +209,10 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     memset(&can->bt.bitrate, 0, sizeof(struct can_bittiming));
     /* set target bitrate*/
     can->bt.bitrate = bitrate;
-    /* calc bittiming settings */
     PRINTF("can->btc\ntseg1_min: %ld\ntseg1_max: %ld\ntseg2_min: %ld\ntseg2_max %ld\nsjw_max: %ld\nbrp_min: %ld\nbrp_max: %ld\nbrp_inc: %ld\n",
             can->btc->tseg1_min, can->btc->tseg1_max, can->btc->tseg2_min, can->btc->tseg2_max, can->btc->sjw_max, can->btc->brp_min,
             can->btc->brp_max, can->btc->brp_inc);
+    /* calc bittiming settings */
     ret = can_calcBittiming(&can->bt, can->btc, can->freq);
     if (ret < 0){
         return NULL;
@@ -273,12 +287,18 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
     {
         int32_t i;
+        struct dcan_mo mo;
+        mo.msk = 0;
+        mo.arb = 0;
+        mo.mctl = 0;
         /* init all filter and create software queue */
         for(i = 0; i < can->filterCount; i++) {
             can->filter[i].used = false;
             /* id 0 is illegal
              * id 1 is reserved for send MB */
             can->filter[i].id = i +DCAN_FILTER_MO_OFFSET;
+            /* reset message objects */
+            ti_dcan_mo_configuration(can, can->filter[i].id, &mo);
             can->filter[i].filter.id = 0;
             can->filter[i].filter.id = 0x1FFFFFFFu;
             can->filter[i].callback = NULL;
@@ -317,6 +337,8 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
 
 
+    PRINTF("TXRQ_X: %#08lx\nNWDAT_X: %#08lx\nMSGVAL_X: %#08lx\n", can->base->txrq_x, can->base->nwdat_x, can->base->msgval_x);
+    PRINTF("TXRQ12: %#08lx\nNWDAT12: %#08lx\nMSGVAL12: %#08lx\n", can->base->txrq12, can->base->nwdat12, can->base->msgval12);
 
 
 
