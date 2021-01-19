@@ -159,12 +159,13 @@ CAN_SET_CALLBACK(ecan, can, filterID, callback, data) {
 CAN_REGISTER_FILTER(ecan, can, filter) {
 	int32_t filter_id = -1;
 	int i;
+	struct ecan_rx_mbox *rx_mbox;
 
 	can_lock(can, portMAX_DELAY, -1);
 
 	// search next free mbox
-	for (i=0; i<ARRAY_SIZE(can->mbox_used); i++) {
-		if (!can->mbox_used[i]) {
+	for (i=0; i<ARRAY_SIZE(can->rx_mboxes); i++) {
+		if (!can->rx_mboxes[i].used) {
 			filter_id = i;
 			break;
 		}
@@ -177,8 +178,11 @@ CAN_REGISTER_FILTER(ecan, can, filter) {
 		return -1;
 	}
 
-	// set mailbox as used
-	can->mbox_used[filter_id] = true;
+	rx_mbox = &can->rx_mboxes[filter_id];
+
+	// set mailbox as used and save filter
+	rx_mbox->used = true;
+	rx_mbox->filter = *filter;
 
 	// set local acceptance mask
 	ECAN_REG32_SET(can->base->LAM[filter_id], ECAN_LAM_LAM(~((uint32_t) (filter->mask))));
@@ -205,7 +209,7 @@ CAN_DEREGISTER_FILTER(ecan, can, filterID) {
 	can_lock(can, portMAX_DELAY, -1);
 
 	// set mailbox as unused
-	can->mbox_used[filterID] = false;
+	can->rx_mboxes[filterID].used = false;
 
 	// disable mailbox
 	ECAN_REG32_CLEAR_BITS(can->base->CANME, BIT(filterID));
@@ -335,7 +339,6 @@ struct can ecan0 = {
 	HAL_NAME("eCAN 0")
 	.config = &ecan0_const,
 	.base = (volatile struct ecan_regs *) 0x00006000,
-	.mbox_used = {0}
 };
 CAN_ADDDEV(ecan, ecan0);
 #endif

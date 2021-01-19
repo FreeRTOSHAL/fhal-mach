@@ -11,4 +11,12 @@ if MACH_C28X_ECAN0=y
 		config MACH_C28X_ECAN0_GPIO_31
 			bool "GPIO_31"
 	endchoice
+	config MACH_C28X_ECAN_CAN0_FILTER_QUEUE_ENTRIES
+		int "Max Filter Software Queue Entries"
+		default 2
+		help
+			The hardware has only one entry per filter,
+			so we need a software queue to store the messages
+
+			How many CAN frames can be stored in this software queue?
 endif

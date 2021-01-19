@@ -2,6 +2,7 @@
 #define C28X_ECAN_H_
 
 
+#include <FreeRTOS.h>
 #include <stdint.h>
 #include <can.h>
 #define CAN_PRV
@@ -196,6 +197,17 @@ struct ecan_regs {
 	struct ecan_mailbox MBOXES[ECAN_NUM_MBOXES];	/* Mailbox Registers */
 };
 
+
+
+struct ecan_rx_mbox {
+	bool used;
+	struct can_filter filter;
+	bool (*callback)(struct can *can, struct can_msg *msg, void *data);
+	void *data;
+	OS_DEFINE_QUEUE(queue, CONFIG_MACH_C28X_ECAN_CAN0_FILTER_QUEUE_ENTRIES, sizeof(struct can_msg));
+};
+
+
 /**
  * Save RAM move const to Flash
  */
@@ -210,7 +222,7 @@ struct can {
 	volatile struct ecan_regs *base;
 	struct can_bittiming bt;
 	int64_t clk_freq;
-	bool mbox_used[ECAN_NUM_FILTERS];
+	struct ecan_rx_mbox rx_mboxes[ECAN_NUM_FILTERS];
 };
 
 
