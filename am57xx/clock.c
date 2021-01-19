@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <clock.h>
 #include <system.h>
+#include <clockid.h>
 
 struct clock {
 	struct clock_generic gen;
@@ -65,7 +66,12 @@ int64_t clock_getCPUSpeed(struct clock *clk) {
 	/*return 20000000;*/
 }
 int64_t clock_getPeripherySpeed(struct clock *clk, uint32_t id) {
-	return 266000000;
+    if(id == SYS_CLK1){
+        return 20000000ul;
+    }
+    else{
+        return 266000000;
+    }
 }
 int32_t clock_deinit(struct clock *clk) {
 	return 0;

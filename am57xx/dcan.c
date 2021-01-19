@@ -7,6 +7,7 @@
 #include <iomux.h>
 #include <vector.h>
 #include <stdio.h>
+#include <clockid.h>
 
 #define CM_WKUPAON_DCAN1_CLKCTRL_ADR        (volatile void *) 0x6ae07888ul
 #define CM_L4PER2_DCAN2_CLKCLTR_ADR         (volatile void *) 0x6a0098f0ul
@@ -27,7 +28,22 @@ struct dcan_clk {
 int32_t dcan_setupClock(struct can *can){
     struct clock *clock = clock_init();
     struct dcan_clk const *clk = can->clkData;
-    can->freq = clock_getPeripherySpeed(clock, 0);
+    if(*clk->clkreg & BIT(24)){
+        printf("%s: SYS_CLK2 in Register\n", __FUNCTION__);
+        // SYS_CLK2 not supported
+        // switch to SYS_CLK1
+        // TODO macro
+        *clk->clkreg &= ~(BIT(24));
+        can->freq = clock_getPeripherySpeed(clock, SYS_CLK1);
+
+
+
+    }
+    else {
+        printf("%s: SYS_CLK1 in Register\n", __FUNCTION__);
+        // SYS_CLK1
+        can->freq = clock_getPeripherySpeed(clock, SYS_CLK1);
+    }
 
     /* Check DCAN Clock is enabled */
     if((*clk->clkreg >> 16) & 0x3u){
@@ -36,6 +52,7 @@ int32_t dcan_setupClock(struct can *can){
         /* wait clock came stable */
         while((*clk->clkreg >> 16) & 0x3u);
     }
+    printf("%s: clkreg: %#08ul\n",__FUNCTION__,  *clk->clkreg);
 
     return 0;
 }

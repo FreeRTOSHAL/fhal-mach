@@ -344,6 +344,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
     PRINTF("%s finished\n", __FUNCTION__);
     PRINTF("%s DCAN_CTL: %#08x\n", __FUNCTION__, can->base->ctl);
+    PRINTF("DCAN_BTR: %#08x\n", can->base->btr);
 
     return can;
 
@@ -558,6 +559,8 @@ CAN_SEND(dcan, can, msg, waittime) {
     
     can_unlock(can, -1);
     PRINTF("%s TXRQ_X: %#08x\n", can->base->txrq_x);
+    PRINTF("TXRQ_X: %#08lx\nNWDAT_X: %#08lx\nMSGVAL_X: %#08lx\n", can->base->txrq_x, can->base->nwdat_x, can->base->msgval_x);
+    PRINTF("TXRQ12: %#08lx\nNWDAT12: %#08lx\nMSGVAL12: %#08lx\n", can->base->txrq12, can->base->nwdat12, can->base->msgval12);
     PRINTF("%s finished\n", __FUNCTION__);
     return 0;
 dcan_send_error0:
