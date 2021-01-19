@@ -105,9 +105,47 @@
 #define ECAN_CANES_BE								BIT(23)
 #define ECAN_CANES_FE								BIT(24)
 
+#define ECAN_CANTEC_TEC_MASK						ECAN_MASK(8, 0)
+#define ECAN_CANTEC_TEC(x)							ECAN_BITS((x), ECAN_CANTEC_TEC_MASK, 0)
+
+#define ECAN_CANREC_TEC_MASK						ECAN_MASK(8, 0)
+#define ECAN_CANREC_TEC(x)							ECAN_BITS((x), ECAN_CANREC_TEC_MASK, 0)
+
+#define ECAN_CANGIFx_MIVx_MASK						ECAN_MASK(5, 0)
+#define ECAN_CANGIFx_MIVx							ECAN_BITS((x), ECAN_CANGIFx_MIVx_MASK, 0)
+#define ECAN_CANGIFx_WLIFx							BIT(8)
+#define ECAN_CANGIFx_EPIFx							BIT(9)
+#define ECAN_CANGIFx_BOIFx							BIT(10)
+#define ECAN_CANGIFx_RMLIFx							BIT(11)
+#define ECAN_CANGIFx_WUIFx							BIT(12)
+#define ECAN_CANGIFx_WDIFx							BIT(13)
+#define ECAN_CANGIFx_AAIFx							BIT(14)
+#define ECAN_CANGIFx_GMIFx							BIT(15)
+#define ECAN_CANGIFx_TCOFx							BIT(16)
+#define ECAN_CANGIFx_MTOFx							BIT(17)
+
+#define ECAN_CANGIM_I0EN							BIT(0)
+#define ECAN_CANGIM_I1EN							BIT(1)
+#define ECAN_CANGIM_GIL								BIT(2)
+#define ECAN_CANGIM_WLIM							BIT(8)
+#define ECAN_CANGIM_EPIM							BIT(9)
+#define ECAN_CANGIM_BOIM							BIT(10)
+#define ECAN_CANGIM_RMLIM							BIT(11)
+#define ECAN_CANGIM_WUIM							BIT(12)
+#define ECAN_CANGIM_WDIM							BIT(13)
+#define ECAN_CANGIM_AAIM							BIT(14)
+#define ECAN_CANGIM_TCOM							BIT(16)
+#define ECAN_CANGIM_MTOM							BIT(17)
+
 #define ECAN_LAM_LAM_MASK							ECAN_MASK(29, 0)
 #define ECAN_LAM_LAM(x)								ECAN_BITS((x), ECAN_LAM_LAM_MASK, 0)
 #define ECAN_LAM_LAMI								BIT(31)
+
+#define ECAN_MOTS_MOTS_MASK							ECAN_MASK(32, 0)
+#define ECAN_MOTS_MOTS(x)							ECAN_BITS((x), ECAN_MOTS_MOTS_MASK, 0)
+
+#define ECAN_MOTO_MOTO_MASK							ECAN_MASK(32, 0)
+#define ECAN_MOTO_MOTO(x)							ECAN_BITS((x), ECAN_MOTO_MOTS_MASK, 0)
 
 
 
