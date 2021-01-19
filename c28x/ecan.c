@@ -3,6 +3,7 @@
  * Author: Jonathan Klamroth <jonathan.klamroth@student.hs-rm.de>
  * Date: 2020
  */
+#include <FreeRTOS.h>
 #include <stdint.h>
 #include <string.h>
 #include <can.h>
@@ -321,10 +322,11 @@ CAN_SET_CALLBACK(ecan, can, filterID, callback, data) {
 	return -1;
 }
 
-// TODO: lock
 CAN_REGISTER_FILTER(ecan, can, filter) {
 	int32_t filter_id = -1;
 	int i;
+
+	can_lock(can, portMAX_DELAY, -1);
 
 	// search next free mbox
 	for (i=0; i<ARRAY_SIZE(can->mbox_used); i++) {
@@ -350,17 +352,31 @@ CAN_REGISTER_FILTER(ecan, can, filter) {
 	// set ID and enable acceptance mask
 	ECAN_REG32_SET(can->base->MBOXES[filter_id].CANMSGID, ECAN_MBOX_CANMSGID_STDMSGID(filter->id) | ECAN_MBOX_CANMSGID_AAM);
 
+	// configure mailbox as receive mailbox
+	ECAN_REG32_SET_BITS(can->base->CANMD, BIT(filter_id));
+
+	// enable mailbox
+	ECAN_REG32_SET_BITS(can->base->CANME, BIT(filter_id));
+
+	can_unlock(can, -1);
+
 	return filter_id;
 }
 
-// TODO: lock
 CAN_DEREGISTER_FILTER(ecan, can, filterID) {
 	if (filterID < 0 || filterID >= ECAN_NUM_FILTERS) {
 		return -1;
 	}
 
+	can_lock(can, portMAX_DELAY, -1);
+
 	// set mailbox as unused
 	can->mbox_used[filterID] = false;
+
+	// disable mailbox
+	ECAN_REG32_CLEAR_BITS(can->base->CANME, BIT(filterID));
+
+	can_unlock(can, -1);
 
 	return 0;
 }
