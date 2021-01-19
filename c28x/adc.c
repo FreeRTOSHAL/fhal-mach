@@ -52,7 +52,11 @@ ADC_INIT(adcc28x, index, bits, hz) {
 	/* waittime per ticks */
 	adc->ticks = (1000 * portTICK_PERIOD_MS) / hz;
 	adc->bits = bits;
+
+	/*not needed?
 	ret = OS_CREATE_TASK(adc_adcc28x_task, "ADC ADCC28X Task", 500, adc, CONFIG_ADC_ADCC28X_PRIO, adc->task);
+	*/
+
 	if (ret != pdPASS) {
 		goto adcc28x_adc_init_error0;
 	}
