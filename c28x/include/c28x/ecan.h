@@ -95,11 +95,9 @@
 
 #define ECAN_CANES_TM								BIT(0)
 #define ECAN_CANES_RM								BIT(1)
-
 #define ECAN_CANES_PDA								BIT(3)
 #define ECAN_CANES_CCE								BIT(4)
 #define ECAN_CANES_SMA								BIT(5)
-
 #define ECAN_CANES_EW								BIT(16)
 #define ECAN_CANES_EP								BIT(17)
 #define ECAN_CANES_BO								BIT(18)
