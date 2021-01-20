@@ -656,11 +656,29 @@ CAN_RECV_ISR(dcan, can, filterID, msg) {
 
 CAN_UP(dcan, can) {
     PRINTF("%s called\n", __FUNCTION__);
+    can_lock(can, portMAX_DELAY, -1);
+    can->base->ctl &= ~DCAN_CTL_INIT_MASK;
+    while(can->base->ctl & DCAN_CTL_INIT_MASK);
+    if(can->pinHigh){
+        gpioPin_setPin(can->enablePin);
+    } else {
+        gpioPin_clearPin(can->enablePin);
+    }
+    can_unlock(can, -1);
     return -1;
 }
 
 CAN_DOWN(dcan, can) {
     PRINTF("%s called\n", __FUNCTION__);
+    can_lock(can, portMAX_DELAY, -1);
+    if(can->pinHigh){
+        gpioPin_clearPin(can->enablePin);
+    } else {
+        gpioPin_setPin(can->enablePin);
+    }
+    can->base->ctl |= DCAN_CTL_INIT_MASK;
+    while(!(can->base->ctl & DCAN_CTL_INIT_MASK));
+    can_unlock(can, -1);
     return -1;
 }
 
