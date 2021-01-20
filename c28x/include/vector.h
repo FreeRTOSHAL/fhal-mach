@@ -171,4 +171,5 @@ extern __cregister volatile unsigned int IFR;
 #define M_DLOG  0x4000
 #define M_RTOS  0x8000
 int32_t irq_setHandler(int32_t irqnr, void (*irq_handler)());
+int32_t irq_reenable(int32_t irqnr);
 #endif
