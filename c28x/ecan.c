@@ -249,8 +249,21 @@ CAN_DEINIT(ecan, can) {
 }
 
 CAN_SET_CALLBACK(ecan, can, filterID, callback, data) {
-	// TODO
-	return -1;
+	struct ecan_rx_mbox *rx_mbox;
+
+	if (filterID < 0 || filterID >= ECAN_NUM_FILTERS) {
+		return -1;
+	}
+
+	can_lock(can, portMAX_DELAY, -1);
+
+	rx_mbox = &can->rx_mboxes[filterID];
+	rx_mbox->callback = callback;
+	rx_mbox->data = data;
+
+	can_unlock(can, -1);
+
+	return 0;
 }
 
 CAN_REGISTER_FILTER(ecan, can, filter) {
