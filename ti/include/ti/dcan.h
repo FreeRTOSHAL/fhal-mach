@@ -158,6 +158,27 @@ void CAN2_PARITY_ISR();
 #define DCAN_CTL_SWR(x)               (((uint32_t)(((uint32_t)(x))<<DCAN_CTL_SWR_SHIFT))&DCAN_CTL_SWR_MASK)
 #define DCAN_CTL_IE1_MASK             0x00020000ul
 
+#define DCAN_ES_PDA_MASK              0x00000400ul
+#define DCAN_ES_WAKEUPPND_MASK        0x00000200ul
+#define DCAN_ES_PER_MASK              0x00000100ul
+#define DCAN_ES_BOFF_MASK             0x00000080ul
+#define DCAN_ES_EWARN_MASK            0x00000040ul
+#define DCAN_ES_EPASS_MASK            0x00000020ul
+#define DCAN_ES_RXOK_MASK             0x00000010ul
+#define DCAN_ES_TXOK_MASK             0x00000008ul
+#define DCAN_ES_LEC_MASK              0x00000007ul
+#define DCAN_ES_LEC_SHIF              0u
+#define DCAN_ES_LEC_WIDTH             3u
+#define DCAN_ES_LEC(x)                (((uint32_t)(((uint32_t)(x))<<DCAN_ES_LEC_SHIF))&DCAN_ES_LEC_MASK)
+#define DCAN_ES_LEC_NO_ERROR          0x00000000ul
+#define DCAN_ES_LEC_STUFF_ERROR       0x00000001ul
+#define DCAN_ES_LEC_FORM_ERROR        0x00000002ul
+#define DCAN_ES_LEC_ACK_ERROR         0x00000003ul
+#define DCAN_ES_LEC_BIT1_ERROR        0x00000004ul
+#define DCAN_ES_LEC_BIT0_ERROR        0x00000005ul
+#define DCAN_ES_LEC_CRC_ERROR         0x00000006ul
+#define DCAN_ES_LEC_NO_EVENT          0x00000007ul
+
 #define DCAN_INT_INT0ID_MASK          0x0000FFFFul
 #define DCAN_INT_INT0ID_SHIFT         0u
 #define DCAN_INT_INT0ID_WIDTH         16u
