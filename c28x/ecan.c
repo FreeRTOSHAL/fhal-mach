@@ -14,8 +14,41 @@
 #include <clk.h>
 #include <mux.h>
 #include <iomux.h>
+#include <irq.h>
+#include <vector.h>
 
 #include <c28x/ecan.h>
+
+
+
+struct can ecan0;
+
+
+
+static interrupt void ecan_handle_system_irq (void) {
+	struct can *can = &ecan0;
+	// TODO
+	(void) can;
+	irq_clear(ECAN0INT_IRQn);
+}
+
+static interrupt void ecan_handle_mbox_irq (void) {
+	struct can *can = &ecan0;
+	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+	BaseType_t tmp;
+
+	if (ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID)) {
+		if (can->tx_task) {
+			vTaskNotifyGiveIndexedFromISR(can->tx_task, 0, &tmp);
+			pxHigherPriorityTaskWoken |= tmp;
+		}
+
+		ECAN_REG32_SET_BITS(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
+	}
+
+	portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
+	irq_clear(ECAN1INT_IRQn);
+}
 
 
 
@@ -53,6 +86,11 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 	if (ret < 0) {
 		goto ecan_init_error0;
 	}
+
+
+	// init private data
+
+	can->tx_task = NULL;
 
 
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
@@ -119,6 +157,28 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 	mux = mux_init();
 	mux_pinctl(mux, can->config->pins[0].pin, can->config->pins[0].cfg, can->config->pins[0].extra);
 	mux_pinctl(mux, can->config->pins[1].pin, can->config->pins[1].cfg, can->config->pins[1].extra);
+
+
+	// setup interrupts
+
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+
+	// enable both interrupt lines
+	ECAN_REG32_SET_BITS(can->base->CANGIM, ECAN_CANGIM_I1EN | ECAN_CANGIM_I0EN);
+
+	// set interrupt line #1 for all mailboxes
+	ECAN_REG32_SET(can->base->CANMIL, 0xFFFFFFFFUL);
+
+	// enable interrupts for all mailboxes
+	ECAN_REG32_SET(can->base->CANMIM, 0xFFFFFFFFUL);
+
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+
+	// set irq handler and activate them
+	irq_setHandler(ECAN0INT_IRQn, ecan_handle_system_irq);		// line #0 has a high priority
+	irq_setHandler(ECAN1INT_IRQn, ecan_handle_mbox_irq);
+	irq_enable(ECAN0INT_IRQn);
+	irq_enable(ECAN1INT_IRQn);
 
 
 	return can;
@@ -221,13 +281,16 @@ CAN_DEREGISTER_FILTER(ecan, can, filterID) {
 
 CAN_SEND(ecan, can, msg, waittime) {
 	volatile struct ecan_mailbox *mbox = &can->base->MBOXES[ECAN_TX_MBOX_ID];
-	TimeOut_t timeout;
+	int ret;
 
 	if (msg->length > 8) {
 		return -1;
 	}
 
 	can_lock(can, waittime, -1);
+
+	// set tx_task to current task (used later for notification)
+	can->tx_task = xTaskGetCurrentTaskHandle();
 
 	// disable mailbox for configuration
 	ECAN_REG32_CLEAR_BITS(can->base->CANME, BIT(ECAN_TX_MBOX_ID));
@@ -255,26 +318,29 @@ CAN_SEND(ecan, can, msg, waittime) {
 	ECAN_REG32_SET_BITS(can->base->CANTRS, BIT(ECAN_TX_MBOX_ID));
 
 	// wait for ack
-	vTaskSetTimeOutState(&timeout);
-	while (!(ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID))) {
-		if (xTaskCheckForTimeOut(&timeout, &waittime) != pdFALSE) {
-			break;
+	ret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
+	if (ret != pdTRUE) {
+		// request abort
+		ECAN_REG32_SET_BITS(can->base->CANTRR, BIT(ECAN_TX_MBOX_ID));
+
+		// wait for confirmation
+		ret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, 1 / portTICK_PERIOD_MS);
+		if (ret != pdTRUE) {
+			goto ecan_send_error0;
 		}
 	}
 
-	// no ack received after timeout?
-	if (!(ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID))) {
-		goto ecan_send_error0;
-	}
-
-	// reset ack flag
-	ECAN_REG32_SET_BITS(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
+	// reset task
+	can->tx_task = NULL;
 
 	can_unlock(can, -1);
 
 	return 0;
 
 ecan_send_error0:
+	// reset task
+	can->tx_task = NULL;
+
 	can_unlock(can, -1);
 	return -1;
 }

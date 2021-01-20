@@ -223,6 +223,7 @@ struct can {
 	struct can_bittiming bt;
 	int64_t clk_freq;
 	struct ecan_rx_mbox rx_mboxes[ECAN_NUM_FILTERS];
+	TaskHandle_t tx_task;
 };
 
 
