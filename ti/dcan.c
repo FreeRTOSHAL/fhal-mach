@@ -398,6 +398,9 @@ void dcan_handleInt1IRQ(struct can *can) {
         }
         msg.length = mo.mctl & DCAN_IF1MCTL_DLC_MASK;
         memcpy(msg.data, mo.data, msg.length);
+        msg.ts = xTaskGetTickCount();
+        // TODO request
+        msg.req = 0;
 
         /* Send msg to userspace, we ignore the overflow error for now */
         /* TODO Handle overflow */

@@ -1,5 +1,5 @@
-#ifndef DCAN_H
-#define DCAN_H
+#ifndef DCAN_H_
+#define DCAN_H_
 #include <stdint.h>
 #ifndef CAN_PRV
 # error CAN_PRV not defined
