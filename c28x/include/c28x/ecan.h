@@ -144,9 +144,12 @@
 #define ECAN_CANGIM_TCOM							BIT(16)
 #define ECAN_CANGIM_MTOM							BIT(17)
 
-#define ECAN_LAM_LAM_MASK							ECAN_MASK(29, 0)
-#define ECAN_LAM_LAM(x)								ECAN_BITS((x), ECAN_LAM_LAM_MASK, 0)
-#define ECAN_LAM_LAM_INV(x)							ECAN_BITS_INV((x), ECAN_LAM_LAM_MASK, 0)
+#define ECAN_LAM_LAM_EXTMSGID_MASK					ECAN_MASK(18, 0)
+#define ECAN_LAM_LAM_EXTMSGID(x)					ECAN_BITS((x), ECAN_LAM_LAM_EXTMSGID_MASK, 0)
+#define ECAN_LAM_LAM_EXTMSGID_INV(x)				ECAN_BITS_INV((x), ECAN_LAM_LAM_EXTMSGID_MASK, 0)
+#define ECAN_LAM_LAM_STDMSGID_MASK					ECAN_MASK(11, 18)
+#define ECAN_LAM_LAM_STDMSGID(x)					ECAN_BITS((x), ECAN_LAM_LAM_STDMSGID_MASK, 18)
+#define ECAN_LAM_LAM_STDMSGID_INV(x)				ECAN_BITS_INV((x), ECAN_LAM_LAM_STDMSGID_MASK, 18)
 #define ECAN_LAM_LAMI								BIT(31)
 
 #define ECAN_MOTS_MOTS_MASK							ECAN_MASK(32, 0)
@@ -231,6 +234,7 @@ struct ecan_rx_mbox {
 struct ecan_const {
 	const struct ecan_pin *pins;
 	struct can_bittiming_const const *btc;
+	uint32_t filter_length;
 };
 
 struct can {

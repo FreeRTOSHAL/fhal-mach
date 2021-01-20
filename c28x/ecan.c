@@ -36,6 +36,10 @@ static interrupt void ecan_handle_mbox_irq (void) {
 	struct can *can = &ecan0;
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
 	BaseType_t tmp;
+	int i, j;
+	struct can_msg msg;
+	uint64_t msg_data;
+	int shift;
 
 	if (ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID)) {
 		if (can->tx_task) {
@@ -43,7 +47,45 @@ static interrupt void ecan_handle_mbox_irq (void) {
 			pxHigherPriorityTaskWoken |= tmp;
 		}
 
+		// reset transmit ack flag
 		ECAN_REG32_SET_BITS(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
+	}
+
+	for (i=0; i<ECAN_NUM_FILTERS; i++) {
+		struct ecan_rx_mbox *rx_mbox = &can->rx_mboxes[i];
+
+		// handle mailbox receive interrupt
+		if (ECAN_REG32_GET(can->base->CANRMP) & BIT(i)) {
+			if (rx_mbox->used) {
+				volatile struct ecan_mailbox *mbox = &can->base->MBOXES[i];
+
+				msg.id = ECAN_MBOX_CANMSGID_STDMSGID_INV(ECAN_REG32_GET(mbox->CANMSGID));
+				msg.length = ECAN_MBOX_CANMSGCTRL_DLC_INV(ECAN_REG32_GET(mbox->CANMSGCTRL));
+
+				msg_data = (((uint64_t) ECAN_REG32_GET(mbox->CANMDL))<<32) | ECAN_REG32_GET(mbox->CANMDH);
+				for (j=0; j<msg.length; j++) {
+					shift = (7-j) * 8;
+					msg.data[j] = (msg_data>>shift) & 0xFF;
+				}
+
+				msg.ts = ECAN_REG32_GET(can->base->MOTS[i]);
+
+				// send msg to userspace, we ignore the overflow error for now
+				// TODO: handle overflow
+
+				(void) xQueueSendToBackFromISR(rx_mbox->queue, &msg, &tmp);
+				pxHigherPriorityTaskWoken |= tmp;
+
+				if (rx_mbox->callback) {
+					bool ret;
+					ret = rx_mbox->callback(can, &msg, rx_mbox->data);
+					pxHigherPriorityTaskWoken |= ret;
+				}
+			}
+
+			// reset received message pending flag
+			ECAN_REG32_SET_BITS(can->base->CANRMP, BIT(i));
+		}
 	}
 
 	portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
@@ -91,6 +133,11 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 	// init private data
 
 	can->tx_task = NULL;
+	memset(&can->rx_mboxes, 0, sizeof(can->rx_mboxes));
+
+	for (i=0; i<ECAN_NUM_FILTERS; i++) {
+		can->rx_mboxes[i].queue = OS_CREATE_QUEUE(can->config->filter_length, sizeof(struct can_msg), can->rx_mboxes[i].queue);
+	}
 
 
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
@@ -245,10 +292,10 @@ CAN_REGISTER_FILTER(ecan, can, filter) {
 	rx_mbox->filter = *filter;
 
 	// set local acceptance mask
-	ECAN_REG32_SET(can->base->LAM[filter_id], ECAN_LAM_LAM(~((uint32_t) (filter->mask))));
+	ECAN_REG32_SET(can->base->LAM[filter_id], ECAN_LAM_LAM_STDMSGID(~((uint32_t) (filter->mask))));
 
 	// set ID and enable acceptance mask
-	ECAN_REG32_SET(can->base->MBOXES[filter_id].CANMSGID, ECAN_MBOX_CANMSGID_STDMSGID(filter->id) | ECAN_MBOX_CANMSGID_AAM);
+	ECAN_REG32_SET(can->base->MBOXES[filter_id].CANMSGID, ECAN_MBOX_CANMSGID_AME | ECAN_MBOX_CANMSGID_STDMSGID(filter->id));
 
 	// configure mailbox as receive mailbox
 	ECAN_REG32_SET_BITS(can->base->CANMD, BIT(filter_id));
@@ -346,8 +393,22 @@ ecan_send_error0:
 }
 
 CAN_RECV(ecan, can, filterID, msg, waittime) {
-	// TODO
-	return -1;
+	BaseType_t ret;
+	struct ecan_rx_mbox *rx_mbox;
+
+	if (filterID < 0 || filterID >= ECAN_NUM_FILTERS) {
+		return -1;
+	}
+
+	rx_mbox = &can->rx_mboxes[filterID];
+
+	// wait for new messages in the queue
+	ret = xQueueReceive(rx_mbox->queue, msg, waittime);
+	if (ret != pdTRUE) {
+		return -1;
+	}
+
+	return 0;
 }
 
 CAN_SEND_ISR(ecan, can, msg) {
@@ -399,6 +460,7 @@ const struct ecan_pin ecan0_pins[2] = {
 const struct ecan_const ecan0_const = {
 	.pins = ecan0_pins,
 	.btc = &ecan_btc,
+	.filter_length = CONFIG_MACH_C28X_ECAN_CAN0_FILTER_QUEUE_ENTRIES,
 };
 struct can ecan0 = {
 	CAN_INIT_DEV(ecan)
