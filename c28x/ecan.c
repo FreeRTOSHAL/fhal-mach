@@ -48,7 +48,7 @@ static interrupt void ecan_handle_mbox_irq (void) {
 		}
 
 		// reset transmit ack flag
-		ECAN_REG32_SET_BITS(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
+		ECAN_REG32_SET(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
 	}
 
 	for (i=0; i<ECAN_NUM_FILTERS; i++) {
@@ -84,7 +84,7 @@ static interrupt void ecan_handle_mbox_irq (void) {
 			}
 
 			// reset received message pending flag
-			ECAN_REG32_SET_BITS(can->base->CANRMP, BIT(i));
+			ECAN_REG32_SET(can->base->CANRMP, BIT(i));
 		}
 	}
 
@@ -164,10 +164,10 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 	}
 
 	// reset CANTA, CANRMP, CANGIF0, CANGIF1
-	ECAN_REG32_SET_BITS(can->base->CANTA, 0xFFFFFFFFUL);
-	ECAN_REG32_SET_BITS(can->base->CANRMP, 0xFFFFFFFFUL);
-	ECAN_REG32_SET_BITS(can->base->CANGIF0, 0xFFFFFFFFUL);
-	ECAN_REG32_SET_BITS(can->base->CANGIF1, 0xFFFFFFFFUL);
+	ECAN_REG32_SET(can->base->CANTA, 0xFFFFFFFFUL);
+	ECAN_REG32_SET(can->base->CANRMP, 0xFFFFFFFFUL);
+	ECAN_REG32_SET(can->base->CANGIF0, 0xFFFFFFFFUL);
+	ECAN_REG32_SET(can->base->CANGIF1, 0xFFFFFFFFUL);
 
 	// request configuration mode
 	ECAN_REG32_SET_BITS(can->base->CANMC, ECAN_CANMC_CCR);
@@ -346,7 +346,7 @@ CAN_SEND(ecan, can, msg, waittime) {
 	ECAN_REG32_CLEAR_BITS(can->base->CANMD, BIT(ECAN_TX_MBOX_ID));
 
 	// reset ack flag
-	ECAN_REG32_SET_BITS(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
+	ECAN_REG32_SET(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
 
 	// set message length
 	ECAN_REG32_UPDATE(mbox->CANMSGCTRL, ECAN_MBOX_CANMSGCTRL_DLC_MASK, ECAN_MBOX_CANMSGCTRL_DLC(msg->length));
@@ -362,13 +362,13 @@ CAN_SEND(ecan, can, msg, waittime) {
 	ECAN_REG32_SET_BITS(can->base->CANME, BIT(ECAN_TX_MBOX_ID));
 
 	// start transmission
-	ECAN_REG32_SET_BITS(can->base->CANTRS, BIT(ECAN_TX_MBOX_ID));
+	ECAN_REG32_SET(can->base->CANTRS, BIT(ECAN_TX_MBOX_ID));
 
 	// wait for ack
 	ret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
 	if (ret != pdTRUE) {
 		// request abort
-		ECAN_REG32_SET_BITS(can->base->CANTRR, BIT(ECAN_TX_MBOX_ID));
+		ECAN_REG32_SET(can->base->CANTRR, BIT(ECAN_TX_MBOX_ID));
 
 		// wait for confirmation
 		ret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, 1 / portTICK_PERIOD_MS);
