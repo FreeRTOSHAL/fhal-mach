@@ -237,7 +237,6 @@ ecan_init_error0:
 
 CAN_DEINIT(ecan, can) {
 	struct mux *mux = NULL;
-	CLK_Obj *clk = (CLK_Obj *) CLK_BASE_ADDR;
 
 	can->gen.init = false;
 
@@ -245,15 +244,6 @@ CAN_DEINIT(ecan, can) {
 	mux = mux_init();
 	mux_pinctl(mux, can->config->pins[0].pin, MUX_CTL_MODE(MODE0) | MUX_CTL_OPEN, 0);
 	mux_pinctl(mux, can->config->pins[1].pin, MUX_CTL_MODE(MODE0) | MUX_CTL_OPEN, 0);
-
-	(void) clk;
-	/*
-	// TODO: see TMS320 reference manual 16.7.5.3 "Enabling or Disabling Clock to the CAN Module"
-	// disable eCAN clock
-	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
-	clk->PCLKCR0 &= ~CLK_PCLKCR0_ECANAENCLK_BITS;
-	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
-	*/
 
 	return 0;
 }
