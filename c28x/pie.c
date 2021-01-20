@@ -85,7 +85,16 @@ int32_t irq_notify(int32_t cpuid, int32_t irqnr) {
 	return -1;
 }
 int32_t irq_clear(int32_t irqnr) {
-	return -1;
+	if (irqnr < Reset_IRQn || irqnr >= IRQ_COUNT) {
+		return -1;
+	}
+	uint32_t group = ((uint32_t) irqnr) >> 3;
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	pie->PIEACK |= BIT(group);
+	IER |= BIT(group);
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+	portENABLE_INTERRUPTS();
+	return 0;
 }
 int32_t irq_getCPUID() {
 	return -1;
@@ -112,17 +121,5 @@ int32_t irq_setHandler(int32_t irqnr, void (*irq_handler)()) {
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	pie->vector[irqnr + 32] = irq_handler;
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
-	return 0;
-}
-int32_t irq_reenable(int32_t irqnr) {
-	if (irqnr < Reset_IRQn || irqnr >= IRQ_COUNT) {
-		return -1;
-	}
-	uint32_t group = ((uint32_t) irqnr) >> 3;
-	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
-	pie->PIEACK |= BIT(group);
-	IER |= BIT(group);
-	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
-	portENABLE_INTERRUPTS();
 	return 0;
 }
