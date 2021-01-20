@@ -412,13 +412,32 @@ CAN_RECV(ecan, can, filterID, msg, waittime) {
 }
 
 CAN_SEND_ISR(ecan, can, msg) {
-	// TODO
+	// not implemented yet
 	return -1;
 }
 
 CAN_RECV_ISR(ecan, can, filterID, msg) {
-	// TODO
-	return -1;
+	BaseType_t ret;
+	struct ecan_rx_mbox *rx_mbox;
+
+	if (filterID < 0 || filterID >= ECAN_NUM_FILTERS) {
+		return -1;
+	}
+
+	rx_mbox = &can->rx_mboxes[filterID];
+
+	/*
+	 * We receive a message from the queue
+	 * no task is writing on the queue, so we can ignore the pxHigherPriorityTaskWoken parameter
+	 *
+	 * We did not perform busy wating, let the userspace do this
+	 */
+	ret = xQueueReceiveFromISR(rx_mbox->queue, msg, NULL);
+	if (ret != pdTRUE) {
+		return -1;
+	}
+
+	return 0;
 }
 
 CAN_UP(ecan, can) {
