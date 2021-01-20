@@ -441,13 +441,26 @@ CAN_RECV_ISR(ecan, can, filterID, msg) {
 }
 
 CAN_UP(ecan, can) {
-	// TODO
-	return -1;
+	// disable local power down mode
+	ECAN_REG32_CLEAR_BITS(can->base->CANMC, ECAN_CANMC_PDR);
+
+	// wait for normal mode
+	while(ECAN_REG32_GET(can->base->CANES) & ECAN_CANES_PDA);
+
+	return 0;
 }
 
 CAN_DOWN(ecan, can) {
-	// TODO
-	return -1;
+	// disable wake up on bus activity
+	ECAN_REG32_CLEAR_BITS(can->base->CANMC, ECAN_CANMC_WUBA);
+
+	// request local power down mode
+	ECAN_REG32_SET_BITS(can->base->CANMC, ECAN_CANMC_PDR);
+
+	// wait for power down mode
+	while(!(ECAN_REG32_GET(can->base->CANES) & ECAN_CANES_PDA));
+
+	return 0;
 }
 
 
