@@ -422,56 +422,64 @@ void dcan_handleInt1IRQ(struct can *can) {
     BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
     PRINTDEBUG;
     PRINTF("%s: DCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n",__FUNCTION__, can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
-    /*
-
-    if(1){
-        if(can->task){
-            vTaskNotifyGiveIndexedFromISR(can->task, 0, &tmp);
-            pxHigherPriorityTaskWoken |= tmp;
-        }
-    }
-    */
 
     while(can->base->intr & DCAN_INT_INT1ID_MASK){
-        struct can_msg msg;
         uint32_t intid = (can->base->intr & DCAN_INT_INT1ID_MASK) >> DCAN_INT_INT1ID_SHIFT;
-        uint32_t filterID = intid - DCAN_FILTER_MO_OFFSET;
-        struct dcan_filter *filter;
         struct dcan_mo mo;
-        PRINTDEBUG;
-        PRINTF("intid: %#08x, filterID: %#08x\n", intid, filterID);
-        if(filterID >= can->filterCount){
-            PRINTF("%s: failed, filterID(%#08x) too big\n", __FUNCTION__, filterID);
-            //return ;
-        }
-        filter = &can->filter[filterID];
-        if(!filter->used){
-            PRINTF("%s: failed, unused filter\n", __FUNCTION__);
-            //return ;
-        }
-        can_lock(can, portMAX_DELAY, -1);
-        ti_dcan_mo_readmsg(can, filter->id, &mo);
-        can_unlock(can, -1);
-        PRINTF("after readmsg: \nDCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n", can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
-        if(mo.arb & DCAN_IF1ARB_XTD_MASK){
-            msg.id = mo.arb & DCAN_IF1ARB_XTD_MASK;
-        } else {
-            msg.id = ((mo.arb & DCAN_IF1ARB_ID_STD_MASK) >> DCAN_IF1ARB_ID_STD_SHIFT);
-        }
-        msg.length = mo.mctl & DCAN_IF1MCTL_DLC_MASK;
-        memcpy(msg.data, mo.data, msg.length);
-        msg.ts = xTaskGetTickCount();
-        // TODO request
-        msg.req = 0;
+        if(intid < DCAN_FILTER_MO_OFFSET){
+            /* Interrupt of send message object */
+            PRINTF("SEND INTERRUPT\n");
+            if(can->task){
+                vTaskNotifyGiveIndexedFromISR(can->task, 0, &tmp);
+                pxHigherPriorityTaskWoken |= tmp;
+            }
+            /* reset IntPnd */
+            can_lock(can, portMAX_DELAY, -1);
+            ti_dcan_mo_readmsg(can, intid, &mo);
+            can_unlock(can, -1);
 
-        /* Send msg to userspace, we ignore the overflow error for now */
-        /* TODO Handle overflow */
-        (void) xQueueSendToBackFromISR(filter->queue, &msg, &tmp);
-        pxHigherPriorityTaskWoken |= tmp;
-        if(filter->callback){
-            bool ret;
-            ret = filter->callback(can, &msg, filter->data);
-            pxHigherPriorityTaskWoken |= ret;
+
+        }
+        else {
+            /* Interrupt of reccieve message object */
+            uint32_t filterID = intid - DCAN_FILTER_MO_OFFSET;
+            struct dcan_filter *filter;
+            struct can_msg msg;
+            PRINTDEBUG;
+            PRINTF("intid: %#08x, filterID: %#08x\n", intid, filterID);
+            if(filterID >= can->filterCount){
+                PRINTF("%s: failed, filterID(%#08x) too big\n", __FUNCTION__, filterID);
+                //return ;
+            }
+            filter = &can->filter[filterID];
+            if(!filter->used){
+                PRINTF("%s: failed, unused filter\n", __FUNCTION__);
+                //return ;
+            }
+            can_lock(can, portMAX_DELAY, -1);
+            ti_dcan_mo_readmsg(can, filter->id, &mo);
+            can_unlock(can, -1);
+            PRINTF("after readmsg: \nDCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n", can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
+            if(mo.arb & DCAN_IF1ARB_XTD_MASK){
+                msg.id = mo.arb & DCAN_IF1ARB_XTD_MASK;
+            } else {
+                msg.id = ((mo.arb & DCAN_IF1ARB_ID_STD_MASK) >> DCAN_IF1ARB_ID_STD_SHIFT);
+            }
+            msg.length = mo.mctl & DCAN_IF1MCTL_DLC_MASK;
+            memcpy(msg.data, mo.data, msg.length);
+            msg.ts = xTaskGetTickCount();
+            // TODO request
+            msg.req = 0;
+
+            /* Send msg to userspace, we ignore the overflow error for now */
+            /* TODO Handle overflow */
+            (void) xQueueSendToBackFromISR(filter->queue, &msg, &tmp);
+            pxHigherPriorityTaskWoken |= tmp;
+            if(filter->callback){
+                bool ret;
+                ret = filter->callback(can, &msg, filter->data);
+                pxHigherPriorityTaskWoken |= ret;
+            }
         }
     }
 
@@ -549,7 +557,7 @@ CAN_REGISTER_FILTER(dcan, can, filter) {
     can_unlock(can, -1);
     PRINTF("%s returns: %i\n", __FUNCTION__,i);
     return i;
-    
+
 
 
 }
@@ -588,6 +596,7 @@ CAN_DEREGISTER_FILTER(dcan, can, filterID) {
 }
 
 CAN_SEND(dcan, can, msg, waittime) {
+    int lret;
     struct dcan_mo mo;
     PRINTF("%s called\n", __FUNCTION__);
     if(msg->req){
@@ -611,7 +620,7 @@ CAN_SEND(dcan, can, msg, waittime) {
     }
 
     mo.mctl = DCAN_IF1MCTL_NEWDAT_MASK | DCAN_IF1MCTL_TXRQST_MASK | 
-        DCAN_IF1MCTL_DLC(msg->length);
+        DCAN_IF1MCTL_DLC(msg->length) | DCAN_IF1MCTL_TXIE_MASK;
     PRINTF("%s: mo.mctl: %#08x\n",__FUNCTION__, mo.mctl );
 
     mo.msk = 0;
@@ -620,7 +629,19 @@ CAN_SEND(dcan, can, msg, waittime) {
 
     PRINTF("Configuating mo\n");
     can_lock(can, waittime, -1);
+
+    /* Get Task Handle */ 
+    can->task = xTaskGetCurrentTaskHandle();
+    /* Clear Notification */
+    xTaskNotifyStateClearIndexed(NULL, 0);
+    /* send message */
     ti_dcan_mo_configuration(can, 1, &mo);
+    /* sleep until it is send */
+    lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
+    if(lret != pdTRUE){
+        /* we request an abort */
+        // TODO
+    }
     
     can_unlock(can, -1);
     PRINTF("%s TXRQ_X: %#08x\n", can->base->txrq_x);
@@ -628,6 +649,9 @@ CAN_SEND(dcan, can, msg, waittime) {
     PRINTF("TXRQ12: %#08lx\nNWDAT12: %#08lx\nMSGVAL12: %#08lx\n", can->base->txrq12, can->base->nwdat12, can->base->msgval12);
     PRINTF("%s finished\n", __FUNCTION__);
     return 0;
+dcan_send_error1:
+    can_unlock(can, -1);
+    PRINTF("dcan_send_error1\n");
 dcan_send_error0:
     PRINTF("dcan_send_error0\n");
     return -1;
