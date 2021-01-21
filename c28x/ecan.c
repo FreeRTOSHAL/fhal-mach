@@ -335,7 +335,7 @@ CAN_DEREGISTER_FILTER(ecan, can, filterID) {
 	return 0;
 }
 
-CAN_SEND(ecan, can, msg, waittime) {
+static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickType_t waittime) {
 	volatile struct ecan_mailbox *mbox = &can->base->MBOXES[ECAN_TX_MBOX_ID];
 	int ret;
 
@@ -345,8 +345,10 @@ CAN_SEND(ecan, can, msg, waittime) {
 
 	can_lock(can, waittime, -1);
 
-	// set tx_task to current task (used later for notification)
-	can->tx_task = xTaskGetCurrentTaskHandle();
+	if (!isr) {
+		// set tx_task to current task (used later for notification)
+		can->tx_task = xTaskGetCurrentTaskHandle();
+	}
 
 	// disable mailbox for configuration
 	ECAN_REG32_CLEAR_BITS(can->base->CANME, BIT(ECAN_TX_MBOX_ID));
@@ -370,24 +372,43 @@ CAN_SEND(ecan, can, msg, waittime) {
 	// enable mailbox
 	ECAN_REG32_SET_BITS(can->base->CANME, BIT(ECAN_TX_MBOX_ID));
 
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+
+	if (!isr) {
+		// enable interrupt for tansmit mailbox
+		ECAN_REG32_SET_BITS(can->base->CANMIM, BIT(ECAN_TX_MBOX_ID));
+	} else {
+		// disable interrupt for tansmit mailbox
+		ECAN_REG32_CLEAR_BITS(can->base->CANMIM, BIT(ECAN_TX_MBOX_ID));
+	}
+
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+
 	// start transmission
 	ECAN_REG32_SET(can->base->CANTRS, BIT(ECAN_TX_MBOX_ID));
 
 	// wait for ack
-	ret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
-	if (ret != pdTRUE) {
-		// request abort
-		ECAN_REG32_SET(can->base->CANTRR, BIT(ECAN_TX_MBOX_ID));
-
-		// wait for confirmation
-		ret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, 1 / portTICK_PERIOD_MS);
+	if (!isr) {
+		ret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
 		if (ret != pdTRUE) {
-			goto ecan_send_error0;
-		}
-	}
+			// request abort
+			ECAN_REG32_SET(can->base->CANTRR, BIT(ECAN_TX_MBOX_ID));
 
-	// reset task
-	can->tx_task = NULL;
+			// wait for confirmation
+			ret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, 1 / portTICK_PERIOD_MS);
+			if (ret != pdTRUE) {
+				goto ecan_send_error0;
+			}
+		}
+
+		// reset task
+		can->tx_task = NULL;
+	} else {
+		while(!(ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID)));
+
+		// reset transmit ack flag
+		ECAN_REG32_SET(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
+	}
 
 	can_unlock(can, -1);
 
@@ -399,6 +420,10 @@ ecan_send_error0:
 
 	can_unlock(can, -1);
 	return -1;
+}
+
+CAN_SEND(ecan, can, msg, waittime) {
+	return ecan_send(can, msg, false, waittime);
 }
 
 CAN_RECV(ecan, can, filterID, msg, waittime) {
@@ -421,8 +446,7 @@ CAN_RECV(ecan, can, filterID, msg, waittime) {
 }
 
 CAN_SEND_ISR(ecan, can, msg) {
-	// not implemented yet
-	return -1;
+	return ecan_send(can, msg, true, 0);
 }
 
 CAN_RECV_ISR(ecan, can, filterID, msg) {
