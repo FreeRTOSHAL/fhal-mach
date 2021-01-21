@@ -49,6 +49,9 @@ int32_t irq_init() {
 	return 0;
 }
 int32_t irq_enable(int32_t irqnr) {
+	if (irqnr < Reset_IRQn || irqnr >= IRQ_COUNT) {
+		return -1;
+	}
 	if (irqnr < 0) {
 		// TODO sys interrupts
 	} else {
@@ -69,6 +72,9 @@ int32_t irq_enable(int32_t irqnr) {
 	return 0;
 }
 int32_t irq_disable(int32_t irqnr) {
+	if (irqnr < Reset_IRQn || irqnr >= IRQ_COUNT) {
+		return -1;
+	}
 	if (irqnr < 0) {
 		// TODO sys interrupts
 	} else {
@@ -85,7 +91,14 @@ int32_t irq_notify(int32_t cpuid, int32_t irqnr) {
 	return -1;
 }
 int32_t irq_clear(int32_t irqnr) {
-	return -1;
+	if (irqnr < Reset_IRQn || irqnr >= IRQ_COUNT) {
+		return -1;
+	}
+	uint32_t group = ((uint32_t) irqnr) >> 3;
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	pie->PIEACK |= BIT(group);
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+	return 0;
 }
 int32_t irq_getCPUID() {
 	return -1;
