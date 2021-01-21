@@ -432,7 +432,9 @@ static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickTy
 		return -1;
 	}
 
-	can_lock(can, waittime, -1);
+	if (!isr) {
+		can_lock(can, waittime, -1);
+	}
 
 	if (!isr) {
 		// set tx_task to current task (used later for notification)
@@ -506,7 +508,9 @@ static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickTy
 		ECAN_REG32_SET(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
 	}
 
-	can_unlock(can, -1);
+	if (!isr) {
+		can_unlock(can, -1);
+	}
 
 	return 0;
 
@@ -514,7 +518,10 @@ ecan_send_error0:
 	// reset task
 	can->tx_task = NULL;
 
-	can_unlock(can, -1);
+	if (!isr) {
+		can_unlock(can, -1);
+	}
+
 	return -1;
 }
 
