@@ -301,7 +301,7 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 
 	// set irq handler and activate them
-	irq_setHandler(ECAN0INT_IRQn, ecan_handle_system_irq);		// line #0 has a high priority
+	irq_setHandler(ECAN0INT_IRQn, ecan_handle_system_irq);		// line #0 has a higher priority
 	irq_setHandler(ECAN1INT_IRQn, ecan_handle_mbox_irq);
 	irq_enable(ECAN0INT_IRQn);
 	irq_enable(ECAN1INT_IRQn);
