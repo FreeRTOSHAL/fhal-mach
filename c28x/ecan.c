@@ -146,12 +146,18 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 	// enable eCAN clock
 	clk_obj->PCLKCR0 |= CLK_PCLKCR0_ECANAENCLK_BITS;
 
+	// software reset
+	ECAN_REG32_SET_BITS(can->base->CANMC, ECAN_CANMC_SRES);
+
 	// configure eCAN RX and TX pins for CAN operation
 	ECAN_REG32_SET_BITS(can->base->CANTIOC, ECAN_CANTIOC_TXFUNC);
 	ECAN_REG32_SET_BITS(can->base->CANRIOC, ECAN_CANRIOC_RXFUNC);
 
 	// enable enhanced mode
 	ECAN_REG32_SET_BITS(can->base->CANMC, ECAN_CANMC_SCB);
+
+	// enable auto bus on
+	ECAN_REG32_SET_BITS(can->base->CANMC, ECAN_CANMC_ABO);
 
 	// initialize all mailboxes to zero
 	for (i=0; i<ARRAY_SIZE(can->base->MBOXES); i++) {
