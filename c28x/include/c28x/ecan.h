@@ -262,6 +262,10 @@ struct can {
 
 
 
+struct can ecan0;
+
+
+
 #endif /* C28X_ECAN_H_ */
 
 

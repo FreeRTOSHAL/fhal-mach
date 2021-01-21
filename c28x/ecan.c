@@ -16,12 +16,7 @@
 #include <iomux.h>
 #include <irq.h>
 #include <vector.h>
-
 #include <c28x/ecan.h>
-
-
-
-struct can ecan0;
 
 
 
