@@ -102,17 +102,27 @@ static interrupt void ecan_handle_mbox_irq (void) {
 			if (rx_mbox->used) {
 				volatile struct ecan_mailbox *mbox = &can->base->MBOXES[i];
 
+				// read message id
 				msg.id = ECAN_MBOX_CANMSGID_STDMSGID_INV(ECAN_REG32_GET(mbox->CANMSGID));
+				if (ECAN_REG32_GET(mbox->CANMSGID) & ECAN_MBOX_CANMSGID_IDE) {
+					msg.id <<= 18;
+					msg.id |= ECAN_MBOX_CANMSGID_EXTMSGID_INV(ECAN_REG32_GET(mbox->CANMSGID));
+				}
+
+				// read data length
 				msg.length = ECAN_MBOX_CANMSGCTRL_DLC_INV(ECAN_REG32_GET(mbox->CANMSGCTRL));
 
+				// read data
 				msg_data = (((uint64_t) ECAN_REG32_GET(mbox->CANMDL))<<32) | ECAN_REG32_GET(mbox->CANMDH);
 				for (j=0; j<msg.length; j++) {
 					shift = (7-j) * 8;
 					msg.data[j] = (msg_data>>shift) & 0xFF;
 				}
 
+				// read timestamp
 				msg.ts = ECAN_REG32_GET(can->base->MOTS[i]);
 
+				// set message received flag for later processing
 				msg_received = true;
 			}
 
@@ -339,6 +349,7 @@ CAN_REGISTER_FILTER(ecan, can, filter) {
 	int32_t filter_id = -1;
 	int i;
 	struct ecan_rx_mbox *rx_mbox;
+	uint32_t tmp;
 
 	can_lock(can, portMAX_DELAY, -1);
 
@@ -364,10 +375,24 @@ CAN_REGISTER_FILTER(ecan, can, filter) {
 	rx_mbox->filter = *filter;
 
 	// set local acceptance mask
-	ECAN_REG32_SET(can->base->LAM[filter_id], ECAN_LAM_LAM_STDMSGID(~((uint32_t) (filter->mask))));
+	if (filter->id < 0x800) {
+		tmp = ECAN_LAM_LAM_STDMSGID(~((uint32_t) filter->mask));
+	} else {
+		tmp = ECAN_LAM_LAM_STDMSGID(~((uint32_t) (filter->mask >> 18))) | ECAN_LAM_LAM_EXTMSGID(~((uint32_t) filter->mask));
+	}
 
-	// set ID and enable acceptance mask
-	ECAN_REG32_SET(can->base->MBOXES[filter_id].CANMSGID, ECAN_MBOX_CANMSGID_AME | ECAN_MBOX_CANMSGID_STDMSGID(filter->id));
+	ECAN_REG32_SET(can->base->LAM[filter_id], tmp);
+
+	// set message id and enable acceptance mask
+	if (filter->id < 0x800) {
+		tmp = ECAN_MBOX_CANMSGID_STDMSGID(filter->id);
+	} else {
+		tmp = ECAN_MBOX_CANMSGID_STDMSGID(filter->id >> 18) | ECAN_MBOX_CANMSGID_EXTMSGID(filter->id);
+		tmp |= ECAN_MBOX_CANMSGID_IDE;
+	}
+
+	tmp |= ECAN_MBOX_CANMSGID_AME;
+	ECAN_REG32_SET(can->base->MBOXES[filter_id].CANMSGID, tmp);
 
 	// configure mailbox as receive mailbox
 	ECAN_REG32_SET_BITS(can->base->CANMD, BIT(filter_id));
@@ -401,6 +426,7 @@ CAN_DEREGISTER_FILTER(ecan, can, filterID) {
 static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickType_t waittime) {
 	volatile struct ecan_mailbox *mbox = &can->base->MBOXES[ECAN_TX_MBOX_ID];
 	int ret;
+	uint32_t tmp;
 
 	if (msg->length > 8) {
 		return -1;
@@ -426,7 +452,14 @@ static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickTy
 	ECAN_REG32_UPDATE(mbox->CANMSGCTRL, ECAN_MBOX_CANMSGCTRL_DLC_MASK, ECAN_MBOX_CANMSGCTRL_DLC(msg->length));
 
 	// set message id
-	ECAN_REG32_SET(mbox->CANMSGID, ECAN_MBOX_CANMSGID_STDMSGID(msg->id));
+	if (msg->id < 0x800) {
+		tmp = ECAN_MBOX_CANMSGID_STDMSGID(msg->id);
+	} else {
+		tmp = ECAN_MBOX_CANMSGID_STDMSGID(msg->id >> 18) | ECAN_MBOX_CANMSGID_EXTMSGID(msg->id);
+		tmp |= ECAN_MBOX_CANMSGID_IDE;
+	}
+
+	ECAN_REG32_SET(mbox->CANMSGID, tmp);
 
 	// set message
 	ECAN_REG32_SET(mbox->CANMDL, ((msg->data[0] & 0xFFUL)<<24) | ((msg->data[1] & 0xFFUL)<<16) | ((msg->data[2] & 0xFFUL)<<8) | ((msg->data[3] & 0xFFUL)<<0));
