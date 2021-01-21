@@ -35,6 +35,7 @@ static interrupt void ecan_handle_mbox_irq (void) {
 	struct can_msg msg;
 	uint64_t msg_data;
 	int shift;
+	bool msg_received;
 
 	if (ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID)) {
 		if (can->tx_task) {
@@ -48,6 +49,8 @@ static interrupt void ecan_handle_mbox_irq (void) {
 
 	for (i=0; i<ECAN_NUM_FILTERS; i++) {
 		struct ecan_rx_mbox *rx_mbox = &can->rx_mboxes[i];
+
+		msg_received = false;
 
 		// handle mailbox receive interrupt
 		if (ECAN_REG32_GET(can->base->CANRMP) & BIT(i)) {
@@ -65,21 +68,35 @@ static interrupt void ecan_handle_mbox_irq (void) {
 
 				msg.ts = ECAN_REG32_GET(can->base->MOTS[i]);
 
-				// send msg to userspace, we ignore the overflow error for now
-				// TODO: handle overflow
-
-				(void) xQueueSendToBackFromISR(rx_mbox->queue, &msg, &tmp);
-				pxHigherPriorityTaskWoken |= tmp;
-
-				if (rx_mbox->callback) {
-					bool ret;
-					ret = rx_mbox->callback(can, &msg, rx_mbox->data);
-					pxHigherPriorityTaskWoken |= ret;
-				}
+				msg_received = true;
 			}
 
 			// reset received message pending flag
 			ECAN_REG32_SET(can->base->CANRMP, BIT(i));
+
+			// check if a message was overwritten -> could be damaged
+			if (ECAN_REG32_GET(can->base->CANRML) & BIT(i)) {
+				msg_received = false;
+
+				// TODO: handle lost message
+
+				// reset received message lost flag
+				ECAN_REG32_SET(can->base->CANRML, BIT(i));
+			}
+		}
+
+		if (msg_received) {
+			// send msg to userspace, we ignore the overflow error for now
+			// TODO: handle overflow
+
+			(void) xQueueSendToBackFromISR(rx_mbox->queue, &msg, &tmp);
+			pxHigherPriorityTaskWoken |= tmp;
+
+			if (rx_mbox->callback) {
+				bool ret;
+				ret = rx_mbox->callback(can, &msg, rx_mbox->data);
+				pxHigherPriorityTaskWoken |= ret;
+			}
 		}
 	}
 
