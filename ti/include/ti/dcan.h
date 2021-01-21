@@ -187,6 +187,11 @@ void CAN2_PARITY_ISR();
 #define DCAN_INT_INT1ID_SHIFT         16u
 #define DCAN_INT_INT1ID_WIDTH         8u
 #define DCAN_INT_INT1ID(x)            (((uint32_t)(((uint32_t)(x))<<DCAN_INT_INT1ID_SHIFT))&DCAN_INT_INT1ID_MASK)
+#define DCAN_INT_INT0ID_MASK          0x0000FFFFul
+#define DCAN_INT_INT0ID_SHIFT         0u
+#define DCAN_INT_INT0ID_WIDTH         16u
+#define DCAN_INT_INT0ID(x)            (((uint32_t)(((uint32_t)(x))<<DCAN_INT_INT0ID_SHIFT))&DCAN_INT_INT0ID_MASK)
+#define DCAN_INT_INT0ID_ES            0x8000u
 
 #define DCAN_TEST_SILENT_MASK         0x00000008ul
 #define DCAN_TEST_LBACK_MASK          0x00000010ul

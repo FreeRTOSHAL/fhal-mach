@@ -249,7 +249,8 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
     {
         uint32_t tmp = can->base->ctl;
         tmp &= ~(DCAN_CTL_INIT_MASK | DCAN_CTL_CCE_MASK);
-        tmp |= (DCAN_CTL_IE1_MASK);
+        /* enable Interrupt lines */
+        tmp |= (DCAN_CTL_IE1_MASK | DCAN_CTL_IE0_MASK);
         can->base->ctl = tmp;
     }
 
@@ -353,67 +354,75 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
 void dcan_handleInt0IRQ(struct can *can) {
     /* copy es */
-    BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
-    uint32_t es = can->base->es;
-    can_error_t err = 0;
-    can_errorData_t data = 0;
-    PRINTDEBUG;
+    if((can->base->intr & DCAN_INT_INT0ID_MASK) == DCAN_INT_INT0ID_ES){
+        PRINTF("error and status Interrupt\n");
 
-    if(es & DCAN_ES_PDA_MASK){
-    }
-    if(es & DCAN_ES_WAKEUPPND_MASK){
-    }
-    if(es & DCAN_ES_PER_MASK){
-    }
-    if(es & DCAN_ES_BOFF_MASK){
-        err |= CAN_ERR_BUSOFF;
-    }
-    if(es & DCAN_ES_EWARN_MASK){
-    }
-    if(es & DCAN_ES_EPASS_MASK){
-    }
-    if(es & DCAN_ES_RXOK_MASK){
-    }
-    if(es & DCAN_ES_TXOK_MASK){
-    }
-    if(es & DCAN_ES_LEC_STUFF_ERROR){
-        err |= CAN_ERR_PROT;
-        data |= CAN_ERR_PROT_STUFF;
-    }
-    if(es & DCAN_ES_LEC_FORM_ERROR){
-        err |= CAN_ERR_PROT;
-        data |= CAN_ERR_PROT_FORM;
-    }
-    if(es & DCAN_ES_LEC_ACK_ERROR){
-        err |= CAN_ERR_PROT;
-        err |= CAN_ERR_ACK;
-        err |= CAN_ERR_PROT_LOC_ACK;
-    }
-    if(es & DCAN_ES_LEC_BIT1_ERROR){
-        err |= CAN_ERR_PROT;
-        data |= CAN_ERR_PROT_BIT1;
-    }
-    if(es & DCAN_ES_LEC_BIT0_ERROR){
-        err |= CAN_ERR_PROT;
-        data |= CAN_ERR_PROT_BIT0;
-    }
-    if(es & DCAN_ES_LEC_CRC_ERROR){
-        err |= CAN_ERR_PROT;
-        data |= CAN_ERR_PROT_BIT;
-        data |= CAN_ERR_PROT_LOC_CRC_SEQ;
-    }
+        BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+        uint32_t es = can->base->es;
+        can_error_t err = 0;
+        can_errorData_t data = 0;
+        PRINTDEBUG;
 
-    if(err != 0){
-        if(can->errorCallback){
-            pxHigherPriorityTaskWoken |= can->errorCallback(can, err, data);
+        if(es & DCAN_ES_PDA_MASK){
         }
-    }
+        if(es & DCAN_ES_WAKEUPPND_MASK){
+        }
+        if(es & DCAN_ES_PER_MASK){
+        }
+        if(es & DCAN_ES_BOFF_MASK){
+            err |= CAN_ERR_BUSOFF;
+        }
+        if(es & DCAN_ES_EWARN_MASK){
+        }
+        if(es & DCAN_ES_EPASS_MASK){
+        }
+        if(es & DCAN_ES_RXOK_MASK){
+        }
+        if(es & DCAN_ES_TXOK_MASK){
+        }
+        if(es & DCAN_ES_LEC_STUFF_ERROR){
+            err |= CAN_ERR_PROT;
+            data |= CAN_ERR_PROT_STUFF;
+        }
+        if(es & DCAN_ES_LEC_FORM_ERROR){
+            err |= CAN_ERR_PROT;
+            data |= CAN_ERR_PROT_FORM;
+        }
+        if(es & DCAN_ES_LEC_ACK_ERROR){
+            err |= CAN_ERR_PROT;
+            err |= CAN_ERR_ACK;
+            err |= CAN_ERR_PROT_LOC_ACK;
+        }
+        if(es & DCAN_ES_LEC_BIT1_ERROR){
+            err |= CAN_ERR_PROT;
+            data |= CAN_ERR_PROT_BIT1;
+        }
+        if(es & DCAN_ES_LEC_BIT0_ERROR){
+            err |= CAN_ERR_PROT;
+            data |= CAN_ERR_PROT_BIT0;
+        }
+        if(es & DCAN_ES_LEC_CRC_ERROR){
+            err |= CAN_ERR_PROT;
+            data |= CAN_ERR_PROT_BIT;
+            data |= CAN_ERR_PROT_LOC_CRC_SEQ;
+        }
+
+        if(err != 0){
+            if(can->errorCallback){
+                pxHigherPriorityTaskWoken |= can->errorCallback(can, err, data);
+            }
+        }
 
         portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
-    
-    
+    }
+    else if(can->base->intr & DCAN_INT_INT0ID_MASK){
+        PRINTF("unexpected Interrupt on Int0\n");
+    }
 
-    
+
+
+
+
 
 }
 
