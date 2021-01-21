@@ -165,6 +165,8 @@
 
 #define ECAN_TX_MBOX_ID								(ECAN_NUM_MBOXES-1)			// use last mailbox for TX
 
+#define ECAN_ERR_COUNT_WARN_THRESHOLD				(96)
+
 
 
 struct ecan_pin {
@@ -243,6 +245,8 @@ struct can {
 	int64_t clk_freq;
 	struct ecan_rx_mbox rx_mboxes[ECAN_NUM_FILTERS];
 	TaskHandle_t tx_task;
+	bool (*error_callback)(struct can *can, can_error_t error, can_errorData_t d, void *userData);
+	void *error_callback_data;
 };
 
 

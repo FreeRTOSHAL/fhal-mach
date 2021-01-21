@@ -22,8 +22,53 @@
 
 static interrupt void ecan_handle_system_irq (void) {
 	struct can *can = &ecan0;
-	// TODO
-	(void) can;
+	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+	uint32_t flags;
+	can_error_t err = 0;
+	can_errorData_t data = 0;
+
+	flags = ECAN_REG32_GET(can->base->CANGIF0);
+
+	// one or bath error counters are >= 96 ?
+	if (flags & ECAN_CANGIFx_WLIFx) {
+		err |= CAN_ERR_CRTL;
+
+		if (ECAN_REG32_GET(can->base->CANREC) >= ECAN_ERR_COUNT_WARN_THRESHOLD) {
+			err |= CAN_ERR_CRTL_RX_WARNING;
+		}
+
+		if (ECAN_REG32_GET(can->base->CANTEC) >= ECAN_ERR_COUNT_WARN_THRESHOLD) {
+			err |= CAN_ERR_CRTL_TX_WARNING;
+		}
+
+		// reset flag
+		ECAN_REG32_SET(can->base->CANGIF0, ECAN_CANGIFx_WLIFx);
+	}
+
+	// CAN module has entered "error passive" mode ?
+	if (flags & ECAN_CANGIFx_EPIFx) {
+		err |= CAN_ERR_PROT;
+		data |= CAN_ERR_CRTL_TX_PASSIVE;
+
+		// reset flag
+		ECAN_REG32_SET(can->base->CANGIF0, ECAN_CANGIFx_EPIFx);
+	}
+
+	// CAN module has entered "buf-off" mode ?
+	if (flags & ECAN_CANGIFx_BOIFx) {
+		err |= CAN_ERR_BUSOFF;
+
+		// reset flag
+		ECAN_REG32_SET(can->base->CANGIF0, ECAN_CANGIFx_BOIFx);
+	}
+
+	if (err != 0) {
+		if (can->error_callback) {
+			pxHigherPriorityTaskWoken |= can->error_callback(can, err, data, can->error_callback_data);
+		}
+	}
+
+	portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
 	irq_clear(ECAN0INT_IRQn);
 }
 
@@ -144,6 +189,9 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 
 	// init private data
 
+	can->error_callback = callback;
+	can->error_callback_data = data;
+
 	can->tx_task = NULL;
 	memset(&can->rx_mboxes, 0, sizeof(can->rx_mboxes));
 
@@ -228,8 +276,11 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 
-	// enable both interrupt lines
-	ECAN_REG32_SET_BITS(can->base->CANGIM, ECAN_CANGIM_I1EN | ECAN_CANGIM_I0EN);
+	// enable both interrupt lines and the following system interrupts:
+	// WLIM: warning level interrupt
+	// EPIM: error-passive
+	// BOIM: bus-off
+	ECAN_REG32_SET_BITS(can->base->CANGIM, ECAN_CANGIM_BOIM | ECAN_CANGIM_EPIM | ECAN_CANGIM_WLIM | ECAN_CANGIM_I1EN | ECAN_CANGIM_I0EN);
 
 	// set interrupt line #1 for all mailboxes
 	ECAN_REG32_SET(can->base->CANMIL, 0xFFFFFFFFUL);
