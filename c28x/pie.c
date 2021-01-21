@@ -91,7 +91,7 @@ int32_t irq_notify(int32_t cpuid, int32_t irqnr) {
 	return -1;
 }
 int32_t irq_clear(int32_t irqnr) {
-	if (irqnr < Reset_IRQn || irqnr >= IRQ_COUNT) {
+	if (irqnr < 0 || irqnr >= IRQ_COUNT) {
 		return -1;
 	}
 	uint32_t group = ((uint32_t) irqnr) >> 3;
