@@ -97,9 +97,7 @@ int32_t irq_clear(int32_t irqnr) {
 	uint32_t group = ((uint32_t) irqnr) >> 3;
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	pie->PIEACK |= BIT(group);
-	IER |= BIT(group);
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
-	portENABLE_INTERRUPTS();
 	return 0;
 }
 int32_t irq_getCPUID() {
