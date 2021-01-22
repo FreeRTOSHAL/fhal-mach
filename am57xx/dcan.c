@@ -719,8 +719,6 @@ CAN_OPS(dcan);
 
 
 
-#define CM_WKUPAON_DCAN1_CLKCTRL_ADR		(volatile void *) 0x6ae07888ul
-#define CM_L4PER2_DCAN2_CLKCLTR_ADR			(volatile void *) 0x6a0098f0ul
 
 struct dcan_pins {
 	const uint32_t pin;
@@ -736,12 +734,12 @@ struct dcan_clk {
 int32_t dcan_setupClock(struct can *can){
 	struct clock *clock = clock_init();
 	struct dcan_clk const *clk = can->clkData;
-	if(*clk->clkreg & BIT(24)){
+	if((clk->clkreg == CM_WKUPAON_DCAN1_CLKCTRL_ADR) && *clk->clkreg & CM_WKUPAON_DCAN1_CLKCTRL_CLKSEL_MASK){
 		PRINTF("%s: SYS_CLK2 in Register\n", __FUNCTION__);
 		// SYS_CLK2 not supported
 		// switch to SYS_CLK1
 		// TODO macro
-		*clk->clkreg &= ~(BIT(24));
+		*clk->clkreg &= ~(CM_WKUPAON_DCAN1_CLKCTRL_CLKSEL_MASK);
 		can->freq = clock_getPeripherySpeed(clock, SYS_CLK1);
 
 
@@ -754,11 +752,11 @@ int32_t dcan_setupClock(struct can *can){
 	}
 
 	/* Check DCAN Clock is enabled */
-	if((*clk->clkreg >> 16) & 0x3u){
+	if(*clk->clkreg & DCAN_CLKCTRL_IDLEST_MASK){
 		/* enable clock */
-		*clk->clkreg |= 0x2u;
+		*clk->clkreg |= DCAN_CLKCTRL_MODULEMODE_ENABLE;
 		/* wait clock came stable */
-		while((*clk->clkreg >> 16) & 0x3u);
+		while(*clk->clkreg & DCAN_CLKCTRL_IDLEST_MASK);
 	}
 	PRINTF("%s: clkreg: %#08ul\n",__FUNCTION__,  *clk->clkreg);
 
