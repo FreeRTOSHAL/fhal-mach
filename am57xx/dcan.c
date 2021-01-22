@@ -203,21 +203,12 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 	if (ret < 0){
 		return NULL;
 	}
-	if(can->bt.brp -1 > 0x3FF){
-		PRINTF("BRP too big\n");
-		return NULL;
-	}
 	{
 		/* setup bittining */
+		uint32_t brp_reg_val = can->bt.brp-1;
 		uint32_t btr;
-
-		if(can->bt.brp -1 > DCAN_BTR_BRP_MASK){
-			btr = DCAN_BTR_BRP(can->bt.brp -1) | 
-				DCAN_BTR_BRPE(((can->bt.brp -1) & 0x3C0) >> 6);
-		} else {
-			btr = DCAN_BTR_BRP(can->bt.brp -1);
-			btr &= ~(DCAN_BTR_BRPE_MASK);
-		}
+		btr = DCAN_BTR_BRP(brp_reg_val);
+		btr |= DCAN_BTR_BRPE(brp_reg_val >> DCAN_BTR_BRP_WIDTH);
 
 		PRINTDEBUG;
 
@@ -333,12 +324,12 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 }
 
 void dcan_handleInt0IRQ(struct can *can) {
+	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
 	PRINTDEBUG;
 	/* copy es */
 	if((can->base->intr & DCAN_INT_INT0ID_MASK) == DCAN_INT_INT0ID_ES){
-		PRINTF("error and status Interrupt\n");
+		//PRINTF("error and status Interrupt\n");
 
-		BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
 		uint32_t es = can->base->es;
 		can_error_t err = 0;
 		can_errorData_t data = 0;
@@ -393,34 +384,31 @@ void dcan_handleInt0IRQ(struct can *can) {
 				pxHigherPriorityTaskWoken |= can->errorCallback(can, err, data);
 			}
 		}
-
-		portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
 	}
 	else if(can->base->intr & DCAN_INT_INT0ID_MASK){
-		PRINTF("unexpected Interrupt on Int0\n");
+		//PRINTF("unexpected Interrupt on Int0\n");
 	}
+	portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
 }
 
 void dcan_handleInt1IRQ(struct can *can) {
 	BaseType_t tmp;
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
 	PRINTDEBUG;
-	PRINTF("%s: DCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n",__FUNCTION__, can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
+	//PRINTF("%s: DCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n",__FUNCTION__, can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
 
 	while(can->base->intr & DCAN_INT_INT1ID_MASK){
 		uint32_t intid = (can->base->intr & DCAN_INT_INT1ID_MASK) >> DCAN_INT_INT1ID_SHIFT;
 		struct dcan_mo mo;
 		if(intid < DCAN_FILTER_MO_OFFSET){
 			/* Interrupt of send message object */
-			PRINTF("SEND INTERRUPT\n");
+			//PRINTF("SEND INTERRUPT\n");
 			if(can->task){
 				vTaskNotifyGiveIndexedFromISR(can->task, 0, &tmp);
 				pxHigherPriorityTaskWoken |= tmp;
 			}
 			/* reset IntPnd */
-			can_lock(can, portMAX_DELAY, -1);
 			ti_dcan_mo_readmsg(can, intid, &mo);
-			can_unlock(can, -1);
 
 
 		}
@@ -430,20 +418,20 @@ void dcan_handleInt1IRQ(struct can *can) {
 			struct dcan_filter *filter;
 			struct can_msg msg;
 			PRINTDEBUG;
-			PRINTF("intid: %#08x, filterID: %#08x\n", intid, filterID);
+			//PRINTF("intid: %#08x, filterID: %#08x\n", intid, filterID);
 			if(filterID >= can->filterCount){
-				PRINTF("%s: failed, filterID(%#08x) too big\n", __FUNCTION__, filterID);
+				//PRINTF("%s: failed, filterID(%#08x) too big\n", __FUNCTION__, filterID);
 				//return ;
 			}
 			filter = &can->filter[filterID];
 			if(!filter->used){
-				PRINTF("%s: failed, unused filter\n", __FUNCTION__);
+				//PRINTF("%s: failed, unused filter\n", __FUNCTION__);
 				//return ;
 			}
 			can_lock(can, portMAX_DELAY, -1);
 			ti_dcan_mo_readmsg(can, filter->id, &mo);
 			can_unlock(can, -1);
-			PRINTF("after readmsg: \nDCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n", can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
+			//PRINTF("after readmsg: \nDCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n", can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
 			if(mo.arb & DCAN_IF1ARB_XTD_MASK){
 				msg.id = mo.arb & DCAN_IF1ARB_XTD_MASK;
 			} else {
@@ -451,7 +439,7 @@ void dcan_handleInt1IRQ(struct can *can) {
 			}
 			msg.length = mo.mctl & DCAN_IF1MCTL_DLC_MASK;
 			memcpy(msg.data, mo.data, msg.length);
-			msg.ts = xTaskGetTickCount();
+			msg.ts = xTaskGetTickCountFromISR();
 			// TODO request
 			msg.req = 0;
 
@@ -528,7 +516,7 @@ CAN_REGISTER_FILTER(dcan, can, filter) {
 
 	mo.msk = DCAN_IF1MSK_MSK(hwFilter->filter.mask);
 
-	if(hwFilter->filter.id >= 0x200) {
+	if(hwFilter->filter.id >= BIT(11)) {
 		mo.arb = DCAN_IF1ARB_MSGVAL_MASK | DCAN_IF1ARB_XTD_MASK | 
 			DCAN_IF1ARB_ID_EXT(hwFilter->filter.id);
 	} else {
@@ -592,7 +580,7 @@ CAN_SEND(dcan, can, msg, waittime) {
 		goto dcan_send_error0;
 	}
 
-	if(msg->id >= 0x200) {
+	if(msg->id >= BIT(11)) {
 		mo.arb = DCAN_IF1ARB_MSGVAL_MASK | DCAN_IF1ARB_XTD_MASK | DCAN_IF1ARB_DIR_MASK | 
 			DCAN_IF1ARB_ID_EXT(msg->id);
 	}
@@ -655,13 +643,6 @@ CAN_RECV(dcan, can, filterID, msg, waittime) {
 		return -1;
 	}
 	filter = &can->filter[filterID];
-	for(i = 0; i <= waittime; ++i){
-		if(can->base->nwdat_x){
-			break;
-		}
-	}
-
-	PRINTF("%s: DCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n",__FUNCTION__, can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
 	PRINTDEBUG;
 
 	ret = xQueueReceive(filter->queue, msg, waittime);
