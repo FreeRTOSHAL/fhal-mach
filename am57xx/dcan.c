@@ -8,17 +8,6 @@
 #include <vector.h>
 #include <stdio.h>
 #include <clockid.h>
-
-
-
-
-
-
-
-
-
-
-
 #include <FreeRTOS.h>
 #include <string.h>
 #include <stdint.h>
@@ -28,7 +17,6 @@
 
 #define PRINTF(fmt, ...) printf("DCAN: " fmt, ##__VA_ARGS__)
 #define PRINTDEBUG PRINTF("File: %s, Function: %s, Line: %i\n", __FILE__, __FUNCTION__, __LINE__)
-
 
 
 /* Transfer a complete message structure into a message object. (Configuration)*/
@@ -108,24 +96,6 @@ void ti_dcan_mo_readmsg(struct can *can, uint8_t msg_num, struct dcan_mo *mo){
 	memcpy(mo->data, (void *) &can->base->if2data, data_length);
 	PRINTF("mo_readmsg\ncmd: %#08x\nmsk: %#08x\narb: %#08x\nmctl: %#08x\n", cmd, mo->msk, mo->arb, mo->mctl);
 }
-
-
-
-void ti_dcan_mo_readmsg_debug(struct can *can, uint8_t msg_num){
-	uint32_t cmd;
-	uint16_t data_length;
-	cmd = DCAN_IF2CMD_MASK_MASK | DCAN_IF2CMD_ARB_MASK | DCAN_IF2CMD_CONTROL_MASK |
-		DCAN_IF2CMD_DATA_A_MASK | DCAN_IF2CMD_DATA_B_MASK |
-		DCAN_IF2CMD_MESSAGE_NUMBER(msg_num);
-	while(can->base->if2cmd & DCAN_IF2CMD_BUSY_MASK);
-	can->base->if2cmd = cmd;
-	while(can->base->if2cmd & DCAN_IF2CMD_BUSY_MASK);
-
-	PRINTF("mo_readmsg_debug\ncmd: %#08x\nmsk: %#08x\narb: %#08x\nmctl: %#08x\ndata: %#08x\ndatb: %#08x\n", cmd, can->base->if2msk, can->base->if2arb, can->base->if2mctl, can->base->if2data, can->base->if2datb);
-}
-
-
-
 
 
 
@@ -296,10 +266,6 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 	PRINTF("External loop back mode activated\n");
 #endif
 
-
-
-
-
 	PRINTDEBUG;
 
 	{
@@ -312,9 +278,10 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 		for(i = 0; i < can->filterCount && (i + DCAN_FILTER_MO_OFFSET) <= DCAN_MO_MAX_NUM; i++) {
 			can->filter[i].used = false;
 			/* id 0 is illegal
-			 * id 1 is reserved for send MB */
+			 * id 1 is reserved for send mo */
 			can->filter[i].id = i +DCAN_FILTER_MO_OFFSET;
 			/* reset message objects */
+			// TODO: use MSGVAL Registers and only reset valid mo
 			ti_dcan_mo_configuration(can, can->filter[i].id, &mo);
 			can->filter[i].filter.id = 0;
 			can->filter[i].filter.id = 0x1FFFFFFFu;
@@ -325,6 +292,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 	}
 	
 	PRINTDEBUG;
+	/* set all mo interrupts to interrupt line 1 */
 	can->base->intmux12 = 0xFFFFFFFFul;
 	can->base->intmux34 = 0xFFFFFFFFul;
 	can->base->intmux56 = 0xFFFFFFFFul;
@@ -352,16 +320,12 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 	}
 
 
-
-
 	PRINTF("TXRQ_X: %#08lx\nNWDAT_X: %#08lx\nMSGVAL_X: %#08lx\n", can->base->txrq_x, can->base->nwdat_x, can->base->msgval_x);
 	PRINTF("TXRQ12: %#08lx\nNWDAT12: %#08lx\nMSGVAL12: %#08lx\n", can->base->txrq12, can->base->nwdat12, can->base->msgval12);
 
-
-
-	PRINTF("%s finished\n", __FUNCTION__);
 	PRINTF("%s DCAN_CTL: %#08x\n", __FUNCTION__, can->base->ctl);
 	PRINTF("DCAN_BTR: %#08x\n", can->base->btr);
+	PRINTF("%s finished\n", __FUNCTION__);
 
 	return can;
 
@@ -435,12 +399,6 @@ void dcan_handleInt0IRQ(struct can *can) {
 	else if(can->base->intr & DCAN_INT_INT0ID_MASK){
 		PRINTF("unexpected Interrupt on Int0\n");
 	}
-
-
-
-
-
-
 }
 
 void dcan_handleInt1IRQ(struct can *can) {
@@ -583,9 +541,6 @@ CAN_REGISTER_FILTER(dcan, can, filter) {
 	can_unlock(can, -1);
 	PRINTF("%s returns: %i\n", __FUNCTION__,i);
 	return i;
-
-
-
 }
 
 CAN_DEREGISTER_FILTER(dcan, can, filterID) {
@@ -716,34 +671,6 @@ CAN_RECV(dcan, can, filterID, msg, waittime) {
 	}
 	PRINTF("%s finished\n", __FUNCTION__);
 	return 0;
-	/*
-	struct dcan_mo mo;
-	struct dcan_filter *filter;
-	int i;
-	PRINTF("%s called\n", __FUNCTION__);
-	if(filterID >= can->filterCount) {
-		return -1;
-	}
-	filter = &can->filter[filterID];
-	for(i = 0; i <= waittime; ++i){
-		if(can->base->nwdat_x){
-			break;
-		}
-	}
-	PRINTF("%s: DCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n",__FUNCTION__, can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
-	PRINTF("INTMUX12: %#08x\n", can->base->intmux12);
-
-
-	ti_dcan_mo_readmsg(can, filter->id, &mo);
-	if(mo.arb & DCAN_IF1ARB_XTD_MASK){
-		msg->id = mo.arb & DCAN_IF1ARB_XTD_MASK;
-	} else {
-		msg->id = ((mo.arb & DCAN_IF1ARB_ID_STD_MASK) >> DCAN_IF1ARB_ID_STD_SHIFT);
-	}
-	msg->length = mo.mctl & DCAN_IF1MCTL_DLC_MASK;
-	memcpy(msg->data, mo.data, msg->length);
-	return 0;
-	*/
 
 }
 
@@ -811,24 +738,6 @@ CAN_OPS(dcan);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #define CM_WKUPAON_DCAN1_CLKCTRL_ADR		(volatile void *) 0x6ae07888ul
 #define CM_L4PER2_DCAN2_CLKCLTR_ADR			(volatile void *) 0x6a0098f0ul
 
@@ -843,13 +752,11 @@ struct dcan_clk {
 };
 
 
-
-
 int32_t dcan_setupClock(struct can *can){
 	struct clock *clock = clock_init();
 	struct dcan_clk const *clk = can->clkData;
 	if(*clk->clkreg & BIT(24)){
-		printf("%s: SYS_CLK2 in Register\n", __FUNCTION__);
+		PRINTF("%s: SYS_CLK2 in Register\n", __FUNCTION__);
 		// SYS_CLK2 not supported
 		// switch to SYS_CLK1
 		// TODO macro
@@ -860,7 +767,7 @@ int32_t dcan_setupClock(struct can *can){
 
 	}
 	else {
-		printf("%s: SYS_CLK1 in Register\n", __FUNCTION__);
+		PRINTF("%s: SYS_CLK1 in Register\n", __FUNCTION__);
 		// SYS_CLK1
 		can->freq = clock_getPeripherySpeed(clock, SYS_CLK1);
 	}
@@ -872,7 +779,7 @@ int32_t dcan_setupClock(struct can *can){
 		/* wait clock came stable */
 		while((*clk->clkreg >> 16) & 0x3u);
 	}
-	printf("%s: clkreg: %#08ul\n",__FUNCTION__,  *clk->clkreg);
+	PRINTF("%s: clkreg: %#08ul\n",__FUNCTION__,  *clk->clkreg);
 
 	return 0;
 }
@@ -883,7 +790,7 @@ int32_t dcan_setupPins(struct can *can) {
 	struct dcan_pins const *pins = can->pins;
 	int i;
 	for (i = 0; i < 2; i++) {
-		printf("ret = mux_pinctl, i= %i\n", i);
+		PRINTF("ret = mux_pinctl, i= %i\n", i);
 		ret = mux_pinctl(mux, pins[i].pin, pins[i].ctl, pins[i].extra);
 		if (ret < 0) {
 			return -1;
