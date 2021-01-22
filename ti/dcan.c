@@ -292,7 +292,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 		mo.arb = 0;
 		mo.mctl = 0;
 		/* init all filter and create software queue */
-		for(i = 0; i < can->filterCount; i++) {
+		for(i = 0; i < can->filterCount && (i + DCAN_FILTER_MO_OFFSET) <= DCAN_MO_MAX_NUM; i++) {
 			can->filter[i].used = false;
 			/* id 0 is illegal
 			 * id 1 is reserved for send MB */
@@ -352,6 +352,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 }
 
 void dcan_handleInt0IRQ(struct can *can) {
+	PRINTDEBUG;
 	/* copy es */
 	if((can->base->intr & DCAN_INT_INT0ID_MASK) == DCAN_INT_INT0ID_ES){
 		PRINTF("error and status Interrupt\n");

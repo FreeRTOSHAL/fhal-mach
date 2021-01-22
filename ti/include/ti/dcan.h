@@ -388,7 +388,9 @@ void CAN2_PARITY_ISR();
 #define DCAN2_RAMINIT_DONE_MASK					 0x00000004ul
 
 
-#define DCAN_FILTER_MO_OFFSET					2
+#define DCAN_FILTER_MO_OFFSET					2u
+#define DCAN_MO_MIN_NUM							0x01u
+#define DCAN_MO_MAX_NUM							0x80u
 
 #endif
 // vim: noexpandtab ts=4 sts=4 sw=4

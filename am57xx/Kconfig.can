@@ -44,7 +44,7 @@ menuconfig MACH_AM57xx_DCAN_CAN1
     default n
 if MACH_AM57xx_DCAN_CAN1=y
     comment "Waring: More than 63 Filter are not posible"
-        depends on MACH_AM57xx_DCAN_CAN1_MAX_FILTER >63
+        depends on MACH_AM57xx_DCAN_CAN1_MAX_FILTER >127
     config MACH_AM57xx_DCAN_CAN1_MAX_FILTER
         int "Max Input Filters"
         default 2
@@ -64,7 +64,7 @@ menuconfig MACH_AM57xx_DCAN_CAN2
     default n
 if MACH_AM57xx_DCAN_CAN2=y
     comment "Waring: More than 63 Filter are not posible"
-        depends on MACH_AM57xx_DCAN_CAN2_MAX_FILTER >63
+        depends on MACH_AM57xx_DCAN_CAN2_MAX_FILTER >127
     config MACH_AM57xx_DCAN_CAN2_MAX_FILTER
         int "Max Input Filters"
         default 2
