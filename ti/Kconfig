@@ -1,3 +1,0 @@
-config TI_DCAN
-    bool
-    default n

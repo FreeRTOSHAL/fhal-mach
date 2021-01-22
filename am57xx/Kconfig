@@ -62,9 +62,6 @@ config MACH_HAS_SPI
 config MACH_HAS_CAN
     bool
     default y
-config USE_TI_LIB
-    bool
-    default y
 config MACH_HAS_TIMER
 	bool
 	default y
