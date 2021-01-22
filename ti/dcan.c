@@ -649,7 +649,13 @@ CAN_SEND(dcan, can, msg, waittime) {
 	lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
 	if(lret != pdTRUE){
 		/* we request an abort */
-		// TODO
+		// TODO does this work?
+		mo.arb = 0;
+		mo.mctl = 0;
+		ti_dcan_mo_configuration(can, 1, &mo);
+		PRINTF("%s: failed, timeout\n", __FUNCTION__);
+		goto dcan_send_error1;
+
 	}
 	
 	can_unlock(can, -1);
