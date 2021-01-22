@@ -60,6 +60,7 @@ struct adc_regs {
 struct adc_base {
 	struct adc_generic gen;
 	volatile struct c28x_adc *base;
+  volatile struct adc_regs *ADCRESULTx
   /*
 
 	uint32_t irq;
@@ -102,6 +103,7 @@ static struct adc_base adc0;
 static struct adc_base adc0 = {
   ADC_INIT_DEV(c28x)
   .base = ADC_BASE_ADDR
+
   //.irq = 53 - wie wo was interrupts - ADCINTFLG?
 };
 
