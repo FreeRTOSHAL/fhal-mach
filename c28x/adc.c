@@ -77,12 +77,52 @@ ADC_DEINIT(adcc28x, a){
 
 ADC_GET(adcc28x, a, waittime){
 
-  int32_t value;
+	struct adc_base *base = adc->base;
+
+	int32_t ret;
+	int32_t val;
+	uint32_t tmp;
+	adc_lock(adc, waittime, -1);
+
+
+/*
+this need to be for c28
+	tmp = base->base->hc[0];
+
+	tmp &= ~ADC_HC_ADCH(0x1F);
+
+	tmp |= ADC_HC_ADCH(adc->channel) | ADC_HC_AIEN;
+
+	base->base->hc[0] = tmp;
+
+	ret = xSemaphoreTake(base->sem, waittime);
+
+	if (ret != 1) {
+		goto adc_get_error1;
+	}
+
+	val = base->val;
+	base->base->hc[0] |= ADC_HC_ADCH(0x1F);
+	base->base->hc[0] &= ~(ADC_HC_AIEN);
+*/
+
+	adc_unlock(adc, -1);
+	return val;
+
+
+
+
+
+
+
+
+/*
+	int32_t value;
 	adc_lock(a, waittime, -1);
 	value = adc_getISR(a);
 	adc_unlock(a, -1);
 	return value;
-
+*/
 }
 
 ADC_GETISR(adcc28x, a){
