@@ -101,7 +101,7 @@ static struct adc_base adc0;
 
 static struct adc_base adc0 = {
   ADC_INIT_DEV(c28x)
-  .base = (volatile struct c28x_adc *) C28X_ADC_RESULT_ADDR,
+  .base = ADC_BASE_ADDR
   //.irq = 53 - wie wo was interrupts - ADCINTFLG?
 };
 
