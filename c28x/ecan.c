@@ -352,7 +352,7 @@ CAN_REGISTER_FILTER(ecan, can, filter) {
 	struct ecan_rx_mbox *rx_mbox;
 	uint32_t tmp;
 
-	if (filter->id & (CAN_RTR_FLAG | CAN_ERR_FLAG)) {
+	if (filter->id & CAN_RTR_FLAG) {
 		return -1;
 	}
 
@@ -439,7 +439,7 @@ static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickTy
 		return -1;
 	}
 
-	if (msg->id & (CAN_RTR_FLAG | CAN_ERR_FLAG)) {
+	if (msg->id & CAN_RTR_FLAG) {
 		return -1;
 	}
 
