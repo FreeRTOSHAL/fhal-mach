@@ -107,6 +107,7 @@ static interrupt void ecan_handle_mbox_irq (void) {
 				if (ECAN_REG32_GET(mbox->CANMSGID) & ECAN_MBOX_CANMSGID_IDE) {
 					msg.id <<= 18;
 					msg.id |= ECAN_MBOX_CANMSGID_EXTMSGID_INV(ECAN_REG32_GET(mbox->CANMSGID));
+					msg.id |= CAN_EFF_FLAG;
 				}
 
 				// read data length
@@ -351,6 +352,10 @@ CAN_REGISTER_FILTER(ecan, can, filter) {
 	struct ecan_rx_mbox *rx_mbox;
 	uint32_t tmp;
 
+	if (filter->id & (CAN_RTR_FLAG | CAN_ERR_FLAG)) {
+		return -1;
+	}
+
 	can_lock(can, portMAX_DELAY, -1);
 
 	// search next free mbox
@@ -375,7 +380,7 @@ CAN_REGISTER_FILTER(ecan, can, filter) {
 	rx_mbox->filter = *filter;
 
 	// set local acceptance mask
-	if (filter->id < 0x800) {
+	if (!(filter->id & CAN_EFF_FLAG)) {
 		tmp = ECAN_LAM_LAM_STDMSGID(~((uint32_t) filter->mask));
 	} else {
 		tmp = ECAN_LAM_LAM_STDMSGID(~((uint32_t) (filter->mask >> 18))) | ECAN_LAM_LAM_EXTMSGID(~((uint32_t) filter->mask));
@@ -384,10 +389,12 @@ CAN_REGISTER_FILTER(ecan, can, filter) {
 	ECAN_REG32_SET(can->base->LAM[filter_id], tmp);
 
 	// set message id and enable acceptance mask
-	if (filter->id < 0x800) {
-		tmp = ECAN_MBOX_CANMSGID_STDMSGID(filter->id);
+	if (!(filter->id & CAN_EFF_FLAG)) {
+		tmp = filter->id & CAN_SFF_MASK;
+		tmp = ECAN_MBOX_CANMSGID_STDMSGID(tmp);
 	} else {
-		tmp = ECAN_MBOX_CANMSGID_STDMSGID(filter->id >> 18) | ECAN_MBOX_CANMSGID_EXTMSGID(filter->id);
+		tmp = filter->id & CAN_EFF_MASK;
+		tmp = ECAN_MBOX_CANMSGID_STDMSGID(tmp >> 18) | ECAN_MBOX_CANMSGID_EXTMSGID(tmp);
 		tmp |= ECAN_MBOX_CANMSGID_IDE;
 	}
 
@@ -432,6 +439,10 @@ static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickTy
 		return -1;
 	}
 
+	if (msg->id & (CAN_RTR_FLAG | CAN_ERR_FLAG)) {
+		return -1;
+	}
+
 	if (!isr) {
 		can_lock(can, waittime, -1);
 	}
@@ -454,10 +465,12 @@ static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickTy
 	ECAN_REG32_UPDATE(mbox->CANMSGCTRL, ECAN_MBOX_CANMSGCTRL_DLC_MASK, ECAN_MBOX_CANMSGCTRL_DLC(msg->length));
 
 	// set message id
-	if (msg->id < 0x800) {
-		tmp = ECAN_MBOX_CANMSGID_STDMSGID(msg->id);
+	if (!(msg->id & CAN_EFF_FLAG)) {
+		tmp = msg->id & CAN_SFF_MASK;
+		tmp = ECAN_MBOX_CANMSGID_STDMSGID(tmp);
 	} else {
-		tmp = ECAN_MBOX_CANMSGID_STDMSGID(msg->id >> 18) | ECAN_MBOX_CANMSGID_EXTMSGID(msg->id);
+		tmp = msg->id & CAN_EFF_MASK;
+		tmp = ECAN_MBOX_CANMSGID_STDMSGID(tmp >> 18) | ECAN_MBOX_CANMSGID_EXTMSGID(tmp);
 		tmp |= ECAN_MBOX_CANMSGID_IDE;
 	}
 
