@@ -381,7 +381,7 @@ void dcan_handleInt0IRQ(struct can *can) {
 
 		if(err != 0){
 			if(can->errorCallback){
-				pxHigherPriorityTaskWoken |= can->errorCallback(can, err, data, NULL);
+				pxHigherPriorityTaskWoken |= can->errorCallback(can, err, data, can->userData);
 			}
 		}
 	}
