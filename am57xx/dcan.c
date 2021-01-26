@@ -428,9 +428,7 @@ void dcan_handleInt1IRQ(struct can *can) {
 				//PRINTF("%s: failed, unused filter\n", __FUNCTION__);
 				//return ;
 			}
-			can_lock(can, portMAX_DELAY, -1);
 			ti_dcan_mo_readmsg(can, filter->id, &mo);
-			can_unlock(can, -1);
 			//PRINTF("after readmsg: \nDCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n", can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
 			if(mo.arb & DCAN_IF1ARB_XTD_MASK){
 				msg.id = mo.arb & DCAN_IF1ARB_ID_EXT_MASK;
