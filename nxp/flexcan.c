@@ -180,7 +180,7 @@ CAN_DEINIT(flexcan, can) {
 	can->base->mcr |= FLEXCAN_MCR_SOFTRST_MASK;
 	/* disable controller */
 	nxp_flexcan_disable(can);
-	return true;
+	return 0;
 }
 
 static void handle_err_or_warn(struct can *can) {

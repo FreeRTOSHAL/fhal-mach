@@ -39,6 +39,8 @@ static int32_t gpio_setSettings(struct gpio_pin *pin) {
 	uint32_t extra = 0;
 	switch (pin->setting) {
 		case GPIO_OPEN:
+			ctrl |= MUX_CTL_OPEN;
+			break;
 		case GPIO_PULL_DOWN:
 			ctrl |= MUX_CTL_PULL_DOWN;
 			break;

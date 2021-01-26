@@ -211,7 +211,7 @@ UART_GETC(sci, uart, waittime) {
 	char c;
 	uart_lock(uart, waittime, 255);
 	/* wait until ready */
-	while (!(uart->base->SCIRXST & SCIRXST_RXRDY))
+	while (!(uart->base->SCIRXST & SCIRXST_RXRDY));
 	c = SCIRXBUF_SAR(uart->base->SCIRXBUF);
 	uart_unlock(uart, 255);
 	return c;
@@ -230,7 +230,7 @@ UART_GETC_ISR(sci, uart) {
 	char c;
 	uart_lock(uart, waittime, 255);
 	/* wait until ready */
-	while (!(uart->base->SCIRXST & SCIRXST_RXRDY))
+	while (!(uart->base->SCIRXST & SCIRXST_RXRDY));
 	c = SCIRXBUF_SAR(uart->base->SCIRXBUF);
 	uart_unlock(uart, 255);
 	return c;

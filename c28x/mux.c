@@ -26,16 +26,16 @@ int32_t mux_pinctl(struct mux* mux, uint32_t pin, uint32_t ctl, uint32_t extra) 
 	/* select reg 0 or 1 */
 	uint32_t reg = (p >> 4);
 	volatile struct gpio_regs_ctrl *ctrl = &mux->gpio->base->ctrl[b];
-	uint32_t tmp = ctrl->GPxMUX[reg];
+	uint32_t tmp;
 
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 
 	if (ctl & MUX_CTL_PULL_UP) {
-		ctrl->GPxPUD |= GPxPUD_PULL_UP(p);
+		ctrl->GPxPUD &= ~GPxPUD_PULL_UP(p);
 	} else {
 		/* Pull Down not supported */
 		/* Disable Nothing is Muxed */
-		ctrl->GPxPUD &= ~GPxPUD_PULL_UP(p);
+		ctrl->GPxPUD |= GPxPUD_PULL_UP(p);
 	}
 	if (extra & MUX_EXTRA_OUTPUT) {
 		ctrl->GPxDIR |= GPxDIR_DIR(p);
@@ -43,6 +43,17 @@ int32_t mux_pinctl(struct mux* mux, uint32_t pin, uint32_t ctl, uint32_t extra) 
 		ctrl->GPxDIR &= ~GPxDIR_DIR(p);
 	}
 	{
+		tmp = ctrl->GPxQSEL[reg];
+		uint32_t muxValue = (extra & MUX_EXTRA_ASYNC) ? 0x3 : 0x0;
+		uint32_t bit = (p & 0xF);
+		/* clear Value */
+		tmp &= ~GPxQSEL_QSEL(0x3, bit);
+		/* Set Value */
+		tmp |= GPxQSEL_QSEL(muxValue & 0x3, bit);
+	}
+	ctrl->GPxQSEL[reg] = tmp;
+	{
+		tmp = ctrl->GPxMUX[reg];
 		uint32_t muxValue = (ctl >> 8);
 		uint32_t bit = (p & 0xF);
 		/* clear Value */
