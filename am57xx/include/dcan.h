@@ -112,7 +112,7 @@ struct can {
 	struct can_bittiming bt;
 	int64_t freq;
 	TaskHandle_t task;
-	bool (*errorCallback)(struct can *can, can_error_t error, can_errorData_t data);
+	bool (*errorCallback)(struct can *can, can_error_t error, can_errorData_t data, void *userData);
 	void *userData;
 	struct dcan_filter *filter;
 	const uint32_t raminit_start_mask;

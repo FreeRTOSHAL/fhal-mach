@@ -381,7 +381,7 @@ void dcan_handleInt0IRQ(struct can *can) {
 
 		if(err != 0){
 			if(can->errorCallback){
-				pxHigherPriorityTaskWoken |= can->errorCallback(can, err, data);
+				pxHigherPriorityTaskWoken |= can->errorCallback(can, err, data, NULL);
 			}
 		}
 	}
@@ -433,15 +433,14 @@ void dcan_handleInt1IRQ(struct can *can) {
 			can_unlock(can, -1);
 			//PRINTF("after readmsg: \nDCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n", can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
 			if(mo.arb & DCAN_IF1ARB_XTD_MASK){
-				msg.id = mo.arb & DCAN_IF1ARB_XTD_MASK;
+				msg.id = mo.arb & DCAN_IF1ARB_ID_EXT_MASK;
+				msg.id |= CAN_EFF_FLAG;
 			} else {
 				msg.id = ((mo.arb & DCAN_IF1ARB_ID_STD_MASK) >> DCAN_IF1ARB_ID_STD_SHIFT);
 			}
 			msg.length = mo.mctl & DCAN_IF1MCTL_DLC_MASK;
 			memcpy(msg.data, mo.data, msg.length);
 			msg.ts = xTaskGetTickCountFromISR();
-			// TODO request
-			msg.req = 0;
 
 			/* Send msg to userspace, we ignore the overflow error for now */
 			/* TODO Handle overflow */
@@ -495,8 +494,13 @@ CAN_SET_CALLBACK(dcan, can, filterID, callback, data) {
 CAN_REGISTER_FILTER(dcan, can, filter) {
 	struct dcan_mo mo;
 	int i;
+	uint32_t tmp;
 	struct dcan_filter *hwFilter;
 	PRINTF("%s called\n", __FUNCTION__);
+	if(filter->id & (CAN_RTR_FLAG)){
+		PRINTF("CAN_REGISTER_FILTER failed\n");
+		return -1;
+	}
 	can_lock(can, portMAX_DELAY, -1);
 
 	for(i = 0; i< can->filterCount; i++) {
@@ -516,11 +520,13 @@ CAN_REGISTER_FILTER(dcan, can, filter) {
 
 	mo.msk = DCAN_IF1MSK_MSK(hwFilter->filter.mask);
 
-	if(hwFilter->filter.id >= BIT(11)) {
+	if(hwFilter->filter.id & CAN_EFF_FLAG) {
+		tmp = hwFilter->filter.id & CAN_EFF_MASK;
 		mo.arb = DCAN_IF1ARB_MSGVAL_MASK | DCAN_IF1ARB_XTD_MASK | 
-			DCAN_IF1ARB_ID_EXT(hwFilter->filter.id);
+			DCAN_IF1ARB_ID_EXT(tmp);
 	} else {
-		mo.arb = DCAN_IF1ARB_MSGVAL_MASK | DCAN_IF1ARB_ID_STD(hwFilter->filter.id);
+		tmp = hwFilter->filter.id & CAN_SFF_MASK;
+		mo.arb = DCAN_IF1ARB_MSGVAL_MASK | DCAN_IF1ARB_ID_STD(tmp);
 	}
 
 	mo.mctl = DCAN_IF1MCTL_UMASK_MASK | DCAN_IF1MCTL_RXIE_MASK;
@@ -567,8 +573,9 @@ CAN_DEREGISTER_FILTER(dcan, can, filterID) {
 CAN_SEND(dcan, can, msg, waittime) {
 	int lret;
 	struct dcan_mo mo;
+	uint32_t tmp;
 	PRINTF("%s called\n", __FUNCTION__);
-	if(msg->req){
+	if(msg->id & CAN_RTR_FLAG){
 		/* TODO Implement request and rcv */
 		/* CAN Requests has a complex MB state machine*/
 		PRINTF("%s error, request\n", __FUNCTION__);
@@ -580,12 +587,14 @@ CAN_SEND(dcan, can, msg, waittime) {
 		goto dcan_send_error0;
 	}
 
-	if(msg->id >= BIT(11)) {
+	if(msg->id & CAN_EFF_FLAG) {
+		tmp = msg->id & CAN_EFF_MASK;
 		mo.arb = DCAN_IF1ARB_MSGVAL_MASK | DCAN_IF1ARB_XTD_MASK | DCAN_IF1ARB_DIR_MASK | 
-			DCAN_IF1ARB_ID_EXT(msg->id);
+			DCAN_IF1ARB_ID_EXT(tmp);
 	}
 	else {
-		mo.arb = DCAN_IF1ARB_MSGVAL_MASK | DCAN_IF1ARB_DIR_MASK | DCAN_IF1ARB_ID_STD(msg->id);
+		tmp = msg->id & CAN_SFF_MASK;
+		mo.arb = DCAN_IF1ARB_MSGVAL_MASK | DCAN_IF1ARB_DIR_MASK | DCAN_IF1ARB_ID_STD(tmp);
 	}
 
 	mo.mctl = DCAN_IF1MCTL_NEWDAT_MASK | DCAN_IF1MCTL_TXRQST_MASK | 
