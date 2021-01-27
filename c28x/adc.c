@@ -3,168 +3,199 @@
 #include <adc_prv.h>
 #include <FreeRTOS.h>
 #include <task.h>
-#include <adc_adcc28x.h>
+#include <c28x/adc.h>
+#include <cpu.h>
 
+static interrupt void adc_handle_system_irq (void) {
 
 /*
-
-TODO
-
-
-struct adc *adc_init(uint32_t index, uint8_t bits, uint32_t hz);
-int32_t adc_deinit(struct adc *adc);
-int32_t adc_get(struct adc *adc, TickType_t waittime);
-int32_t adc_getISR(struct adc *adc);
-int32_t adc_setCallback(struct adc *adc, bool (*callback)(struct adc *adc, uint32_t channel, int32_t value, void *data), void *data);
-int32_t adc_start(struct adc *adc);
-int32_t adc_stop(struct adc *adc);
-
-
-#define ADC_INIT(ns, index, bits, hz) struct adc *adc_init(uint32_t index, uint8_t bits, uint32_t hz)
-#define ADC_DEINIT(ns, a) int32_t adc_deinit(struct adc *a)
-#define ADC_GET(ns, a, waittime) int32_t adc_get(struct adc *a, TickType_t waittime)
-#define ADC_GET_ISR(ns, a) int32_t adc_getISR(struct adc *a)
-#define ADC_SET_CALLBACK(ns, a, callback, data) int32_t adc_setCallback(struct adc *a, bool (*callback)(struct adc *adc, uint32_t channel, int32_t value, void *data), void *data)
-#define ADC_START(ns, a) int32_t adc_start(struct adc *a)
-#define ADC_STOP(ns, a) int32_t adc_stop(struct adc *a)
-
+//TODO INTERRUPTS
+//flags auslesen
+//flags behandeln
+//flasg resetten
+//
+	portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
+	irq_clear(ECAN0INT_IRQn);
 
 */
+
+}
+
+
 
 
 ADC_INIT(adcc28x, index, bits, hz) {
-	struct adc_adcc28x *adc;
+	struct adc *adc = (struct adc *) ADC_GET_DEV(index);
+	struct adc_base *base;
 	int32_t ret;
-	adc = (struct adcc28x *) ADC_GET_DEV(index);
+
 	if (adc == NULL) {
-		goto adcc28x_adc_init_error0;
+		return NULL;
 	}
-	ret = adc_generic_init((struct adc *) adc);
+
+	ret = adc_generic_init(adc);
 
 	if (ret < 0) {
-		goto adcc28x_adc_init_error0;
-	}
-	if (ret > 0) {
-		goto adcc28x_adc_init_exit;
+		return NULL;
 	}
 
-	adc->running = false;
-	/* waittime per ticks */
-	adc->ticks = (1000 * portTICK_PERIOD_MS) / hz;
-	adc->bits = bits;
-
-	/*not needed?
-	ret = OS_CREATE_TASK(adc_adcc28x_task, "ADC ADCC28X Task", 500, adc, CONFIG_ADC_ADCC28X_PRIO, adc->task);
-	*/
-
-	if (ret != pdPASS) {
-		goto adcc28x_adc_init_error0;
+	if (ret == ADC_ALREDY_INITED) {
+		return adc;
 	}
 
-  adcc28x_adc_init_exit:
-	return (struct adc *) adc;
-  adcc28x_adc_init_error0:
-	return NULL;
+	/*
+	 * Base is also compatible to adc struct
+	 */
+	base = adc->base;
+	ret = adc_generic_init((struct adc *) base);
+
+	if (ret < 0) {
+		return NULL;
+	}
+
+	if (ret != ADC_ALREDY_INITED) {
+
+		ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+
+		{
+			//enable clock for adc
+			CLK_Obj *obj = (CLK_Obj *) CLK_BASE_ADDR;
+			obj->PCLKCR0 |= CLK_PCLKCR0_ADCENCLK_BITS;
+		}
+
+		//disable adc
+	  base->base->ADCCTL1 &= (~ADC_ADCCTL1_ADCENABLE_BITS);
+
+
+		//enable bandgap
+		//enable if internal ref voltage is selected
+		base->base->ADCCTL1 |= ADC_ADCCTL1_ADCBGPWD_BITS;
+
+		//set Voltage Reference Source
+		//
+	  base->base->ADCCTL1 &= (~ADC_ADCCTL1_ADCREFSEL_BITS);
+	  base->base->ADCCTL1 |= ADC_VoltageRefSrc_Int; //later: config kconfig variable
+
+		// enable the ADC reference buffers
+		base->base->ADCCTL1 |= ADC_ADCCTL1_ADCREFPWD_BITS;
+
+
+		// Set main clock scaling factor (max45MHz clock for the ADC module)
+		base->base->ADCCTL2 &= (~(ADC_ADCCTL2_CLKDIV2EN_BITS|ADC_ADCCTL2_CLKDIV4EN_BITS));
+		base->base->ADCCTL2 |= ADC_DivideSelect_ClkIn_by_2;
+
+		// power up the ADCs
+		base->base->ADCCTL1 |= ADC_ADCCTL1_ADCPWDN_BITS;
+
+		//enable adc
+		base->base->ADCCTL1 |= ADC_ADCCTL1_ADCENABLE_BITS;
+
+		// set the ADC interrupt pulse generation to prior
+		base->base->ADCCTL1 &= (~ADC_ADCCTL1_INTPULSEPOS_BITS);
+		base->base->ADCCTL1 |= ADC_IntPulseGenMode_Prior;
+
+
+
+
+	  DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+
+
+		//TODO INTERRUPTS
+		/*
+		//irqs....
+		// EPIM: error-passive
+		// BOIM: bus-off
+		ECAN_REG32_SET_BITS(can->base->CANGIM, ECAN_CANGIM_BOIM | ECAN_CANGIM_EPIM | ECAN_CANGIM_WLIM | ECAN_CANGIM_I1EN | ECAN_CANGIM_I0EN);
+
+		// set interrupt line #1 for all mailboxes
+		ECAN_REG32_SET(can->base->CANMIL, 0xFFFFFFFFUL);
+
+		// enable interrupts for all mailboxes
+		ECAN_REG32_SET(can->base->CANMIM, 0xFFFFFFFFUL);
+
+
+		// set irq handler and activate them
+		irq_setHandler(ECAN0INT_IRQn, ecan_handle_system_irq);		// line #0 has a higher priority
+		irq_setHandler(ECAN1INT_IRQn, ecan_handle_mbox_irq);
+		irq_enable(ECAN0INT_IRQn);
+		irq_enable(ECAN1INT_IRQn);
+		*/
+
+
+
+
+
+	}
+
+	//channels here
+
+	//ADC_setSocChanNumber(obj->adcHandle,ADC_SocNumber_7,ADC_SocChanNumber_B7);
+	base->base->ADCSOCxCTL[adc->channel] &= (~ADC_ADCSOCxCTL_CHSEL_BITS);
+  base->base->ADCSOCxCTL[adc->channel] |= adc->chsel;
+	//ADC_setSocTrigSrc(obj->adcHandle,ADC_SocNumber_7,ADC_SocTrigSrc_EPWM1_ADCSOCA);
+	base->base->ADCSOCxCTL[adc->channel] &= (~ADC_ADCSOCxCTL_TRIGSEL_BITS);
+	base->base->ADCSOCxCTL[adc->channel] |= adc->trigsrc;
+	//ADC_setSocSampleDelay(obj->adcHandle,ADC_SocNumber_7,ADC_SocSampleDelay_9_cycles);
+	base->base->ADCSOCxCTL[adc->channel] &= (~ADC_ADCSOCxCTL_ACQPS_BITS);
+  base->base->ADCSOCxCTL[adc->channel] |= adc->sampledelay;
+
+
+
+
+	if (adc->channel == 6){
+		// set the temperature sensor source to external
+		base->base->ADCCTL1 &= (~ADC_ADCCTL1_TEMPCONV_BITS);
+		base->base->ADCCTL1 |= ADC_TempSensorSrc_Ext;
+	}
+
+
+
+
+
+
+
+
+	return adc;
 }
 
-ADC_DEINIT(adcc28x, a){
-
-  struct adc_adcc28x *adc = (struct adc_adcc28x *) a;
-	adc->gen.init = false;
-
-  return 0;
+ADC_DEINIT(adcc28x, adc) {
+	return -1;
 }
 
-ADC_GET(adcc28x, a, waittime){
+ADC_GET(adcc28x, adc, waittime) {
 
-	struct adc_base *base = adc->base;
+	struct adc_base *base;
+	base = adc->base;
 
-	int32_t ret;
-	int32_t val;
-	uint32_t tmp;
-	adc_lock(adc, waittime, -1);
-
-
-/*
-this need to be for c28
-	tmp = base->base->hc[0];
-
-	tmp &= ~ADC_HC_ADCH(0x1F);
-
-	tmp |= ADC_HC_ADCH(adc->channel) | ADC_HC_AIEN;
-
-	base->base->hc[0] = tmp;
-
-	ret = xSemaphoreTake(base->sem, waittime);
-
-	if (ret != 1) {
-		goto adc_get_error1;
-	}
-
-	val = base->val;
-	base->base->hc[0] |= ADC_HC_ADCH(0x1F);
-	base->base->hc[0] &= ~(ADC_HC_AIEN);
-*/
-
-	adc_unlock(adc, -1);
-	return val;
-
-
-
-
-
-
-
-
-/*
-	int32_t value;
-	adc_lock(a, waittime, -1);
-	value = adc_getISR(a);
-	adc_unlock(a, -1);
-	return value;
-*/
-}
-
-ADC_GETISR(adcc28x, a){
-
-  struct adc_adcc28x *adc = (struct adc_adcc28x *) a;
-	int32_t value;
-	if (adc->adcc28x_callback) {
-		value = adc->adc_adcc28x_callback(a, adc->channelID, adc->adcc28x_data);
-	} else {
-		return -1;
-	}
-	return value;
+	return base->result_base->ADCRESULT[adc->channel];
 
 }
-ADC_SETCALLBACK(adcc28x, a, callback, data){
 
-  struct adc_adcc28x *adc = (struct adc_adcc28x *) a;
-	if (callback == NULL) {
-		adc_stop((struct adc *) adc);
-	}
+ADC_GET_ISR(adcc28x, adc) {
+	return -1;
+}
+
+ADC_SET_CALLBACK(adcc28x, adc, callback, data) {
+
 	adc->callback = callback;
-	adc->data = data;
+	adc->callbackData = data;
+
 	return 0;
 
-}
-ADC_START(adcc28x, a){
-
-  struct adc_adcc28x *adc = (struct adc_adcc28x *) a;
-	adc->running = true;
-  #ifdef CONFIG_INCLUDE_vTaskSuspend
-	vTaskResume(adc->task);
-  #endif
-	return 0;
 
 }
 
-ADC_STOP(adcc28x, a){
+ADC_START(adcc28x, adc) {
+	return -1;
+}
 
-  struct adc_adcc28x *adc = (struct adc_adcc28x *) a;
-	adc->running = false;
-	return 0;
-
+ADC_STOP(adcc28x, adc) {
+	return -1;
 }
 
 ADC_OPS(adcc28x);
+
+
+
+
+// vim: noexpandtab ts=4 sts=4 sw=4
