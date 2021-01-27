@@ -9,6 +9,6 @@ menuconfig MACH_C28X_ePWM0
 		config MACH_C28X_ePWM0_PWM
 			bool "activate PWM 0A"
 			if MACH_C28X_ePWM0_PWM
-				comment "TODO Muxing
+				comment "TODO Muxing"
 			endif
 	endif
