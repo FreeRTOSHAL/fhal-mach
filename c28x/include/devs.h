@@ -20,5 +20,11 @@ HAL_DEFINE_GLOBAL_ARRAY(timer);
 #ifdef CONFIG_MACH_C28X_CPU_TIMER2
 # define CPU_TIMER2_ID HAL_GET_ID(timer, c28x, cpu_timer2)
 #endif
-
+HAL_DEFINE_GLOBAL_ARRAY(pwm);
+#ifdef CONFIG_MACH_C28X_ePWM0
+# define EPWM0_TIMER_ID HAL_GET_ID(pwm, epwm, epwm0_data)
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM0_PWM
+# define EPWM0_PWM_ID HAL_GET_ID(pwm, epwm, epwm0_pwm_data)
+#endif
 #endif

@@ -193,6 +193,10 @@ TIMER_PERIODIC(c28x, timer, us) {
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
+TIMER_GET_TIME(c28x, timer) {
+	//TODO
+	return -1;
+}
 TIMER_OPS(c28x);
 
 #ifdef CONFIG_MACH_C28X_CPU_TIMER0

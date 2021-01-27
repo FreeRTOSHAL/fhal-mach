@@ -96,3 +96,10 @@ menuconfig MACH_C28X_CPU_TIMER
 	if MACH_C28X_CPU_TIMER
 		source mach/c28x/Kconfig.timer
 	endif
+menuconfig MACH_C28X_ePWM
+	bool "ePWM (Timter + PWM)"
+	depends on TIMER
+	default y
+	if MACH_C28X_ePWM
+		source mach/c28x/Kconfig.epwm
+	endif
