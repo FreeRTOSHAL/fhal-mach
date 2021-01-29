@@ -21,6 +21,70 @@
 #else
 # define PRINTF(fmt, ...)
 #endif
+
+
+#define TIMER_TBCTL_CTRMODE_BITS          (3 << 0)
+
+//! \brief Defines the location of the PHSEN bits in the TBCTL register
+//!
+#define TIMER_TBCTL_PHSEN_BITS            (1 << 2)
+
+//! \brief Defines the location of the PRDLD bits in the TBCTL register
+//!
+#define TIMER_TBCTL_PRDLD_BITS            (1 << 3)
+
+//! \brief Defines the location of the SYNCOSEL bits in the TBCTL register (Mode)
+//!
+#define TIMER_TBCTL_SYNCOSEL_BITS         (3 << 4)
+
+//! \brief Defines the location of the SWFSYNC bits in the TBCTL register
+//!
+#define TIMER_TBCTL_SWFSYNC_BITS          (1 << 6)
+
+//! \brief Defines the location of the HSPCLKDIV bits in the TBCTL register
+//!
+#define TIMER_TBCTL_HSPCLKDIV_BITS        (7 << 7)
+
+//! \brief Defines the location of the CLKDIV bits in the TBCTL register
+//!
+#define TIMER_TBCTL_CLKDIV_BITS           (7 << 10)
+
+//! \brief Defines the location of the PHSDIR bits in the TBCTL register
+//!
+#define TIMER_TBCTL_PHSDIR_BITS           (1 << 13)
+
+//! \brief Defines the location of the FREESOFT bits in the TBCTL register
+//!
+#define TIMER_TBCTL_FREESOFT_BITS         (3 << 14)
+
+#define PWM_CMPCTL_LOADAMODE_BITS       (3 << 0)
+
+//! \brief Defines the location of the LOADBMODE bits in the CMPCTL register
+//!
+#define PWM_CMPCTL_LOADBMODE_BITS       (3 << 2)
+
+//! \brief Defines the location of the SHDWAMODE bits in the CMPCTL register
+//!
+#define PWM_CMPCTL_SHDWAMODE_BITS       (1 << 4)
+
+//! \brief Defines the location of the SHDWBMODE bits in the CMPCTL register
+//!
+#define PWM_CMPCTL_SHDWBMODE_BITS       (1 << 6)
+
+#define  EALLOW asm(" EALLOW")
+
+//! \brief Define to allow protected register writes
+//!
+#define  ENABLE_PROTECTED_REGISTER_WRITE_MODE  asm(" EALLOW")
+
+//! \brief Define to disable protected register writes (legacy)
+//!
+#define  EDIS   asm(" EDIS")
+
+//! \brief Define to disable protected register writes
+//!
+#define  DISABLE_PROTECTED_REGISTER_WRITE_MODE asm(" EDIS")
+
 struct timer_reg {
 	volatile uint16_t   TBCTL;       //!< Time-Base Control Register
 	volatile uint16_t   TBSTS;       //!< Time-Base Status Register
@@ -91,9 +155,10 @@ struct timer {
 	volatile struct timer_reg *base;
 	void (*irqHandler)();
 };
-TIMER_INIT(epwm, index, prescaler, basetime, adjust) {
+
+TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	int32_t ret;
-	struct timer *timer;;
+	struct timer *timer;
 	timer = TIMER_GET_DEV(index);
 	if (timer == NULL) {
 		goto epwm_timer_init_error0;
@@ -113,6 +178,65 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust) {
 	timer->basetime = basetime;
 	timer->adjust = adjust;
 	// TODO setup Timer
+	
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+     	//Timer set Counter Mode
+      	// clear the bits
+      	timer->base->TBCTL &= (~TIMER_TBCTL_CTRMODE_BITS);
+    	// set the bits
+    	timer->base->TBCTL |= (2 << 0);
+    	
+      	// Timer disable Counter Load
+      	timer->base->TBCTL &= (~TIMER_TBCTL_PHSEN_BITS);
+
+      	//Timer set PeriodLoad Immediate
+      	// clear the bits
+    	timer->base->TBCTL &= (~TIMER_TBCTL_PRDLD_BITS);
+   	// set the bits
+   	timer->base->TBCTL |= (1 << 3);
+    
+     	//Timer set SyncMode
+      	// clear the bits
+    	timer->base->TBCTL &= (~TIMER_TBCTL_SYNCOSEL_BITS);
+   	 // set the bits
+    	timer->base->TBCTL |= (0 << 4);
+    	
+      	//Timer set HighSpeed ClkDiv
+      	// clear the bits
+    	timer->base->TBCTL &= (~TIMER_TBCTL_HSPCLKDIV_BITS);
+    	// set the bits
+    	timer->base->TBCTL |= (0 << 7);
+    	
+      	//Timer set ClkDiv
+      	// clear the bits
+    	timer->base->TBCTL &= (~TIMER_TBCTL_CLKDIV_BITS);
+    	// set the bits
+    	timer->base->TBCTL |= (0 << 10);
+      
+      
+        // Timer set PhaseDir
+      	// clear the bits
+    	timer->base->TBCTL &= (~TIMER_TBCTL_PHSDIR_BITS);
+    	// set the bits
+    	timer->base->TBCTL |=(1 << 13);
+    	
+      	// Timer set RunMode
+      	// clear the bits
+    	timer->base->TBCTL &= (~TIMER_TBCTL_FREESOFT_BITS);
+   	// set the bits
+   	timer->base->TBCTL |= (2 << 14);
+
+      	// setup the Timer-Based Phase Register (TBPHS)
+        timer->base->TBPHS = 0;
+
+      	// setup the Time-Base Counter Register (TBCTR)
+	timer->base->TBCTR = 0;
+
+      // setup the Time-Base Period Register (TBPRD)
+      // set to zero initially
+	timer->base->TBPRD = 0;
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+	
 epwm_timer_init_exit:
 	return timer;
 epwm_timer_init_error1:
@@ -127,20 +251,33 @@ TIMER_DEINIT(epwm, timer) {
 TIMER_SET_OVERFLOW_CALLBACK(epwm, timer, callback, data) {
 	timer->callback = callback;
 	timer->data = data;
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	if (callback != NULL) {
 		// TODO setup IRQ 
+		timer->base->TBCTR &= 0x0000;
 	} else {
-		// TODO desetup IRQ 
+		// TODO desetup IRQ
+		timer->base->TBCTR &= 0x0000;
+		timer->base->TBCTR |= timer->base->TBPRD;
 	}
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
 TIMER_START(epwm, timer) {
 	// TODO Start Timer
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	timer->base->TBCTL |= TIMER_TBCTL_SWFSYNC_BITS;
+    	timer->base->TBCTL &= (~TIMER_TBCTL_PRDLD_BITS);
+   	timer->base->TBCTL |= (1 << 3);
+   	timer->base->TBCTL &= (~TIMER_TBCTL_SWFSYNC_BITS);
+   	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
 TIMER_STOP(epwm, timer) {
 	// TODO Stop Timer
-	// TBCTL->FREE, SOFT = 0 (Stop after the next time-base counter increment or decrement)
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	timer->base->TBCTL |= TIMER_TBCTL_SWFSYNC_BITS;
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
 
@@ -193,17 +330,26 @@ static uint64_t USToCounter(struct timer *timer, uint64_t value) {
 TIMER_ONESHOT(epwm, timer, us) {
 	// TODO Programm the timer to oneshot
 	// TBCTL FREE, SOFT = 1 (Stop when counter completes a whole cycle)
+         ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+   	 timer->base->TBCTL &= (~TIMER_TBCTL_FREESOFT_BITS);
+	 timer->base->TBCTL |=(1 << 14);
+    	 DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return timer_start(timer);
 }
 
 TIMER_PERIODIC(epwm, timer, us) {
 	// TODO Programm the timer to periotic
 	// TBCTL FREE, SOFT = 2 (Free-Run)
+	 ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	 timer->base->TBCTL &= (~TIMER_TBCTL_FREESOFT_BITS);
+	 timer->base->TBCTL |=(2 << 14);
+	 DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return timer_start(timer);
 }
 TIMER_GET_TIME(epwm, timer) {
 	//TODO
-	return 0;
+	uint64_t counter = timer->base->TBCTR;
+	return counterToUS(timer, counter);
 }
 TIMER_OPS(epwm);
 #ifdef CONFIG_MACH_C28X_ePWM_PWM
@@ -249,12 +395,38 @@ PWM_DEINIT(epwm, pwm) {
 }
 PWM_SET_PERIOD(epwm, pwm, us) {
 	//TODO Setup Period and init pwm
-	//TODO Setup UP and Down Counter etc
+	
  	//Setup CMPB (3.4.2 Counter-Compare Submodule Registers)
+ 	
+ 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+ 	// PWM set LoadMode_CmpA_Zero
+	pwm->CMPCTL &= (~PWM_CMPCTL_LOADBMODE_BITS);
+    	// set the bits
+    	pwm->CMPCTL |= 0;
+    	
+    	//PWM set ShadowMode_CmpA 
+    	pwm->CMPCTL &= (~PWM_CMPCTL_SHDWBMODE_BITS);
+
+   	// set the bits
+   	pwm->CMPCTL |= (1 << 4);
+   	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
 PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
 	//TODO Setup CMPA (3.4.2 Counter-Compare Submodule Registers)
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	// PWM set LoadMode_CmpA_Zero
+	pwm->CMPCTL &= (~PWM_CMPCTL_LOADAMODE_BITS);
+    	// set the bits
+    	pwm->CMPCTL |= 0;
+    	
+    	//PWM set ShadowMode_CmpA 
+    	pwm->CMPCTL &= (~PWM_CMPCTL_SHDWAMODE_BITS);
+
+   	// set the bits
+   	pwm->CMPCTL |= (0 << 4);
+   	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+    	
 	return 0;
 }
 PWM_OPS(epwm);
@@ -302,9 +474,9 @@ TIMER_ADDDEV(epwm, epwm0_data);
 struct pwm epwm0_pwm_data = {
 	PWM_INIT_DEV(epwm)
 	HAL_NAME("epwm0 PWM")
-	.timer = &epwm0_data,
+	.timer = &epwm0_data;
 	// TODO Muxing
-};
-PWM_ADDDEV(epwm, epwm0_pwm_data);
+};*/
+//PWM_ADDDEV(epwm, epwm0_pwm_data);
 #endif
 #endif
