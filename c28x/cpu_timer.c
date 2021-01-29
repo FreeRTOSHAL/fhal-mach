@@ -194,8 +194,10 @@ TIMER_PERIODIC(c28x, timer, us) {
 	return 0;
 }
 TIMER_GET_TIME(c28x, timer) {
-	//TODO
-	return -1;
+	/* down counter */
+	uint32_t ticks = timer->base->PRD - timer->base->TIM;
+	int64_t freq = clock_getCPUSpeed(clock_init()) / 1000000;
+	return (ticks / freq);
 }
 TIMER_OPS(c28x);
 
