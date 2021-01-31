@@ -272,6 +272,3 @@ struct can ecan0;
 
 #endif /* C28X_ECAN_H_ */
 
-
-// vim: noexpandtab ts=4 sts=4 sw=4
-

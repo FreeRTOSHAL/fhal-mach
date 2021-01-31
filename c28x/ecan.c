@@ -652,6 +652,3 @@ struct can ecan0 = {
 CAN_ADDDEV(ecan, ecan0);
 #endif
 
-
-// vim: noexpandtab ts=4 sts=4 sw=4
-
