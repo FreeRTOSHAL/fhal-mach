@@ -69,7 +69,7 @@ static interrupt void ecan_handle_system_irq (void) {
 	}
 
 	portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
-	irq_clear(ECAN0INT_IRQn);
+	irq_clear(can->config->irq0);
 }
 
 static interrupt void ecan_handle_mbox_irq (void) {
@@ -157,7 +157,7 @@ static interrupt void ecan_handle_mbox_irq (void) {
 	}
 
 	portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
-	irq_clear(ECAN1INT_IRQn);
+	irq_clear(can->config->irq1);
 }
 
 
@@ -302,10 +302,10 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 
 	// set irq handler and activate them
-	irq_setHandler(ECAN0INT_IRQn, ecan_handle_system_irq);		// line #0 has a higher priority
-	irq_setHandler(ECAN1INT_IRQn, ecan_handle_mbox_irq);
-	irq_enable(ECAN0INT_IRQn);
-	irq_enable(ECAN1INT_IRQn);
+	irq_setHandler(can->config->irq0, ecan_handle_system_irq);		// line #0 has a higher priority
+	irq_setHandler(can->config->irq1, ecan_handle_mbox_irq);
+	irq_enable(can->config->irq0);
+	irq_enable(can->config->irq1);
 
 
 	return can;
@@ -642,6 +642,8 @@ const struct ecan_const ecan0_const = {
 	.pins = ecan0_pins,
 	.btc = &ecan_btc,
 	.filter_length = CONFIG_MACH_C28X_ECAN_CAN0_FILTER_QUEUE_ENTRIES,
+	.irq0 = ECAN0INT_IRQn,
+	.irq1 = ECAN1INT_IRQn,
 };
 struct can ecan0 = {
 	CAN_INIT_DEV(ecan)

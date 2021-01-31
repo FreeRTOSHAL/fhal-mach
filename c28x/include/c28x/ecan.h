@@ -235,6 +235,8 @@ struct ecan_const {
 	const struct ecan_pin *pins;
 	struct can_bittiming_const const *btc;
 	uint32_t filter_length;
+	uint32_t irq0;
+	uint32_t irq1;
 };
 
 struct can {
