@@ -117,7 +117,8 @@
 #define ECAN_CANREC_TEC_INV(x)						ECAN_BITS_INV((x), ECAN_CANREC_TEC_MASK, 0)
 
 #define ECAN_CANGIFx_MIVx_MASK						ECAN_MASK(5, 0)
-#define ECAN_CANGIFx_MIVx							ECAN_BITS((x), ECAN_CANGIFx_MIVx_MASK, 0)
+#define ECAN_CANGIFx_MIVx(x)						ECAN_BITS((x), ECAN_CANGIFx_MIVx_MASK, 0)
+#define ECAN_CANGIFx_MIVx_INV(x)					ECAN_BITS_INV((x), ECAN_CANGIFx_MIVx_MASK, 0)
 #define ECAN_CANGIFx_WLIFx							BIT(8)
 #define ECAN_CANGIFx_EPIFx							BIT(9)
 #define ECAN_CANGIFx_BOIFx							BIT(10)
