@@ -31,6 +31,9 @@ static interrupt void ecan_handle_system_irq (void) {
 
 	// one or bath error counters are >= 96 ?
 	if (flags & ECAN_CANGIFx_WLIFx) {
+		// reset flag
+		ECAN_REG32_SET(can->base->CANGIF0, ECAN_CANGIFx_WLIFx);
+
 		err |= CAN_ERR_CRTL;
 
 		if (ECAN_REG32_GET(can->base->CANREC) >= ECAN_ERR_COUNT_WARN_THRESHOLD) {
@@ -40,26 +43,78 @@ static interrupt void ecan_handle_system_irq (void) {
 		if (ECAN_REG32_GET(can->base->CANTEC) >= ECAN_ERR_COUNT_WARN_THRESHOLD) {
 			err |= CAN_ERR_CRTL_TX_WARNING;
 		}
-
-		// reset flag
-		ECAN_REG32_SET(can->base->CANGIF0, ECAN_CANGIFx_WLIFx);
 	}
 
 	// CAN module has entered "error passive" mode ?
 	if (flags & ECAN_CANGIFx_EPIFx) {
-		err |= CAN_ERR_CRTL;
-		data |= CAN_ERR_CRTL_TX_PASSIVE;
-
 		// reset flag
 		ECAN_REG32_SET(can->base->CANGIF0, ECAN_CANGIFx_EPIFx);
+
+		err |= CAN_ERR_CRTL;
+		data |= CAN_ERR_CRTL_TX_PASSIVE;
 	}
 
 	// CAN module has entered "buf-off" mode ?
 	if (flags & ECAN_CANGIFx_BOIFx) {
-		err |= CAN_ERR_BUSOFF;
-
 		// reset flag
 		ECAN_REG32_SET(can->base->CANGIF0, ECAN_CANGIFx_BOIFx);
+
+		err |= CAN_ERR_BUSOFF;
+	}
+
+	flags = ECAN_REG32_GET(can->base->CANES);
+
+	// ack error ?
+	if (flags & ECAN_CANES_ACKE) {
+		// reset flag
+		ECAN_REG32_SET(can->base->CANES, ECAN_CANES_ACKE);
+
+		err |= CAN_ERR_ACK;
+	}
+
+	// stuff error ?
+	if (flags & ECAN_CANES_SE) {
+		// reset flag
+		ECAN_REG32_SET(can->base->CANES, ECAN_CANES_SE);
+
+		err |= CAN_ERR_PROT;
+		data |= CAN_ERR_PROT_STUFF;
+	}
+
+	// CRC error ?
+	if (flags & ECAN_CANES_CRCE) {
+		// reset flag
+		ECAN_REG32_SET(can->base->CANES, ECAN_CANES_CRCE);
+
+		err |= CAN_ERR_PROT;
+		data |= CAN_ERR_PROT_LOC_CRC_SEQ;
+	}
+
+	// stuck at dominant error ?
+	if (flags & ECAN_CANES_SA1) {
+		// reset flag
+		ECAN_REG32_SET(can->base->CANES, ECAN_CANES_SA1);
+
+		err |= CAN_ERR_TRX;
+		data |= CAN_ERR_TRX_CANL_SHORT_TO_CANH;
+	}
+
+	// bit error ?
+	if (flags & ECAN_CANES_BE) {
+		// reset flag
+		ECAN_REG32_SET(can->base->CANES, ECAN_CANES_BE);
+
+		err |= CAN_ERR_PROT;
+		data |= CAN_ERR_PROT_BIT;
+	}
+
+	// format error ?
+	if (flags & ECAN_CANES_FE) {
+		// reset flag
+		ECAN_REG32_SET(can->base->CANES, ECAN_CANES_FE);
+
+		err |= CAN_ERR_PROT;
+		data |= CAN_ERR_PROT_FORM;
 	}
 
 	if (err != 0) {
@@ -75,7 +130,6 @@ static interrupt void ecan_handle_system_irq (void) {
 static interrupt void ecan_handle_mbox_irq (void) {
 	struct can *can = &ecan0;
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
-	BaseType_t tmp;
 	int i;
 	struct can_msg msg;
 	uint64_t msg_data;
@@ -85,6 +139,9 @@ static interrupt void ecan_handle_mbox_irq (void) {
 	struct ecan_rx_mbox *rx_mbox;
 	volatile struct ecan_mailbox *mbox;
 	bool message_lost = false;
+	can_error_t err = 0;
+	can_errorData_t data = 0;
+	BaseType_t ret;
 
 	flags = ECAN_REG32_GET(can->base->CANGIF1);
 	mbox_id = ECAN_CANGIFx_MIVx_INV(flags);
@@ -92,13 +149,12 @@ static interrupt void ecan_handle_mbox_irq (void) {
 	if (ECAN_REG32_GET(can->base->CANTA) & BIT(mbox_id)) {
 		CONFIG_ASSERT(mbox_id == ECAN_TX_MBOX_ID);
 
-		if (can->tx_task) {
-			vTaskNotifyGiveIndexedFromISR(can->tx_task, 0, &tmp);
-			pxHigherPriorityTaskWoken |= tmp;
-		}
-
 		// reset transmit ack flag
 		ECAN_REG32_SET(can->base->CANTA, BIT(mbox_id));
+
+		if (can->tx_task) {
+			vTaskNotifyGiveIndexedFromISR(can->tx_task, 0, &pxHigherPriorityTaskWoken);
+		}
 	} else if (ECAN_REG32_GET(can->base->CANRMP) & BIT(mbox_id)) {
 		// check if a message was overwritten
 		if (ECAN_REG32_GET(can->base->CANRML) & BIT(mbox_id)) {
@@ -136,16 +192,14 @@ static interrupt void ecan_handle_mbox_irq (void) {
 
 			// check received message pending flag again
 			if (!(ECAN_REG32_GET(can->base->CANRMP) & BIT(mbox_id))) {
-				// send msg to userspace, we ignore the overflow error for now
-				// TODO: handle overflow
-
-				(void) xQueueSendToBackFromISR(rx_mbox->queue, &msg, &tmp);
-				pxHigherPriorityTaskWoken |= tmp;
-
 				if (rx_mbox->callback) {
-					bool ret;
-					ret = rx_mbox->callback(can, &msg, rx_mbox->data);
-					pxHigherPriorityTaskWoken |= ret;
+					pxHigherPriorityTaskWoken |= rx_mbox->callback(can, &msg, rx_mbox->data);
+				} else {
+					// send msg to userspace
+					ret = xQueueSendToBackFromISR(rx_mbox->queue, &msg, &pxHigherPriorityTaskWoken);
+					if (ret != pdPASS) {
+						message_lost = true;
+					}
 				}
 			} else {
 				// message may have been corrupted, so abort further processing
@@ -156,7 +210,14 @@ static interrupt void ecan_handle_mbox_irq (void) {
 		}
 
 		if (message_lost) {
-			// TODO: handle lost message
+			err |= CAN_ERR_CRTL;
+			data |= CAN_ERR_CRTL_RX_OVERFLOW;
+		}
+	}
+
+	if (err != 0) {
+		if (can->error_callback) {
+			pxHigherPriorityTaskWoken |= can->error_callback(can, err, data, can->error_callback_data);
 		}
 	}
 
@@ -462,6 +523,9 @@ static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickTy
 	// configure mailbox as transmit mailbox
 	ECAN_REG32_CLEAR_BITS(can->base->CANMD, BIT(ECAN_TX_MBOX_ID));
 
+	// reset abort ack flag
+	ECAN_REG32_SET(can->base->CANAA, BIT(ECAN_TX_MBOX_ID));
+
 	// reset ack flag
 	ECAN_REG32_SET(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
 	while(ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID));
@@ -538,11 +602,17 @@ static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickTy
 		can_unlock(can, -1);
 	}
 
+	// reset ack error flag
+	ECAN_REG32_SET(can->base->CANES, ECAN_CANES_ACKE);
+
 	return 0;
 
 ecan_send_error0:
 	// reset task
 	can->tx_task = NULL;
+
+	// reset ack error flag
+	ECAN_REG32_SET(can->base->CANES, ECAN_CANES_ACKE);
 
 	if (!isr) {
 		can_unlock(can, -1);
