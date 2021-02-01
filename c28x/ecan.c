@@ -76,83 +76,87 @@ static interrupt void ecan_handle_mbox_irq (void) {
 	struct can *can = &ecan0;
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
 	BaseType_t tmp;
-	int i, j;
+	int i;
 	struct can_msg msg;
 	uint64_t msg_data;
 	int shift;
-	bool msg_received;
+	uint32_t flags;
+	uint8_t mbox_id;
+	struct ecan_rx_mbox *rx_mbox;
+	volatile struct ecan_mailbox *mbox;
+	bool message_lost = false;
 
-	if (ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID)) {
+	flags = ECAN_REG32_GET(can->base->CANGIF1);
+	mbox_id = ECAN_CANGIFx_MIVx_INV(flags);
+
+	if (ECAN_REG32_GET(can->base->CANTA) & BIT(mbox_id)) {
+		CONFIG_ASSERT(mbox_id == ECAN_TX_MBOX_ID);
+
 		if (can->tx_task) {
 			vTaskNotifyGiveIndexedFromISR(can->tx_task, 0, &tmp);
 			pxHigherPriorityTaskWoken |= tmp;
 		}
 
 		// reset transmit ack flag
-		ECAN_REG32_SET(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
-	}
+		ECAN_REG32_SET(can->base->CANTA, BIT(mbox_id));
+	} else if (ECAN_REG32_GET(can->base->CANRMP) & BIT(mbox_id)) {
+		// check if a message was overwritten
+		if (ECAN_REG32_GET(can->base->CANRML) & BIT(mbox_id)) {
+			message_lost = true;
+		}
 
-	for (i=0; i<ECAN_NUM_FILTERS; i++) {
-		struct ecan_rx_mbox *rx_mbox = &can->rx_mboxes[i];
+		// reset received message pending flag
+		ECAN_REG32_SET(can->base->CANRMP, BIT(mbox_id));
 
-		msg_received = false;
+		rx_mbox = &can->rx_mboxes[mbox_id];
 
-		// handle mailbox receive interrupt
-		if (ECAN_REG32_GET(can->base->CANRMP) & BIT(i)) {
-			if (rx_mbox->used) {
-				volatile struct ecan_mailbox *mbox = &can->base->MBOXES[i];
+		if (rx_mbox->used) {
+			mbox = &can->base->MBOXES[mbox_id];
 
-				// read message id
-				msg.id = ECAN_MBOX_CANMSGID_STDMSGID_INV(ECAN_REG32_GET(mbox->CANMSGID));
-				if (ECAN_REG32_GET(mbox->CANMSGID) & ECAN_MBOX_CANMSGID_IDE) {
-					msg.id <<= 18;
-					msg.id |= ECAN_MBOX_CANMSGID_EXTMSGID_INV(ECAN_REG32_GET(mbox->CANMSGID));
-					msg.id |= CAN_EFF_FLAG;
-				}
-
-				// read data length
-				msg.length = ECAN_MBOX_CANMSGCTRL_DLC_INV(ECAN_REG32_GET(mbox->CANMSGCTRL));
-
-				// read data
-				msg_data = (((uint64_t) ECAN_REG32_GET(mbox->CANMDL))<<32) | ECAN_REG32_GET(mbox->CANMDH);
-				for (j=0; j<msg.length; j++) {
-					shift = (7-j) * 8;
-					msg.data[j] = (msg_data>>shift) & 0xFF;
-				}
-
-				// read timestamp
-				msg.ts = ECAN_REG32_GET(can->base->MOTS[i]);
-
-				// set message received flag for later processing
-				msg_received = true;
+			// read message id
+			msg.id = ECAN_MBOX_CANMSGID_STDMSGID_INV(ECAN_REG32_GET(mbox->CANMSGID));
+			if (ECAN_REG32_GET(mbox->CANMSGID) & ECAN_MBOX_CANMSGID_IDE) {
+				msg.id <<= 18;
+				msg.id |= ECAN_MBOX_CANMSGID_EXTMSGID_INV(ECAN_REG32_GET(mbox->CANMSGID));
+				msg.id |= CAN_EFF_FLAG;
 			}
 
-			// reset received message pending flag
-			ECAN_REG32_SET(can->base->CANRMP, BIT(i));
+			// read data length
+			msg.length = ECAN_MBOX_CANMSGCTRL_DLC_INV(ECAN_REG32_GET(mbox->CANMSGCTRL));
 
-			// check if a message was overwritten -> could be damaged
-			if (ECAN_REG32_GET(can->base->CANRML) & BIT(i)) {
-				msg_received = false;
+			// read data
+			msg_data = (((uint64_t) ECAN_REG32_GET(mbox->CANMDL))<<32) | ECAN_REG32_GET(mbox->CANMDH);
+			for (i=0; i<msg.length; i++) {
+				shift = (7-i) * 8;
+				msg.data[i] = (msg_data>>shift) & 0xFF;
+			}
 
-				// TODO: handle lost message
+			// read timestamp
+			msg.ts = ECAN_REG32_GET(can->base->MOTS[mbox_id]);
 
-				// reset received message lost flag
-				ECAN_REG32_SET(can->base->CANRML, BIT(i));
+			// check received message pending flag again
+			if (!(ECAN_REG32_GET(can->base->CANRMP) & BIT(mbox_id))) {
+				// send msg to userspace, we ignore the overflow error for now
+				// TODO: handle overflow
+
+				(void) xQueueSendToBackFromISR(rx_mbox->queue, &msg, &tmp);
+				pxHigherPriorityTaskWoken |= tmp;
+
+				if (rx_mbox->callback) {
+					bool ret;
+					ret = rx_mbox->callback(can, &msg, rx_mbox->data);
+					pxHigherPriorityTaskWoken |= ret;
+				}
+			} else {
+				// message may have been corrupted, so abort further processing
+				// do not clear the flag in CANRMP here so the interrupt fires again and the new message can be read
+
+				message_lost = true;
 			}
 		}
 
-		if (msg_received) {
-			// send msg to userspace, we ignore the overflow error for now
-			// TODO: handle overflow
-
-			(void) xQueueSendToBackFromISR(rx_mbox->queue, &msg, &tmp);
-			pxHigherPriorityTaskWoken |= tmp;
-
-			if (rx_mbox->callback) {
-				bool ret;
-				ret = rx_mbox->callback(can, &msg, rx_mbox->data);
-				pxHigherPriorityTaskWoken |= ret;
-			}
+		if (message_lost) {
+			// TODO: handle lost message
 		}
 	}
 
@@ -288,7 +292,7 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 
 	// enable both interrupt lines and the following system interrupts:
-	// WLIM: warning level interrupt
+	// WLIM: warning level
 	// EPIM: error-passive
 	// BOIM: bus-off
 	ECAN_REG32_SET_BITS(can->base->CANGIM, ECAN_CANGIM_BOIM | ECAN_CANGIM_EPIM | ECAN_CANGIM_WLIM | ECAN_CANGIM_I1EN | ECAN_CANGIM_I0EN);
