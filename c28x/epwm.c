@@ -5,9 +5,6 @@
 #include <pwm.h>
 #define PWM_PRV
 #include <pwm_prv.h>
-#include <capture.h>
-#define CAPTURE_PRV
-#include <capture_prv.h>
 #include <system.h>
 #include <FreeRTOS.h>
 #include <task.h>
@@ -85,6 +82,56 @@
 //!
 #define  DISABLE_PROTECTED_REGISTER_WRITE_MODE asm(" EDIS")
 
+
+//! \brief Defines the base address of the pulse width modulation (PWM) 1 registers
+//!
+#define PWM_ePWM1_BASE_ADDR          (0x00006800)
+
+//! \brief Defines the base address of the pulse width modulation (PWM) 2 registers
+//!
+#define PWM_ePWM2_BASE_ADDR          (0x00006840)
+
+//! \brief Defines the base address of the pulse width modulation (PWM) 3 registers
+//!
+#define PWM_ePWM3_BASE_ADDR          (0x00006880)
+
+//! \brief Defines the base address of the pulse width modulation (PWM) 4 registers
+//!
+#define PWM_ePWM4_BASE_ADDR          (0x000068C0)
+
+//! \brief Defines the base address of the pulse width modulation (PWM) 5 registers
+//!
+#define PWM_ePWM5_BASE_ADDR          (0x00006900)
+
+//! \brief Defines the base address of the pulse width modulation (PWM) 6 registers
+//!
+#define PWM_ePWM6_BASE_ADDR          (0x00006940)
+
+//! \brief Defines the base address of the pulse width modulation (PWM) 7 registers
+//!
+#define PWM_ePWM7_BASE_ADDR          (0x00006980)
+
+//! \brief Defines the base address of the pulse width modulation (PWM) 8 registers
+//!
+#define PWM_ePWM8_BASE_ADDR          (0x000069C0)
+
+#define EPWM1A GPIO_0
+#define EPWM1B GPIO_1
+#define EPWM2A GPIO_2
+#define EPWM2B GPIO_3
+#define EPWM3A GPIO_4
+#define EPWM3B GPIO_5
+#define EPWM4A GPIO_6
+#define EPWM4B GPIO_7
+#define EPWM5A GPIO_8
+#define EPWM5B GPIO_9
+#define EPWM6A GPIO_10
+#define EPWM6B GPIO_11
+#define EPWM7A GPIO_40
+#define EPWM7B GPIO_41
+#define EPWM8A GPIO_42
+#define EPWM8B GPIO_43
+
 struct timer_reg {
 	volatile uint16_t   TBCTL;       //!< Time-Base Control Register
 	volatile uint16_t   TBSTS;       //!< Time-Base Status Register
@@ -120,26 +167,26 @@ struct timer_reg {
 	volatile uint16_t   rsvd_1;      //!< Reserved
 	volatile uint16_t   HRCNFG;      //!< HRPWM Config Reg
 	volatile uint16_t   HRPWR;       //!< HRPWM Power Register
-	volatile uint16_t   rsvd_2[4];   //!< Reserved
-	volatile uint16_t   HRMSTEP;     //!< HRPWM MEP Step Register
-	volatile uint16_t   rsvd_3;      //!< Reserved
-	volatile uint16_t   HRPCTL;      //!< High Resolution Period Control
-	volatile uint16_t   rsvd_4;      //!< Reserved
-	volatile uint16_t   TBPRDHRM;    //!< Time-Base Period High Resolution mirror Register
-	volatile uint16_t   TBPRDM;      //!< Time-Base Period mirror register
-	volatile uint16_t   CMPAHRM;     //!< Extension of HRPWM Counter-Compare A mirror Register
-	volatile uint16_t   CMPAM;       //!< Counter-Compare A mirror Register
-	volatile uint16_t   rsvd_5[2];   //!< Reserved
-	volatile uint16_t   DCTRIPSEL;   //!< Digital Compare Trip Select
-	volatile uint16_t   DCACTL;      //!< Digital Compare A Control
-	volatile uint16_t   DCBCTL;      //!< Digital Compare B Control
-	volatile uint16_t   DCFCTL;      //!< Digital Compare Filter Control
-	volatile uint16_t   DCCAPCTL;    //!< Digital Compare Capture Control
-	volatile uint16_t   DCFOFFSET;   //!< Digital Compare Filter Offset
-	volatile uint16_t   DCFOFFSETCNT;//!< Digital Compare Filter Offset Counter
-	volatile uint16_t   DCFWINDOW;   //!< Digital Compare Filter Window
-	volatile uint16_t   DCFWINDOWCNT;//!< Digital Compare Filter Window Counter
-	volatile uint16_t   DCCAP;       //!< Digital Compare Filter Counter Capture
+	//volatile uint16_t   rsvd_2[4];   //!< Reserved
+	//volatile uint16_t   HRMSTEP;     //!< HRPWM MEP Step Register
+	//volatile uint16_t   rsvd_3;      //!< Reserved
+	//volatile uint16_t   HRPCTL;      //!< High Resolution Period Control
+	//volatile uint16_t   rsvd_4;      //!< Reserved
+	//volatile uint16_t   TBPRDHRM;    //!< Time-Base Period High Resolution mirror Register
+	//volatile uint16_t   TBPRDM;      //!< Time-Base Period mirror register
+	//volatile uint16_t   CMPAHRM;     //!< Extension of HRPWM Counter-Compare A mirror Register
+	//volatile uint16_t   CMPAM;       //!< Counter-Compare A mirror Register
+	//volatile uint16_t   rsvd_5[2];   //!< Reserved
+	//volatile uint16_t   DCTRIPSEL;   //!< Digital Compare Trip Select
+	//volatile uint16_t   DCACTL;      //!< Digital Compare A Control
+	//volatile uint16_t   DCBCTL;      //!< Digital Compare B Control
+	//volatile uint16_t   DCFCTL;      //!< Digital Compare Filter Control
+	//volatile uint16_t   DCCAPCTL;    //!< Digital Compare Capture Control
+	//volatile uint16_t   DCFOFFSET;   //!< Digital Compare Filter Offset
+	//volatile uint16_t   DCFOFFSETCNT;//!< Digital Compare Filter Offset Counter
+	//volatile uint16_t   DCFWINDOW;   //!< Digital Compare Filter Window
+	//volatile uint16_t   DCFWINDOWCNT;//!< Digital Compare Filter Window Counter
+	//volatile uint16_t   DCCAP;       //!< Digital Compare Filter Counter Capture
 };
 
 struct timer {
@@ -156,6 +203,14 @@ struct timer {
 	void (*irqHandler)();
 };
 
+struct pwm {
+	struct pwm_generic gen;
+	struct timer *timer;
+	// TODO Muxing
+	enum pins pinsA; 
+	enum pins pinsB;
+};
+
 TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	int32_t ret;
 	struct timer *timer;
@@ -166,7 +221,7 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	ret = timer_generic_init(timer);
 	if (ret < 0) {
 		goto epwm_timer_init_error0;
-	}
+	}  
 	if (ret > 0) {
 		goto epwm_timer_init_exit;
 	}
@@ -353,11 +408,7 @@ TIMER_GET_TIME(epwm, timer) {
 }
 TIMER_OPS(epwm);
 #ifdef CONFIG_MACH_C28X_ePWM_PWM
-struct pwm {
-	struct pwm_generic gen;
-	struct timer *timer;
-	// TODO Muxing
-};
+
 PWM_INIT(epwm, index) {
 	int32_t ret;
 	struct pwm *pwm;
@@ -381,7 +432,7 @@ PWM_INIT(epwm, index) {
 		PRINTF("timer is not init\n");
 		goto epwm_pwm_init_error1;
 	}
-	// TODO Muxing
+
 epwm_pwm_init_exit:
 	return pwm;
 epwm_pwm_init_error1:
@@ -400,15 +451,15 @@ PWM_SET_PERIOD(epwm, pwm, us) {
  	
  	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
  	// PWM set LoadMode_CmpA_Zero
-	pwm->CMPCTL &= (~PWM_CMPCTL_LOADBMODE_BITS);
+	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_LOADBMODE_BITS);
     	// set the bits
-    	pwm->CMPCTL |= 0;
+    	pwm->timer->base->CMPCTL |= 0;
     	
     	//PWM set ShadowMode_CmpA 
-    	pwm->CMPCTL &= (~PWM_CMPCTL_SHDWBMODE_BITS);
+    	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_SHDWBMODE_BITS);
 
    	// set the bits
-   	pwm->CMPCTL |= (1 << 4);
+   	pwm->timer->base->CMPCTL |= (1 << 4);
    	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
@@ -416,67 +467,193 @@ PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
 	//TODO Setup CMPA (3.4.2 Counter-Compare Submodule Registers)
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	// PWM set LoadMode_CmpA_Zero
-	pwm->CMPCTL &= (~PWM_CMPCTL_LOADAMODE_BITS);
+	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_LOADAMODE_BITS);
     	// set the bits
-    	pwm->CMPCTL |= 0;
+    	pwm->timer->base->CMPCTL |= 0;
     	
     	//PWM set ShadowMode_CmpA 
-    	pwm->CMPCTL &= (~PWM_CMPCTL_SHDWAMODE_BITS);
+    	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_SHDWAMODE_BITS);
 
    	// set the bits
-   	pwm->CMPCTL |= (0 << 4);
+   	pwm->timer->base->CMPCTL |= (0 << 4);
    	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
     	
 	return 0;
 }
 PWM_OPS(epwm);
 #endif
-//! \brief Defines the base address of the pulse width modulation (PWM) 1 registers
-//!
-#define PWM_ePWM1_BASE_ADDR          (0x00006800)
 
-//! \brief Defines the base address of the pulse width modulation (PWM) 2 registers
-//!
-#define PWM_ePWM2_BASE_ADDR          (0x00006840)
-
-//! \brief Defines the base address of the pulse width modulation (PWM) 3 registers
-//!
-#define PWM_ePWM3_BASE_ADDR          (0x00006880)
-
-//! \brief Defines the base address of the pulse width modulation (PWM) 4 registers
-//!
-#define PWM_ePWM4_BASE_ADDR          (0x000068C0)
-
-//! \brief Defines the base address of the pulse width modulation (PWM) 5 registers
-//!
-#define PWM_ePWM5_BASE_ADDR          (0x00006900)
-
-//! \brief Defines the base address of the pulse width modulation (PWM) 6 registers
-//!
-#define PWM_ePWM6_BASE_ADDR          (0x00006940)
-
-//! \brief Defines the base address of the pulse width modulation (PWM) 7 registers
-//!
-#define PWM_ePWM7_BASE_ADDR          (0x00006980)
-
-//! \brief Defines the base address of the pulse width modulation (PWM) 8 registers
-//!
-#define PWM_ePWM8_BASE_ADDR          (0x000069C0)
-#ifdef CONFIG_MACH_C28X_ePWM0
-struct timer epwm0_data = {
+#ifdef CONFIG_MACH_C28X_ePWM1
+struct timer epwm1_data = {
 	TIMER_INIT_DEV(epwm)
-	HAL_NAME("epwm0 Timer")
+	HAL_NAME("epwm1 Timer")
 	.base = (volatile struct timer_reg *) PWM_ePWM1_BASE_ADDR,
 	// TODO IRQ
+	//.irq =
 };
-TIMER_ADDDEV(epwm, epwm0_data);
-#ifdef CONFIG_MACH_C28X_ePWM0_PWM
-struct pwm epwm0_pwm_data = {
+TIMER_ADDDEV(epwm, epwm1_data);
+#ifdef CONFIG_MACH_C28X_ePWM1_PWM
+struct pwm epwm1_pwm_data = {
 	PWM_INIT_DEV(epwm)
-	HAL_NAME("epwm0 PWM")
-	.timer = &epwm0_data;
-	// TODO Muxing
-};*/
-//PWM_ADDDEV(epwm, epwm0_pwm_data);
+	HAL_NAME("epwm1 PWM")
+	.timer = &epwm1_data,
+	.pinsA = EPWM1A,
+	.pinsB = EPWM1B,
+};
+PWM_ADDDEV(epwm, epwm1_pwm_data);
+#endif
+#endif
+
+
+#ifdef CONFIG_MACH_C28X_ePWM2
+struct timer epwm2_data = {
+	TIMER_INIT_DEV(epwm)
+	HAL_NAME("epwm2 Timer")
+	.base = (volatile struct timer_reg *) PWM_ePWM2_BASE_ADDR,
+	// TODO IRQ
+	//.irq =
+};
+TIMER_ADDDEV(epwm, epwm2_data);
+#ifdef CONFIG_MACH_C28X_ePWM2_PWM
+struct pwm epwm2_pwm_data = {
+	PWM_INIT_DEV(epwm)
+	HAL_NAME("epwm2 PWM")
+	.timer = &epwm2_data,
+	.pinsA = EPWM2A,
+	.pinsB = EPWM2B,
+};
+PWM_ADDDEV(epwm, epwm2_pwm_data);
+#endif
+#endif
+
+
+#ifdef CONFIG_MACH_C28X_ePWM3
+struct timer epwm3_data = {
+	TIMER_INIT_DEV(epwm)
+	HAL_NAME("epwm3 Timer")
+	.base = (volatile struct timer_reg *) PWM_ePWM3_BASE_ADDR,
+	// TODO IRQ
+	//.irq =
+};
+TIMER_ADDDEV(epwm, epwm3_data);
+#ifdef CONFIG_MACH_C28X_ePWM3_PWM
+struct pwm epwm3_pwm_data = {
+	PWM_INIT_DEV(epwm)
+	HAL_NAME("epwm3 PWM")
+	.timer = &epwm3_data,
+	.pinsA = EPWM3A,
+	.pinsB = EPWM3B,
+};
+PWM_ADDDEV(epwm, epwm3_pwm_data);
+#endif
+#endif
+
+
+#ifdef CONFIG_MACH_C28X_ePWM4
+struct timer epwm4_data = {
+	TIMER_INIT_DEV(epwm)
+	HAL_NAME("epwm4 Timer")
+	.base = (volatile struct timer_reg *) PWM_ePWM4_BASE_ADDR,
+	// TODO IRQ
+	//.irq =
+};
+TIMER_ADDDEV(epwm, epwm4_data);
+#ifdef CONFIG_MACH_C28X_ePWM4_PWM
+struct pwm epwm4_pwm_data = {
+	PWM_INIT_DEV(epwm)
+	HAL_NAME("epwm4 PWM")
+	.timer = &epwm4_data,
+	.pinsA = EPWM4A,
+	.pinsB = EPWM4B,
+};
+PWM_ADDDEV(epwm, epwm4_pwm_data);
+#endif
+#endif
+
+
+#ifdef CONFIG_MACH_C28X_ePWM5
+struct timer epwm5_data = {
+	TIMER_INIT_DEV(epwm)
+	HAL_NAME("epwm5 Timer")
+	.base = (volatile struct timer_reg *) PWM_ePWM5_BASE_ADDR,
+	// TODO IRQ
+	//.irq =
+};
+TIMER_ADDDEV(epwm, epwm5_data);
+#ifdef CONFIG_MACH_C28X_ePWM5_PWM
+struct pwm epwm5_pwm_data = {
+	PWM_INIT_DEV(epwm)
+	HAL_NAME("epwm5 PWM")
+	.timer = &epwm5_data,
+	.pinsA = EPWM5A,
+	.pinsB = EPWM5B,
+};
+PWM_ADDDEV(epwm, epwm5_pwm_data);
+#endif
+#endif
+
+
+#ifdef CONFIG_MACH_C28X_ePWM6
+struct timer epwm6_data = {
+	TIMER_INIT_DEV(epwm)
+	HAL_NAME("epwm6 Timer")
+	.base = (volatile struct timer_reg *) PWM_ePWM6_BASE_ADDR,
+	// TODO IRQ
+	//.irq =
+};
+TIMER_ADDDEV(epwm, epwm6_data);
+#ifdef CONFIG_MACH_C28X_ePWM6_PWM
+struct pwm epwm6_pwm_data = {
+	PWM_INIT_DEV(epwm)
+	HAL_NAME("epwm6 PWM")
+	.timer = &epwm6_data,
+	.pinsA = EPWM6A,
+	.pinsB = EPWM6B,
+};
+PWM_ADDDEV(epwm, epwm6_pwm_data);
+#endif
+#endif
+
+
+#ifdef CONFIG_MACH_C28X_ePWM7
+struct timer epwm7_data = {
+	TIMER_INIT_DEV(epwm)
+	HAL_NAME("epwm7 Timer")
+	.base = (volatile struct timer_reg *) PWM_ePWM7_BASE_ADDR,
+	// TODO IRQ
+	//.irq =
+};
+TIMER_ADDDEV(epwm, epwm7_data);
+#ifdef CONFIG_MACH_C28X_ePWM7_PWM
+struct pwm epwm7_pwm_data = {
+	PWM_INIT_DEV(epwm)
+	HAL_NAME("epwm7 PWM")
+	.timer = &epwm7_data,
+	.pinsA = EPWM7A,
+	.pinsB = EPWM7B,
+};
+PWM_ADDDEV(epwm, epwm7_pwm_data);
+#endif
+#endif
+
+
+#ifdef CONFIG_MACH_C28X_ePWM8
+struct timer epwm8_data = {
+	TIMER_INIT_DEV(epwm)
+	HAL_NAME("epwm8 Timer")ss
+	.base = (volatile struct timer_reg *) PWM_ePWM8_BASE_ADDR,
+	// TODO IRQ
+	//.irq = 
+};
+TIMER_ADDDEV(epwm, epwm8_data);
+#ifdef CONFIG_MACH_C28X_ePWM8_PWM
+struct pwm epwm8_pwm_data = {
+	PWM_INIT_DEV(epwm)
+	HAL_NAME("epwm8 PWM")
+	.timer = &epwm8_data,
+	.pinsA = EPWM8A,
+	.pinsB = EPWM8B,
+};
+PWM_ADDDEV(epwm, epwm8_pwm_data);
 #endif
 #endif

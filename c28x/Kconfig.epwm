@@ -3,12 +3,75 @@ config MACH_C28X_ePWM_PWM
 	depends on PWM
 config MACH_C28X_ePWM_DEBUG
 	bool "Activate Debug"
-menuconfig MACH_C28X_ePWM0
-	bool "ePWM 0"
-	if MACH_C28X_ePWM0
-		config MACH_C28X_ePWM0_PWM
-			bool "activate PWM 0A"
-			if MACH_C28X_ePWM0_PWM
-				comment "TODO Muxing"
+menuconfig MACH_C28X_ePWM1
+	bool "ePWM 1"
+	if MACH_C28X_ePWM1
+		config MACH_C28X_ePWM1_PWM
+			bool "activate PWM 1A"
+			if MACH_C28X_ePWM1_PWM
+				comment "EPWM1A GPIO0	EPWM1B GPIO1"
+			endif
+	endif
+menuconfig MACH_C28X_ePWM2
+	bool "ePWM 2"
+	if MACH_C28X_ePWM2
+		config MACH_C28X_ePWM2_PWM
+			bool "activate PWM 2A"
+			if MACH_C28X_ePWM2_PWM
+				comment "EPWM2A GPIO2	EPWM2B GPIO3"
+			endif
+	endif
+menuconfig MACH_C28X_ePWM3
+	bool "ePWM 3"
+	if MACH_C28X_ePWM3
+		config MACH_C28X_ePWM3_PWM
+			bool "activate PWM 3A"
+			if MACH_C28X_ePWM3_PWM
+				comment "EPWM3A GPIO4	EPWM3B GPIO5"
+			endif
+	endif
+menuconfig MACH_C28X_ePWM4
+	bool "ePWM 4"
+	if MACH_C28X_ePWM4
+		config MACH_C28X_ePWM4_PWM
+			bool "activate PWM 4A"
+			if MACH_C28X_ePWM4_PWM
+				comment "EPWM4A GPIO6	EPWM4B GPIO7"
+			endif
+	endif
+menuconfig MACH_C28X_ePWM5
+	bool "ePWM 5"
+	if MACH_C28X_ePWM5
+		config MACH_C28X_ePWM5_PWM
+			bool "activate PWM 5A"
+			if MACH_C28X_ePWM5_PWM
+				comment "EPWM5A GPIO8	EPWM5B GPIO9"
+			endif
+	endif
+menuconfig MACH_C28X_ePWM6
+	bool "ePWM 6"
+	if MACH_C28X_ePWM6
+		config MACH_C28X_ePWM6_PWM
+			bool "activate PWM 6A"
+			if MACH_C28X_ePWM6_PWM
+				comment "EPWM6A GPIO10	EPWM6B GPIO11"
+			endif
+	endif
+menuconfig MACH_C28X_ePWM7
+	bool "ePWM 7"
+	if MACH_C28X_ePWM7
+		config MACH_C28X_ePWM7_PWM
+			bool "activate PWM 7A"
+			if MACH_C28X_ePWM7_PWM
+				comment "EPWM7A GPIO40	EPWM7B GPIO41"
+			endif
+	endif
+menuconfig MACH_C28X_ePWM8
+	bool "ePWM 8"
+	if MACH_C28X_ePWM8
+		config MACH_C28X_ePWM8_PWM
+			bool "activate PWM 8A"
+			if MACH_C28X_ePWM8_PWM
+				comment "EPWM8A GPIO42	EPWM8B GPIO43"
 			endif
 	endif

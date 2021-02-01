@@ -10,7 +10,7 @@
 #include <iomux.h>
 #include <clock.h>
 #include <cpu.h>
-
+#ifdef 0
 struct timer_reg {
 	/**
 	 * Counter Register
@@ -193,12 +193,6 @@ TIMER_PERIODIC(c28x, timer, us) {
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
-TIMER_GET_TIME(c28x, timer) {
-	/* down counter */
-	uint32_t ticks = timer->base->PRD - timer->base->TIM;
-	int64_t freq = clock_getCPUSpeed(clock_init()) / 1000000;
-	return (ticks / freq);
-}
 TIMER_OPS(c28x);
 
 #ifdef CONFIG_MACH_C28X_CPU_TIMER0
@@ -251,4 +245,5 @@ struct timer cpu_timer2 = {
 	.config = &cpu_timer2_config,
 };
 TIMER_ADDDEV(c28x, cpu_timer2);
+#endif
 #endif
