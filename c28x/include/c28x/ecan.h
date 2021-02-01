@@ -269,7 +269,9 @@ struct can {
 
 
 
+#ifdef CONFIG_MACH_C28X_ECAN0
 struct can ecan0;
+#endif
 
 
 
