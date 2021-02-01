@@ -460,6 +460,7 @@ static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickTy
 
 	// reset ack flag
 	ECAN_REG32_SET(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
+	while(ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID));
 
 	// set message length
 	ECAN_REG32_UPDATE(mbox->CANMSGCTRL, ECAN_MBOX_CANMSGCTRL_DLC_MASK, ECAN_MBOX_CANMSGCTRL_DLC(msg->length));
@@ -515,7 +516,15 @@ static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickTy
 		// reset task
 		can->tx_task = NULL;
 	} else {
-		while(!(ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID)));
+		while(!(ECAN_REG32_GET(can->base->CANTA) & BIT(ECAN_TX_MBOX_ID))) {
+			// CAN controller entered bus-off state?
+			if (ECAN_REG32_GET(can->base->CANES) & ECAN_CANES_BO) {
+				// request abort
+				ECAN_REG32_SET(can->base->CANTRR, BIT(ECAN_TX_MBOX_ID));
+
+				goto ecan_send_error0;
+			}
+		}
 
 		// reset transmit ack flag
 		ECAN_REG32_SET(can->base->CANTA, BIT(ECAN_TX_MBOX_ID));
