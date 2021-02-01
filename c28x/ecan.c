@@ -47,7 +47,7 @@ static interrupt void ecan_handle_system_irq (void) {
 
 	// CAN module has entered "error passive" mode ?
 	if (flags & ECAN_CANGIFx_EPIFx) {
-		err |= CAN_ERR_PROT;
+		err |= CAN_ERR_CRTL;
 		data |= CAN_ERR_CRTL_TX_PASSIVE;
 
 		// reset flag
