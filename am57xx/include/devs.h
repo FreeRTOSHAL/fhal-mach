@@ -75,9 +75,9 @@ HAL_DEFINE_GLOBAL_ARRAY(temp);
 #define TEMP_DSPEVE_ID HAL_GET_ID(temp, am57xx, temp_dspeve)
 HAL_DEFINE_GLOBAL_ARRAY(can);
 #ifdef CONFIG_MACH_AM57xx_DCAN_CAN1
-#define DCAN1_ID HAL_GET_ID(can, ti, dcan1)
+#define DCAN1_ID HAL_GET_ID(can, am57xx, dcan1)
 #endif
 #ifdef CONFIG_MACH_AM57xx_DCAN_CAN2
-#define DCAN2_ID HAL_GET_ID(can, ti, dcan2)
+#define DCAN2_ID HAL_GET_ID(can, am57xx, dcan2)
 #endif
 #endif
