@@ -251,6 +251,10 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 	}
 
 
+	can->enable_pin = pin;
+	can->enable_pin_high = pinHigh;
+
+
 	clk = clock_init();
 	can->clk_freq = clock_getCPUSpeed(clk)/2;
 
@@ -673,6 +677,10 @@ CAN_RECV_ISR(ecan, can, filterID, msg) {
 }
 
 CAN_UP(ecan, can) {
+	if (can->enable_pin) {
+		gpioPin_setValue(can->enable_pin, can->enable_pin_high);
+	}
+
 	// disable local power down mode
 	ECAN_REG32_CLEAR_BITS(can->base->CANMC, ECAN_CANMC_PDR);
 
@@ -691,6 +699,10 @@ CAN_DOWN(ecan, can) {
 
 	// wait for power down mode
 	while(!(ECAN_REG32_GET(can->base->CANES) & ECAN_CANES_PDA));
+
+	if (can->enable_pin) {
+		gpioPin_setValue(can->enable_pin, !can->enable_pin_high);
+	}
 
 	return 0;
 }

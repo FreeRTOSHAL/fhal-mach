@@ -4,6 +4,7 @@
 
 #include <FreeRTOS.h>
 #include <stdint.h>
+#include <gpio.h>
 #include <can.h>
 #define CAN_PRV
 #include <can_prv.h>
@@ -250,6 +251,8 @@ struct can {
 	TaskHandle_t tx_task;
 	bool (*error_callback)(struct can *can, can_error_t error, can_errorData_t d, void *userData);
 	void *error_callback_data;
+	struct gpio_pin *enable_pin;
+	bool enable_pin_high;
 };
 
 
