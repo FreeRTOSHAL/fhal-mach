@@ -1,3 +1,8 @@
+/* SPDX-License-Identifier: MIT */
+/*
+ * Author: Jonathan Klamroth <jonathan.klamroth@student.hs-rm.de>
+ * Date: 2021
+ */
 #ifndef C28X_ECAN_H_
 #define C28X_ECAN_H_
 

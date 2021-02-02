@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 /*
  * Author: Jonathan Klamroth <jonathan.klamroth@student.hs-rm.de>
- * Date: 2020
+ * Date: 2021
  */
 #include <FreeRTOS.h>
 #include <stdint.h>
