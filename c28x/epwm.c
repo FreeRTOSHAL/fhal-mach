@@ -1,6 +1,5 @@
 #include "epwm.h"
 
-
 TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	int32_t ret;
 	struct timer *timer;
@@ -177,11 +176,10 @@ TIMER_PERIODIC(epwm, timer, us) {
 	return timer_start(timer);
 }
 
-TIMER_GET_TIME(c28x, timer) {
+TIMER_GET_TIME(epwm, timer) {
 	/* down counter */
-	uint32_t ticks = timer->base->TBPRD - timer->base->TBCTR;
-	int64_t freq = clock_getCPUSpeed(clock_init()) / 1000000;
-	return (ticks / freq);
+	uint32_t counter = timer->base->TBCTR;
+	return counterToUS(timer, counter);
 }
 
 TIMER_OPS(epwm);

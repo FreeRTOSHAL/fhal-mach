@@ -1,7 +1,5 @@
 #ifndef EPWM_H_
 #define EPWM_H_
-
-
 #include <stdio.h>
 #include <timer.h>
 #define TIMER_PRV
