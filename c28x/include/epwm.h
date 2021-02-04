@@ -22,6 +22,13 @@
 # define PRINTF(fmt, ...)
 #endif
 
+//! \brief Defines the location of the ETCR bits in the ETCLR register
+//!
+#define PWM_ETCLR_INT_BITS		(1 << 0)
+
+//! \brief Defines the location of the INTPRD bits in the ETPS register
+//!
+#define PWM_ETPS_INTPRD_BITS		(3 << 0)
 //! \brief Defines the location of the INTSEL bits in the ETSEL register
 //!
 #define PWM_ETSEL_INTSEL_BITS		(7 << 0)

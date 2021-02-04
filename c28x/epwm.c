@@ -51,6 +51,11 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	
 	// setup  the Interrupt 
 	timer->base->ETSEL |= PWM_ETSEL_INTEN_BITS;
+	if(prescaler<=3){
+		timer->base->ETPS &= (~PWM_ETPS_INTPRD_BITS);
+		timer->base->ETPS |= (prescaler << 0);
+	}
+	timer->base->ETCLR = PWM_ETCLR_INT_BITS;
 
 	// setup the Timer-Based Phase Register (TBPHS)
 	timer->base->TBPHS = 0;
@@ -183,8 +188,8 @@ TIMER_GET_TIME(epwm, timer) {
 }
 
 TIMER_OPS(epwm);
-#ifdef 0
-#ifdef CONFIG_MACH_C28X_ePWM_PWM
+
+//#ifdef CONFIG_MACH_C28X_ePWM_PWM
 
 PWM_INIT(epwm, index) {
 	int32_t ret;
@@ -257,7 +262,6 @@ PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
 	return 0;
 }
 PWM_OPS(epwm);
-#endif
 
 #ifdef CONFIG_MACH_C28X_ePWM1
 struct timer epwm1_data = {
@@ -265,9 +269,10 @@ struct timer epwm1_data = {
 	HAL_NAME("epwm1 Timer")
 	.base = (volatile struct timer_reg *) PWM_ePWM1_BASE_ADDR,
 	// TODO IRQ
-	//.irq =
+	.irq = EPWM1_INT_IRQn,
 };
 TIMER_ADDDEV(epwm, epwm1_data);
+
 #ifdef CONFIG_MACH_C28X_ePWM1_PWM
 struct pwm epwm1_pwm_data = {
 	PWM_INIT_DEV(epwm)
@@ -286,7 +291,7 @@ struct timer epwm2_data = {
 	HAL_NAME("epwm2 Timer")
 	.base = (volatile struct timer_reg *) PWM_ePWM2_BASE_ADDR,
 	// TODO IRQ
-	//.irq =
+	.irq = EPWM2_INT_IRQn,
 };
 TIMER_ADDDEV(epwm, epwm2_data);
 #ifdef CONFIG_MACH_C28X_ePWM2_PWM
@@ -307,7 +312,7 @@ struct timer epwm3_data = {
 	HAL_NAME("epwm3 Timer")
 	.base = (volatile struct timer_reg *) PWM_ePWM3_BASE_ADDR,
 	// TODO IRQ
-	//.irq =
+	irq = EPWM3_INT_IRQn,
 };
 TIMER_ADDDEV(epwm, epwm3_data);
 #ifdef CONFIG_MACH_C28X_ePWM3_PWM
@@ -328,7 +333,7 @@ struct timer epwm4_data = {
 	HAL_NAME("epwm4 Timer")
 	.base = (volatile struct timer_reg *) PWM_ePWM4_BASE_ADDR,
 	// TODO IRQ
-	//.irq =
+	.irq = EPWM4_INT_IRQn,
 };
 TIMER_ADDDEV(epwm, epwm4_data);
 #ifdef CONFIG_MACH_C28X_ePWM4_PWM
@@ -349,7 +354,7 @@ struct timer epwm5_data = {
 	HAL_NAME("epwm5 Timer")
 	.base = (volatile struct timer_reg *) PWM_ePWM5_BASE_ADDR,
 	// TODO IRQ
-	//.irq =
+	.irq = EPWM5_INT_IRQn,
 };
 TIMER_ADDDEV(epwm, epwm5_data);
 #ifdef CONFIG_MACH_C28X_ePWM5_PWM
@@ -370,7 +375,7 @@ struct timer epwm6_data = {
 	HAL_NAME("epwm6 Timer")
 	.base = (volatile struct timer_reg *) PWM_ePWM6_BASE_ADDR,
 	// TODO IRQ
-	//.irq =
+	.irq = EPWM6_INT_IRQn,
 };
 TIMER_ADDDEV(epwm, epwm6_data);
 #ifdef CONFIG_MACH_C28X_ePWM6_PWM
@@ -391,7 +396,7 @@ struct timer epwm7_data = {
 	HAL_NAME("epwm7 Timer")
 	.base = (volatile struct timer_reg *) PWM_ePWM7_BASE_ADDR,
 	// TODO IRQ
-	//.irq =
+	.irq = EPWM7_INT_IRQn,
 };
 TIMER_ADDDEV(epwm, epwm7_data);
 #ifdef CONFIG_MACH_C28X_ePWM7_PWM
@@ -413,7 +418,7 @@ struct timer epwm8_data = {
 	HAL_NAME("epwm8 Timer")
 	.base = (volatile struct timer_reg *) PWM_ePWM8_BASE_ADDR,
 	// TODO IRQ
-	//.irq = 
+	.irq = EPWM8_INT_IRQn,
 };
 TIMER_ADDDEV(epwm, epwm8_data);
 #ifdef CONFIG_MACH_C28X_ePWM8_PWM
@@ -425,6 +430,5 @@ struct pwm epwm8_pwm_data = {
 	.pinsB = EPWM8B,
 };
 PWM_ADDDEV(epwm, epwm8_pwm_data);
-#endif
 #endif
 #endif
