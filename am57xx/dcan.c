@@ -844,7 +844,7 @@ struct can dcan1 = {
 	.raminit_done_mask = DCAN1_RAMINIT_DONE_MASK,
 };
 
-CAN_ADDDEV(ti, dcan1);
+CAN_ADDDEV(am57xx, dcan1);
 
 void CAN1_INT0_ISR(){
 	dcan_handleInt0IRQ(&dcan1);
@@ -883,7 +883,7 @@ struct can dcan2 = {
 	.raminit_done_mask = DCAN2_RAMINIT_DONE_MASK,
 };
 
-CAN_ADDDEV(ti, dcan2);
+CAN_ADDDEV(am57xx , dcan2);
 
 void CAN2_INT0_ISR(){
 	dcan_handleInt0IRQ(&dcan2);
