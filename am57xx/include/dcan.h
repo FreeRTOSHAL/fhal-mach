@@ -402,4 +402,3 @@ void CAN2_PARITY_ISR();
 #define DCAN_CLKCTRL_MODULEMODE_ENABLE			0x00000002ul
 
 #endif
-// vim: noexpandtab ts=4 sts=4 sw=4

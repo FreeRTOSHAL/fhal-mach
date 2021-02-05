@@ -896,4 +896,3 @@ void CAN2_PARITY_ISR(){
 }
 
 #endif
-// vim: noexpandtab ts=4 sts=4 sw=4
