@@ -174,6 +174,10 @@
 
 #define ECAN_ERR_COUNT_WARN_THRESHOLD				(96)
 
+#define ECAN_TX_NOTIFY_ID							(0)
+#define ECAN_TX_NOTIFY_VAL_SENT						BIT(0)
+#define ECAN_TX_NOTIFY_VAL_ABORTED					BIT(1)
+
 
 
 struct ecan_pin {

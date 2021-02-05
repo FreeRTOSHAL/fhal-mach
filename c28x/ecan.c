@@ -153,7 +153,19 @@ static interrupt void ecan_handle_mbox_irq (void) {
 		ECAN_REG32_SET(can->base->CANTA, BIT(mbox_id));
 
 		if (can->tx_task) {
-			vTaskNotifyGiveIndexedFromISR(can->tx_task, 0, &pxHigherPriorityTaskWoken);
+			(void) xTaskNotifyIndexedFromISR(can->tx_task, ECAN_TX_NOTIFY_ID, ECAN_TX_NOTIFY_VAL_SENT, eSetBits, &pxHigherPriorityTaskWoken);
+		}
+	} else if (ECAN_REG32_GET(can->base->CANAA) & BIT(mbox_id)) {
+		CONFIG_ASSERT(mbox_id == ECAN_TX_MBOX_ID);
+
+		// reset abort ack flag
+		ECAN_REG32_SET(can->base->CANAA, BIT(mbox_id));
+
+		// reset ack error flag
+		ECAN_REG32_SET(can->base->CANES, ECAN_CANES_ACKE);
+
+		if (can->tx_task) {
+			(void) xTaskNotifyIndexedFromISR(can->tx_task, ECAN_TX_NOTIFY_ID, ECAN_TX_NOTIFY_VAL_ABORTED, eSetBits, &pxHigherPriorityTaskWoken);
 		}
 	} else if (ECAN_REG32_GET(can->base->CANRMP) & BIT(mbox_id)) {
 		// check if a message was overwritten
@@ -360,7 +372,8 @@ CAN_INIT(ecan, index, bitrate, pin, pinHigh, callback, data) {
 	// WLIM: warning level
 	// EPIM: error-passive
 	// BOIM: bus-off
-	ECAN_REG32_SET_BITS(can->base->CANGIM, ECAN_CANGIM_BOIM | ECAN_CANGIM_EPIM | ECAN_CANGIM_WLIM | ECAN_CANGIM_I1EN | ECAN_CANGIM_I0EN);
+	// AAIM: abort ack
+	ECAN_REG32_SET_BITS(can->base->CANGIM, ECAN_CANGIM_AAIM | ECAN_CANGIM_BOIM | ECAN_CANGIM_EPIM | ECAN_CANGIM_WLIM | ECAN_CANGIM_I1EN | ECAN_CANGIM_I0EN);
 
 	// set interrupt line #1 for all mailboxes
 	ECAN_REG32_SET(can->base->CANMIL, 0xFFFFFFFFUL);
@@ -568,21 +581,33 @@ static int32_t ecan_send (struct can *can, struct can_msg *msg, bool isr, TickTy
 
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 
+	if (!isr) {
+		// clear a pending notification and its value (if any)
+		xTaskNotifyStateClearIndexed(can->tx_task, ECAN_TX_NOTIFY_ID);
+		ulTaskNotifyValueClearIndexed(can->tx_task, ECAN_TX_NOTIFY_ID, UINT32_MAX);
+	}
+
 	// start transmission
 	ECAN_REG32_SET(can->base->CANTRS, BIT(ECAN_TX_MBOX_ID));
 
 	// wait for ack
 	if (!isr) {
-		ret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
+		ret = xTaskNotifyWaitIndexed(ECAN_TX_NOTIFY_ID, 0, UINT32_MAX, &tmp, waittime);
 		if (ret != pdTRUE) {
 			// request abort
 			ECAN_REG32_SET(can->base->CANTRR, BIT(ECAN_TX_MBOX_ID));
 
 			// wait for confirmation
-			ret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, 1 / portTICK_PERIOD_MS);
+			ret = xTaskNotifyWaitIndexed(ECAN_TX_NOTIFY_ID, 0, UINT32_MAX, &tmp, 1 / portTICK_PERIOD_MS);
 			if (ret != pdTRUE) {
+				// no notification received -> error
 				goto ecan_send_error0;
 			}
+		}
+
+		// notification received -> check value
+		if ((tmp & ECAN_TX_NOTIFY_VAL_ABORTED) || !(tmp & ECAN_TX_NOTIFY_VAL_SENT)) {
+			goto ecan_send_error0;
 		}
 
 		// reset task
