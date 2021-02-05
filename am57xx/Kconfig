@@ -102,7 +102,7 @@ menuconfig AM57xx_TIMER
 	source mach/am57xx/Kconfig.timer
 menuconfig MACH_AM57xx_DCAN
     depends on CAN
-    select TI_DCAN
+    select USE_TASK_NOTIFICATIONS
     bool "Activate DCAN"
     default n
     if MACH_AM57xx_DCAN
