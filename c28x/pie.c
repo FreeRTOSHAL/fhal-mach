@@ -82,6 +82,10 @@ int32_t irq_disable(int32_t irqnr) {
 		uint32_t group = ((uint32_t) irqnr) >> 3;
 		uint32_t bit = ((uint32_t) irqnr) & 0x7;
 		ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+		if ((pie->PIEIER_PIEIFR[group].IER & ~BIT(bit)) == 0) {
+			/* disable group interrupt first */
+			IER &= ~BIT(group);
+		}
 		pie->PIEIER_PIEIFR[group].IER &= ~BIT(bit);
 		DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	}
