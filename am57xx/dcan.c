@@ -7,7 +7,7 @@
 #include <iomux.h>
 #include <vector.h>
 #include <stdio.h>
-#include <clockid.h>
+#include <clk.h>
 #include <FreeRTOS.h>
 #include <string.h>
 #include <stdint.h>

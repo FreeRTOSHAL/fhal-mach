@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <clock.h>
 #include <system.h>
-#include <clockid.h>
+#include <clk.h>
 
 struct clock {
 	struct clock_generic gen;
