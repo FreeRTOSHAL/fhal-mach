@@ -1,4 +1,10 @@
 
+config TI_DCAN_VERBOSE
+	bool "Activate Verbose mode"
+	default n
+	help
+		Activate Verbose mode
+		Debug information is send via printf
 comment "Warning: Silent mode disables physical connection of CAN_TX to the CAN Bus"
     depends on TI_DCAN_SILENT_MODE
 config TI_DCAN_SILENT_MODE

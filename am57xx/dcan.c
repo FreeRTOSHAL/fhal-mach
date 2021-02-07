@@ -15,8 +15,13 @@
 #include <irq.h>
 #include <ctrl.h>
 
+#ifdef CONFIG_TI_DCAN_VERBOSE
 #define PRINTF(fmt, ...) printf("DCAN: " fmt, ##__VA_ARGS__)
 #define PRINTDEBUG PRINTF("File: %s, Function: %s, Line: %i\n", __FILE__, __FUNCTION__, __LINE__)
+#else
+#define PRINTF(fmt, ...) 
+#define PRINTDEBUG 
+#endif 
 
 
 /* Transfer a complete message structure into a message object. (Configuration)*/
