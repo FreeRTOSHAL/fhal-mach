@@ -82,11 +82,94 @@ int32_t irq_disable(int32_t irqnr) {
 		uint32_t group = ((uint32_t) irqnr) >> 3;
 		uint32_t bit = ((uint32_t) irqnr) & 0x7;
 		ENABLE_PROTECTED_REGISTER_WRITE_MODE;
-		if ((pie->PIEIER_PIEIFR[group].IER & ~BIT(bit)) == 0) {
-			/* disable group interrupt first */
+		/*
+		 * Step 1: Disable global interrupts (INTM = 1)
+		 */
+		portDISABLE_INTERRUPTS();
+		/*
+		 * Step 2: Clear the PIEIERx.y bit to disable the interrupt for a given peripheral.
+		 * This can be done for one or more peripherals within the same group.
+		 */
+		pie->PIEIER_PIEIFR[group].IER &= ~BIT(bit);
+		
+		/* 
+		 * Step 3:
+		 * Wait 5 cycles. This delay is required to insure that any interrupt that
+		 * was incoming to the CPU has been flagged within the CPU IFR register.
+		 */
+		portNOP();
+		portNOP();
+		portNOP();
+		portNOP();
+		portNOP();
+		
+		/*
+		 * Step 4: Clear the CPU IFRx bit for the peripheral group. This is a safe
+		 * operation on the CPU IFR register.
+		 * IFR &= ~BIT(group) is not suppored by the compiler :(
+		 */
+		{
+			switch(group) {
+				case 0:
+					__asm(" AND IFR, #1");
+					break;
+				case 1:
+					__asm(" AND IFR, #2");
+					break;
+				case 2:
+					__asm(" AND IFR, #4");
+					break;
+				case 3:
+					__asm(" AND IFR, #8");
+					break;
+				case 4:
+					__asm(" AND IFR, #10");
+					break;
+				case 5:
+					__asm(" AND IFR, #20");
+					break;
+				case 6:
+					__asm(" AND IFR, #40");
+					break;
+				case 7:
+					__asm(" AND IFR, #80");
+					break;
+				case 8:
+					__asm(" AND IFR, #100");
+					break;
+				case 9:
+					__asm(" AND IFR, #200");
+					break;
+				case 10:
+					__asm(" AND IFR, #400");
+					break;
+				case 11:
+					__asm(" AND IFR, #800");
+					break;
+				case 12:
+					__asm(" AND IFR, #1000");
+					break;
+				case 13:
+					__asm(" AND IFR, #2000");
+					break;
+			}
+		}
+
+		/*
+		 * Step 5: Clear the PIEACKx bit for the peripheral group
+		 */
+		pie->PIEACK |= BIT(group);
+
+		if (pie->PIEIER_PIEIFR[group].IER == 0) {
+			/* disable group interrupt
+			 * no peripheral in this group is enabled any more
+			 */
 			IER &= ~BIT(group);
 		}
-		pie->PIEIER_PIEIFR[group].IER &= ~BIT(bit);
+		/*
+		 * Step 6: Enable global interrupts (INTM = 0)
+		 */
+		portENABLE_INTERRUPTS();
 		DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	}
 	return 0;
