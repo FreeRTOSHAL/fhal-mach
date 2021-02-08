@@ -49,12 +49,9 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	//Timer set SyncMode
 	timer->base->TBCTL &= (~TIMER_TBCTL_SYNCOSEL_BITS);
 	
-	// setup  the Interrupt 
-	timer->base->ETSEL |= PWM_ETSEL_INTEN_BITS;
-	if(prescaler<=3){
-		timer->base->ETPS &= (~PWM_ETPS_INTPRD_BITS);
-		timer->base->ETPS |= (prescaler << 0);
-	}
+	//disable  the Interrupt 
+	timer->base->ETSEL &= ~PWM_ETSEL_INTEN_BITS;
+	
 	timer->base->ETCLR = PWM_ETCLR_INT_BITS;
 
 	// setup the Timer-Based Phase Register (TBPHS)
@@ -85,14 +82,20 @@ TIMER_SET_OVERFLOW_CALLBACK(epwm, timer, callback, data) {
 	timer->callback = callback;
 	timer->data = data;
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
-	
-	/* Clear Interrupt Event Select Bits */
-	timer->base->ETSEL &= ~PWM_ETSEL_INTSEL_BITS;
-	/* if down Counter timer must set up as Down or Up/Down Counter */
-	timer->base->ETSEL |= (1 << 0);
-	/* Enable this Interrupt */
-	timer->base->ETSEL |= PWM_ETSEL_INTEN_BITS;
-	irq_enable(timer->irq);
+	if (callback !=NULL){
+		/* Clear Interrupt Event Select Bits */
+		timer->base->ETSEL &= ~PWM_ETSEL_INTSEL_BITS;
+		/* if down Counter timer must set up as Down or Up/Down Counter */
+		timer->base->ETSEL |= (1 << 0);
+		/* Enable this Interrupt */
+		timer->base->ETSEL |= PWM_ETSEL_INTEN_BITS;
+		irq_enable(timer->irq);
+	}else{
+		/* Desable this Interrupt */
+		timer->base->ETSEL &= ~PWM_ETSEL_INTEN_BITS;
+		timer->base->ETPS &= ~PWM_ETPS_INTPRD_BITS;
+		irq_disable(timer->irq);
+	}
 	
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
@@ -100,29 +103,33 @@ TIMER_SET_OVERFLOW_CALLBACK(epwm, timer, callback, data) {
 TIMER_START(epwm, timer) {
 	// TODO Start Timer
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
-	/* Start Timer set to down Counter default is 0x3 == disable */
+	/* Start Timer set to PWM_CounterMode_Down=(0 << 0) Counter default is 0x3 == disable */
 	timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_CTRMODE_BITS) | (0x1 << 0);
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
 TIMER_STOP(epwm, timer) {
 	// TODO Stop Timer
-	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	
 	/* Disable timer */
+	timer->base->TBCTL &= ~PWM_TBCTL_FREESOFT_BITS;
 	timer->base->TBCTL &= ~PWM_TBCTL_CTRMODE_BITS;
-
-	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
 
 void c28x_pwm_timerIRQHandler(struct timer *timer) {
-	bool wakeThread = false; 
+	bool wakeThread = false;
 	if (timer->callback) {
 		wakeThread = timer->callback(timer, timer->data);
 	} else {
 		timer_stop(timer);
 	}
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	timer->base->ETCLR |= PWM_ETCLR_INT_BITS;
+	timer->base->ETCLR &= ~PWM_ETCLR_INT_BITS;
+	irq_clear(timer->irq);
 	portYIELD_FROM_ISR(wakeThread);
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 }
 
 
@@ -175,10 +182,15 @@ static uint64_t USToCounter(struct timer *timer, uint64_t value) {
 TIMER_ONESHOT(epwm, timer, us) {
 	// TODO Programm the timer to oneshot
 	// TBCTL FREE, SOFT = 1 (Stop when counter completes a whole cycle)
+	uint64_t x = USToCounter(timer, us);
+	if(x > UINT16_MAX -1){
+		return -1;
+	}
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	timer->base->TBPRD = USToCounter(timer, us);
 	timer->base->TBCTL &= (~TIMER_TBCTL_FREESOFT_BITS);
+	//PWM_RunMode_SoftStopAfterCycle=(1 << 14)
 	timer->base->TBCTL |=(1 << 14);
-	timer->base->TBCTR = USToCounter(timer, us);
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return timer_start(timer);
 }
@@ -186,11 +198,15 @@ TIMER_ONESHOT(epwm, timer, us) {
 TIMER_PERIODIC(epwm, timer, us) {
 	// TODO Programm the timer to periotic
 	// TBCTL FREE, SOFT = 2 (Free-Run)
+	uint64_t x = USToCounter(timer, us);
+	if(x > UINT16_MAX -1){
+		return -1;
+	}
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	timer->base->TBPRD = USToCounter(timer, us );
 	timer->base->TBCTL &= (~TIMER_TBCTL_FREESOFT_BITS);
+	//PWM_RunMode_FreeRun=(2 << 14) 
 	timer->base->TBCTL |=(2 << 14);
-	
-	timer->base->TBCTR = USToCounter(timer, us );
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return timer_start(timer);
 }
@@ -203,7 +219,7 @@ TIMER_GET_TIME(epwm, timer) {
 
 TIMER_OPS(epwm);
 
-//#ifdef CONFIG_MACH_C28X_ePWM_PWM
+#ifdef CONFIG_MACH_C28X_ePWM_PWM
 
 PWM_INIT(epwm, index) {
 	int32_t ret;
@@ -243,24 +259,37 @@ PWM_DEINIT(epwm, pwm) {
 PWM_SET_PERIOD(epwm, pwm, us) {
 	//TODO Setup Period and init pwm
 	//Setup CMPB (3.4.2 Counter-Compare Submodule Registers)
-	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	
+	uint64_t x = USToCounter(timer, us);
+	if(x > UINT16_MAX -1){
+		return -1;
+	}
+	
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+
+	//PWM set Period
+	pwm->timer->base->TBPRD = USToCounter(pwm->timer, us );
 	// PWM set LoadMode_CmpB_Zero
 	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_LOADBMODE_BITS);
-	
 	//PWM set ShadowMode_CmpB
 	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_SHDWBMODE_BITS);
 	pwm->timer->base->CMPCTL |= (1 << 4);
-	
-	//PWM set Period
-	pwm->timer->base->TBPRD = USToCounter(pwm->timer, us );
 	
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
 PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
 	//TODO Setup CMPA (3.4.2 Counter-Compare Submodule Registers)
+	
+	uint64_t x = USToCounter(timer, us);
+	if(x > UINT16_MAX -1){
+		return -1;
+	}
+	
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	
+	//PWM set DUTY 
+	pwm->timer->base->CMPA = USToCounter(pwm->timer, us); 
 	
 	// PWM set LoadMode_CmpA_Zero
 	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_LOADAMODE_BITS);
@@ -268,15 +297,12 @@ PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
 	//PWM set ShadowMode_CmpA 
 	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_SHDWAMODE_BITS);
 	
-	//PWM set DUTY 
-	pwm->timer->base->CMPA = USToCounter(pwm->timer, us);
-	
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	
 	return 0;
 }
 PWM_OPS(epwm);
-
+#endif
 #ifdef CONFIG_MACH_C28X_ePWM1
 extern void epwm_timer1_irqHandler();
 struct timer epwm1_data = {
@@ -286,10 +312,11 @@ struct timer epwm1_data = {
 	// TODO IRQ
 	.irq = EPWM1_INT_IRQn,
 	.irqHandler = epwm_timer1_irqHandler,
+	.clk = CLK_PCLKCR1_EPWM1ENCLK_BITS, 
 	
 };
 TIMER_ADDDEV(epwm, epwm1_data);
-void epwm_timer1_irqHandler() {
+void interrupt epwm_timer1_irqHandler() {
 	c28x_pwm_timerIRQHandler(&epwm1_data);
 }
 #ifdef CONFIG_MACH_C28X_ePWM1_PWM
@@ -313,9 +340,10 @@ struct timer epwm2_data = {
 	// TODO IRQ
 	.irq = EPWM2_INT_IRQn,
 	.irqHandler = epwm_timer2_irqHandler,
+	.clk = CLK_PCLKCR2_EPWM1ENCLK_BITS, 
 };
 TIMER_ADDDEV(epwm, epwm2_data);
-void epwm_timer2_irqHandler() {
+void interrupt epwm_timer2_irqHandler() {
 	c28x_pwm_timerIRQHandler(&epwm2_data);
 }
 #ifdef CONFIG_MACH_C28X_ePWM2_PWM
@@ -339,9 +367,10 @@ struct timer epwm3_data = {
 	// TODO IRQ
 	irq = EPWM3_INT_IRQn,
 	.irqHandler = epwm_timer3_irqHandler,
+	.clk = CLK_PCLKCR3_EPWM1ENCLK_BITS, 
 };
 TIMER_ADDDEV(epwm, epwm3_data);
-void epwm_timer3_irqHandler() {
+void interrupt epwm_timer3_irqHandler() {
 	c28x_pwm_timerIRQHandler(&epwm3_data);
 }
 #ifdef CONFIG_MACH_C28X_ePWM3_PWM
@@ -365,9 +394,10 @@ struct timer epwm4_data = {
 	// TODO IRQ
 	.irq = EPWM4_INT_IRQn,
 	.irqHandler = epwm_timer4_irqHandler,
+	.clk = CLK_PCLKCR4_EPWM1ENCLK_BITS, 
 };
 TIMER_ADDDEV(epwm, epwm4_data);
-void epwm_timer4_irqHandler() {
+void interrupt epwm_timer4_irqHandler() {
 	c28x_pwm_timerIRQHandler(&epwm4_data);
 }
 #ifdef CONFIG_MACH_C28X_ePWM4_PWM
@@ -391,9 +421,10 @@ struct timer epwm5_data = {
 	// TODO IRQ
 	.irq = EPWM5_INT_IRQn,
 	.irqHandler = epwm_timer5_irqHandler,
+	.clk = CLK_PCLKCR5_EPWM1ENCLK_BITS, 
 };
 TIMER_ADDDEV(epwm, epwm5_data);
-void epwm_timer5_irqHandler() {
+void interrupt epwm_timer5_irqHandler() {
 	c28x_pwm_timerIRQHandler(&epwm5_data);
 }
 #ifdef CONFIG_MACH_C28X_ePWM5_PWM
@@ -417,9 +448,10 @@ struct timer epwm6_data = {
 	// TODO IRQ
 	.irq = EPWM6_INT_IRQn,
 	.irqHandler = epwm_timer6_irqHandler,
+	.clk = CLK_PCLKCR6_EPWM1ENCLK_BITS, 
 };
 TIMER_ADDDEV(epwm, epwm6_data);
-void epwm_timer6_irqHandler() {
+void interrupt epwm_timer6_irqHandler() {
 	c28x_pwm_timerIRQHandler(&epwm6_data);
 }
 #ifdef CONFIG_MACH_C28X_ePWM6_PWM
@@ -443,9 +475,10 @@ struct timer epwm7_data = {
 	// TODO IRQ
 	.irq = EPWM7_INT_IRQn,
 	.irqHandler = epwm_timer7_irqHandler,
+	.clk = CLK_PCLKCR7_EPWM1ENCLK_BITS, 
 };
 TIMER_ADDDEV(epwm, epwm7_data);
-void epwm_timer7_irqHandler() {
+void interrupt epwm_timer7_irqHandler() {
 	c28x_pwm_timerIRQHandler(&epwm7_data);
 }
 #ifdef CONFIG_MACH_C28X_ePWM7_PWM
@@ -470,9 +503,10 @@ struct timer epwm8_data = {
 	// TODO IRQ
 	.irq = EPWM8_INT_IRQn,
 	.irqHandler = epwm_timer8_irqHandler,
+	.clk = CLK_PCLKCR8_EPWM1ENCLK_BITS, 
 };
 TIMER_ADDDEV(epwm, epwm8_data);
-void epwm_timer8_irqHandler() {
+void interrupt epwm_timer8_irqHandler() {
 	c28x_pwm_timerIRQHandler(&epwm8_data);
 }
 #ifdef CONFIG_MACH_C28X_ePWM8_PWM

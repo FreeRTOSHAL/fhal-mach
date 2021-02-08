@@ -15,12 +15,17 @@
 #include <vector.h>
 #include <iomux.h>
 #include <cpu.h>
+#include <clk.h>
 
 #ifdef CONFIG_MACH_C28X_ePWM_DEBUG
 # define PRINTF(fmt, ...) printf("ePWM: " fmt, ##__VA_ARGS__)
 #else
 # define PRINTF(fmt, ...)
 #endif
+
+//! \brief Defines the location of the FREESOFT bits in the TBCTL register
+//!
+#define PWM_TBCTL_FREESOFT_BITS		(3 << 14)
 
 //! \brief Defines the location of the ETCR bits in the ETCLR register
 //!
@@ -193,7 +198,7 @@ struct timer {
 	void *data;
 	uint32_t irq;
 	bool periodic;
-
+	uint32_t clk;
 	volatile struct timer_reg *base;
 	void (*irqHandler)();
 };
@@ -205,4 +210,5 @@ struct pwm {
 	enum pins pinsA;
 	enum pins pinsB;
 };
+		
 #endif
