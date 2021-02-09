@@ -405,6 +405,7 @@ void dcan_handleInt1IRQ(struct can *can) {
 	while(can->base->intr & DCAN_INT_INT1ID_MASK){
 		uint32_t intid = (can->base->intr & DCAN_INT_INT1ID_MASK) >> DCAN_INT_INT1ID_SHIFT;
 		struct dcan_mo mo;
+		PRINTF("intid: %#08lx\n", intid);
 		if(intid < DCAN_FILTER_MO_OFFSET){
 			/* Interrupt of send message object */
 			//PRINTF("SEND INTERRUPT\n");
@@ -573,7 +574,7 @@ CAN_DEREGISTER_FILTER(dcan, can, filterID) {
 
 }
 
-CAN_SEND(dcan, can, msg, waittime) {
+int32_t dcan_send(struct can *can, struct can_msg *msg, bool isr, TickType_t waittime){
 	int lret;
 	struct dcan_mo mo;
 	uint32_t tmp;
@@ -589,6 +590,8 @@ CAN_SEND(dcan, can, msg, waittime) {
 		PRINTF("%s error, CAN FD\n", __FUNCTION__);
 		goto dcan_send_error0;
 	}
+	// read DCAN_ES Register to reset TXOK
+	tmp = can->base->es;
 
 	if(msg->id & CAN_EFF_FLAG) {
 		tmp = msg->id & CAN_EFF_MASK;
@@ -600,8 +603,16 @@ CAN_SEND(dcan, can, msg, waittime) {
 		mo.arb = DCAN_IF1ARB_MSGVAL_MASK | DCAN_IF1ARB_DIR_MASK | DCAN_IF1ARB_ID_STD(tmp);
 	}
 
-	mo.mctl = DCAN_IF1MCTL_NEWDAT_MASK | DCAN_IF1MCTL_TXRQST_MASK | 
-		DCAN_IF1MCTL_DLC(msg->length) | DCAN_IF1MCTL_TXIE_MASK;
+	if(!isr){
+		// with transmission interrupt
+		mo.mctl = DCAN_IF1MCTL_NEWDAT_MASK | DCAN_IF1MCTL_TXRQST_MASK | 
+			DCAN_IF1MCTL_DLC(msg->length) | DCAN_IF1MCTL_TXIE_MASK;
+	} else {
+		// without transmission interrupt
+		mo.mctl = DCAN_IF1MCTL_NEWDAT_MASK | DCAN_IF1MCTL_TXRQST_MASK | 
+			DCAN_IF1MCTL_DLC(msg->length) ;
+	}
+
 	PRINTF("%s: mo.mctl: %#08x\n",__FUNCTION__, mo.mctl );
 
 	mo.msk = 0;
@@ -609,39 +620,67 @@ CAN_SEND(dcan, can, msg, waittime) {
 	memcpy(mo.data, msg->data, msg->length);
 
 	PRINTF("Configuating mo\n");
-	can_lock(can, waittime, -1);
+	if(!isr){
+		can_lock(can, waittime, -1);
+	}
 
-	/* Get Task Handle */ 
-	can->task = xTaskGetCurrentTaskHandle();
-	/* Clear Notification */
-	xTaskNotifyStateClearIndexed(NULL, 0);
+	if(!isr){
+		/* Get Task Handle */ 
+		can->task = xTaskGetCurrentTaskHandle();
+		/* Clear Notification */
+		xTaskNotifyStateClearIndexed(NULL, 0);
+	}
 	/* send message */
 	ti_dcan_mo_configuration(can, 1, &mo);
-	/* sleep until it is send */
-	lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
-	if(lret != pdTRUE){
-		/* we request an abort */
-		// TODO does this work?
-		mo.arb = 0;
-		mo.mctl = 0;
-		ti_dcan_mo_configuration(can, 1, &mo);
-		PRINTF("%s: failed, timeout\n", __FUNCTION__);
-		goto dcan_send_error1;
+	if(!isr){
+		/* sleep until it is send */
+		PRINTF("sleep until send\n");
+		lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
+		if(lret != pdTRUE){
+			/* we request an abort */
+			// TODO does this work?
+			mo.arb = 0;
+			mo.mctl = 0;
+			ti_dcan_mo_configuration(can, 1, &mo);
+			PRINTF("%s: failed, timeout\n", __FUNCTION__);
+			goto dcan_send_error1;
 
+		}
+	} else {
+		while(!(can->base->es & DCAN_ES_TXOK_MASK)){
+			if(can->base->es & DCAN_ES_BOFF_MASK){
+				// request abort
+				// TODO
+				mo.arb = 0;
+				mo.mctl = 0;
+				ti_dcan_mo_configuration(can, 1, &mo);
+				PRINTF("%s: failed, timeout\n", __FUNCTION__);
+				goto dcan_send_error0;
+			}
+		}
 	}
-	
-	can_unlock(can, -1);
+
+	if(!isr){
+		can_unlock(can, -1);
+	}
 	PRINTF("%s TXRQ_X: %#08x\n", can->base->txrq_x);
 	PRINTF("TXRQ_X: %#08lx\nNWDAT_X: %#08lx\nMSGVAL_X: %#08lx\n", can->base->txrq_x, can->base->nwdat_x, can->base->msgval_x);
 	PRINTF("TXRQ12: %#08lx\nNWDAT12: %#08lx\nMSGVAL12: %#08lx\n", can->base->txrq12, can->base->nwdat12, can->base->msgval12);
 	PRINTF("%s finished\n", __FUNCTION__);
 	return 0;
 dcan_send_error1:
-	can_unlock(can, -1);
+	if(!isr){
+		can_unlock(can, -1);
+	}
 	PRINTF("dcan_send_error1\n");
 dcan_send_error0:
 	PRINTF("dcan_send_error0\n");
 	return -1;
+}
+
+CAN_SEND(dcan, can, msg, waittime){
+	PRINTF("%s called\n", __FUNCTION__);
+	return dcan_send(can, msg, false, waittime);
 }
 
 CAN_RECV(dcan, can, filterID, msg, waittime) {
@@ -669,7 +708,7 @@ CAN_RECV(dcan, can, filterID, msg, waittime) {
 
 CAN_SEND_ISR(dcan, can, msg) {
 	PRINTF("%s called\n", __FUNCTION__);
-	return -1;
+	return dcan_send(can, msg, true, 0);
 }
 
 CAN_RECV_ISR(dcan, can, filterID, msg) {
