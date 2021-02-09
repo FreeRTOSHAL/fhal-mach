@@ -47,15 +47,19 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	timer->base->TBCTL |= (1 << 3);
     
 	//Timer set SyncMode
-	timer->base->TBCTL &= (~TIMER_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS); 	
+	timer->base->TBCTL |= PWM_SyncMode_EPWMxSYNC;
+	
+	//Timer set PhaseDir
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_CountUp;
+	
+	// setup the Timer-Based Phase Register (TBPHS)
+	timer->base->TBPHS = 0; 
 	
 	//disable  the Interrupt 
 	timer->base->ETSEL &= ~PWM_ETSEL_INTEN_BITS;
-	
 	timer->base->ETCLR = PWM_ETCLR_INT_BITS;
-
-	// setup the Timer-Based Phase Register (TBPHS)
-	timer->base->TBPHS = 0;
 
 	// setup the Time-Base Counter Register (TBCTR)
 	timer->base->TBCTR = 0;
@@ -260,7 +264,7 @@ PWM_SET_PERIOD(epwm, pwm, us) {
 	//TODO Setup Period and init pwm
 	//Setup CMPB (3.4.2 Counter-Compare Submodule Registers)
 	
-	uint64_t x = USToCounter(timer, us);
+	uint64_t x = USToCounter(pwm, us);
 	if(x > UINT16_MAX -1){
 		return -1;
 	}
@@ -281,7 +285,7 @@ PWM_SET_PERIOD(epwm, pwm, us) {
 PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
 	//TODO Setup CMPA (3.4.2 Counter-Compare Submodule Registers)
 	
-	uint64_t x = USToCounter(timer, us);
+	uint64_t x = USToCounter(pwm, us);
 	if(x > UINT16_MAX -1){
 		return -1;
 	}
@@ -369,7 +373,9 @@ struct timer epwm3_data = {
 	.irqHandler = epwm_timer3_irqHandler,
 	.clk = CLK_PCLKCR3_EPWM1ENCLK_BITS, 
 };
+
 TIMER_ADDDEV(epwm, epwm3_data);
+
 void interrupt epwm_timer3_irqHandler() {
 	c28x_pwm_timerIRQHandler(&epwm3_data);
 }

@@ -103,6 +103,14 @@
 //!
 #define PWM_CMPCTL_SHDWBMODE_BITS	(1 << 6)
 
+//! \brief Defines the location of the SYNCOSEL bits in the TBCTL register
+//!
+#define PWM_TBCTL_SYNCOSEL_BITS		(3 << 4)
+
+//! \brief Defines the location of the PHSDIR bits in the TBCTL register
+//!
+#define PWM_TBCTL_PHSDIR_BITS		(1 << 13)
+
 //! \brief Defines the base address of the pulse width modulation (PWM) 1 registers
 //!
 #define PWM_ePWM1_BASE_ADDR		(0x00006800)
@@ -151,6 +159,9 @@
 #define EPWM7B GPIO_41
 #define EPWM8A GPIO_42
 #define EPWM8B GPIO_43
+
+#define PWM_SyncMode_EPWMxSYNC		(0 << 4)
+#define PWM_PhaseDir_CountUp		(1 << 13)
 
 struct timer_reg {
 	volatile uint16_t   TBCTL;	//!< Time-Base Control Register
