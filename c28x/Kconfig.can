@@ -1,5 +1,6 @@
 config MACH_C28X_ECAN0
 	bool "eCAN0"
+	select USE_TASK_NOTIFICATIONS
 if MACH_C28X_ECAN0=y
 	choice
 		prompt "RX Pin"
