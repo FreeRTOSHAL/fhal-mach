@@ -103,6 +103,7 @@ menuconfig MACH_C28X_ECAN
 	bool "eCAN Driver"
 	depends on CAN
 	default y
+	select USE_TASK_NOTIFICATIONS
 	if MACH_C28X_ECAN = y
 		source mach/c28x/Kconfig.can
 	endif
