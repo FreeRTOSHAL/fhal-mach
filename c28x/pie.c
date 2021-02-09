@@ -147,10 +147,10 @@ int32_t irq_disable(int32_t irqnr) {
 					__asm(" AND IFR, #0xF7FF");
 					break;
 				case 12:
-					__asm(" AND IFR, #0xEFF");
+					__asm(" AND IFR, #0xEFFF");
 					break;
 				case 13:
-					__asm(" AND IFR, #0xDFF");
+					__asm(" AND IFR, #0xDFFF");
 					break;
 			}
 		}
