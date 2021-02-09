@@ -106,7 +106,7 @@ int32_t irq_disable(int32_t irqnr) {
 		/*
 		 * Step 4: Clear the CPU IFRx bit for the peripheral group. This is a safe
 		 * operation on the CPU IFR register.
-		 * IFR &= ~BIT(group) is not suppored by the compiler :(
+		 * IFR &= BIT(group) is not suppored by the compiler :(
 		 */
 		{
 			switch(group) {
