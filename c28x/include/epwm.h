@@ -219,8 +219,13 @@ struct timer {
 	uint32_t clk;
 	volatile struct timer_reg *base;
 	void (*irqHandler)();
+	uint16_t syncout;
+	bool syncin; 
+	bool phaseUp;
+	uint64_t phasevalue;
 };
 
+	
 struct pwm {
 	struct pwm_generic gen;
 	struct timer *timer;
