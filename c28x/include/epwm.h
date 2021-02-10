@@ -95,6 +95,10 @@
 //!
 #define PWM_CMPCTL_LOADBMODE_BITS	(3 << 2)
 
+//! \brief Defines the location of the PHSEN bits in the TBCTL register
+//!
+#define PWM_TBCTL_PHSEN_BITS		(1 << 2)
+
 //! \brief Defines the location of the SHDWAMODE bits in the CMPCTL register
 //!
 #define PWM_CMPCTL_SHDWAMODE_BITS	(1 << 4)
@@ -160,9 +164,12 @@
 #define EPWM8A GPIO_42
 #define EPWM8B GPIO_43
 
+#define PWM_SyncMode_EqualZero		(1 << 4)
+#define PWM_SyncMode_cmp		(2 << 4)
+#define PWM_SyncMode_Disable		(3 << 4)
 #define PWM_SyncMode_EPWMxSYNC		(0 << 4)
 #define PWM_PhaseDir_CountUp		(1 << 13)
-
+#define PWM_PhaseDir_CountDown		(0 << 13)
 struct timer_reg {
 	volatile uint16_t   TBCTL;	//!< Time-Base Control Register
 	volatile uint16_t   TBSTS;	//!< Time-Base Status Register
@@ -221,5 +228,11 @@ struct pwm {
 	enum pins pinsA;
 	enum pins pinsB;
 };
+
+/**
+ * sync all timer
+ * \param on 1 = Clock start 0 = Clock off(used for configuration)
+ */
+void epwm_sync(bool on);
 		
 #endif

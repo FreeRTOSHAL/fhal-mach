@@ -45,14 +45,6 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	//Timer set PeriodLoad Immediate
 	timer->base->TBCTL &= (~TIMER_TBCTL_PRDLD_BITS);
 	timer->base->TBCTL |= (1 << 3);
-    
-	//Timer set SyncMode
-	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS); 	
-	timer->base->TBCTL |= PWM_SyncMode_EPWMxSYNC;
-	
-	//Timer set PhaseDir
-	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
-	timer->base->TBCTL |= PWM_PhaseDir_CountUp;
 	
 	// setup the Timer-Based Phase Register (TBPHS)
 	timer->base->TBPHS = 0; 
@@ -66,10 +58,263 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 
 	// setup the Time-Base Period Register (TBPRD)	
 	timer->base->TBPRD = 0;
+#ifdef CONFIG_MACH_C28X_ePWM1
+#ifdef CONFIG_MACH_C28X_ePWM1_SYNCI
+	timer->base->TBCTL |= PWM_TBCTL_PHSEN_BITS;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSEN_BITS);
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PHASEDIR
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_CountUp;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_Down;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_SYNCMODE_CMP
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_cmp;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_SYNCMODE_ZERO
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EqualZero;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_SYNCMODE_DISABLE
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_Disable;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_SYNCMODE_EPWMxSYNC
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EPWMxSYNC;
+#endif
+#endif
+
+
+#ifdef CONFIG_MACH_C28X_ePWM2
+#ifdef CONFIG_MACH_C28X_ePWM2_SYNCI
+	timer->base->TBCTL |= PWM_TBCTL_PHSEN_BITS;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSEN_BITS);
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_PHASEDIR
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_CountUp;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_Down;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_SYNCMODE_CMP
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_cmp;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_SYNCMODE_ZERO
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EqualZero;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_SYNCMODE_DISABLE
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_Disable;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_SYNCMODE_EPWMxSYNC
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EPWMxSYNC;
+#endif
+#endif 
+
+
+#ifdef CONFIG_MACH_C28X_ePWM3
+#ifdef CONFIG_MACH_C28X_ePWM3_SYNCI
+	timer->base->TBCTL |= PWM_TBCTL_PHSEN_BITS;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSEN_BITS);
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM3_PHASEDIR
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_CountUp;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_Down;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM3_SYNCMODE_CMP
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_cmp;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM3_SYNCMODE_ZERO
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EqualZero;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM3_SYNCMODE_DISABLE
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_Disable;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM3_SYNCMODE_EPWMxSYNC
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EPWMxSYNC;
+#endif
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM4
+#ifdef CONFIG_MACH_C28X_ePWM4_SYNCI
+	timer->base->TBCTL |= PWM_TBCTL_PHSEN_BITS;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSEN_BITS);
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM4_PHASEDIR
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_CountUp;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_Down;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM4_SYNCMODE_CMP
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_cmp;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM4_SYNCMODE_ZERO
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EqualZero;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM4_SYNCMODE_DISABLE
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_Disable;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM4_SYNCMODE_EPWMxSYNC
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EPWMxSYNC;
+#endif
+#endif
+
+
+#ifdef CONFIG_MACH_C28X_ePWM5
+#ifdef CONFIG_MACH_C28X_ePWM5_SYNCI
+	timer->base->TBCTL |= PWM_TBCTL_PHSEN_BITS;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSEN_BITS);
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM5_PHASEDIR
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_CountUp;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_Down;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM5_SYNCMODE_CMP
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_cmp;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM5_SYNCMODE_ZERO
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EqualZero;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM5_SYNCMODE_DISABLE
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_Disable;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM5_SYNCMODE_EPWMxSYNC
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EPWMxSYNC;
+#endif
+#endif
+
+
+#ifdef CONFIG_MACH_C28X_ePWM6
+#ifdef CONFIG_MACH_C28X_ePWM6_SYNCI
+	timer->base->TBCTL |= PWM_TBCTL_PHSEN_BITS;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSEN_BITS);
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM6_PHASEDIR
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_CountUp;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_Down;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM6_SYNCMODE_CMP
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_cmp;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM6_SYNCMODE_ZERO
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EqualZero;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM6_SYNCMODE_DISABLE
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_Disable;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM6_SYNCMODE_EPWMxSYNC
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EPWMxSYNC;
+#endif
+#endif
+
+
+#ifdef CONFIG_MACH_C28X_ePWM7
+#ifdef CONFIG_MACH_C28X_ePWM7_SYNCI
+	timer->base->TBCTL |= PWM_TBCTL_PHSEN_BITS;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSEN_BITS);
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM7_PHASEDIR
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_CountUp;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_Down;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM7_SYNCMODE_CMP
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_cmp;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM7_SYNCMODE_ZERO
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EqualZero;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM7_SYNCMODE_DISABLE
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_Disable;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM7_SYNCMODE_EPWMxSYNC
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EPWMxSYNC;
+#endif
+#endif
+
+
+#ifdef CONFIG_MACH_C28X_ePWM8
+#ifdef CONFIG_MACH_C28X_ePWM8_SYNCI
+	timer->base->TBCTL |= PWM_TBCTL_PHSEN_BITS;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSEN_BITS);
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM8_PHASEDIR
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_CountUp;
+#else
+	timer->base->TBCTL &= (~PWM_TBCTL_PHSDIR_BITS);
+	timer->base->TBCTL |= PWM_PhaseDir_Down;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM8_SYNCMODE_CMP
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_cmp;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM8_SYNCMODE_ZERO
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EqualZero;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM8_SYNCMODE_DISABLE
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_Disable;
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM8_SYNCMODE_EPWMxSYNC
+	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
+	timer->base->TBCTL |= PWM_SyncMode_EPWMxSYNC;
+#endif
+#endif
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
-	
 	irq_setHandler(timer->irq, timer->irqHandler);
 	irq_enable(timer->irq);
+	
 	
 epwm_timer_init_exit:
 	return timer;
@@ -136,6 +381,16 @@ void c28x_pwm_timerIRQHandler(struct timer *timer) {
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 }
 
+void epwm_sync(bool on) {
+        CLK_Obj *obj = (CLK_Obj *) CLK_BASE_ADDR;
+        ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+        if (on) {
+                obj->PCLKCR0 |= CLK_PCLKCR0_TBCLKSYNC_BITS;
+        } else {
+                obj->PCLKCR0 &= ~CLK_PCLKCR0_TBCLKSYNC_BITS;
+        }
+        DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+}
 
 static uint64_t counterToUS(struct timer *timer, uint32_t value) {
 	struct clock *clk = clock_init();
@@ -264,7 +519,7 @@ PWM_SET_PERIOD(epwm, pwm, us) {
 	//TODO Setup Period and init pwm
 	//Setup CMPB (3.4.2 Counter-Compare Submodule Registers)
 	
-	uint64_t x = USToCounter(pwm, us);
+	uint64_t x = USToCounter(pwm->timer, us);
 	if(x > UINT16_MAX -1){
 		return -1;
 	}
@@ -285,7 +540,7 @@ PWM_SET_PERIOD(epwm, pwm, us) {
 PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
 	//TODO Setup CMPA (3.4.2 Counter-Compare Submodule Registers)
 	
-	uint64_t x = USToCounter(pwm, us);
+	uint64_t x = USToCounter(pwm->timer, us);
 	if(x > UINT16_MAX -1){
 		return -1;
 	}
@@ -319,6 +574,7 @@ struct timer epwm1_data = {
 	.clk = CLK_PCLKCR1_EPWM1ENCLK_BITS, 
 	
 };
+					
 TIMER_ADDDEV(epwm, epwm1_data);
 void interrupt epwm_timer1_irqHandler() {
 	c28x_pwm_timerIRQHandler(&epwm1_data);
@@ -418,6 +674,7 @@ PWM_ADDDEV(epwm, epwm4_pwm_data);
 #endif
 #endif
 
+
 #ifdef CONFIG_MACH_C28X_ePWM5
 extern void epwm_timer5_irqHandler();
 struct timer epwm5_data = {
@@ -483,6 +740,8 @@ struct timer epwm7_data = {
 	.irqHandler = epwm_timer7_irqHandler,
 	.clk = CLK_PCLKCR7_EPWM1ENCLK_BITS, 
 };
+			
+			
 TIMER_ADDDEV(epwm, epwm7_data);
 void interrupt epwm_timer7_irqHandler() {
 	c28x_pwm_timerIRQHandler(&epwm7_data);
