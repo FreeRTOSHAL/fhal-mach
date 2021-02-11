@@ -37,13 +37,15 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	//Timer set Counter Mode
 	timer->base->TBCTL &= (~TIMER_TBCTL_CTRMODE_BITS);
 	
-	timer->base->TBCTL |= (2 << 0); 
+	timer->base->TBCTL |= PWM_CounterMode_UpDown; 
 	
 	// Timer disable Counter Load
 	timer->base->TBCTL &= (~TIMER_TBCTL_PHSEN_BITS);
 
 	//Timer set PeriodLoad Immediate
-	timer->base->TBCTL |= TIMER_TBCTL_PRDLD_BITS;
+	timer->base->TBCTL &= (~TIMER_TBCTL_PRDLD_BITS);
+	timer->base->TBCTL |= PWM_PeriodLoad_Immediate;
+
 	
 	//Timer set SyncMode
 	timer->base->TBCTL &= (~PWM_TBCTL_SYNCOSEL_BITS);
@@ -61,6 +63,7 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	timer->base->TBPHS = 0; 
 	if (timer->syncin){
 		timer->base->TBCTL |= PWM_TBCTL_PHSEN_BITS;
+		timer->base->TBPHS =  USToCounter(timer, timer->phasevalue);
 	}else{
 		timer->base->TBCTL &= ~PWM_TBCTL_PHSEN_BITS;
 	}
@@ -98,11 +101,13 @@ TIMER_SET_OVERFLOW_CALLBACK(epwm, timer, callback, data) {
 	timer->data = data;
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	if (callback !=NULL){
-		/* Clear Interrupt Event Select Bits */
+		//Interrupt Event Select Bits 
 		timer->base->ETSEL &= ~PWM_ETSEL_INTSEL_BITS;
-		/* if down Counter timer must set up as Down or Up/Down Counter */
-		timer->base->ETSEL |= (1 << 0);
-		/* Enable this Interrupt */
+		timer->base->ETSEL |= PWM_IntMode_Period;
+		
+		timer->base->ETPS &= ~PWM_ETPS_INTPRD_BITS; 
+		timer->base->ETPS |= PWM_IntPeriod_FirstEvent;
+		
 		timer->base->ETSEL |= PWM_ETSEL_INTEN_BITS;
 		irq_enable(timer->irq);
 	}else{
@@ -215,7 +220,7 @@ TIMER_ONESHOT(epwm, timer, us) {
 	timer->base->TBPRD = USToCounter(timer, us);
 	timer->base->TBCTL &= (~TIMER_TBCTL_FREESOFT_BITS);
 	//PWM_RunMode_SoftStopAfterCycle=(1 << 14)
-	timer->base->TBCTL |=(1 << 14);
+	timer->base->TBCTL |= PWM_RunMode_SoftStopAfterCycle;
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return timer_start(timer);
 }
@@ -231,7 +236,7 @@ TIMER_PERIODIC(epwm, timer, us) {
 	timer->base->TBPRD = USToCounter(timer, us );
 	timer->base->TBCTL &= (~TIMER_TBCTL_FREESOFT_BITS);
 	//PWM_RunMode_FreeRun=(2 << 14) 
-	timer->base->TBCTL |=(2 << 14);
+	timer->base->TBCTL |= PWM_RunMode_FreeRun;
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return timer_start(timer);
 }

@@ -18,21 +18,23 @@ menuconfig MACH_C28X_ePWM1
 				int "phase Value"
 				default 1
 		endif
-			
-		if MACH_C28X_ePWM1_SYNCI = n		
+		choice 	MACH_C28X_ePWM1_SYNCOUT	
+			bool "choice SYNCOUT"
+			default MACH_C28X_ePWM1_SYNCMODE_EPWMxSYNC
+				
 			config MACH_C28X_ePWM1_SYNCMODE_CMP
 				bool "syncmode CMP"
-				default n
+					
 			config MACH_C28X_ePWM1_SYNCMODE_ZERO
 				bool "syncmode ZERO"
-				default n
+
 			config MACH_C28X_ePWM1_SYNCMODE_DISABLE
 				bool "syncmode DISABLE"
-				default n
+					
 			config MACH_C28X_ePWM1_SYNCMODE_EPWMxSYNC
 				bool "syncmode EPWMxSYNC"
-				default n
-		endif
+		endchoice
+		
 
 		config MACH_C28X_ePWM1_PWM
 			bool "activate PWM 1A"

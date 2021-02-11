@@ -170,6 +170,13 @@
 #define PWM_SyncMode_EPWMxSYNC		(0 << 4)
 #define PWM_PhaseDir_CountUp		(1 << 13)
 #define PWM_PhaseDir_CountDown		(0 << 13)
+#define PWM_IntMode_Period 		(2 << 0)
+#define PWM_IntPeriod_FirstEvent	(1 << 0)
+#define PWM_RunMode_SoftStopAfterCycle	(1 << 14)
+#define PWM_RunMode_FreeRun		(2 << 14)
+#define PWM_CounterMode_UpDown		(2 << 0)
+#define PWM_PeriodLoad_Immediate	(1 << 3)
+
 struct timer_reg {
 	volatile uint16_t   TBCTL;	//!< Time-Base Control Register
 	volatile uint16_t   TBSTS;	//!< Time-Base Status Register
@@ -239,5 +246,8 @@ struct pwm {
  * \param on 1 = Clock start 0 = Clock off(used for configuration)
  */
 void epwm_sync(bool on);
+void c28x_pwm_timerIRQHandler(struct timer *timer);
+static uint64_t counterToUS(struct timer *timer, uint32_t value);
+static uint64_t USToCounter(struct timer *timer, uint64_t value);
 		
 #endif
