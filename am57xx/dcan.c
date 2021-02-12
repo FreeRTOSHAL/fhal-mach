@@ -232,7 +232,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 		uint32_t tmp = can->base->ctl;
 		tmp &= ~(DCAN_CTL_INIT_MASK | DCAN_CTL_CCE_MASK);
 		/* enable Interrupt lines */
-		tmp |= (DCAN_CTL_IE1_MASK | DCAN_CTL_IE0_MASK | DCAN_CTL_SIE_MASK | DCAN_CTL_EIE_MASK);
+		tmp |= (DCAN_CTL_IE1_MASK | DCAN_CTL_IE0_MASK /*| DCAN_CTL_SIE_MASK */| DCAN_CTL_EIE_MASK | DCAN_CTL_ABO_MASK);
 		can->base->ctl = tmp;
 	}
 
@@ -331,11 +331,12 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 void dcan_handleInt0IRQ(struct can *can) {
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
 	PRINTDEBUG;
-	/* copy es */
 	if((can->base->intr & DCAN_INT_INT0ID_MASK) == DCAN_INT_INT0ID_ES){
 		//PRINTF("error and status Interrupt\n");
 
+		/* copy es */
 		uint32_t es = can->base->es;
+		PRINTF("%s: es = %#08lx\n", __FUNCTION__, es);
 		can_error_t err = 0;
 		can_errorData_t data = 0;
 		PRINTDEBUG;
@@ -637,6 +638,7 @@ int32_t dcan_send(struct can *can, struct can_msg *msg, bool isr, TickType_t wai
 		PRINTF("sleep until send\n");
 		lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
 		if(lret != pdTRUE){
+			PRINTF("%s: requested abort\n", __FUNCTION__);
 			/* we request an abort */
 			// TODO does this work?
 			mo.arb = 0;
@@ -649,6 +651,7 @@ int32_t dcan_send(struct can *can, struct can_msg *msg, bool isr, TickType_t wai
 	} else {
 		while(!(can->base->es & DCAN_ES_TXOK_MASK)){
 			if(can->base->es & DCAN_ES_BOFF_MASK){
+				PRINTF("%s: requested abort\n", __FUNCTION__);
 				// request abort
 				// TODO
 				mo.arb = 0;
@@ -663,7 +666,7 @@ int32_t dcan_send(struct can *can, struct can_msg *msg, bool isr, TickType_t wai
 	if(!isr){
 		can_unlock(can, -1);
 	}
-	PRINTF("%s TXRQ_X: %#08x\n", can->base->txrq_x);
+	PRINTF("%s TXRQ_X: %#08x\n", __FUNCTION__, can->base->txrq_x);
 	PRINTF("TXRQ_X: %#08lx\nNWDAT_X: %#08lx\nMSGVAL_X: %#08lx\n", can->base->txrq_x, can->base->nwdat_x, can->base->msgval_x);
 	PRINTF("TXRQ12: %#08lx\nNWDAT12: %#08lx\nMSGVAL12: %#08lx\n", can->base->txrq12, can->base->nwdat12, can->base->msgval12);
 	PRINTF("%s finished\n", __FUNCTION__);
