@@ -351,8 +351,20 @@ void dcan_handleInt0IRQ(struct can *can) {
 			err |= CAN_ERR_BUSOFF;
 		}
 		if(es & DCAN_ES_EWARN_MASK){
+			if(((can->base->errc >> DCAN_ERRC_REC_SHIFT) & DCAN_ERRC_REC_MASK) >= DCAN_ERROR_WARNING_LIMIT){
+				err |= CAN_ERR_CRTL;
+				data |= CAN_ERR_CRTL_RX_WARNING;
+			}
+			if(((can->base->errc >> DCAN_ERRC_TEC_SHIFT) & DCAN_ERRC_TEC_MASK) >= DCAN_ERROR_WARNING_LIMIT){
+				err |= CAN_ERR_CRTL;
+				data |= CAN_ERR_CRTL_TX_WARNING;
+			}
 		}
 		if(es & DCAN_ES_EPASS_MASK){
+			if(can->base->errc & DCAN_ERRC_RP_MASK){
+				err |= CAN_ERR_CRTL;
+				data |= CAN_ERR_CRTL_RX_PASSIVE;
+			}
 		}
 		if(es & DCAN_ES_RXOK_MASK){
 		}
