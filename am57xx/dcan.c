@@ -232,7 +232,7 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 		uint32_t tmp = can->base->ctl;
 		tmp &= ~(DCAN_CTL_INIT_MASK | DCAN_CTL_CCE_MASK);
 		/* enable Interrupt lines */
-		tmp |= (DCAN_CTL_IE1_MASK | DCAN_CTL_IE0_MASK /*| DCAN_CTL_SIE_MASK */| DCAN_CTL_EIE_MASK | DCAN_CTL_ABO_MASK);
+		tmp |= (DCAN_CTL_IE1_MASK | DCAN_CTL_IE0_MASK | DCAN_CTL_SIE_MASK | DCAN_CTL_EIE_MASK | DCAN_CTL_ABO_MASK);
 		can->base->ctl = tmp;
 	}
 
@@ -330,16 +330,16 @@ CAN_INIT(dcan, index, bitrate, pin, pinHigh, callback, data) {
 
 void dcan_handleInt0IRQ(struct can *can) {
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
-	PRINTDEBUG;
+	//PRINTDEBUG;
 	if((can->base->intr & DCAN_INT_INT0ID_MASK) == DCAN_INT_INT0ID_ES){
 		//PRINTF("error and status Interrupt\n");
 
 		/* copy es */
 		uint32_t es = can->base->es;
-		PRINTF("%s: es = %#08lx\n", __FUNCTION__, es);
+		//PRINTF("%s: es = %#08lx\n", __FUNCTION__, es);
 		can_error_t err = 0;
 		can_errorData_t data = 0;
-		PRINTDEBUG;
+		//PRINTDEBUG;
 
 		if(es & DCAN_ES_PDA_MASK){
 		}
@@ -412,13 +412,13 @@ void dcan_handleInt0IRQ(struct can *can) {
 void dcan_handleInt1IRQ(struct can *can) {
 	BaseType_t tmp;
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
-	PRINTDEBUG;
+	//PRINTDEBUG;
 	//PRINTF("%s: DCAN_INT: %#08x\nDCAN_INTPND_X: %#08x\nDCAN_NWDAT_X: %#08x\n",__FUNCTION__, can->base->intr, can->base->intpnd_x, can->base->nwdat_x);
 
 	while(can->base->intr & DCAN_INT_INT1ID_MASK){
 		uint32_t intid = (can->base->intr & DCAN_INT_INT1ID_MASK) >> DCAN_INT_INT1ID_SHIFT;
 		struct dcan_mo mo;
-		PRINTF("intid: %#08lx\n", intid);
+		//PRINTF("intid: %#08lx\n", intid);
 		if(intid < DCAN_FILTER_MO_OFFSET){
 			/* Interrupt of send message object */
 			//PRINTF("SEND INTERRUPT\n");
@@ -436,7 +436,7 @@ void dcan_handleInt1IRQ(struct can *can) {
 			uint32_t filterID = intid - DCAN_FILTER_MO_OFFSET;
 			struct dcan_filter *filter;
 			struct can_msg msg;
-			PRINTDEBUG;
+			//PRINTDEBUG;
 			//PRINTF("intid: %#08x, filterID: %#08x\n", intid, filterID);
 			if(filterID >= can->filterCount){
 				//PRINTF("%s: failed, filterID(%#08x) too big\n", __FUNCTION__, filterID);
