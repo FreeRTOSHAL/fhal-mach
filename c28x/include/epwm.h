@@ -164,20 +164,20 @@
 #define EPWM8A GPIO_42
 #define EPWM8B GPIO_43
 
-#define PWM_SyncMode_EqualZero		(1 << 4)
-#define PWM_SyncMode_cmp		(2 << 4)
-#define PWM_SyncMode_Disable		(3 << 4)
-#define PWM_SyncMode_EPWMxSYNC		(0 << 4)
-#define PWM_PhaseDir_CountUp		(1 << 13)
-#define PWM_PhaseDir_CountDown		(0 << 13)
-#define PWM_TBCTR_TBPRD			(2 << 0)
-#define PWM_IntPeriod_FirstEvent	(1 << 0)
-#define PWM_RunMode_SoftStopAfterCycle	(1 << 14)
-#define PWM_RunMode_FreeRun		(2 << 14)
-#define PWM_CounterMode_UpDown		(2 << 0)
-#define PWM_CounterMode_Down		(1 << 0)
-#define PWM_CounterMode_Up		(0 << 0)
-#define PWM_PeriodLoad_Immediate	(1 << 3)
+#define PWM_SyncMode_EqualZero		(1U << 4)
+#define PWM_SyncMode_cmp		(2U << 4)
+#define PWM_SyncMode_Disable		(3U << 4)
+#define PWM_SyncMode_EPWMxSYNC		(0U << 4)
+#define PWM_PhaseDir_CountUp		(1U << 13)
+#define PWM_PhaseDir_CountDown		(0U << 13)
+#define PWM_TBCTR_TBPRD			(2U << 0)
+#define PWM_IntPeriod_FirstEvent	(1U << 0)
+#define PWM_RunMode_SoftStopAfterCycle	(1U << 14)
+#define PWM_RunMode_FreeRun		(2U << 14)
+#define PWM_CounterMode_UpDown		(2U << 0)
+#define PWM_CounterMode_Down		(1U << 0)
+#define PWM_CounterMode_Up		(0U << 0)
+#define PWM_PeriodLoad_Immediate	(1U << 3)
 
 struct timer_reg {
 	volatile uint16_t   TBCTL;	//!< Time-Base Control Register

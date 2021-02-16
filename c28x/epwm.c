@@ -4,6 +4,7 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	int32_t ret;
 	struct timer *timer;
 	timer = TIMER_GET_DEV(index);
+	CLK_Obj *obj = (CLK_Obj *) CLK_BASE_ADDR;
 	if (timer == NULL) {
 		goto epwm_timer_init_error0;
 	}
@@ -21,6 +22,12 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	timer->prescaler = prescaler;
 	timer->basetime = basetime;
 	timer->adjust = adjust;
+	
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	obj->PCLKCR1 |= timer->clk;
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+
+	
 	// TODO setup Timer
 	
 	/* Set prescaler we don't use the HSP Clock Div */
@@ -64,7 +71,7 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
                 timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_HSPCLKDIV_BITS) | ((hsp / 2) << 7);
         }
 
-	
+
 				
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	//Timer set Counter Mode
@@ -430,8 +437,33 @@ struct timer epwm2_data = {
 	// TODO IRQ
 	.irq = EPWM2_INT_IRQn,
 	.irqHandler = epwm_timer2_irqHandler,
-	.clk = CLK_PCLKCR2_EPWM1ENCLK_BITS, 
+	.clk = CLK_PCLKCR1_EPWM2ENCLK_BITS, 
+#ifdef CONFIG_MACH_C28X_ePWM2_SYNCI
+	.syncin = true,
+	.phasevalue = CONFIG_MACH_C28X_ePWM2_PHASE_VALUE,
+#else
+	.syncin = false,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_PHASEDIR
+	.phaseUp = true,
+#else
+	.phaseUp = false, 
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_SYNCMODE_CMP
+	.syncout = PWM_SyncMode_cmp,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_SYNCMODE_ZERO
+	.syncout = PWM_SyncMode_EqualZero,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_SYNCMODE_DISABLE
+	.syncout = PWM_SyncMode_Disable,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_SYNCMODE_EPWMxSYNC
+	.syncout = PWM_SyncMode_EPWMxSYNC,
+#endif
+	
 };
+					
 TIMER_ADDDEV(epwm, epwm2_data);
 void interrupt epwm_timer2_irqHandler() {
 	c28x_pwm_timerIRQHandler(&epwm2_data);
@@ -448,170 +480,3 @@ PWM_ADDDEV(epwm, epwm2_pwm_data);
 #endif
 #endif
 
-#ifdef CONFIG_MACH_C28X_ePWM3
-extern void epwm_timer3_irqHandler();
-struct timer epwm3_data = {
-	TIMER_INIT_DEV(epwm)
-	HAL_NAME("epwm3 Timer")
-	.base = (volatile struct timer_reg *) PWM_ePWM3_BASE_ADDR,
-	// TODO IRQ
-	irq = EPWM3_INT_IRQn,
-	.irqHandler = epwm_timer3_irqHandler,
-	.clk = CLK_PCLKCR3_EPWM1ENCLK_BITS, 
-};
-
-TIMER_ADDDEV(epwm, epwm3_data);
-
-void interrupt epwm_timer3_irqHandler() {
-	c28x_pwm_timerIRQHandler(&epwm3_data);
-}
-#ifdef CONFIG_MACH_C28X_ePWM3_PWM
-struct pwm epwm3_pwm_data = {
-	PWM_INIT_DEV(epwm)
-	HAL_NAME("epwm3 PWM")
-	.timer = &epwm3_data,
-	.pinsA = EPWM3A,
-	.pinsB = EPWM3B,
-};
-PWM_ADDDEV(epwm, epwm3_pwm_data);
-#endif
-#endif
-
-#ifdef CONFIG_MACH_C28X_ePWM4
-extern void epwm_timer4_irqHandler();
-struct timer epwm4_data = {
-	TIMER_INIT_DEV(epwm)
-	HAL_NAME("epwm4 Timer")
-	.base = (volatile struct timer_reg *) PWM_ePWM4_BASE_ADDR,
-	// TODO IRQ
-	.irq = EPWM4_INT_IRQn,
-	.irqHandler = epwm_timer4_irqHandler,
-	.clk = CLK_PCLKCR4_EPWM1ENCLK_BITS, 
-};
-TIMER_ADDDEV(epwm, epwm4_data);
-void interrupt epwm_timer4_irqHandler() {
-	c28x_pwm_timerIRQHandler(&epwm4_data);
-}
-#ifdef CONFIG_MACH_C28X_ePWM4_PWM
-struct pwm epwm4_pwm_data = {
-	PWM_INIT_DEV(epwm)
-	HAL_NAME("epwm4 PWM")
-	.timer = &epwm4_data,
-	.pinsA = EPWM4A,
-	.pinsB = EPWM4B,
-};
-PWM_ADDDEV(epwm, epwm4_pwm_data);
-#endif
-#endif
-
-
-#ifdef CONFIG_MACH_C28X_ePWM5
-extern void epwm_timer5_irqHandler();
-struct timer epwm5_data = {
-	TIMER_INIT_DEV(epwm)
-	HAL_NAME("epwm5 Timer")
-	.base = (volatile struct timer_reg *) PWM_ePWM5_BASE_ADDR,
-	// TODO IRQ
-	.irq = EPWM5_INT_IRQn,
-	.irqHandler = epwm_timer5_irqHandler,
-	.clk = CLK_PCLKCR5_EPWM1ENCLK_BITS, 
-};
-TIMER_ADDDEV(epwm, epwm5_data);
-void interrupt epwm_timer5_irqHandler() {
-	c28x_pwm_timerIRQHandler(&epwm5_data);
-}
-#ifdef CONFIG_MACH_C28X_ePWM5_PWM
-struct pwm epwm5_pwm_data = {
-	PWM_INIT_DEV(epwm)
-	HAL_NAME("epwm5 PWM")
-	.timer = &epwm5_data,
-	.pinsA = EPWM5A,
-	.pinsB = EPWM5B,
-};
-PWM_ADDDEV(epwm, epwm5_pwm_data);
-#endif
-#endif
-
-#ifdef CONFIG_MACH_C28X_ePWM6
-extern void epwm_timer6_irqHandler();
-struct timer epwm6_data = {
-	TIMER_INIT_DEV(epwm)
-	HAL_NAME("epwm6 Timer")
-	.base = (volatile struct timer_reg *) PWM_ePWM6_BASE_ADDR,
-	// TODO IRQ
-	.irq = EPWM6_INT_IRQn,
-	.irqHandler = epwm_timer6_irqHandler,
-	.clk = CLK_PCLKCR6_EPWM1ENCLK_BITS, 
-};
-TIMER_ADDDEV(epwm, epwm6_data);
-void interrupt epwm_timer6_irqHandler() {
-	c28x_pwm_timerIRQHandler(&epwm6_data);
-}
-#ifdef CONFIG_MACH_C28X_ePWM6_PWM
-struct pwm epwm6_pwm_data = {
-	PWM_INIT_DEV(epwm)
-	HAL_NAME("epwm6 PWM")
-	.timer = &epwm6_data,
-	.pinsA = EPWM6A,
-	.pinsB = EPWM6B,
-};
-PWM_ADDDEV(epwm, epwm6_pwm_data);
-#endif
-#endif
-
-#ifdef CONFIG_MACH_C28X_ePWM7
-extern void epwm_timer6_irqHandler();
-struct timer epwm7_data = {
-	TIMER_INIT_DEV(epwm)
-	HAL_NAME("epwm7 Timer")
-	.base = (volatile struct timer_reg *) PWM_ePWM7_BASE_ADDR,
-	// TODO IRQ
-	.irq = EPWM7_INT_IRQn,
-	.irqHandler = epwm_timer7_irqHandler,
-	.clk = CLK_PCLKCR7_EPWM1ENCLK_BITS, 
-};
-			
-			
-TIMER_ADDDEV(epwm, epwm7_data);
-void interrupt epwm_timer7_irqHandler() {
-	c28x_pwm_timerIRQHandler(&epwm7_data);
-}
-#ifdef CONFIG_MACH_C28X_ePWM7_PWM
-struct pwm epwm7_pwm_data = {
-	PWM_INIT_DEV(epwm)
-	HAL_NAME("epwm7 PWM")
-	.timer = &epwm7_data,
-	.pinsA = EPWM7A,
-	.pinsB = EPWM7B,
-};
-PWM_ADDDEV(epwm, epwm7_pwm_data);
-#endif
-#endif
-
-
-#ifdef CONFIG_MACH_C28X_ePWM8
-extern void epwm_timer7_irqHandler();
-struct timer epwm8_data = {
-	TIMER_INIT_DEV(epwm)
-	HAL_NAME("epwm8 Timer")
-	.base = (volatile struct timer_reg *) PWM_ePWM8_BASE_ADDR,
-	// TODO IRQ
-	.irq = EPWM8_INT_IRQn,
-	.irqHandler = epwm_timer8_irqHandler,
-	.clk = CLK_PCLKCR8_EPWM1ENCLK_BITS, 
-};
-TIMER_ADDDEV(epwm, epwm8_data);
-void interrupt epwm_timer8_irqHandler() {
-	c28x_pwm_timerIRQHandler(&epwm8_data);
-}
-#ifdef CONFIG_MACH_C28X_ePWM8_PWM
-struct pwm epwm8_pwm_data = {
-	PWM_INIT_DEV(epwm)
-	HAL_NAME("epwm8 PWM")
-	.timer = &epwm8_data,
-	.pinsA = EPWM8A,
-	.pinsB = EPWM8B,
-};
-PWM_ADDDEV(epwm, epwm8_pwm_data);
-#endif
-#endif
