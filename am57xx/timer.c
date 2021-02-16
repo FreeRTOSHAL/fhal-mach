@@ -519,71 +519,70 @@ CAPTURE_OPS(am57xx);
 #endif
 TIMER_OPS(am57xx);
 #ifdef CONFIG_AM57xx_TIMER1
-	static void am57xx_timer_IRQHandler1();
-	# ifdef CONFIG_AM57xx_TIMER1_CAPTURE
-		extern struct capture capture1_data;
-	# endif
-	struct timer timer1_data = {
+static void am57xx_timer_IRQHandler1();
+# ifdef CONFIG_AM57xx_TIMER1_CAPTURE
+extern struct capture capture1_data;
+# endif
+struct timer timer1_data = {
 	TIMER_INIT_DEV(am57xx)
 	HAL_NAME("AM57xx Timer 1")
 	.base = (struct timer_reg *) 0x6AE18000,
 	.irqBase = TIMER1_IRQ,
 	.clkbase = (uint32_t *) 0x6AE07840,
 	.irqHandler = am57xx_timer_IRQHandler1,
-	# ifdef CONFIG_AM57xx_TIMER1_CAPTURE
-		.capture = &capture1_data,
-	# endif
-	};
-	TIMER_ADDDEV(am57xx, timer1_data);
-	# ifdef CONFIG_AM57xx_TIMER1_PWM
-		struct pwm pwm1_data = {
-		PWM_INIT_DEV(am57xx)
-		HAL_NAME("AM57xx PWM 1")
-		.timer = &timer1_data,
-		#  ifdef CONFIG_AM57xx_TIMER1_GPMC_BEN1
-			.pin = {
-			.pin = PAD_GPMC_BEN1,
-			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
-			.extra = MUX_INPUT,
-			},	
-		#  endif
-		#  ifdef CONFIG_AM57xx_TIMER1_GPIO6_14
-			.pin = {
-			.pin = PAD_GPIO6_14,
-			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
-			.extra = MUX_INPUT,
-			},
-		#  endif
-		};
-		PWM_ADDDEV(am57xx, pwm1_data);
-	# endif
-	# ifdef CONFIG_AM57xx_TIMER1_CAPTURE
-		struct capture capture1_data = {
-		CAPTURE_INIT_DEV(am57xx)
-		HAL_NAME("AM57xx Capture 1")
-		.timer = &timer1_data,
-		#  ifdef CONFIG_AM57xx_TIMER1_GPMC_BEN1
-			.pin = {
-			.pin = PAD_GPMC_BEN1,
-			.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
-			.extra = MUX_INPUT,
-		},
-		#  endif
-		#  ifdef CONFIG_AM57xx_TIMER1_GPIO6_14
-			.pin = {
-			.pin = PAD_GPIO6_14,
-			.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
-			.extra = MUX_INPUT,
-		},
-		#  endif
-		};
-		CAPTURE_ADDDEV(am57xx, capture1_data);
-	# endif
-	static void am57xx_timer_IRQHandler1() {
+# ifdef CONFIG_AM57xx_TIMER1_CAPTURE
+	.capture = &capture1_data,
+# endif
+};
+TIMER_ADDDEV(am57xx, timer1_data);
+# ifdef CONFIG_AM57xx_TIMER1_PWM
+struct pwm pwm1_data = {
+	PWM_INIT_DEV(am57xx)
+	HAL_NAME("AM57xx PWM 1")
+	.timer = &timer1_data,
+#  ifdef CONFIG_AM57xx_TIMER1_GPMC_BEN1
+	.pin = {
+		.pin = PAD_GPMC_BEN1,
+		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0x7),
+		.extra = MUX_INPUT,
+	},
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER1_GPIO6_14
+	.pin = {
+		.pin = PAD_GPIO6_14,
+		.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(0xA),
+		.extra = MUX_INPUT,
+	},
+#  endif
+};
+PWM_ADDDEV(am57xx, pwm1_data);
+# endif
+# ifdef CONFIG_AM57xx_TIMER1_CAPTURE
+struct capture capture1_data = {
+	CAPTURE_INIT_DEV(am57xx)
+	HAL_NAME("AM57xx Capture 1")
+	.timer = &timer1_data,
+#  ifdef CONFIG_AM57xx_TIMER1_GPMC_BEN1
+	.pin = {
+		.pin = PAD_GPMC_BEN1,
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0x7),
+		.extra = MUX_INPUT,
+	},
+#  endif
+#  ifdef CONFIG_AM57xx_TIMER1_GPIO6_14
+	.pin = {
+		.pin = PAD_GPIO6_14,
+		.cfg = MUX_CTL_OPEN | MUX_CTL_MODE(0xA),
+		.extra = MUX_INPUT,
+	},
+#  endif
+};
+CAPTURE_ADDDEV(am57xx, capture1_data);
+# endif
+static void am57xx_timer_IRQHandler1() {
 	am57xx_timer_IRQHandler(&timer1_data);
-	}
+}
 #endif
-
 #ifdef CONFIG_AM57xx_TIMER2
 static void am57xx_timer_IRQHandler2();
 # ifdef CONFIG_AM57xx_TIMER2_CAPTURE
