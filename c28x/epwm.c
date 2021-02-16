@@ -24,20 +24,51 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	// TODO setup Timer
 	
 	/* Set prescaler we don't use the HSP Clock Div */
-	{
+	/*{
 		uint16_t prescalerBase = 0;
 		while (prescaler >>=  1) {
 			prescalerBase++;
 		}
 		timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_CLKDIV_BITS) | (prescalerBase << 10);
 		timer->base->TBCTL &= PWM_TBCTL_HSPCLKDIV_BITS;
-	}
+	}*/
+
+	{
+                uint16_t prescalerBase = 0;
+                uint16_t hsp = 0;
+                bool found = false;
+                for (hsp = 0; hsp <= 14; hsp++) {
+                        uint16_t tmp = hsp;
+                        if ((hsp % 2) != 0) {
+                                continue;
+                        }
+                        if (hsp == 0) {
+                                tmp = 1;
+                        }
+                        for (prescalerBase = 0; prescalerBase <= 7; prescalerBase++) {
+                                if (((1 << prescalerBase) * tmp) == prescaler) {
+                                        found = true;
+                                        break;
+                                }
+                        }
+                        if (found) {
+                                break;
+                        }
+                }
+                if (!found) {
+                        PRINTF("no presacler combination found (hsp * prescaler) prescaler is base 2 and hsp is 1 or multiply of 2\n");
+                        goto epwm_timer_init_error1;
+                }
+                PRINTF("prescaler: %u hsp: %u\n", (1 << prescalerBase), ((hsp == 0)? 1 : hsp));
+                timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_CLKDIV_BITS) | (prescalerBase << 10);
+                timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_HSPCLKDIV_BITS) | ((hsp / 2) << 7);
+        }
+
 	
+				
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	//Timer set Counter Mode
-	timer->base->TBCTL &= (~TIMER_TBCTL_CTRMODE_BITS);
-	
-	timer->base->TBCTL |= PWM_CounterMode_UpDown; 
+	timer->base->TBCTL |= (TIMER_TBCTL_CTRMODE_BITS); 
 	
 	// Timer disable Counter Load
 	timer->base->TBCTL &= (~TIMER_TBCTL_PHSEN_BITS);
@@ -103,10 +134,13 @@ TIMER_SET_OVERFLOW_CALLBACK(epwm, timer, callback, data) {
 	if (callback !=NULL){
 		//Interrupt Event Select Bits 
 		timer->base->ETSEL &= ~PWM_ETSEL_INTSEL_BITS;
-		timer->base->ETSEL |= PWM_IntMode_Period;
+		timer->base->ETSEL |= PWM_TBCTR_TBPRD;
 		
 		timer->base->ETPS &= ~PWM_ETPS_INTPRD_BITS; 
 		timer->base->ETPS |= PWM_IntPeriod_FirstEvent;
+		
+		timer->base->ETCLR |= (PWM_ETCLR_INT_BITS);
+		timer->base->ETCLR &= (~PWM_ETCLR_INT_BITS);
 		
 		timer->base->ETSEL |= PWM_ETSEL_INTEN_BITS;
 		irq_enable(timer->irq);
@@ -123,8 +157,8 @@ TIMER_SET_OVERFLOW_CALLBACK(epwm, timer, callback, data) {
 TIMER_START(epwm, timer) {
 	// TODO Start Timer
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
-	/* Start Timer set to PWM_CounterMode_Down=(0 << 0) Counter default is 0x3 == disable */
-	timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_CTRMODE_BITS) | (0x1 << 0);
+	/* Start Timer set to PWM_CounterMode_UpDown=(2 << 0) Counter default is 0x3 == disable */
+	timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_CTRMODE_BITS) | PWM_CounterMode_Up;
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
@@ -133,7 +167,7 @@ TIMER_STOP(epwm, timer) {
 	
 	/* Disable timer */
 	timer->base->TBCTL &= ~PWM_TBCTL_FREESOFT_BITS;
-	timer->base->TBCTL &= ~PWM_TBCTL_CTRMODE_BITS;
+	timer->base->TBCTL |= ~PWM_TBCTL_CTRMODE_BITS;
 	return 0;
 }
 
@@ -144,12 +178,12 @@ void c28x_pwm_timerIRQHandler(struct timer *timer) {
 	} else {
 		timer_stop(timer);
 	}
-	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	
 	timer->base->ETCLR |= PWM_ETCLR_INT_BITS;
 	timer->base->ETCLR &= ~PWM_ETCLR_INT_BITS;
 	irq_clear(timer->irq);
 	portYIELD_FROM_ISR(wakeThread);
-	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+
 }
 
 void epwm_sync(bool on) {
@@ -217,7 +251,7 @@ TIMER_ONESHOT(epwm, timer, us) {
 		return -1;
 	}
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
-	timer->base->TBPRD = USToCounter(timer, us);
+	timer->base->TBPRD = x;
 	timer->base->TBCTL &= (~TIMER_TBCTL_FREESOFT_BITS);
 	//PWM_RunMode_SoftStopAfterCycle=(1 << 14)
 	timer->base->TBCTL |= PWM_RunMode_SoftStopAfterCycle;
@@ -228,15 +262,17 @@ TIMER_ONESHOT(epwm, timer, us) {
 TIMER_PERIODIC(epwm, timer, us) {
 	// TODO Programm the timer to periotic
 	// TBCTL FREE, SOFT = 2 (Free-Run)
+	PRINTF("TIMER_PERIODIC\n");
 	uint64_t x = USToCounter(timer, us);
 	if(x > UINT16_MAX -1){
 		return -1;
 	}
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
-	timer->base->TBPRD = USToCounter(timer, us );
+	timer->base->TBPRD = x;
 	timer->base->TBCTL &= (~TIMER_TBCTL_FREESOFT_BITS);
 	//PWM_RunMode_FreeRun=(2 << 14) 
 	timer->base->TBCTL |= PWM_RunMode_FreeRun;
+	timer->base->TBCTR = 0;
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return timer_start(timer);
 }
@@ -291,14 +327,14 @@ PWM_SET_PERIOD(epwm, pwm, us) {
 	//Setup CMPB (3.4.2 Counter-Compare Submodule Registers)
 	
 	uint64_t x = USToCounter(pwm->timer, us);
-	if(x > UINT16_MAX -1){
+	if(x < UINT16_MAX -1){
 		return -1;
 	}
 	
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 
 	//PWM set Period
-	pwm->timer->base->TBPRD = USToCounter(pwm->timer, us );
+	pwm->timer->base->TBPRD = x;
 	// PWM set LoadMode_CmpB_Zero
 	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_LOADBMODE_BITS);
 	//PWM set ShadowMode_CmpB
@@ -312,14 +348,14 @@ PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
 	//TODO Setup CMPA (3.4.2 Counter-Compare Submodule Registers)
 	
 	uint64_t x = USToCounter(pwm->timer, us);
-	if(x > UINT16_MAX -1){
+	if(x < UINT16_MAX -1){
 		return -1;
 	}
 	
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	
 	//PWM set DUTY 
-	pwm->timer->base->CMPA = USToCounter(pwm->timer, us); 
+	pwm->timer->base->CMPA = x; 
 	
 	// PWM set LoadMode_CmpA_Zero
 	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_LOADAMODE_BITS);

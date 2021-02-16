@@ -19,7 +19,7 @@ menuconfig MACH_C28X_ePWM1
 				default 1
 		endif
 		choice 	MACH_C28X_ePWM1_SYNCOUT	
-			bool "choice SYNCOUT"
+			prompt "choice SYNCOUT"
 			default MACH_C28X_ePWM1_SYNCMODE_EPWMxSYNC
 				
 			config MACH_C28X_ePWM1_SYNCMODE_CMP
@@ -34,7 +34,6 @@ menuconfig MACH_C28X_ePWM1
 			config MACH_C28X_ePWM1_SYNCMODE_EPWMxSYNC
 				bool "syncmode EPWMxSYNC"
 		endchoice
-		
 
 		config MACH_C28X_ePWM1_PWM
 			bool "activate PWM 1A"

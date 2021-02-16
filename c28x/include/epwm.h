@@ -170,11 +170,13 @@
 #define PWM_SyncMode_EPWMxSYNC		(0 << 4)
 #define PWM_PhaseDir_CountUp		(1 << 13)
 #define PWM_PhaseDir_CountDown		(0 << 13)
-#define PWM_IntMode_Period 		(2 << 0)
+#define PWM_TBCTR_TBPRD			(2 << 0)
 #define PWM_IntPeriod_FirstEvent	(1 << 0)
 #define PWM_RunMode_SoftStopAfterCycle	(1 << 14)
 #define PWM_RunMode_FreeRun		(2 << 14)
 #define PWM_CounterMode_UpDown		(2 << 0)
+#define PWM_CounterMode_Down		(1 << 0)
+#define PWM_CounterMode_Up		(0 << 0)
 #define PWM_PeriodLoad_Immediate	(1 << 3)
 
 struct timer_reg {
