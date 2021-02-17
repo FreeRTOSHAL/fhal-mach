@@ -381,7 +381,7 @@ void dcan_handleInt0IRQ(struct can *can) {
 		if(es & DCAN_ES_LEC_ACK_ERROR){
 			err |= CAN_ERR_PROT;
 			err |= CAN_ERR_ACK;
-			err |= CAN_ERR_PROT_LOC_ACK;
+			data |= CAN_ERR_PROT_LOC_ACK;
 		}
 		if(es & DCAN_ES_LEC_BIT1_ERROR){
 			err |= CAN_ERR_PROT;
