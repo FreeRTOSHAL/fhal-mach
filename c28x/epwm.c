@@ -41,35 +41,35 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	}*/
 
 	{
-                uint16_t prescalerBase = 0;
-                uint16_t hsp = 0;
-                bool found = false;
-                for (hsp = 0; hsp <= 14; hsp++) {
-                        uint16_t tmp = hsp;
-                        if ((hsp % 2) != 0) {
-                                continue;
-                        }
-                        if (hsp == 0) {
-                                tmp = 1;
-                        }
-                        for (prescalerBase = 0; prescalerBase <= 7; prescalerBase++) {
-                                if (((1 << prescalerBase) * tmp) == prescaler) {
-                                        found = true;
-                                        break;
-                                }
-                        }
-                        if (found) {
-                                break;
-                        }
-                }
-                if (!found) {
-                        PRINTF("no presacler combination found (hsp * prescaler) prescaler is base 2 and hsp is 1 or multiply of 2\n");
-                        goto epwm_timer_init_error1;
-                }
-                PRINTF("prescaler: %u hsp: %u\n", (1 << prescalerBase), ((hsp == 0)? 1 : hsp));
-                timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_CLKDIV_BITS) | (prescalerBase << 10);
-                timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_HSPCLKDIV_BITS) | ((hsp / 2) << 7);
-        }
+		uint16_t prescalerBase = 0;
+		uint16_t hsp = 0;
+		bool found = false;
+		for (hsp = 0; hsp <= 14; hsp++) {
+			uint16_t tmp = hsp;
+			if ((hsp % 2) != 0) {
+				continue;
+			}
+			if (hsp == 0) {
+				tmp = 1;
+			}
+			for (prescalerBase = 0; prescalerBase <= 7; prescalerBase++) {
+				if (((1 << prescalerBase) * tmp) == prescaler) {
+					found = true;
+					break;
+				}
+			}
+			if (found) {
+				break;
+			}
+		}
+		if (!found) {
+			PRINTF("no presacler combination found (hsp * prescaler) prescaler is base 2 and hsp is 1 or multiply of 2\n");
+ 			goto epwm_timer_init_error1;
+		}
+		PRINTF("prescaler: %u hsp: %u\n", (1 << prescalerBase), ((hsp == 0)? 1 : hsp));
+		timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_CLKDIV_BITS) | (prescalerBase << 10);
+		timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_HSPCLKDIV_BITS) | ((hsp / 2) << 7);
+	}
 
 
 				
@@ -317,6 +317,7 @@ PWM_INIT(epwm, index) {
 		PRINTF("timer is not init\n");
 		goto epwm_pwm_init_error1;
 	}
+	
 
 epwm_pwm_init_exit:
 	return pwm;
@@ -333,44 +334,54 @@ PWM_SET_PERIOD(epwm, pwm, us) {
 	//TODO Setup Period and init pwm
 	//Setup CMPB (3.4.2 Counter-Compare Submodule Registers)
 	
+	
+	
 	uint64_t x = USToCounter(pwm->timer, us);
 	if(x < UINT16_MAX -1){
 		return -1;
 	}
 	
-	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
-
-	//PWM set Period
 	pwm->timer->base->TBPRD = x;
-	// PWM set LoadMode_CmpB_Zero
-	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_LOADBMODE_BITS);
-	//PWM set ShadowMode_CmpB
+	pwm->timer->base->TBCTR = 0;
+
 	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_SHDWBMODE_BITS);
-	pwm->timer->base->CMPCTL |= (1 << 4);
+	pwm->timer->base->CMPCTL |= (1 << 6);
+	pwm->timer->base->CMPB = pwm->timer->base->TBPRD; 
 	
-	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+	if (pwm->timer->adc){
+		pwm->timer->base->ETSEL &= ~PWM_ETSEL_SOCBSEL_BITS;
+		// time-base counter equal to CMPB when the timer is incrementing.
+		pwm->timer->base->ETSEL |= PWM_Cmp_B_INC;
+	
+		//PWM_SocPeriod_FirstEvent,	
+		pwm->timer->base->ETPS &= ~PWM_ETPS_SOCBPRD_BITS; 
+		pwm->timer->base->ETPS |= PWM_SOCBPeriod_FirstEvent;
+		
+		pwm->timer->base->ETCLR |= (PWM_ETCLR_SOCB_BITS);
+		pwm->timer->base->ETCLR &= (~PWM_ETCLR_SOCB_BITS);
+	}
+	
 	return 0;
 }
 PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
 	//TODO Setup CMPA (3.4.2 Counter-Compare Submodule Registers)
-	
-	uint64_t x = USToCounter(pwm->timer, us);
+	uint64_t periode = counterToUS(pwm->timer, pwm->timer->base->TBPRD);
+	uint64_t x = USToCounter(pwm->timer, (us * periode / 100));
 	if(x < UINT16_MAX -1){
 		return -1;
 	}
 	
-	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
-	
+	//PWM set ShadowMode_CmpA 
+	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_SHDWAMODE_BITS);
+	pwm->timer->base->CMPCTL |= (1 << 4);
 	//PWM set DUTY 
 	pwm->timer->base->CMPA = x; 
 	
-	// PWM set LoadMode_CmpA_Zero
-	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_LOADAMODE_BITS);
-
-	//PWM set ShadowMode_CmpA 
-	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_SHDWAMODE_BITS);
+	pwm->timer->base->AQCTLA &= (~PWM_AQCTL_CAU_BITS);
+	pwm->timer->base->AQCTLA |= PWM_AQCTL_CAU_LOW;
 	
-	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+	pwm->timer->base->AQCTLA &= (~PWM_AQCTL_ZRO_BITS);
+	pwm->timer->base->AQCTLA |= PWM_AQCTL_ZRO_HIGH;
 	
 	return 0;
 }
@@ -408,6 +419,11 @@ struct timer epwm1_data = {
 #endif
 #ifdef CONFIG_MACH_C28X_ePWM1_SYNCMODE_EPWMxSYNC
 	.syncout = PWM_SyncMode_EPWMxSYNC,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_ADC
+	.adc = true,
+#else
+	.adc = false,
 #endif
 	
 };
@@ -463,6 +479,7 @@ struct timer epwm2_data = {
 #endif
 	
 };
+
 					
 TIMER_ADDDEV(epwm, epwm2_data);
 void interrupt epwm_timer2_irqHandler() {

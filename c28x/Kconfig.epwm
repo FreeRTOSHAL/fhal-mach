@@ -34,6 +34,10 @@ menuconfig MACH_C28X_ePWM1
 			config MACH_C28X_ePWM1_SYNCMODE_EPWMxSYNC
 				bool "syncmode EPWMxSYNC"
 		endchoice
+		
+		config CONFIG_MACH_C28X_ePWM1_ADC
+			bool "activate ADC"
+			default n
 
 		config MACH_C28X_ePWM1_PWM
 			bool "activate PWM 1A"
@@ -73,6 +77,10 @@ menuconfig MACH_C28X_ePWM2
 			config MACH_C28X_ePWM2_SYNCMODE_EPWMxSYNC
 				bool "syncmode EPWMxSYNC"
 		endchoice
+		
+		config CONFIG_MACH_C28X_ePWM1_ADC
+			bool "activate ADC"
+			default n
 
 		config MACH_C28X_ePWM2_PWM
 			bool "activate PWM 2A"
