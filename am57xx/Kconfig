@@ -59,6 +59,9 @@ config MACH_HAS_GPIO
 config MACH_HAS_SPI
 	bool
 	default y
+config MACH_HAS_CAN
+    bool
+    default y
 config MACH_HAS_TIMER
 	bool
 	default y
@@ -97,7 +100,16 @@ menuconfig AM57xx_TIMER
 	bool "Am57xx General-Purpose Timers"
 	default n
 	source mach/am57xx/Kconfig.timer
+menuconfig MACH_AM57xx_DCAN
+    depends on CAN
+    select USE_TASK_NOTIFICATIONS
+    bool "Activate DCAN"
+    default n
+    if MACH_AM57xx_DCAN
+    source mach/am57xx/Kconfig.can
+    endif
 config AM57xx_TEMP
 	depends on TEMP
 	bool "Am57xx Temperature Sensors"
 	default n
+
