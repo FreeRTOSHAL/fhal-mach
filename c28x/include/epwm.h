@@ -82,7 +82,7 @@
 
 //! \brief Defines the location of the SOCBEN bits in the ETSEL register
 //!
-#define PWM_ETSEL_SOCBEN_BITS		(1 << 15)
+#define PWM_ETSEL_SOCBEN_BITS		(1U << 15)
 
 //! \brief Defines the location of the FREESOFT bits in the TBCTL register
 //!
@@ -210,9 +210,6 @@
 #define EPWM8A GPIO_42
 #define EPWM8B GPIO_43
 
-#define PWM_SyncMode_EqualZero		(1U << 4)
-#define PWM_SyncMode_cmp		(2U << 4)
-#define PWM_Cmp_B_INC			(4U << 12)
 #define PWM_SyncMode_Disable		(3U << 4)
 #define PWM_SyncMode_EPWMxSYNC		(0U << 4)
 #define PWM_PhaseDir_CountUp		(1U << 13)
@@ -220,6 +217,7 @@
 #define PWM_TBCTR_TBPRD			(2U << 0)
 #define PWM_IntPeriod_FirstEvent	(1U << 0)
 #define PWM_SOCBPeriod_FirstEvent	(1U << 12)
+#define PWM_SOCAPeriod_FirstEvent	(1U << 0)
 #define PWM_RunMode_SoftStopAfterCycle	(1U << 14)
 #define PWM_RunMode_FreeRun		(2U << 14)
 #define PWM_CounterMode_UpDown		(2U << 0)
@@ -230,6 +228,22 @@
 #define PWM_AQCTL_CAU_LOW		(1U << 4)
 #define PWM_AQCTL_ZRO_BITS		(3U << 0)
 #define PWM_AQCTL_ZRO_HIGH		(2U << 0)
+
+#define PWM_SyncMode_EqualZero		(1U << 4)
+#define PWM_SyncMode_cmp		(2U << 4)
+
+#define SOCA_SEL 			8
+#define SOCB_SEL			12
+
+#define ADC_DCBEVT1			0U
+#define ADC_ZERO			1U
+#define ADC_PRD				2U
+#define ADC_PRD_OR_ZERO			3U
+#define ADC_CMPA_INC			4U
+#define ADC_CMPA_DEC			5U
+#define ADC_CMPB_INC			6U
+#define ADC_CMPB_DEC			7U
+
 
 struct timer_reg {
 	volatile uint16_t   TBCTL;	//!< Time-Base Control Register
@@ -285,6 +299,11 @@ struct timer {
 	bool phaseUp;
 	uint64_t phasevalue;
 	bool adc;
+	bool  socA;
+	bool  socB;
+	unsigned int adcEventA;
+	unsigned int adcEventB;
+	
 };
 
 	
@@ -295,6 +314,8 @@ struct pwm {
 	enum pins pinsA;
 	enum pins pinsB;
 };
+
+
 
 /**
  * sync all timer

@@ -35,9 +35,60 @@ menuconfig MACH_C28X_ePWM1
 				bool "syncmode EPWMxSYNC"
 		endchoice
 		
-		config CONFIG_MACH_C28X_ePWM1_ADC
+		config MACH_C28X_ePWM1_ADC
 			bool "activate ADC"
 			default n
+		if MACH_C28X_ePWM1_ADC = y
+			config MACH_C28X_ePWM1_ADC_SOCA
+				bool "Activate SOCA"
+				default n
+			if MACH_C28X_ePWM1_ADC_SOCA = y
+			choice MACH_C28X_ePWM1_ADC_EVENTA
+				prompt "choice ADC_EVENTA"
+				config MACH_C28X_ePWM1_ADC_EVENTA_CMPB_INC
+					bool "adcEvent CMPB_INC"
+				config MACH_C28X_ePWM1_ADC_EVENTA_DCBEVT1
+					bool "adcEvent DCBEVT1"
+				config MACH_C28X_ePWM1_ADC_EVENTA_ZERO
+					bool "adcEvent ZERO"
+				config MACH_C28X_ePWM1_ADC_EVENTA_PRD
+					bool "adcEvent PRD" 
+				config MACH_C28X_ePWM1_ADC_EVENTA_PRD_OR_ZERO
+					bool "adcEvent PRDORZERO"
+				config MACH_C28X_ePWM1_ADC_EVENTA_CMPA_INC
+					bool "adcEvent CMPA_INC"
+				config MACH_C28X_ePWM1_ADC_EVENTA_CMPA_DEC
+					bool "adcEvent CMPA_DEC"
+				config MACH_C28X_ePWM1_ADC_EVENTA_CMPB_DEC
+					bool "adcEvent CMPB_DEC"
+			endchoice
+			endif
+				
+			config MACH_C28X_ePWM1_ADC_SOCB
+				bool "Activate SOCB"
+				default n
+			if MACH_C28X_ePWM1_ADC_SOCB = y
+			choice MACH_C28X_ePWM1_ADC_EVENTB
+				prompt "choice ADC_EVENTB"
+				config MACH_C28X_ePWM1_ADC_EVENTB_CMPB_INC
+					bool "adcEvent CMPB_INC"
+				config MACH_C28X_ePWM1_ADC_EVENTB_DCBEVT1
+					bool "adcEvent DCBEVT1"
+				config MACH_C28X_ePWM1_ADC_EVENTB_ZERO
+					bool "adcEvent ZERO"
+				config MACH_C28X_ePWM1_ADC_EVENTB_PRD
+					bool "adcEvent PRD" 
+				config MACH_C28X_ePWM1_ADC_EVENTB_PRD_OR_ZERO
+					bool "adcEvent PRDORZERO"
+				config MACH_C28X_ePWM1_ADC_EVENTB_CMPA_INC
+					bool "adcEvent CMPA_INC"
+				config MACH_C28X_ePWM1_ADC_EVENTB_CMPA_DEC
+					bool "adcEvent CMPA_DEC"
+				config MACH_C28X_ePWM1_ADC_EVENTB_CMPB_DEC
+					bool "adcEvent CMPB_DEC"
+			endchoice
+			endif
+		endif
 
 		config MACH_C28X_ePWM1_PWM
 			bool "activate PWM 1A"
