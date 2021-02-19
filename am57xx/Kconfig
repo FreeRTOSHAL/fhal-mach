@@ -37,7 +37,7 @@ config MACH_LD_SCRIPT
 
 config MACH_INCLUDE
 	string
-	default "-Imach/am57xx/include -Imach/ti/include"
+	default "-Imach/am57xx/include"
 config MACH_DEFINE_HEAP
 	bool
 	default y
