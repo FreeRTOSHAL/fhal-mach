@@ -106,6 +106,38 @@ TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 		timer->base->TBCTL &= ~PWM_TBCTL_PHSEN_BITS;
 	}
 	
+	if (timer->adc){
+		if (timer->socB){
+			timer->base->ETSEL &= ~PWM_ETSEL_SOCBSEL_BITS;
+			// time-base counter equal to CMPB when the timer is incrementing.
+			timer->base->ETSEL |= (timer->adcEventA << SOCB_SEL);
+	
+			//PWM_SocPeriod_FirstEvent,	
+			timer->base->ETPS &= ~PWM_ETPS_SOCBPRD_BITS; 
+			timer->base->ETPS |= PWM_SOCBPeriod_FirstEvent;
+		
+			timer->base->ETCLR |= (PWM_ETCLR_SOCB_BITS);
+			timer->base->ETCLR &= (~PWM_ETCLR_SOCB_BITS);
+		
+			timer->base->ETSEL |= PWM_ETSEL_SOCBEN_BITS;
+		}
+		
+		if (timer->socA){
+			timer->base->ETSEL &= ~PWM_ETSEL_SOCBSEL_BITS;
+			// time-base counter equal to CMPB when the timer is incrementing.
+			timer->base->ETSEL |= (timer->adcEventB << SOCA_SEL);
+	
+			//PWM_SocPeriod_FirstEvent,	
+			timer->base->ETPS &= ~PWM_ETPS_SOCAPRD_BITS; 
+			timer->base->ETPS |= PWM_SOCAPeriod_FirstEvent;
+		
+			timer->base->ETCLR |= (PWM_ETCLR_SOCA_BITS);
+			timer->base->ETCLR &= (~PWM_ETCLR_SOCA_BITS);
+		
+			timer->base->ETSEL |= PWM_ETSEL_SOCAEN_BITS;
+		}
+	}
+	
 	//disable  the Interrupt 
 	timer->base->ETSEL &= (~PWM_ETSEL_INTEN_BITS);
 	timer->base->ETCLR &= (~PWM_ETCLR_INT_BITS);
@@ -164,8 +196,13 @@ TIMER_SET_OVERFLOW_CALLBACK(epwm, timer, callback, data) {
 TIMER_START(epwm, timer) {
 	// TODO Start Timer
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
-	/* Start Timer set to PWM_CounterMode_UpDown=(2 << 0) Counter default is 0x3 == disable */
-	timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_CTRMODE_BITS) | PWM_CounterMode_Up;
+	timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_CTRMODE_BITS);
+	if (timer->upMode){
+		timer->base->TBCTL |=PWM_CounterMode_Up;
+	}else {
+		timer->base->TBCTL |=PWM_CounterMode_UpDown;
+	}
+	
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	return 0;
 }
@@ -298,6 +335,7 @@ PWM_INIT(epwm, index) {
 	int32_t ret;
 	struct pwm *pwm;
 	struct timer *timer;
+	struct mux *mux = mux_init();
 	pwm = PWM_GET_DEV(index);
 	if (pwm == NULL) {
 		PRINTF("dev not found\n");
@@ -318,6 +356,32 @@ PWM_INIT(epwm, index) {
 		goto epwm_pwm_init_error1;
 	}
 	
+	//PWM set ShadowMode_CmpB
+	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_SHDWBMODE_BITS);
+	pwm->timer->base->CMPCTL |= EPWM_CMPB_Immediate;
+	
+	//PWM set ShadowMode_CmpA 
+	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_SHDWAMODE_BITS);
+	pwm->timer->base->CMPCTL |=  EPWM_CMPA_Immediate;
+	
+	// set Action Qualifier
+	pwm->timer->base->AQCTLA &= (~pwm->timer->base->AQCTLA);
+	pwm->timer->base->AQCTLA |= (pwm->epwmActionCBU << EPWMxCBU);
+	pwm->timer->base->AQCTLA |= (pwm->epwmActionCBD << EPWMxCBD);
+	pwm->timer->base->AQCTLA |= (pwm->epwmActionCAU << EPWMxCAU);
+	pwm->timer->base->AQCTLA |= (pwm->epwmActionCAD << EPWMxCAD);
+	pwm->timer->base->AQCTLA |= (pwm->epwmActionPRD << EPWMxPRD);
+	pwm->timer->base->AQCTLA |= (pwm->epwmActionZRO << EPWMxZRO);
+	
+	//Disable Chopping
+	pwm->timer->base->PCCTL &= (~PWM_PCCTL_CHPEN_BITS);
+	
+	// Disable Trip Zones
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+    	pwm->timer->base->TZSEL = 0;
+    	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
+    	
+    	
 
 epwm_pwm_init_exit:
 	return pwm;
@@ -333,77 +397,52 @@ PWM_DEINIT(epwm, pwm) {
 PWM_SET_PERIOD(epwm, pwm, us) {
 	//TODO Setup Period and init pwm
 	//Setup CMPB (3.4.2 Counter-Compare Submodule Registers)
+	int ret;
+	struct timer *timer = pwm->timer;
 	
+	ret = timer_stop(timer);
+		if (ret < 0) {
+			return -1;
+	}
 	
+	uint64_t x = USToCounter(timer, us);
+	if(x < UINT16_MAX -1){
+		return -1;
+	}
+	if (timer->upMode){
+		timer->base->TBPRD = x;
+	} else {
+		timer->base->TBPRD = USToCounter(timer, us/2);
+	}
+
+	timer->base->TBCTR = 0;
+	timer->base->CMPB = timer->base->TBPRD; 
 	
+	return timer_start(timer);
+}
+PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
+	//TODO Setup CMPA (3.4.2 Counter-Compare Submodule Registers)
+	
+	uint64_t periodeHalf;// == TBPRD / bei upDown Mode periodeHalf = periode/2. 
 	uint64_t x = USToCounter(pwm->timer, us);
 	if(x < UINT16_MAX -1){
 		return -1;
 	}
+	periodeHalf = counterToUS(pwm->timer, pwm->timer->base->TBPRD);
 	
-	pwm->timer->base->TBPRD = x;
-	pwm->timer->base->TBCTR = 0;
-
-	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_SHDWBMODE_BITS);
-	pwm->timer->base->CMPCTL |= (1 << 6);
-	pwm->timer->base->CMPB = pwm->timer->base->TBPRD; 
-	
-	if (pwm->timer->adc){
-		if (pwm->timer->socB){
-			pwm->timer->base->ETSEL &= ~PWM_ETSEL_SOCBSEL_BITS;
-			// time-base counter equal to CMPB when the timer is incrementing.
-			pwm->timer->base->ETSEL |= (pwm->timer->adcEventA << SOCB_SEL);
-	
-			//PWM_SocPeriod_FirstEvent,	
-			pwm->timer->base->ETPS &= ~PWM_ETPS_SOCBPRD_BITS; 
-			pwm->timer->base->ETPS |= PWM_SOCBPeriod_FirstEvent;
+	if (us <= periodeHalf){
+		if (pwm->timer->upMode){
+		pwm->timer->base->CMPA = x;	
+		}else{
 		
-			pwm->timer->base->ETCLR |= (PWM_ETCLR_SOCB_BITS);
-			pwm->timer->base->ETCLR &= (~PWM_ETCLR_SOCB_BITS);
-		
-			pwm->timer->base->ETSEL |= PWM_ETSEL_SOCBEN_BITS;
+		pwm->timer->base->CMPA = USToCounter(pwm->timer, (periodeHalf - (us/2))); 
 		}
-		
-		if (pwm->timer->socA){
-			pwm->timer->base->ETSEL &= ~PWM_ETSEL_SOCBSEL_BITS;
-			// time-base counter equal to CMPB when the timer is incrementing.
-			pwm->timer->base->ETSEL |= (pwm->timer->adcEventB << SOCA_SEL);
-	
-			//PWM_SocPeriod_FirstEvent,	
-			pwm->timer->base->ETPS &= ~PWM_ETPS_SOCAPRD_BITS; 
-			pwm->timer->base->ETPS |= PWM_SOCAPeriod_FirstEvent;
-		
-			pwm->timer->base->ETCLR |= (PWM_ETCLR_SOCA_BITS);
-			pwm->timer->base->ETCLR &= (~PWM_ETCLR_SOCA_BITS);
-		
-			pwm->timer->base->ETSEL |= PWM_ETSEL_SOCAEN_BITS;
-		}
-	}
-	
-	return 0;
-}
-PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
-	//TODO Setup CMPA (3.4.2 Counter-Compare Submodule Registers)
-	uint64_t periode = counterToUS(pwm->timer, pwm->timer->base->TBPRD);
-	uint64_t x = USToCounter(pwm->timer, (us * periode / 100));
-	if(x < UINT16_MAX -1){
+	}else{
 		return -1;
 	}
-	
-	//PWM set ShadowMode_CmpA 
-	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_SHDWAMODE_BITS);
-	pwm->timer->base->CMPCTL |= (1 << 4);
-	//PWM set DUTY 
-	pwm->timer->base->CMPA = x; 
-	
-	pwm->timer->base->AQCTLA &= (~PWM_AQCTL_CAU_BITS);
-	pwm->timer->base->AQCTLA |= PWM_AQCTL_CAU_LOW;
-	
-	pwm->timer->base->AQCTLA &= (~PWM_AQCTL_ZRO_BITS);
-	pwm->timer->base->AQCTLA |= PWM_AQCTL_ZRO_HIGH;
-	
 	return 0;
 }
+
 PWM_OPS(epwm);
 #endif
 #ifdef CONFIG_MACH_C28X_ePWM1
@@ -457,6 +496,11 @@ struct timer epwm1_data = {
 	.socB = false,
 #endif
 
+#ifdef CONFIG_MACH_C28X_ePWM1_UP_MODE
+	.upMode = true,
+#else
+	.upMode = false,
+#endif 
 #ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTA_DCBEVT1
 	.adcEventA = ADC_DCBEVT1,
 #endif
@@ -521,8 +565,93 @@ struct pwm epwm1_pwm_data = {
 	PWM_INIT_DEV(epwm)
 	HAL_NAME("epwm1 PWM")
 	.timer = &epwm1_data,
+	
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA
 	.pinsA = EPWM1A,
-	.pinsB = EPWM1B,
+
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBU_NOTHING
+	.epwmActionCBU = EPWMx_NOTHING,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBU_CLEAR
+	.epwmActionCBU = EPWMx_CLEAR,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBU_SET
+	.epwmActionCBU = EPWMx_SET,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBU_TOGGLE
+	.epwmActionCBU = EPWMx_TOGGLE,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBD_NOTHING
+	.epwmActionCBD = EPWMx_NOTHING,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBD_CLEAR
+	.epwmActionCBD = EPWMx_CLEAR,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBD_SET
+	.epwmActionCBD = EPWMx_SET,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBD_TOGGLE
+	.epwmActionCBD = EPWMx_TOGGLE,
+#endif
+	
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAU_NOTHING
+	.epwmActionCAU = EPWMx_NOTHING,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAU_CLEAR
+	.epwmActionCAU = EPWMx_CLEAR,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAU_SET
+	.epwmActionCAU = EPWMx_SET,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAU_TOGGLE
+	.epwmActionCAU = EPWMx_TOGGLE,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAD_NOTHING
+	.epwmActionCAD = EPWMx_NOTHING,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAD_CLEAR
+	.epwmActionCAD = EPWMx_CLEAR,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAD_SET
+	.epwmActionCAD = EPWMx_SET,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAD_TOGGLE
+	.epwmActionCAD = EPWMx_TOGGLE,
+#endif	
+	
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_PRD_NOTHING
+	.epwmActionPRD = EPWMx_NOTHING,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_PRD_CLEAR
+	.epwmActionPRD = EPWMx_CLEAR,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_PRD_SET
+	.epwmActionPRD = EPWMx_SET,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_PRD_TOGGLE
+	.epwmActionPRD = EPWMx_TOGGLE,
+#endif	
+	
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_ZRO_NOTHING
+	.epwmActionZRO = EPWMx_NOTHING,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_ZRO_CLEAR
+	.epwmActionZRO = EPWMx_CLEAR,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_ZRO_SET
+	.epwmActionZRO = EPWMx_SET,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_ZRO_TOGGLE
+	.epwmActionZRO = EPWMx_TOGGLE,
+#endif
+
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_PWM_B
+	.pinsA = EPWM1B,
+#endif
+
 };
 PWM_ADDDEV(epwm, epwm1_pwm_data);
 #endif
@@ -562,14 +691,83 @@ struct timer epwm2_data = {
 	.syncout = PWM_SyncMode_EPWMxSYNC,
 #endif
 
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC
 	.adc = true,
 #else
 	.adc = false,
 #endif
-	
-};
 
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_SOCA
+	.socA = true,
+#else 
+	.socA = false,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_SOCB
+	.socB = true,
+#else 
+	.socB = false,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM1_UP_MODE
+	.upMode = true,
+#else
+	.upMode = false,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_DCBEVT1
+	.adcEventA = ADC_DCBEVT1,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_ZERO
+	.adcEventA = ADC_ZERO,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_PRD
+	.adcEventA = ADC_PRD,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_PRD_OR_ZERO
+	.adcEventA = ADC_PRD_OR_ZERO,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_CMPA_INC
+	.adcEventA = ADC_CMPA_INC,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_CMPA_DEC
+	.adcEventA = ADC_CMPA_DEC,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_CMPB_INC
+	.adcEventA = ADC_CMPB_INC,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_CMPB_DEC
+	.adcEventA = ADC_CMPB_DEC,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_DCBEVT1
+	.adcEventB = ADC_DCBEVT1,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_ZERO
+	.adcEventB = ADC_ZERO,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_PRD
+	.adcEventB = ADC_PRD,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_PRD_OR_ZERO
+	.adcEventB = ADC_PRD_OR_ZERO,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_CMPA_INC
+	.adcEventB = ADC_CMPA_INC,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_CMPA_DEC
+	.adcEventB = ADC_CMPA_DEC,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_CMPB_INC
+	.adcEventB = ADC_CMPB_INC,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_CMPB_DEC
+	.adcEventB = ADC_CMPB_DEC,
+#endif
+		
+};
 					
 TIMER_ADDDEV(epwm, epwm2_data);
 void interrupt epwm_timer2_irqHandler() {

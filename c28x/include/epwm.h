@@ -14,6 +14,7 @@
 #include <hal.h>
 #include <vector.h>
 #include <iomux.h>
+#include <mux.h>
 #include <cpu.h>
 #include <clk.h>
 
@@ -22,6 +23,10 @@
 #else
 # define PRINTF(fmt, ...)
 #endif
+
+//! \brief Defines the location of the CHPEN bits in the PCCTL register
+//!
+#define PWM_PCCTL_CHPEN_BITS 		(1 << 0)
 //! \brief Defines the location of the ETCR bits in the ETCLR register
 //!
 #define PWM_ETCLR_INT_BITS		(1 << 0)
@@ -161,6 +166,30 @@
 //!
 #define PWM_TBCTL_PHSDIR_BITS		(1 << 13)
 
+//! \brief Defines the location of the ZRO bits in the AQCTL register
+//!
+#define PWM_AQCTL_ZRO_BITS		(3 << 0)
+
+//! \brief Defines the location of the PRD bits in the AQCTL register
+//!
+#define PWM_AQCTL_PRD_BITS		(3 << 2)
+
+//! \brief Defines the location of the CAU bits in the AQCTL register
+//!
+#define PWM_AQCTL_CAU_BITS		(3 << 4)
+
+//! \brief Defines the location of the CAD bits in the AQCTL register
+//!
+#define PWM_AQCTL_CAD_BITS		(3 << 6)
+
+//! \brief Defines the location of the CBU bits in the AQCTL register
+//!
+#define PWM_AQCTL_CBU_BITS		(3 << 8)
+
+//! \brief Defines the location of the CBD bits in the AQCTL register
+//!
+#define PWM_AQCTL_CBD_BITS		(3 << 10)
+
 //! \brief Defines the base address of the pulse width modulation (PWM) 1 registers
 //!
 #define PWM_ePWM1_BASE_ADDR		(0x00006800)
@@ -210,6 +239,8 @@
 #define EPWM8A GPIO_42
 #define EPWM8B GPIO_43
 
+#define EPWM_CMPA_Immediate 		(1U << 4)
+#define EPWM_CMPB_Immediate		(1U << 6)
 #define PWM_SyncMode_Disable		(3U << 4)
 #define PWM_SyncMode_EPWMxSYNC		(0U << 4)
 #define PWM_PhaseDir_CountUp		(1U << 13)
@@ -224,9 +255,7 @@
 #define PWM_CounterMode_Down		(1U << 0)
 #define PWM_CounterMode_Up		(0U << 0)
 #define PWM_PeriodLoad_Immediate	(1U << 3)
-#define PWM_AQCTL_CAU_BITS		(3U << 4)
 #define PWM_AQCTL_CAU_LOW		(1U << 4)
-#define PWM_AQCTL_ZRO_BITS		(3U << 0)
 #define PWM_AQCTL_ZRO_HIGH		(2U << 0)
 
 #define PWM_SyncMode_EqualZero		(1U << 4)
@@ -245,6 +274,20 @@
 #define ADC_CMPB_DEC			7U
 
 
+#define EPWMx_NOTHING 			0U
+#define EPWMx_CLEAR			1U
+#define EPWMx_SET			2U
+#define EPWMx_TOGGLE			3U
+
+#define	EPWMxCBD			11
+#define	EPWMxCBU			9
+#define	EPWMxCAD			7
+#define	EPWMxCAU			5
+#define	EPWMxPRD			3
+#define	EPWMxZRO			1
+
+#define PWM_DeadBandOutputMode_EPWMxA_Rising_EPWMxB_Falling (3U << 0)
+#define PWM_DeadBandPolarity_EPWMxB_Inverted (2U << 2)
 struct timer_reg {
 	volatile uint16_t   TBCTL;	//!< Time-Base Control Register
 	volatile uint16_t   TBSTS;	//!< Time-Base Status Register
@@ -303,8 +346,16 @@ struct timer {
 	bool  socB;
 	unsigned int adcEventA;
 	unsigned int adcEventB;
+	bool upMode; 
 	
 };
+
+struct pinCFG {
+	enum pins pin;
+	uint32_t cfg;
+	uint32_t extra;
+};
+int32_t mux_configPins(struct mux *mux, const struct pinCFG *cfg, uint32_t len);
 
 	
 struct pwm {
@@ -313,9 +364,14 @@ struct pwm {
 	// TODO Muxing
 	enum pins pinsA;
 	enum pins pinsB;
+	
+	unsigned int epwmActionCBU;
+	unsigned int epwmActionCAD;
+	unsigned int epwmActionCAU;
+	unsigned int epwmActionCBD;
+	unsigned int epwmActionPRD;
+	unsigned int epwmActionZRO;
 };
-
-
 
 /**
  * sync all timer
