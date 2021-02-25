@@ -336,6 +336,7 @@ PWM_INIT(epwm, index) {
 	struct pwm *pwm;
 	struct timer *timer;
 	struct mux *mux = mux_init();
+	struct pinCFG  pin; 
 	pwm = PWM_GET_DEV(index);
 	if (pwm == NULL) {
 		PRINTF("dev not found\n");
@@ -356,6 +357,19 @@ PWM_INIT(epwm, index) {
 		goto epwm_pwm_init_error1;
 	}
 	
+	pin = pwm->pinsA;
+	
+	ret = mux_pinctl(mux, pin.pin, pin.cfg, pin.extra);
+		if (ret < 0) {
+			goto epwm_pwm_init_error0;
+		}
+	pin = pwm->pinsB;
+	
+	ret = mux_pinctl(mux, pin.pin, pin.cfg, pin.extra);
+		if (ret < 0) {
+			goto epwm_pwm_init_error0;
+		}
+		
 	//PWM set ShadowMode_CmpB
 	pwm->timer->base->CMPCTL &= (~PWM_CMPCTL_SHDWBMODE_BITS);
 	pwm->timer->base->CMPCTL |= EPWM_CMPB_Immediate;
@@ -372,6 +386,16 @@ PWM_INIT(epwm, index) {
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionCAD << EPWMxCAD);
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionPRD << EPWMxPRD);
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionZRO << EPWMxZRO);
+	
+	//Set DeadBand 
+	
+	pwm->timer->base->DBCTL &= (~PWM_DBCTL_OUTMODE_BITS);
+    	pwm->timer->base->DBCTL |= PWM_DB_Output_AR_BF;
+	pwm->timer->base->DBCTL &= (~PWM_DBCTL_POLSEL_BITS);
+	pwm->timer->base->DBCTL |= PWM_DBP_Polarity_B_Inverted;
+	pwm->timer->base->DBRED = HAL_PWM_DBRED_CNT;
+	pwm->timer->base->DBFED = HAL_PWM_DBFED_CNT;
+    
 	
 	//Disable Chopping
 	pwm->timer->base->PCCTL &= (~PWM_PCCTL_CHPEN_BITS);
@@ -412,7 +436,7 @@ PWM_SET_PERIOD(epwm, pwm, us) {
 	if (timer->upMode){
 		timer->base->TBPRD = x;
 	} else {
-		timer->base->TBPRD = USToCounter(timer, us/2);
+		timer->base->TBPRD = x/2;
 	}
 
 	timer->base->TBCTR = 0;
@@ -428,14 +452,14 @@ PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
 	if(x < UINT16_MAX -1){
 		return -1;
 	}
-	periodeHalf = counterToUS(pwm->timer, pwm->timer->base->TBPRD);
+	periodeHalf = pwm->timer->base->TBPRD;
 	
 	if (us <= periodeHalf){
 		if (pwm->timer->upMode){
 		pwm->timer->base->CMPA = x;	
-		}else{
 		
-		pwm->timer->base->CMPA = USToCounter(pwm->timer, (periodeHalf - (us/2))); 
+		}else{
+		pwm->timer->base->CMPA = periodeHalf - (x/2); 
 		}
 	}else{
 		return -1;
@@ -486,12 +510,14 @@ struct timer epwm1_data = {
 
 #ifdef CONFIG_MACH_C28X_ePWM1_ADC_SOCA
 	.socA = true,
+	.adcEventA = CONFIG_MACH_C28X_ePWM1_ADC_EVENTA,
 #else 
 	.socA = false,
 #endif
 
 #ifdef CONFIG_MACH_C28X_ePWM1_ADC_SOCB
 	.socB = true,
+	.adcEventB = CONFIG_MACH_C28X_ePWM1_ADC_EVENTB,
 #else 
 	.socB = false,
 #endif
@@ -501,58 +527,7 @@ struct timer epwm1_data = {
 #else
 	.upMode = false,
 #endif 
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTA_DCBEVT1
-	.adcEventA = ADC_DCBEVT1,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTA_ZERO
-	.adcEventA = ADC_ZERO,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTA_PRD
-	.adcEventA = ADC_PRD,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTA_PRD_OR_ZERO
-	.adcEventA = ADC_PRD_OR_ZERO,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTA_CMPA_INC
-	.adcEventA = ADC_CMPA_INC,
-#endif
 
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTA_CMPA_DEC
-	.adcEventA = ADC_CMPA_DEC,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTA_CMPB_INC
-	.adcEventA = ADC_CMPB_INC,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTA_CMPB_DEC
-	.adcEventA = ADC_CMPB_DEC,
-#endif
-
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTB_DCBEVT1
-	.adcEventB = ADC_DCBEVT1,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTB_ZERO
-	.adcEventB = ADC_ZERO,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTB_PRD
-	.adcEventB = ADC_PRD,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTB_PRD_OR_ZERO
-	.adcEventB = ADC_PRD_OR_ZERO,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTB_CMPA_INC
-	.adcEventB = ADC_CMPA_INC,
-#endif
-
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTB_CMPA_DEC
-	.adcEventB = ADC_CMPA_DEC,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTB_CMPB_INC
-	.adcEventB = ADC_CMPB_INC,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_EVENTB_CMPB_DEC
-	.adcEventB = ADC_CMPB_DEC,
-#endif
-	
 };
 
 					
@@ -567,89 +542,29 @@ struct pwm epwm1_pwm_data = {
 	.timer = &epwm1_data,
 	
 #ifdef CONFIG_MACH_C28X_ePWM1_PWMA
-	.pinsA = EPWM1A,
+	.pinsA = {
+			.pin = EPWM1A,
+			.cfg = MUX_CTL_OPEN,
+			.extra = MUX_EXTRA_OUTPUT,
+	}, 
 
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBU_NOTHING
-	.epwmActionCBU = EPWMx_NOTHING,
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION
+	.epwmActionCBU = CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBU,
+	.epwmActionCBD =  CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBD,
+	.epwmActionCAU = CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAU,
+	.epwmActionCAD = CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAD,	
+	.epwmActionPRD = CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_PRD,
+	.epwmActionZRO = CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_ZRO,
 #endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBU_CLEAR
-	.epwmActionCBU = EPWMx_CLEAR,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBU_SET
-	.epwmActionCBU = EPWMx_SET,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBU_TOGGLE
-	.epwmActionCBU = EPWMx_TOGGLE,
-#endif
-
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBD_NOTHING
-	.epwmActionCBD = EPWMx_NOTHING,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBD_CLEAR
-	.epwmActionCBD = EPWMx_CLEAR,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBD_SET
-	.epwmActionCBD = EPWMx_SET,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBD_TOGGLE
-	.epwmActionCBD = EPWMx_TOGGLE,
-#endif
-	
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAU_NOTHING
-	.epwmActionCAU = EPWMx_NOTHING,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAU_CLEAR
-	.epwmActionCAU = EPWMx_CLEAR,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAU_SET
-	.epwmActionCAU = EPWMx_SET,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAU_TOGGLE
-	.epwmActionCAU = EPWMx_TOGGLE,
-#endif
-
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAD_NOTHING
-	.epwmActionCAD = EPWMx_NOTHING,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAD_CLEAR
-	.epwmActionCAD = EPWMx_CLEAR,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAD_SET
-	.epwmActionCAD = EPWMx_SET,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAD_TOGGLE
-	.epwmActionCAD = EPWMx_TOGGLE,
-#endif	
-	
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_PRD_NOTHING
-	.epwmActionPRD = EPWMx_NOTHING,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_PRD_CLEAR
-	.epwmActionPRD = EPWMx_CLEAR,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_PRD_SET
-	.epwmActionPRD = EPWMx_SET,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_PRD_TOGGLE
-	.epwmActionPRD = EPWMx_TOGGLE,
-#endif	
-	
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_ZRO_NOTHING
-	.epwmActionZRO = EPWMx_NOTHING,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_ZRO_CLEAR
-	.epwmActionZRO = EPWMx_CLEAR,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_ZRO_SET
-	.epwmActionZRO = EPWMx_SET,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_ZRO_TOGGLE
-	.epwmActionZRO = EPWMx_TOGGLE,
-#endif
-
 #endif
 #ifdef CONFIG_MACH_C28X_ePWM1_PWM_B
-	.pinsA = EPWM1B,
+	.pinsB = {
+			.pin = EPWM1A,
+			.cfg = MUX_CTL_OPEN,
+			.extra = MUX_EXTRA_OUTPUT,
+	},
+	
+	
 #endif
 
 };
@@ -699,12 +614,14 @@ struct timer epwm2_data = {
 
 #ifdef CONFIG_MACH_C28X_ePWM2_ADC_SOCA
 	.socA = true,
+	.adcEventA = CONFIG_MACH_C28X_ePWM1_ADC_EVENTA,
 #else 
 	.socA = false,
 #endif
 
 #ifdef CONFIG_MACH_C28X_ePWM2_ADC_SOCB
 	.socB = true,
+	.adcEventB = CONFIG_MACH_C28X_ePWM1_ADC_EVENTB,
 #else 
 	.socB = false,
 #endif
@@ -715,58 +632,6 @@ struct timer epwm2_data = {
 	.upMode = false,
 #endif
 
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_DCBEVT1
-	.adcEventA = ADC_DCBEVT1,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_ZERO
-	.adcEventA = ADC_ZERO,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_PRD
-	.adcEventA = ADC_PRD,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_PRD_OR_ZERO
-	.adcEventA = ADC_PRD_OR_ZERO,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_CMPA_INC
-	.adcEventA = ADC_CMPA_INC,
-#endif
-
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_CMPA_DEC
-	.adcEventA = ADC_CMPA_DEC,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_CMPB_INC
-	.adcEventA = ADC_CMPB_INC,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_CMPB_DEC
-	.adcEventA = ADC_CMPB_DEC,
-#endif
-
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_DCBEVT1
-	.adcEventB = ADC_DCBEVT1,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_ZERO
-	.adcEventB = ADC_ZERO,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_PRD
-	.adcEventB = ADC_PRD,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_PRD_OR_ZERO
-	.adcEventB = ADC_PRD_OR_ZERO,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_CMPA_INC
-	.adcEventB = ADC_CMPA_INC,
-#endif
-
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_CMPA_DEC
-	.adcEventB = ADC_CMPA_DEC,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_CMPB_INC
-	.adcEventB = ADC_CMPB_INC,
-#endif
-#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_CMPB_DEC
-	.adcEventB = ADC_CMPB_DEC,
-#endif
-		
 };
 					
 TIMER_ADDDEV(epwm, epwm2_data);
@@ -778,8 +643,24 @@ struct pwm epwm2_pwm_data = {
 	PWM_INIT_DEV(epwm)
 	HAL_NAME("epwm2 PWM")
 	.timer = &epwm2_data,
-	.pinsA = EPWM2A,
-	.pinsB = EPWM2B,
+	.pinsA =  {
+			.pin = EPWM2A,
+			.cfg = MUX_CTL_OPEN,
+			.extra = MUX_EXTRA_OUTPUT,
+	},
+	.pinsB = {
+			.pin = EPWM2B,
+			.cfg = MUX_CTL_OPEN,
+			.extra = MUX_EXTRA_OUTPUT,
+	},
+#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION
+	.epwmActionCBU = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_CBU,
+	.epwmActionCBD =  CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_CBD,
+	.epwmActionCAU = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_CAU,
+	.epwmActionCAD = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_CAD,	
+	.epwmActionPRD = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_PRD,
+	.epwmActionZRO = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_ZRO,
+#endif
 };
 PWM_ADDDEV(epwm, epwm2_pwm_data);
 #endif

@@ -24,6 +24,13 @@
 # define PRINTF(fmt, ...)
 #endif
 
+#define PWM_DBCTL_OUTMODE_BITS		(3 << 0)
+
+//! \brief Defines the location of the POLSEL bits in the DBCTL register
+//!
+#define PWM_DBCTL_POLSEL_BITS		(3 << 2)
+
+//! \brief Defines the location of the INMODE bits in the DBCTL register
 //! \brief Defines the location of the CHPEN bits in the PCCTL register
 //!
 #define PWM_PCCTL_CHPEN_BITS 		(1 << 0)
@@ -222,6 +229,15 @@
 //!
 #define PWM_ePWM8_BASE_ADDR		(0x000069C0)
 
+//! \brief Defines the PWM deadband falling edge delay count (system clocks)
+//!
+#define HAL_PWM_DBFED_CNT         5
+
+
+//! \brief Defines the PWM deadband rising edge delay count (system clocks)
+//!
+#define HAL_PWM_DBRED_CNT         5
+
 #define EPWM1A GPIO_0
 #define EPWM1B GPIO_1
 #define EPWM2A GPIO_2
@@ -285,6 +301,9 @@
 #define	EPWMxCAU			5
 #define	EPWMxPRD			3
 #define	EPWMxZRO			1
+
+#define PWM_DB_Output_AR_BF		(3 << 0)
+#define PWM_DBP_Polarity_B_Inverted	(2 << 2)
 
 #define PWM_DeadBandOutputMode_EPWMxA_Rising_EPWMxB_Falling (3U << 0)
 #define PWM_DeadBandPolarity_EPWMxB_Inverted (2U << 2)
@@ -361,9 +380,13 @@ int32_t mux_configPins(struct mux *mux, const struct pinCFG *cfg, uint32_t len);
 struct pwm {
 	struct pwm_generic gen;
 	struct timer *timer;
+	
 	// TODO Muxing
-	enum pins pinsA;
-	enum pins pinsB;
+	//enum pins pinsA;
+	//enum pins pinsB;
+	
+	struct pinCFG pinsA; 
+	struct pinCFG pinsB;
 	
 	unsigned int epwmActionCBU;
 	unsigned int epwmActionCAD;
