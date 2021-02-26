@@ -128,26 +128,7 @@ SECTIONS
    .cinit              : > FLASHA_B,   PAGE = 0
    .pinit              : > FLASHA_B,   PAGE = 0
    .text               : > FLASHA_B,   PAGE = 0
- .rodata.dev.hal : { __dev_hal = .; *(.rodata.dev.hal) __dev_hal_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.gpio : { __dev_gpio = .; *(.rodata.dev.gpio) __dev_gpio_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.uart : { __dev_uart = .; *(.rodata.dev.uart) __dev_uart_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.timer : { __dev_timer = .; *(.rodata.dev.timer) __dev_timer_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.pwm : { __dev_pwm = .; *(.rodata.dev.pwm) __dev_pwm_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.capture : { __dev_capture = .; *(.rodata.dev.capture) __dev_capture_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.spi : { __dev_spi = .; *(.rodata.dev.spi) __dev_spi_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.accel : { __dev_accel = .; *(.rodata.dev.accel) __dev_accel_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.gyro : { __dev_gyro = .; *(.rodata.dev.gyro) __dev_gyro_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.adc : { __dev_adc = .; *(.rodata.dev.adc) __dev_adc_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.example : { __dev_example = .; *(.rodata.dev.example) __dev_example_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.sd : { __dev_sd = .; *(.rodata.dev.sd) __dev_sd_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.mailbox : { __dev_mailbox = .; *(.rodata.dev.mailbox) __dev_mailbox_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.phydev : { __dev_phydev = .; *(.rodata.dev.phydev) __dev_phydev_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.mac : { __dev_mac = .; *(.rodata.dev.mac) __dev_mac_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.net : { __dev_net = .; *(.rodata.dev.net) __dev_net_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.counter : { __dev_counter = .; *(.rodata.dev.counter) __dev_counter_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.rtc : { __dev_rtc = .; *(.rodata.dev.rtc) __dev_rtc_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.temp : { __dev_temp = .; *(.rodata.dev.temp) __dev_temp_end = .; } > FLASHA_B, PAGE=0
- .rodata.dev.can : { __dev_can = .; *(.rodata.dev.can) __dev_can_end = .; } > FLASHA_B, PAGE=0
+ .rodata.dev.hal : { __devs = .; *(.rodata.dev.hal) __devs_end = .; } > FLASHA_B, PAGE=0
 
    codestart           : > BEGIN,      PAGE = 0
    ramfuncs            : LOAD = FLASHD,
