@@ -128,7 +128,7 @@ SECTIONS
    .cinit              : > FLASHA_B,   PAGE = 0
    .pinit              : > FLASHA_B,   PAGE = 0
    .text               : > FLASHA_B,   PAGE = 0
- .rodata.dev.hal : { __dev_hal = .; *(.rodata.dev.hal) __dev_hal_end = .; } > FLASHA_B, PAGE=0
+ .rodata.dev.hal : { __devs = .; *(.rodata.dev.hal) __devs_end = .; } > FLASHA_B, PAGE=0
 
    codestart           : > BEGIN,      PAGE = 0
    ramfuncs            : LOAD = FLASHD,
