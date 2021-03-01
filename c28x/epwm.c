@@ -388,13 +388,14 @@ PWM_INIT(epwm, index) {
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionZRO << EPWMxZRO);
 	
 	//Set DeadBand 
-	
+	pwm->timer->base->DBCTL &= (~PWM_DBCTL_INMODE_BITS);
+	pwm->timer->base->DBCTL |= (pwm->dbInMode << EPWMxDB_IN);
 	pwm->timer->base->DBCTL &= (~PWM_DBCTL_OUTMODE_BITS);
-    	pwm->timer->base->DBCTL |= PWM_DB_Output_AR_BF;
+    	pwm->timer->base->DBCTL |= (pwm->dbOutMode << EPWMxDB_OUT);
 	pwm->timer->base->DBCTL &= (~PWM_DBCTL_POLSEL_BITS);
-	pwm->timer->base->DBCTL |= PWM_DBP_Polarity_B_Inverted;
-	pwm->timer->base->DBRED = HAL_PWM_DBRED_CNT;
-	pwm->timer->base->DBFED = HAL_PWM_DBFED_CNT;
+	pwm->timer->base->DBCTL |= (pwm->dbPolarity << EPWMxDB_POL);
+	pwm->timer->base->DBRED = pwm->dbred;
+	pwm->timer->base->DBFED = pwm->dbfed;
     
 	
 	//Disable Chopping
@@ -508,25 +509,68 @@ struct timer epwm1_data = {
 	.adc = false,
 #endif
 
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_SOCA
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_SOCA
 	.socA = true,
-	.adcEventA = CONFIG_MACH_C28X_ePWM1_ADC_EVENTA,
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTA_DCBEVT1
+	.adcEventA = ADC_DCBEVT1,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTA_ZERO
+	.adcEventA = ADC_ZERO,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTA_PRD
+	.adcEventA = ADC_PRD,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTA_PRD_OR_ZERO
+	.adcEventA = ADC_PRD_OR_ZERO,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTA_CMPA_INC
+	.adcEventA = ADC_CMPA_INC,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTA_CMPA_DEC
+	.adcEventA = ADC_CMPA_DEC,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTA_CMPB_INC
+	.adcEventA = ADC_CMPB_INC,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTA_CMPB_DEC
+	.adcEventA = ADC_CMPB_DEC,
+#endif
+
 #else 
 	.socA = false,
 #endif
 
-#ifdef CONFIG_MACH_C28X_ePWM1_ADC_SOCB
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_SOCB
 	.socB = true,
-	.adcEventB = CONFIG_MACH_C28X_ePWM1_ADC_EVENTB,
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTB_DCBEVT1
+	.adcEventB = ADC_DCBEVT1,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTB_ZERO
+	.adcEventB = ADC_ZERO,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTB_PRD
+	.adcEventB = ADC_PRD,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTB_PRD_OR_ZERO
+	.adcEventB = ADC_PRD_OR_ZERO,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTB_CMPA_INC
+	.adcEventB = ADC_CMPA_INC,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTB_CMPA_DEC
+	.adcEventB = ADC_CMPA_DEC,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTB_CMPB_INC
+	.adcEventB = ADC_CMPB_INC,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_ADC_EVENTB_CMPB_DEC
+	.adcEventB = ADC_CMPB_DEC,
+#endif 
 #else 
 	.socB = false,
 #endif
-
-#ifdef CONFIG_MACH_C28X_ePWM1_UP_MODE
-	.upMode = true,
-#else
-	.upMode = false,
-#endif 
 
 };
 
@@ -550,20 +594,66 @@ struct pwm epwm1_pwm_data = {
 
 #ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION
 	.epwmActionCBU = CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBU,
-	.epwmActionCBD =  CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBD,
+	.epwmActionCBD = CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CBD,
 	.epwmActionCAU = CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAU,
 	.epwmActionCAD = CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_CAD,	
 	.epwmActionPRD = CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_PRD,
 	.epwmActionZRO = CONFIG_MACH_C28X_ePWM1_PWMA_ACTION_ZRO,
 #endif
+
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_HALFCYCLE
+	.dbHalfcycle = 1U,
+#else 
+	.dbHalfcycle = 0U,
+#endif 
+
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_IN_MODE_A_FALLING_RISING
+	.dbInMode = 0U,
+#endif 
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_IN_MODE_B_RISING_A_FALLING
+	.dbInMode = 1U,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_IN_MODE_A_RISING_B_FALLING
+	.dbInMode = 2U,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_IN_MODE_B_RISING_FALLING
+	.dbInMode = 3U,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_OUT_MODE_BYPASS
+	.dbOutMode = 0U,
+#endif 
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_OUT_MODE_A_DISABLE_B_FALLING
+	.dbOutMode = 1U,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_OUT_MODE_A_RISING_B_DISABLE
+	.dbOutMode = 2U,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_OUT_MODE_A_RISING_B_FALLING
+	.dbOutMode = 3U,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_POLARITY_A_B
+	.dbPolarity = 0U,
+#endif 
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_POLARITY_A_INVERTED
+	.dbPolarity = 1U,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_POLARITY_B_INVERTED
+	.dbPolarity = 2U,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM1_DB_POLARITY_A_B_INVERTED
+	.dbPolarity = 3U,
+#endif
+	.dbred = CONFIG_MACH_C28X_ePWM1_DB_DBRED,
+	.dbfed = CONFIG_MACH_C28X_ePWM1_DB_DBFED,
 #endif
 #ifdef CONFIG_MACH_C28X_ePWM1_PWM_B
 	.pinsB = {
-			.pin = EPWM1A,
+			.pin = EPWM1B,
 			.cfg = MUX_CTL_OPEN,
 			.extra = MUX_EXTRA_OUTPUT,
 	},
-	
 	
 #endif
 
@@ -614,19 +704,69 @@ struct timer epwm2_data = {
 
 #ifdef CONFIG_MACH_C28X_ePWM2_ADC_SOCA
 	.socA = true,
-	.adcEventA = CONFIG_MACH_C28X_ePWM1_ADC_EVENTA,
+	#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_DCBEVT1
+	.adcEventA = ADC_DCBEVT1,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_ZERO
+	.adcEventA = ADC_ZERO,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_PRD
+	.adcEventA = ADC_PRD,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_PRD_OR_ZERO
+	.adcEventA = ADC_PRD_OR_ZERO,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_CMPA_INC
+	.adcEventA = ADC_CMPA_INC,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_CMPA_DEC
+	.adcEventA = ADC_CMPA_DEC,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_CMPB_INC
+	.adcEventA = ADC_CMPB_INC,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTA_CMPB_DEC
+	.adcEventA = ADC_CMPB_DEC,
+#endif
+
 #else 
 	.socA = false,
 #endif
 
 #ifdef CONFIG_MACH_C28X_ePWM2_ADC_SOCB
 	.socB = true,
-	.adcEventB = CONFIG_MACH_C28X_ePWM1_ADC_EVENTB,
+	#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_DCBEVT1
+	.adcEventB = ADC_DCBEVT1,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_ZERO
+	.adcEventB = ADC_ZERO,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_PRD
+	.adcEventB = ADC_PRD,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_PRD_OR_ZERO
+	.adcEventB = ADC_PRD_OR_ZERO,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_CMPA_INC
+	.adcEventB = ADC_CMPA_INC,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_CMPA_DEC
+	.adcEventB = ADC_CMPA_DEC,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_CMPB_INC
+	.adcEventB = ADC_CMPB_INC,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_ADC_EVENTB_CMPB_DEC
+	.adcEventB = ADC_CMPB_DEC,
+#endif
+
 #else 
 	.socB = false,
 #endif
 
-#ifdef CONFIG_MACH_C28X_ePWM1_UP_MODE
+#ifdef CONFIG_MACH_C28X_ePWM2_UP_MODE
 	.upMode = true,
 #else
 	.upMode = false,
@@ -643,23 +783,79 @@ struct pwm epwm2_pwm_data = {
 	PWM_INIT_DEV(epwm)
 	HAL_NAME("epwm2 PWM")
 	.timer = &epwm2_data,
-	.pinsA =  {
+	
+#ifdef CONFIG_MACH_C28X_ePWM2_PWMA
+	.pinsA = {
 			.pin = EPWM2A,
 			.cfg = MUX_CTL_OPEN,
 			.extra = MUX_EXTRA_OUTPUT,
-	},
+	}, 
+
+#ifdef CONFIG_MACH_C28X_ePWM2_PWMA_ACTION
+	.epwmActionCBU = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_CBU,
+	.epwmActionCBD = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_CBD,
+	.epwmActionCAU = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_CAU,
+	.epwmActionCAD = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_CAD,	
+	.epwmActionPRD = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_PRD,
+	.epwmActionZRO = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_ZRO,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_HALFCYCLE
+	.dbHalfcycle = 1U,
+#else 
+	.dbHalfcycle = 0U,
+#endif 
+
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_IN_MODE_A_FALLING_RISING
+	.dbInMode = 0U,
+#endif 
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_IN_MODE_B_RISING_A_FALLING
+	.dbInMode = 1U,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_IN_MODE_A_RISING_B_FALLING
+	.dbInMode = 2U,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_IN_MODE_B_RISING_FALLING
+	.dbInMode = 3U,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_OUT_MODE_BYPASS
+	.dbOutMode = 0U,
+#endif 
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_OUT_MODE_A_DISABLE_B_FALLING
+	.dbOutMode = 1U,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_OUT_MODE_A_RISING_B_DISABLE
+	.dbOutMode = 2U,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_OUT_MODE_A_RISING_B_FALLING
+	.dbOutMode = 3U,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_POLARITY_A_B
+	.dbPolarity = 0U,
+#endif 
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_POLARITY_A_INVERTED
+	.dbPolarity = 1U,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_POLARITY_B_INVERTED
+	.dbPolarity = 2U,
+#endif
+#ifdef CONFIG_MACH_C28X_ePWM2_DB_POLARITY_A_B_INVERTED
+	.dbPolarity = 3U,
+#endif
+	.dbred = CONFIG_MACH_C28X_ePWM2_DB_DBRED,
+	.dbfed = CONFIG_MACH_C28X_ePWM2_DB_DBFED,
+#endif
+
+#ifdef CONFIG_MACH_C28X_ePWM2_PWM_B
 	.pinsB = {
 			.pin = EPWM2B,
 			.cfg = MUX_CTL_OPEN,
 			.extra = MUX_EXTRA_OUTPUT,
 	},
-#ifdef CONFIG_MACH_C28X_ePWM1_PWMA_ACTION
-	.epwmActionCBU = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_CBU,
-	.epwmActionCBD =  CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_CBD,
-	.epwmActionCAU = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_CAU,
-	.epwmActionCAD = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_CAD,	
-	.epwmActionPRD = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_PRD,
-	.epwmActionZRO = CONFIG_MACH_C28X_ePWM2_PWMA_ACTION_ZRO,
+	
+	
 #endif
 };
 PWM_ADDDEV(epwm, epwm2_pwm_data);

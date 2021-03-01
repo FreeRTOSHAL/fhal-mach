@@ -24,6 +24,10 @@
 # define PRINTF(fmt, ...)
 #endif
 
+//! \brief Defines the location of the INMODE bits in the DBCTL register
+//!
+#define PWM_DBCTL_INMODE_BITS           (3 << 4)
+
 #define PWM_DBCTL_OUTMODE_BITS		(3 << 0)
 
 //! \brief Defines the location of the POLSEL bits in the DBCTL register
@@ -229,15 +233,6 @@
 //!
 #define PWM_ePWM8_BASE_ADDR		(0x000069C0)
 
-//! \brief Defines the PWM deadband falling edge delay count (system clocks)
-//!
-#define HAL_PWM_DBFED_CNT         5
-
-
-//! \brief Defines the PWM deadband rising edge delay count (system clocks)
-//!
-#define HAL_PWM_DBRED_CNT         5
-
 #define EPWM1A GPIO_0
 #define EPWM1B GPIO_1
 #define EPWM2A GPIO_2
@@ -301,6 +296,11 @@
 #define	EPWMxCAU			5
 #define	EPWMxPRD			3
 #define	EPWMxZRO			1
+
+#define	EPWMxDB_IN			4
+#define	EPWMxDB_OUT			0
+#define	EPWMxDB_POL			2
+
 
 #define PWM_DB_Output_AR_BF		(3 << 0)
 #define PWM_DBP_Polarity_B_Inverted	(2 << 2)
@@ -394,6 +394,13 @@ struct pwm {
 	unsigned int epwmActionCBD;
 	unsigned int epwmActionPRD;
 	unsigned int epwmActionZRO;
+	unsigned int dbPolarity;
+	unsigned int dbInMode;
+	unsigned int dbOutMode;
+	unsigned int dbHalfcycle;
+	uint64_t dbred;
+	uint64_t dbfed;
+	
 };
 
 /**
