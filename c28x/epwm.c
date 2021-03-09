@@ -1,4 +1,5 @@
 #include "epwm.h"
+#include <iomux.h>
 
 TIMER_INIT(epwm, index, prescaler, basetime, adjust){
 	int32_t ret;
@@ -195,6 +196,7 @@ TIMER_SET_OVERFLOW_CALLBACK(epwm, timer, callback, data) {
 }
 TIMER_START(epwm, timer) {
 	// TODO Start Timer
+	printf("TIMER_START");
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
 	timer->base->TBCTL = (timer->base->TBCTL & ~PWM_TBCTL_CTRMODE_BITS);
 	if (timer->upMode){
@@ -332,6 +334,7 @@ TIMER_OPS(epwm);
 #ifdef CONFIG_MACH_C28X_ePWM_PWM
 
 PWM_INIT(epwm, index) {
+	printf("PWM_INIT\n");
 	int32_t ret;
 	struct pwm *pwm;
 	struct timer *timer;
@@ -361,13 +364,16 @@ PWM_INIT(epwm, index) {
 	
 	ret = mux_pinctl(mux, pin.pin, pin.cfg, pin.extra);
 		if (ret < 0) {
+			printf("mux_pinctlA error");
 			goto epwm_pwm_init_error0;
 		}
 	pin = pwm->pinsB;
 	
 	ret = mux_pinctl(mux, pin.pin, pin.cfg, pin.extra);
 		if (ret < 0) {
+			printf("mux_pinctlB error");
 			goto epwm_pwm_init_error0;
+			
 		}
 		
 	//PWM set ShadowMode_CmpB
@@ -420,6 +426,7 @@ PWM_DEINIT(epwm, pwm) {
 	return 0;
 }
 PWM_SET_PERIOD(epwm, pwm, us) {
+	printf("PWM_SET_PERIOD");
 	//TODO Setup Period and init pwm
 	//Setup CMPB (3.4.2 Counter-Compare Submodule Registers)
 	int ret;
@@ -431,7 +438,7 @@ PWM_SET_PERIOD(epwm, pwm, us) {
 	}
 	
 	uint64_t x = USToCounter(timer, us);
-	if(x < UINT16_MAX -1){
+	if(x > UINT16_MAX -1){
 		return -1;
 	}
 	if (timer->upMode){
@@ -440,31 +447,38 @@ PWM_SET_PERIOD(epwm, pwm, us) {
 		timer->base->TBPRD = x/2;
 	}
 
-	timer->base->TBCTR = 0;
 	timer->base->CMPB = timer->base->TBPRD; 
+
+	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+	timer->base->TBCTL &= (~TIMER_TBCTL_FREESOFT_BITS);
+	//PWM_RunMode_FreeRun=(2 << 14) 
+	timer->base->TBCTL |= PWM_RunMode_FreeRun;
+	timer->base->TBCTR = 0;
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	
 	return timer_start(timer);
 }
 PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
 	//TODO Setup CMPA (3.4.2 Counter-Compare Submodule Registers)
-	
+	printf("PWM_SET_DUTY_CYCLE");
 	uint64_t periodeHalf;// == TBPRD / bei upDown Mode periodeHalf = periode/2. 
 	uint64_t x = USToCounter(pwm->timer, us);
-	if(x < UINT16_MAX -1){
+	if(x > UINT16_MAX -1){
 		return -1;
 	}
 	periodeHalf = pwm->timer->base->TBPRD;
 	
-	if (us <= periodeHalf){
+	//if (us <= periodeHalf){
 		if (pwm->timer->upMode){
 		pwm->timer->base->CMPA = x;	
 		
 		}else{
 		pwm->timer->base->CMPA = periodeHalf - (x/2); 
 		}
-	}else{
+	/*}else{
+	printf("DUTY_CYCLE error \n");
 		return -1;
-	}
+	}*/
 	return 0;
 }
 
@@ -588,7 +602,7 @@ struct pwm epwm1_pwm_data = {
 #ifdef CONFIG_MACH_C28X_ePWM1_PWMA
 	.pinsA = {
 			.pin = EPWM1A,
-			.cfg = MUX_CTL_OPEN,
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(MODE1),
 			.extra = MUX_EXTRA_OUTPUT,
 	}, 
 
@@ -651,7 +665,7 @@ struct pwm epwm1_pwm_data = {
 #ifdef CONFIG_MACH_C28X_ePWM1_PWM_B
 	.pinsB = {
 			.pin = EPWM1B,
-			.cfg = MUX_CTL_OPEN,
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(MODE1),
 			.extra = MUX_EXTRA_OUTPUT,
 	},
 	
