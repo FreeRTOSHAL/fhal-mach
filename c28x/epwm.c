@@ -175,6 +175,7 @@ TIMER_SET_OVERFLOW_CALLBACK(epwm, timer, callback, data) {
 		//Interrupt Event Select Bits 
 		timer->base->ETSEL &= ~PWM_ETSEL_INTSEL_BITS;
 		timer->base->ETSEL |= PWM_TBCTR_TBPRD;
+		//timer->base->ETSEL |= (4U << 0);
 		
 		timer->base->ETPS &= ~PWM_ETPS_INTPRD_BITS; 
 		timer->base->ETPS |= PWM_IntPeriod_FirstEvent;
@@ -339,7 +340,8 @@ PWM_INIT(epwm, index) {
 	struct pwm *pwm;
 	struct timer *timer;
 	struct mux *mux = mux_init();
-	struct pinCFG  pin; 
+	struct pinCFG  pinA; 
+	struct pinCFG  pinB; 
 	pwm = PWM_GET_DEV(index);
 	if (pwm == NULL) {
 		PRINTF("dev not found\n");
@@ -360,16 +362,16 @@ PWM_INIT(epwm, index) {
 		goto epwm_pwm_init_error1;
 	}
 	
-	pin = pwm->pinsA;
+	pinA = pwm->pinsA;
 	
-	ret = mux_pinctl(mux, pin.pin, pin.cfg, pin.extra);
+	ret = mux_pinctl(mux, pinA.pin, pinA.cfg, pinA.extra);
 		if (ret < 0) {
 			printf("mux_pinctlA error");
 			goto epwm_pwm_init_error0;
 		}
-	pin = pwm->pinsB;
+	pinB = pwm->pinsB;
 	
-	ret = mux_pinctl(mux, pin.pin, pin.cfg, pin.extra);
+	ret = mux_pinctl(mux, pinB.pin, pinB.cfg, pinB.extra);
 		if (ret < 0) {
 			printf("mux_pinctlB error");
 			goto epwm_pwm_init_error0;
@@ -392,7 +394,7 @@ PWM_INIT(epwm, index) {
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionCAD << EPWMxCAD);
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionPRD << EPWMxPRD);
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionZRO << EPWMxZRO);
-	
+
 	//Set DeadBand 
 	pwm->timer->base->DBCTL &= (~PWM_DBCTL_INMODE_BITS);
 	pwm->timer->base->DBCTL |= (pwm->dbInMode << EPWMxDB_IN);
@@ -400,8 +402,23 @@ PWM_INIT(epwm, index) {
     	pwm->timer->base->DBCTL |= (pwm->dbOutMode << EPWMxDB_OUT);
 	pwm->timer->base->DBCTL &= (~PWM_DBCTL_POLSEL_BITS);
 	pwm->timer->base->DBCTL |= (pwm->dbPolarity << EPWMxDB_POL);
-	pwm->timer->base->DBRED = pwm->dbred;
-	pwm->timer->base->DBFED = pwm->dbfed;
+	{
+		uint32_t x;
+		printf("Config RED: ");
+		x = USToCounter(pwm->timer, pwm->dbred);
+		if (x == 0 && pwm->dbred != 0) {
+			x = 1;
+		}
+
+		pwm->timer->base->DBRED = x;
+
+		printf("Config FED: ");
+		x = USToCounter(pwm->timer, pwm->dbfed);
+		if (x == 0 && pwm->dbfed != 0) {
+			x = 1;
+		}
+		pwm->timer->base->DBFED = x;
+	}
     
 	
 	//Disable Chopping
@@ -410,8 +427,20 @@ PWM_INIT(epwm, index) {
 	// Disable Trip Zones
 	ENABLE_PROTECTED_REGISTER_WRITE_MODE;
     	pwm->timer->base->TZSEL = 0;
-    	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
-    	
+	
+	//PWM_enableTripZoneSrc
+    	pwm->timer->base->TZSEL |= PWM_TripZoneSrc_CycleByCycle_TZ6_NOT;
+	pwm->timer->base->TZSEL |= PWM_TripZoneSrc_CycleByCycle_TZ3_NOT;
+	pwm->timer->base->TZSEL |= PWM_TripZoneSrc_CycleByCycle_TZ2_NOT;
+	
+	//PWM_setTripZoneState_TZA
+	pwm->timer->base->TZCTL &= (~PWM_TZCTL_TZA_BITS);
+	pwm->timer->base->TZCTL |= (PWM_TripZoneState_EPWM_Low << TZA_BITS);
+	
+	//PWM_setTripZoneState_TZB
+	pwm->timer->base->TZCTL &= (~PWM_TZCTL_TZB_BITS);
+	pwm->timer->base->TZCTL |= (PWM_TripZoneState_EPWM_Low << TZB_BITS);
+	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
     	
 
 epwm_pwm_init_exit:
@@ -468,17 +497,17 @@ PWM_SET_DUTY_CYCLE(epwm, pwm, us) {
 	}
 	periodeHalf = pwm->timer->base->TBPRD;
 	
-	//if (us <= periodeHalf){
+	if (us >= periodeHalf){
 		if (pwm->timer->upMode){
 		pwm->timer->base->CMPA = x;	
 		
 		}else{
 		pwm->timer->base->CMPA = periodeHalf - (x/2); 
 		}
-	/*}else{
+	}else{
 	printf("DUTY_CYCLE error \n");
 		return -1;
-	}*/
+	}
 	return 0;
 }
 
@@ -585,6 +614,66 @@ struct timer epwm1_data = {
 #else 
 	.socB = false,
 #endif
+
+
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ1_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ1_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ2_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ2_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ3_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ3_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ3_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ3_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ4_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ4_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ5_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ5_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ6_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ6_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_CMPA
+	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_CmpA,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_CMPB
+	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_CmpB,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ1_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ1_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ2_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ2_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ3_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ3_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ3_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ3_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ4_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ4_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ5_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ5_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ6_NOT
+	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ6_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_CMPA
+	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_CmpA,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_CMPB
+	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_CmpB,
+#endif
+
+
+
 
 };
 
@@ -801,7 +890,7 @@ struct pwm epwm2_pwm_data = {
 #ifdef CONFIG_MACH_C28X_ePWM2_PWMA
 	.pinsA = {
 			.pin = EPWM2A,
-			.cfg = MUX_CTL_OPEN,
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(MODE1),
 			.extra = MUX_EXTRA_OUTPUT,
 	}, 
 
@@ -863,11 +952,11 @@ struct pwm epwm2_pwm_data = {
 #endif
 
 #ifdef CONFIG_MACH_C28X_ePWM2_PWM_B
-	.pinsB = {
-			.pin = EPWM2B,
-			.cfg = MUX_CTL_OPEN,
+	.pinsA = {
+			.pin = EPWM2A,
+			.cfg = MUX_CTL_PULL_UP | MUX_CTL_MODE(MODE1),
 			.extra = MUX_EXTRA_OUTPUT,
-	},
+	}, 
 	
 	
 #endif

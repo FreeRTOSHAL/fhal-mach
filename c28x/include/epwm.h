@@ -24,6 +24,14 @@
 # define PRINTF(fmt, ...)
 #endif
 
+//! \brief Defines the location of the TZA bits in the TZCTL register
+//!
+#define PWM_TZCTL_TZA_BITS		(3 << 0)
+
+//! \brief Defines the location of the  TZB bits in the TZCTL register
+//!
+#define PWM_TZCTL_TZB_BITS		(3 << 2)
+
 //! \brief Defines the location of the INMODE bits in the DBCTL register
 //!
 #define PWM_DBCTL_INMODE_BITS           (3 << 4)
@@ -307,6 +315,27 @@
 
 #define PWM_DeadBandOutputMode_EPWMxA_Rising_EPWMxB_Falling (3U << 0)
 #define PWM_DeadBandPolarity_EPWMxB_Inverted (2U << 2)
+
+#define	PWM_TripZoneSrc_CycleByCycle_TZ1_NOT	(1 << 0)
+#define	PWM_TripZoneSrc_CycleByCycle_TZ2_NOT	(1 << 1)
+#define	PWM_TripZoneSrc_CycleByCycle_TZ3_NOT	(1 << 2)
+#define	PWM_TripZoneSrc_CycleByCycle_TZ4_NOT	(1 << 3)
+#define	PWM_TripZoneSrc_CycleByCycle_TZ5_NOT	(1 << 4)
+#define	PWM_TripZoneSrc_CycleByCycle_TZ6_NOT	(1 << 5)
+
+
+#define PWM_TripZoneState_HighImp	0
+#define PWM_TripZoneState_EPWM_High	1
+#define PWM_TripZoneState_EPWM_Low	2
+#define PWM_TripZoneState_DoNothing	3
+
+#define TZA_BITS		0
+#define TZB_BITS		2
+
+
+
+
+
 struct timer_reg {
 	volatile uint16_t   TBCTL;	//!< Time-Base Control Register
 	volatile uint16_t   TBSTS;	//!< Time-Base Status Register
@@ -400,6 +429,7 @@ struct pwm {
 	unsigned int dbHalfcycle;
 	uint64_t dbred;
 	uint64_t dbfed;
+	
 	
 };
 
