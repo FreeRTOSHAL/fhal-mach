@@ -145,6 +145,7 @@ SECTIONS
    .stack              : > RAMM0,      PAGE = 1
    .ebss               : > RAML2_3,    PAGE = 1
    .esysmem            : > RAML2_3,    PAGE = 1
+   .cio                : > RAML2_3,    PAGE = 1
 
    graph_data          : > RAML2_3,    PAGE = 1
 
