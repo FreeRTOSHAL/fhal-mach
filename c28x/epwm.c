@@ -387,12 +387,17 @@ PWM_INIT(epwm, index) {
 	pwm->timer->base->CMPCTL |=  EPWM_CMPA_Immediate;
 	
 	// set Action Qualifier
-	pwm->timer->base->AQCTLA &= (~pwm->timer->base->AQCTLA);
+	pwm->timer->base->AQCTLA &= (~PWM_AQCTL_CBU_BITS);
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionCBU << EPWMxCBU);
+	pwm->timer->base->AQCTLA &= (~PWM_AQCTL_CBD_BITS);
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionCBD << EPWMxCBD);
+	pwm->timer->base->AQCTLA &= (~PWM_AQCTL_CAU_BITS);
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionCAU << EPWMxCAU);
+	pwm->timer->base->AQCTLA &= (~PWM_AQCTL_CAD_BITS);
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionCAD << EPWMxCAD);
+	pwm->timer->base->AQCTLA &= (~PWM_AQCTL_PRD_BITS);
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionPRD << EPWMxPRD);
+	pwm->timer->base->AQCTLA &= (~PWM_AQCTL_ZRO_BITS);
 	pwm->timer->base->AQCTLA |= (pwm->epwmActionZRO << EPWMxZRO);
 
 	//Set DeadBand 
@@ -429,19 +434,21 @@ PWM_INIT(epwm, index) {
     	pwm->timer->base->TZSEL = 0;
 	
 	//PWM_enableTripZoneSrc
-    	pwm->timer->base->TZSEL |= PWM_TripZoneSrc_CycleByCycle_TZ6_NOT;
-	pwm->timer->base->TZSEL |= PWM_TripZoneSrc_CycleByCycle_TZ3_NOT;
-	pwm->timer->base->TZSEL |= PWM_TripZoneSrc_CycleByCycle_TZ2_NOT;
+	int i;
+    	for(i = 0; i < 16; i++){
+		pwm->timer->base->TZSEL |= pwm->TripZoneSrc[i];
+	}
 	
 	//PWM_setTripZoneState_TZA
 	pwm->timer->base->TZCTL &= (~PWM_TZCTL_TZA_BITS);
-	pwm->timer->base->TZCTL |= (PWM_TripZoneState_EPWM_Low << TZA_BITS);
+	pwm->timer->base->TZCTL |= (pwm->TZState_TZA << TZA_BITS);
 	
 	//PWM_setTripZoneState_TZB
 	pwm->timer->base->TZCTL &= (~PWM_TZCTL_TZB_BITS);
-	pwm->timer->base->TZCTL |= (PWM_TripZoneState_EPWM_Low << TZB_BITS);
+	pwm->timer->base->TZCTL |= (pwm->TZState_TZA << TZB_BITS);
+
 	DISABLE_PROTECTED_REGISTER_WRITE_MODE;
-    	
+
 
 epwm_pwm_init_exit:
 	return pwm;
@@ -614,67 +621,6 @@ struct timer epwm1_data = {
 #else 
 	.socB = false,
 #endif
-
-
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ1_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ1_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ2_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ2_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ3_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ3_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ3_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ3_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ4_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ4_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ5_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ5_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ6_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_TZ6_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_CMPA
-	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_CmpA,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_CMPB
-	.TripZoneSrc |= PWM_TripZoneSrc_CycleByCycle_CmpB,
-#endif
-
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ1_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ1_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ2_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ2_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ3_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ3_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ3_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ3_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ4_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ4_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ5_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ5_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ6_NOT
-	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_TZ6_NOT,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_CMPA
-	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_CmpA,
-#endif
-#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_CMPB
-	.TripZoneSrc |= PWM_TripZoneSrc_ONESHOT_CmpB,
-#endif
-
-
-
-
 };
 
 					
@@ -750,6 +696,116 @@ struct pwm epwm1_pwm_data = {
 #endif
 	.dbred = CONFIG_MACH_C28X_ePWM1_DB_DBRED,
 	.dbfed = CONFIG_MACH_C28X_ePWM1_DB_DBFED,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ1_NOT
+	.TripZoneSrc[0] = PWM_TripZoneSrc_CycleByCycle_TZ1_NOT,
+#else 
+	.TripZoneSrc[0] = ~PWM_TripZoneSrc_CycleByCycle_TZ1_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ2_NOT
+	.TripZoneSrc[1] = PWM_TripZoneSrc_CycleByCycle_TZ2_NOT,
+#else 
+	.TripZoneSrc[1] = ~PWM_TripZoneSrc_CycleByCycle_TZ2_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ3_NOT
+	.TripZoneSrc[2] = PWM_TripZoneSrc_CycleByCycle_TZ3_NOT,
+#else 
+	.TripZoneSrc[2] = ~PWM_TripZoneSrc_CycleByCycle_TZ3_NOT,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ4_NOT
+	.TripZoneSrc[3] = PWM_TripZoneSrc_CycleByCycle_TZ4_NOT,
+#else 
+	.TripZoneSrc[3] = PWM_TripZoneSrc_CycleByCycle_TZ4_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ5_NOT
+	.TripZoneSrc[4] = PWM_TripZoneSrc_CycleByCycle_TZ5_NOT,
+#else 
+	.TripZoneSrc[4] = ~PWM_TripZoneSrc_CycleByCycle_TZ5_NOT,
+
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ6_NOT
+	.TripZoneSrc[5] = PWM_TripZoneSrc_CycleByCycle_TZ6_NOT,
+#else 
+	.TripZoneSrc[4] = ~PWM_TripZoneSrc_CycleByCycle_TZ6_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_CMPA
+	.TripZoneSrc[6] = PWM_TripZoneSrc_CycleByCycle_CmpA,
+#else 
+	.TripZoneSrc[6] = ~PWM_TripZoneSrc_CycleByCycle_CmpA,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_CMPB
+	.TripZoneSrc[7] = PWM_TripZoneSrc_CycleByCycle_CmpB,
+#else 
+	.TripZoneSrc[7] = ~PWM_TripZoneSrc_CycleByCycle_CmpB,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ1_NOT
+	.TripZoneSrc[8] = PWM_TripZoneSrc_OneShot_TZ1_NOT,
+#else 
+.	TripZoneSrc[8] = ~PWM_TripZoneSrc_OneShot_TZ1_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ2_NOT
+	.TripZoneSrc[9] = PWM_TripZoneSrc_OneShot_TZ2_NOT,
+#else 
+	.TripZoneSrc[9] = ~PWM_TripZoneSrc_OneShot_TZ2_NOT,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ3_NOT
+	.TripZoneSrc[10] = PWM_TripZoneSrc_OneShot_TZ3_NOT,
+#else 
+	.TripZoneSrc[10] = ~PWM_TripZoneSrc_OneShot_TZ3_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ4_NOT
+	.TripZoneSrc[11] = PWM_TripZoneSrc_OneShot_TZ4_NOT,
+#else 
+	.TripZoneSrc[11] = ~PWM_TripZoneSrc_OneShot_TZ4_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ5_NOT
+	.TripZoneSrc[12] = PWM_TripZoneSrc_OneShot_TZ5_NOT,
+#else 
+	.TripZoneSrc[12] = ~PWM_TripZoneSrc_OneShot_TZ5_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ6_NOT
+	.TripZoneSrc[13]= PWM_TripZoneSrc_OneShot_TZ6_NOT,
+#else 
+	.TripZoneSrc[13]= ~PWM_TripZoneSrc_OneShot_TZ6_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_CMPA
+	.TripZoneSrc[14]= PWM_TripZoneSrc_OneShot_CmpA,
+#else 
+	.TripZoneSrc[14]= PWM_TripZoneSrc_OneShot_CmpA,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_CMPB
+	.TripZoneSrc[15] = PWM_TripZoneSrc_OneShot_CmpB,
+#else 
+	.TripZoneSrc[15] = PWM_TripZoneSrc_OneShot_CmpB,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONE_STATE_TZA_HIGHIMP
+	.TZState_TZA = PWM_TripZoneState_HighImp,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONE_STATE_TZA_EPWM_HIGH
+	.TZState_TZA = PWM_TripZoneState_EPWM_High,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONE_STATE_TZA_EPWM_LOW
+	.TZState_TZA = PWM_TripZoneState_EPWM_Low,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONE_STATE_TZA_DONOTHING
+	.TZState_TZA = PWM_TripZoneState_DoNothing,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONE_STATE_TZB_HIGHIMP
+	.TZState_TZB = PWM_TripZoneState_HighImp,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONE_STATE_TZB_EPWM_HIGH
+	.TZState_TZB = PWM_TripZoneState_EPWM_High,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONE_STATE_TZB_EPWM_LOW
+	.TZState_TZB = PWM_TripZoneState_EPWM_Low,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm1_TRIPZONE_STATE_TZB_DONOTHING
+	.TZState_TZB = PWM_TripZoneState_DoNothing,
 #endif
 #ifdef CONFIG_MACH_C28X_ePWM1_PWM_B
 	.pinsB = {
@@ -949,6 +1005,116 @@ struct pwm epwm2_pwm_data = {
 #endif
 	.dbred = CONFIG_MACH_C28X_ePWM2_DB_DBRED,
 	.dbfed = CONFIG_MACH_C28X_ePWM2_DB_DBFED,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ1_NOT
+	.TripZoneSrc[0] = PWM_TripZoneSrc_CycleByCycle_TZ1_NOT,
+#else 
+	.TripZoneSrc[0] = ~PWM_TripZoneSrc_CycleByCycle_TZ1_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ2_NOT
+	.TripZoneSrc[1] = PWM_TripZoneSrc_CycleByCycle_TZ2_NOT,
+#else 
+	.TripZoneSrc[1] = ~PWM_TripZoneSrc_CycleByCycle_TZ2_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ3_NOT
+	.TripZoneSrc[2] = PWM_TripZoneSrc_CycleByCycle_TZ3_NOT,
+#else 
+	.TripZoneSrc[2] = ~PWM_TripZoneSrc_CycleByCycle_TZ3_NOT,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ4_NOT
+	.TripZoneSrc[3] = PWM_TripZoneSrc_CycleByCycle_TZ4_NOT,
+#else 
+	.TripZoneSrc[3] = PWM_TripZoneSrc_CycleByCycle_TZ4_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ5_NOT
+	.TripZoneSrc[4] = PWM_TripZoneSrc_CycleByCycle_TZ5_NOT,
+#else 
+	.TripZoneSrc[4] = ~PWM_TripZoneSrc_CycleByCycle_TZ5_NOT,
+
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ6_NOT
+	.TripZoneSrc[5] = PWM_TripZoneSrc_CycleByCycle_TZ6_NOT,
+#else 
+	.TripZoneSrc[4] = ~PWM_TripZoneSrc_CycleByCycle_TZ6_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_CMPA
+	.TripZoneSrc[6] = PWM_TripZoneSrc_CycleByCycle_CmpA,
+#else 
+	.TripZoneSrc[6] = ~PWM_TripZoneSrc_CycleByCycle_CmpA,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_CMPB
+	.TripZoneSrc[7] = PWM_TripZoneSrc_CycleByCycle_CmpB,
+#else 
+	.TripZoneSrc[7] = ~PWM_TripZoneSrc_CycleByCycle_CmpB,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ1_NOT
+	.TripZoneSrc[8] = PWM_TripZoneSrc_OneShot_TZ1_NOT,
+#else 
+.	TripZoneSrc[8] = ~PWM_TripZoneSrc_OneShot_TZ1_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ2_NOT
+	.TripZoneSrc[9] = PWM_TripZoneSrc_OneShot_TZ2_NOT,
+#else 
+	.TripZoneSrc[9] = ~PWM_TripZoneSrc_OneShot_TZ2_NOT,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ3_NOT
+	.TripZoneSrc[10] = PWM_TripZoneSrc_OneShot_TZ3_NOT,
+#else 
+	.TripZoneSrc[10] = ~PWM_TripZoneSrc_OneShot_TZ3_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ4_NOT
+	.TripZoneSrc[11] = PWM_TripZoneSrc_OneShot_TZ4_NOT,
+#else 
+	.TripZoneSrc[11] = ~PWM_TripZoneSrc_OneShot_TZ4_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ5_NOT
+	.TripZoneSrc[12] = PWM_TripZoneSrc_OneShot_TZ5_NOT,
+#else 
+	.TripZoneSrc[12] = ~PWM_TripZoneSrc_OneShot_TZ5_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ6_NOT
+	.TripZoneSrc[13]= PWM_TripZoneSrc_OneShot_TZ6_NOT,
+#else 
+	.TripZoneSrc[13]= ~PWM_TripZoneSrc_OneShot_TZ6_NOT,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_CMPA
+	.TripZoneSrc[14]= PWM_TripZoneSrc_OneShot_CmpA,
+#else 
+	.TripZoneSrc[14]= PWM_TripZoneSrc_OneShot_CmpA,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_CMPB
+	.TripZoneSrc[15] = PWM_TripZoneSrc_OneShot_CmpB,
+#else 
+	.TripZoneSrc[15] = PWM_TripZoneSrc_OneShot_CmpB,
+#endif
+
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONE_STATE_TZA_HIGHIMP
+	.TZState_TZA = PWM_TripZoneState_HighImp,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONE_STATE_TZA_EPWM_HIGH
+	.TZState_TZA = PWM_TripZoneState_EPWM_High,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONE_STATE_TZA_EPWM_LOW
+	.TZState_TZA = PWM_TripZoneState_EPWM_Low,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONE_STATE_TZA_DONOTHING
+	.TZState_TZA = PWM_TripZoneState_DoNothing,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONE_STATE_TZB_HIGHIMP
+	.TZState_TZB = PWM_TripZoneState_HighImp,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONE_STATE_TZB_EPWM_HIGH
+	.TZState_TZB = PWM_TripZoneState_EPWM_High,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONE_STATE_TZB_EPWM_LOW
+	.TZState_TZB = PWM_TripZoneState_EPWM_Low,
+#endif
+#ifdef CONFIG_MACH_C28X_epwm2_TRIPZONE_STATE_TZB_DONOTHING
+	.TZState_TZB = PWM_TripZoneState_DoNothing,
 #endif
 
 #ifdef CONFIG_MACH_C28X_ePWM2_PWM_B

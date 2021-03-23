@@ -26,83 +26,99 @@
 
 //! \brief Defines the location of the TZA bits in the TZCTL register
 //!
-#define PWM_TZCTL_TZA_BITS		(3 << 0)
+#define PWM_TZCTL_TZA_BITS		(3U << 0)
 
-//! \brief Defines the location of the  TZB bits in the TZCTL register
+//! \brief Defines the location of the  TZB bits in the TZCTL register 
 //!
-#define PWM_TZCTL_TZB_BITS		(3 << 2)
+#define PWM_TZCTL_TZB_BITS		(3U << 2)
+
+//! \brief Defines the location of the DCAEVT1 bits in the TZCTL register
+//!
+#define PWM_TZCTL_DCAEVT1_BITS		(3U << 4)
+
+//! \brief Defines the location of the DCAEVT2 bits in the TZCTL register
+//!
+#define PWM_TZCTL_DCAEVT2_BITS		(3U << 6)
+
+//! \brief Defines the location of the DCBEVT1 bits in the TZCTL register
+//!
+#define PWM_TZCTL_DCBEVT1_BITS		(3U << 8)
+
+//! \brief Defines the location of the DCBEVT2 bits in the TZCTL register
+//!
+#define PWM_TZCTL_DCBEVT2_BITS		(3U << 10)
 
 //! \brief Defines the location of the INMODE bits in the DBCTL register
 //!
-#define PWM_DBCTL_INMODE_BITS           (3 << 4)
+#define PWM_DBCTL_INMODE_BITS		(3U << 4)
 
-#define PWM_DBCTL_OUTMODE_BITS		(3 << 0)
+#define PWM_DBCTL_OUTMODE_BITS		(3U << 0)
 
 //! \brief Defines the location of the POLSEL bits in the DBCTL register
 //!
-#define PWM_DBCTL_POLSEL_BITS		(3 << 2)
+#define PWM_DBCTL_POLSEL_BITS		(3U << 2)
 
 //! \brief Defines the location of the INMODE bits in the DBCTL register
 //! \brief Defines the location of the CHPEN bits in the PCCTL register
 //!
-#define PWM_PCCTL_CHPEN_BITS 		(1 << 0)
+#define PWM_PCCTL_CHPEN_BITS 		(1U << 0)
 //! \brief Defines the location of the ETCR bits in the ETCLR register
 //!
-#define PWM_ETCLR_INT_BITS		(1 << 0)
+#define PWM_ETCLR_INT_BITS		(1U << 0)
 
 //! \brief Defines the location of the SOCA bits in the ETCLR register
 //!
-#define PWM_ETCLR_SOCA_BITS 		(1 << 2)
+#define PWM_ETCLR_SOCA_BITS 		(1U << 2)
 
 //! \brief Defines the location of the SOCB bits in the ETCLR register
 //!
-#define PWM_ETCLR_SOCB_BITS		(1 << 3)
+#define PWM_ETCLR_SOCB_BITS		(1U << 3)
 
 
 //! \brief Defines the location of the INTPRD bits in the ETPS register
 //!
-#define PWM_ETPS_INTPRD_BITS		(3 << 0)
+#define PWM_ETPS_INTPRD_BITS		(3U << 0)
 
 //! \brief Defines the location of the INTCNT bits in the ETPS register
 //!
-#define PWM_ETPS_INTCNT_BITS		(3 << 2)
+#define PWM_ETPS_INTCNT_BITS		(3U << 2)
 
 //! \brief Defines the location of the SOCAPRD bits in the ETPS register
 //!
-#define PWM_ETPS_SOCAPRD_BITS		(3 << 8)
+#define PWM_ETPS_SOCAPRD_BITS		(3U << 8)
 
 //! \brief Defines the location of the SOCACNT bits in the ETPS register
 //!
-#define PWM_ETPS_SOCACNT_BITS		(3 << 10)
+#define PWM_ETPS_SOCACNT_BITS		(3U << 10)
 
 //! \brief Defines the location of the SOCBPRD bits in the ETPS register
 //!
-#define PWM_ETPS_SOCBPRD_BITS		(3 << 12)
+#define PWM_ETPS_SOCBPRD_BITS		(3U << 12)
 
 //! \brief Defines the location of the SOCBCNT bits in the ETPS register
 //!
-#define PWM_ETPS_SOCBCNT_BITS		(3 << 14)
+#define PWM_ETPS_SOCBCNT_BITS		(3U << 14)
 
 
 //! \brief Defines the location of the INTSEL bits in the ETSEL register
 //!
-#define PWM_ETSEL_INTSEL_BITS		(7 << 0)
+#define PWM_ETSEL_INTSEL_BITS		(7U << 0)
 
 //! \brief Defines the location of the INTEN bits in the ETSEL register
 //!
-#define PWM_ETSEL_INTEN_BITS		(1 << 3)
+#define PWM_ETSEL_INTEN_BITS		(1U << 3)
 
 //! \brief Defines the location of the SOCASEL bits in the ETSEL register
 //!
-#define PWM_ETSEL_SOCASEL_BITS		(7 << 8)
+#define PWM_ETSEL_SOCASEL_BITS		(7U << 8)
 
 //! \brief Defines the location of the SOCAEN bits in the ETSEL register
 //!
-#define PWM_ETSEL_SOCAEN_BITS		(1 << 11)
+#define PWM_ETSEL_SOCAEN_BITS		(1U << 11)
 
 //! \brief Defines the location of the SOCBSEL bits in the ETSEL register
 //!
-#define PWM_ETSEL_SOCBSEL_BITS		(7 << 12)
+#define PWM_ETSEL_SOCBSEL_BITS		(7U << 12)
 
 //! \brief Defines the location of the SOCBEN bits in the ETSEL register
 //!
@@ -110,104 +126,104 @@
 
 //! \brief Defines the location of the FREESOFT bits in the TBCTL register
 //!
-#define PWM_TBCTL_FREESOFT_BITS		(3 << 14)
+#define PWM_TBCTL_FREESOFT_BITS		(3U << 14)
 
 //! \brief Defines the location of the CTRMODE bits in the TBCTL register
 //!
-#define PWM_TBCTL_CTRMODE_BITS		(3 << 0)
+#define PWM_TBCTL_CTRMODE_BITS		(3U << 0)
 
 //! \brief Defines the location of the HSPCLKDIV bits in the TBCTL register
 //!
-#define PWM_TBCTL_HSPCLKDIV_BITS	(7 << 7)
+#define PWM_TBCTL_HSPCLKDIV_BITS	(7U << 7)
 
 //! \brief Defines the location of the CLKDIV bits in the TBCTL register
 //!
-#define PWM_TBCTL_CLKDIV_BITS		(7 << 10)
+#define PWM_TBCTL_CLKDIV_BITS		(7U << 10)
 
 
-#define TIMER_TBCTL_CTRMODE_BITS	(3 << 0)
+#define TIMER_TBCTL_CTRMODE_BITS	(3U << 0)
 
 //! \brief Defines the location of the PHSEN bits in the TBCTL register
 //!
-#define TIMER_TBCTL_PHSEN_BITS		(1 << 2)
+#define TIMER_TBCTL_PHSEN_BITS		(1U << 2)
 
 //! \brief Defines the location of the PRDLD bits in the TBCTL register
 //!
-#define TIMER_TBCTL_PRDLD_BITS		(1 << 3)
+#define TIMER_TBCTL_PRDLD_BITS		(1U << 3)
 
 //! \brief Defines the location of the SYNCOSEL bits in the TBCTL register (Mode)
 //!
-#define TIMER_TBCTL_SYNCOSEL_BITS	(3 << 4)
+#define TIMER_TBCTL_SYNCOSEL_BITS	(3U << 4)
 
 //! \brief Defines the location of the SWFSYNC bits in the TBCTL register
 //!
-#define TIMER_TBCTL_SWFSYNC_BITS	(1 << 6)
+#define TIMER_TBCTL_SWFSYNC_BITS	(1U << 6)
 
 //! \brief Defines the location of the HSPCLKDIV bits in the TBCTL register
 //!
-#define TIMER_TBCTL_HSPCLKDIV_BITS	(7 << 7)
+#define TIMER_TBCTL_HSPCLKDIV_BITS	(7U << 7)
 
 //! \brief Defines the location of the CLKDIV bits in the TBCTL register
 //!
-#define TIMER_TBCTL_CLKDIV_BITS		(7 << 10)
+#define TIMER_TBCTL_CLKDIV_BITS		(7U << 10)
 
 //! \brief Defines the location of the PHSDIR bits in the TBCTL register
 //!
-#define TIMER_TBCTL_PHSDIR_BITS		(1 << 13)
+#define TIMER_TBCTL_PHSDIR_BITS		(1U << 13)
 
 //! \brief Defines the location of the FREESOFT bits in the TBCTL register
 //!
-#define TIMER_TBCTL_FREESOFT_BITS	(3 << 14)
+#define TIMER_TBCTL_FREESOFT_BITS	(3U << 14)
 
-#define PWM_CMPCTL_LOADAMODE_BITS	(3 << 0)
+#define PWM_CMPCTL_LOADAMODE_BITS	(3U << 0)
 
 //! \brief Defines the location of the LOADBMODE bits in the CMPCTL register
 //!
-#define PWM_CMPCTL_LOADBMODE_BITS	(3 << 2)
+#define PWM_CMPCTL_LOADBMODE_BITS	(3U << 2)
 
 //! \brief Defines the location of the PHSEN bits in the TBCTL register
 //!
-#define PWM_TBCTL_PHSEN_BITS		(1 << 2)
+#define PWM_TBCTL_PHSEN_BITS		(1U << 2)
 
 //! \brief Defines the location of the SHDWAMODE bits in the CMPCTL register
 //!
-#define PWM_CMPCTL_SHDWAMODE_BITS	(1 << 4)
+#define PWM_CMPCTL_SHDWAMODE_BITS	(1U << 4)
 
 //! \brief Defines the location of the SHDWBMODE bits in the CMPCTL register
 //!
-#define PWM_CMPCTL_SHDWBMODE_BITS	(1 << 6)
+#define PWM_CMPCTL_SHDWBMODE_BITS	(1U << 6)
 
 //! \brief Defines the location of the SYNCOSEL bits in the TBCTL register
 //!
-#define PWM_TBCTL_SYNCOSEL_BITS		(3 << 4)
+#define PWM_TBCTL_SYNCOSEL_BITS		(3U << 4)
 
 //! \brief Defines the location of the PHSDIR bits in the TBCTL register
 //!
-#define PWM_TBCTL_PHSDIR_BITS		(1 << 13)
+#define PWM_TBCTL_PHSDIR_BITS		(1U << 13)
 
 //! \brief Defines the location of the ZRO bits in the AQCTL register
 //!
-#define PWM_AQCTL_ZRO_BITS		(3 << 0)
+#define PWM_AQCTL_ZRO_BITS		(3U << 0)
 
 //! \brief Defines the location of the PRD bits in the AQCTL register
 //!
-#define PWM_AQCTL_PRD_BITS		(3 << 2)
+#define PWM_AQCTL_PRD_BITS		(3U << 2)
 
 //! \brief Defines the location of the CAU bits in the AQCTL register
 //!
-#define PWM_AQCTL_CAU_BITS		(3 << 4)
+#define PWM_AQCTL_CAU_BITS		(3U << 4)
 
 //! \brief Defines the location of the CAD bits in the AQCTL register
 //!
-#define PWM_AQCTL_CAD_BITS		(3 << 6)
+#define PWM_AQCTL_CAD_BITS		(3U << 6)
 
 //! \brief Defines the location of the CBU bits in the AQCTL register
 //!
-#define PWM_AQCTL_CBU_BITS		(3 << 8)
+#define PWM_AQCTL_CBU_BITS		(3U << 8)
 
 //! \brief Defines the location of the CBD bits in the AQCTL register
 //!
-#define PWM_AQCTL_CBD_BITS		(3 << 10)
+#define PWM_AQCTL_CBD_BITS		(3U << 10)
 
 //! \brief Defines the base address of the pulse width modulation (PWM) 1 registers
 //!
@@ -298,79 +314,93 @@
 #define EPWMx_SET			2U
 #define EPWMx_TOGGLE			3U
 
-#define	EPWMxCBD			11
-#define	EPWMxCBU			9
-#define	EPWMxCAD			7
-#define	EPWMxCAU			5
-#define	EPWMxPRD			3
-#define	EPWMxZRO			1
+#define	EPWMxCBD			10
+#define	EPWMxCBU			8
+#define	EPWMxCAD			6
+#define	EPWMxCAU			4
+#define	EPWMxPRD			2
+#define	EPWMxZRO			0
 
 #define	EPWMxDB_IN			4
 #define	EPWMxDB_OUT			0
 #define	EPWMxDB_POL			2
 
 
-#define PWM_DB_Output_AR_BF		(3 << 0)
-#define PWM_DBP_Polarity_B_Inverted	(2 << 2)
+#define PWM_DB_Output_AR_BF		(3U << 0)
+#define PWM_DBP_Polarity_B_Inverted	(2U << 2)
 
 #define PWM_DeadBandOutputMode_EPWMxA_Rising_EPWMxB_Falling (3U << 0)
 #define PWM_DeadBandPolarity_EPWMxB_Inverted (2U << 2)
 
-#define	PWM_TripZoneSrc_CycleByCycle_TZ1_NOT	(1 << 0)
-#define	PWM_TripZoneSrc_CycleByCycle_TZ2_NOT	(1 << 1)
-#define	PWM_TripZoneSrc_CycleByCycle_TZ3_NOT	(1 << 2)
-#define	PWM_TripZoneSrc_CycleByCycle_TZ4_NOT	(1 << 3)
-#define	PWM_TripZoneSrc_CycleByCycle_TZ5_NOT	(1 << 4)
-#define	PWM_TripZoneSrc_CycleByCycle_TZ6_NOT	(1 << 5)
 
+typedef enum
+{
+	 PWM_TripZoneSrc_CycleByCycle_TZ1_NOT=(1U << 0),
+	 PWM_TripZoneSrc_CycleByCycle_TZ2_NOT=(1U << 1),
+	 PWM_TripZoneSrc_CycleByCycle_TZ3_NOT=(1U << 2),
+	 PWM_TripZoneSrc_CycleByCycle_TZ4_NOT=(1U << 3),
+	 PWM_TripZoneSrc_CycleByCycle_TZ5_NOT=(1U << 4),
+	 PWM_TripZoneSrc_CycleByCycle_TZ6_NOT=(1U << 5),
+	 PWM_TripZoneSrc_CycleByCycle_CmpA=(1U << 6),
+	 PWM_TripZoneSrc_CycleByCycle_CmpB=(1U << 7),
+	 PWM_TripZoneSrc_OneShot_TZ1_NOT=(1U << 8),
+	 PWM_TripZoneSrc_OneShot_TZ2_NOT=(1U << 9),
+	 PWM_TripZoneSrc_OneShot_TZ3_NOT=(1U << 10),
+	 PWM_TripZoneSrc_OneShot_TZ4_NOT=(1U << 11),
+	 PWM_TripZoneSrc_OneShot_TZ5_NOT=(1U << 12),
+	 PWM_TripZoneSrc_OneShot_TZ6_NOT=(1U << 13),
+	 PWM_TripZoneSrc_OneShot_CmpA=(1U << 14),
+	 PWM_TripZoneSrc_OneShot_CmpB=(1U << 15)
+} PWM_TripZoneSrc_e;
 
-#define PWM_TripZoneState_HighImp	0
-#define PWM_TripZoneState_EPWM_High	1
-#define PWM_TripZoneState_EPWM_Low	2
-#define PWM_TripZoneState_DoNothing	3
+#define PWM_TripZoneState_HighImp	0U
+#define PWM_TripZoneState_EPWM_High	1U
+#define PWM_TripZoneState_EPWM_Low	2U
+#define PWM_TripZoneState_DoNothing	3U
 
 #define TZA_BITS		0
 #define TZB_BITS		2
-
-
-
+#define DCAEVT1_BITS 		4
+#define DCAEVT2_BITS		6
+#define DCBEVT1_BITS		8
+#define DCBEVT2_BITS		10
 
 
 struct timer_reg {
-	volatile uint16_t   TBCTL;	//!< Time-Base Control Register
-	volatile uint16_t   TBSTS;	//!< Time-Base Status Register
-	volatile uint16_t   TBPHSHR;	//!< Extension for the HRPWM Phase Register
-	volatile uint16_t   TBPHS;	//!< Time-Base Phase Register
-	volatile uint16_t   TBCTR;	//!< Time-Base Counter
-	volatile uint16_t   TBPRD;	//!< Time-Base Period register set
-	volatile uint16_t   TBPRDHR;	//!< Time-Base Period High Resolution Register
-	volatile uint16_t   CMPCTL;	//!< Counter-Compare Control Register
-	volatile uint16_t   CMPAHR;	//!< Extension of HRPWM Counter-Compare A Register
-	volatile uint16_t   CMPA;	//!< Counter-Compare A Register
-	volatile uint16_t   CMPB;	//!< Counter-Compare B Register
-	volatile uint16_t   AQCTLA;	//!< Action-Qualifier Control Register for Output A (EPWMxA)
-	volatile uint16_t   AQCTLB;	//!< Action-Qualifier Control Register for Output B (EPWMxB)
-	volatile uint16_t   AQSFRC;	//!< Action qual SW force
-	volatile uint16_t   AQCSFRC;	//!< Action qualifier continuous SW force
-	volatile uint16_t   DBCTL;	//!< Dead-band control
-	volatile uint16_t   DBRED;	//!< Dead-band rising edge delay
-	volatile uint16_t   DBFED;	//!< Dead-band falling edge delay
-	volatile uint16_t   TZSEL;	//!< Trip zone select
-	volatile uint16_t   TZDCSEL;	//!< Trip zone digital comparator select
-	volatile uint16_t   TZCTL;	//!< Trip zone control
-	volatile uint16_t   TZEINT;	//!< Trip zone interrupt enable
-	volatile uint16_t   TZFLG;	//!< Trip zone interrupt flags
-	volatile uint16_t   TZCLR;	//!< Trip zone clear
-	volatile uint16_t   TZFRC;	//!< Trip zone force interrupt
-	volatile uint16_t   ETSEL;	//!< Event trigger selection
-	volatile uint16_t   ETPS;	//!< Event trigger pre-scaler
-	volatile uint16_t   ETFLG;	//!< Event trigger flags
-	volatile uint16_t   ETCLR;	//!< Event trigger clear
-	volatile uint16_t   ETFRC;	//!< Event trigger force
-	volatile uint16_t   PCCTL;	//!< PWM chopper control
-	volatile uint16_t   rsvd_1;	//!< Reserved
-	volatile uint16_t   HRCNFG;	//!< HRPWM Config Reg
-	volatile uint16_t   HRPWR;	//!< HRPWM Power Register
+	volatile uint16_t	TBCTL;	//!< Time-Base Control Register
+	volatile uint16_t	TBSTS;	//!< Time-Base Status Register
+	volatile uint16_t	TBPHSHR;	//!< Extension for the HRPWM Phase Register
+	volatile uint16_t	TBPHS;	//!< Time-Base Phase Register
+	volatile uint16_t	TBCTR;	//!< Time-Base Counter
+	volatile uint16_t	TBPRD;	//!< Time-Base Period register set
+	volatile uint16_t	TBPRDHR;	//!< Time-Base Period High Resolution Register
+	volatile uint16_t	CMPCTL;	//!< Counter-Compare Control Register
+	volatile uint16_t	CMPAHR;	//!< Extension of HRPWM Counter-Compare A Register
+	volatile uint16_t	CMPA;	//!< Counter-Compare A Register
+	volatile uint16_t	CMPB;	//!< Counter-Compare B Register
+	volatile uint16_t	AQCTLA;	//!< Action-Qualifier Control Register for Output A (EPWMxA)
+	volatile uint16_t	AQCTLB;	//!< Action-Qualifier Control Register for Output B (EPWMxB)
+	volatile uint16_t	AQSFRC;	//!< Action qual SW force
+	volatile uint16_t	AQCSFRC;	//!< Action qualifier continuous SW force
+	volatile uint16_t	DBCTL;	//!< Dead-band control
+	volatile uint16_t	DBRED;	//!< Dead-band rising edge delay
+	volatile uint16_t	DBFED;	//!< Dead-band falling edge delay
+	volatile uint16_t	TZSEL;	//!< Trip zone select
+	volatile uint16_t	TZDCSEL;	//!< Trip zone digital comparator select
+	volatile uint16_t	TZCTL;	//!< Trip zone control
+	volatile uint16_t	TZEINT;	//!< Trip zone interrupt enable
+	volatile uint16_t	TZFLG;	//!< Trip zone interrupt flags
+	volatile uint16_t	TZCLR;	//!< Trip zone clear
+	volatile uint16_t	TZFRC;	//!< Trip zone force interrupt
+	volatile uint16_t	ETSEL;	//!< Event trigger selection
+	volatile uint16_t	ETPS;	//!< Event trigger pre-scaler
+	volatile uint16_t	ETFLG;	//!< Event trigger flags
+	volatile uint16_t	ETCLR;	//!< Event trigger clear
+	volatile uint16_t	ETFRC;	//!< Event trigger force
+	volatile uint16_t	PCCTL;	//!< PWM chopper control
+	volatile uint16_t	rsvd_1;	//!< Reserved
+	volatile uint16_t	HRCNFG;	//!< HRPWM Config Reg
+	volatile uint16_t	HRPWR;	//!< HRPWM Power Register
 };
 
 struct timer {
@@ -403,7 +433,7 @@ struct pinCFG {
 	uint32_t cfg;
 	uint32_t extra;
 };
-int32_t mux_configPins(struct mux *mux, const struct pinCFG *cfg, uint32_t len);
+//int32_t mux_configPins(struct mux *mux, const struct pinCFG *cfg, uint32_t len);
 
 	
 struct pwm {
@@ -429,8 +459,13 @@ struct pwm {
 	unsigned int dbHalfcycle;
 	uint64_t dbred;
 	uint64_t dbfed;
-	
-	
+	PWM_TripZoneSrc_e TripZoneSrc[16];
+	unsigned int TZState_TZA;
+	unsigned int TZState_TZB;
+	unsigned int TZState_DCBEVT2;
+	unsigned int TZState_DCBEVT1;
+	unsigned int TZState_DCAEVT1;
+	unsigned int TZState_DCAEVT2;
 };
 
 /**

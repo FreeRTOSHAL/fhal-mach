@@ -1,5 +1,6 @@
 config MACH_C28X_ePWM_PWM
 	bool "PWM Subssystem"
+	select PWM_MULTI
 	depends on PWM
 config MACH_C28X_ePWM_DEBUG
 	bool "Activate Debug"
@@ -164,7 +165,7 @@ menuconfig MACH_C28X_ePWM1
 							bool "mode A_DISABLE_B_FALLING"
 						config MACH_C28X_ePWM1_DB_OUT_MODE_A_RISING_B_DISABLE
 							bool "mode A_RISING_B_DISABLE"
-						config CONFIG_MACH_C28X_ePWM1_DB_OUT_MODE_A_RISING_B_FALLING
+						config MACH_C28X_ePWM1_DB_OUT_MODE_A_RISING_B_FALLING
 							bool "mode A_RISING_B_FALLING"
 					endchoice 
 					
@@ -187,6 +188,86 @@ menuconfig MACH_C28X_ePWM1
 						int "Dead-Band Generator Falling Edge Delay"
 						default 5
 				endif
+				config MACH_C28X_ePWM1_TRIP_ZONE
+					bool "set TRIP_ZONE"
+					default n 
+				if MACH_C28X_ePWM1_TRIP_ZONE = y
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ1_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ1_NOT"
+	
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ2_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ2_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ3_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ3_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ4_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ4_NOT"
+	
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ5_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ5_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ6_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ6_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_CMPA
+						bool "enable Trip Zone Src CYCLEBYCYCLE_CMPA"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_CMPB
+						bool "enable Trip Zone Src CYCLEBYCYCLE_CMPB"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ1_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ1_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ2_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ2_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ3_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ3_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ4_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ4_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ5_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ5_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ6_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ6_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_CMPA
+						bool "enable Trip Zone ONESHOT_CMPA"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_CMPB
+						bool "enable Trip Zone ONESHOT_CMPB"
+
+					choice MACH_C28X_epwm1_TRIPZONE_STATE_TZA
+						prompt "choice TRIPZONE_STATE_TZA"
+						default MACH_C28X_epwm1_TRIPZONE_STATE_EPWM_LOW
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZA_HIGHIMP
+							bool "HIGHIMP"
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZA_EPWM_HIGH
+							bool "EPWM_HIGH"
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZA_EPWM_LOW
+							bool "EPWM_LOW"
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZA_DONOTHING
+							bool "DONOTHING"
+					endchoice
+					choice MACH_C28X_epwm1_TRIPZONE_STATE_TZB
+						prompt "choice TRIPZONE_STATE_TZB"
+						default MACH_C28X_epwm1_TRIPZONE_STATE_EPWM_LOW
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZB_HIGHIMP
+							bool "HIGHIMP"
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZB_EPWM_HIGH
+							bool "EPWM_HIGH"
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZB_EPWM_LOW
+							bool "EPWM_LOW"
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZB_DONOTHING
+							bool "DONOTHING"
+					endchoice
+
+
+				endif
+
 					
 			endif
 			config MACH_C28X_ePWM1_PWMB
@@ -357,7 +438,7 @@ menuconfig MACH_C28X_ePWM2
 							bool "mode A_DISABLE_B_FALLING"
 						config MACH_C28X_ePWM2_DB_OUT_MODE_A_RISING_B_DISABLE
 							bool "mode A_RISING_B_DISABLE"
-						config CONFIG_MACH_C28X_ePWM2_DB_OUT_MODE_A_RISING_B_FALLING
+						config MACH_C28X_ePWM2_DB_OUT_MODE_A_RISING_B_FALLING
 							bool "mode A_RISING_B_FALLING"
 					endchoice 
 					
@@ -373,13 +454,94 @@ menuconfig MACH_C28X_ePWM2
 						config MACH_C28X_ePWM2_DB_POLARITY_A_B_INVERTED
 							bool "POLARITY_A_B_INVERTED"
 					endchoice
-					config CONFIG_MACH_C28X_ePWM2_DB_DBRED
+					config MACH_C28X_ePWM2_DB_DBRED
 						int "Dead-Band Generator Rising Edge Delay"
 						default 5
-					config CONFIG_MACH_C28X_ePWM2_DB_DBFED
+					config MACH_C28X_ePWM2_DB_DBFED
 						int "Dead-Band Generator Falling Edge Delay"
 						default 5
 				endif
+
+				config MACH_C28X_epwm2_TRIP_ZONE
+					bool "set TRIP_ZONE"
+					default n 
+				if MACH_C28X_epwm2_TRIP_ZONE = y
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ1_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ1_NOT"
+	
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ2_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ2_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ3_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ3_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ4_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ4_NOT"
+	
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ5_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ5_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ6_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ6_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_CMPA
+						bool "enable Trip Zone Src CYCLEBYCYCLE_CMPA"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_CMPB
+						bool "enable Trip Zone Src CYCLEBYCYCLE_CMPB"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ1_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ1_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ2_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ2_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ3_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ3_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ4_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ4_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ5_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ5_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ6_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ6_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_CMPA
+						bool "enable Trip Zone ONESHOT_CMPA"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_CMPB
+						bool "enable Trip Zone ONESHOT_CMPB"
+
+					choice MACH_C28X_epwm2_TRIPZONE_STATE_TZA
+						prompt "choice TRIPZONE_STATE_TZA"
+						default MACH_C28X_epwm2_TRIPZONE_STATE_TZA_EPWM_LOW
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZA_HIGHIMP
+							bool "HIGHIMP"
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZA_EPWM_HIGH
+							bool "EPWM_HIGH"
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZA_EPWM_LOW
+							bool "EPWM_LOW"
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZA_DONOTHING
+							bool "DONOTHING"
+					endchoice
+					choice MACH_C28X_epwm2_TRIPZONE_STATE_TZB
+						prompt "choice TRIPZONE_STATE_TZB"
+						default MACH_C28X_epwm2_TRIPZONE_STATE_TZB_EPWM_LOW
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZB_HIGHIMP
+							bool "HIGHIMP"
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZB_EPWM_HIGH
+							bool "EPWM_HIGH"
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZB_EPWM_LOW
+							bool "EPWM_LOW"
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZB_DONOTHING
+							bool "DONOTHING"
+					endchoice
+
+
+				endif
+
 			
 			config MACH_C28X_ePWM2_PWMB
 				bool "activate PWM2B"
