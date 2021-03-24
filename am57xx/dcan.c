@@ -1,3 +1,8 @@
+/* SPDX-License-Identifier: MIT */
+/*
+ * Author: Theodor Bauer <theodor.bauer@student.hs-rm.de>
+ * Date: 2021
+ */
 #include <can.h>
 #define CAN_PRV
 #include <can_prv.h>
@@ -592,6 +597,7 @@ int32_t dcan_send(struct can *can, struct can_msg *msg, bool isr, TickType_t wai
 	struct dcan_mo mo;
 	uint32_t tmp;
 	PRINTF("%s called\n", __FUNCTION__);
+	PRINTF("errc = %#08lx\n", can->base->errc);
 	if(msg->id & CAN_RTR_FLAG){
 		/* TODO Implement request and rcv */
 		/* CAN Requests has a complex MB state machine*/
@@ -681,6 +687,7 @@ int32_t dcan_send(struct can *can, struct can_msg *msg, bool isr, TickType_t wai
 	PRINTF("%s TXRQ_X: %#08x\n", __FUNCTION__, can->base->txrq_x);
 	PRINTF("TXRQ_X: %#08lx\nNWDAT_X: %#08lx\nMSGVAL_X: %#08lx\n", can->base->txrq_x, can->base->nwdat_x, can->base->msgval_x);
 	PRINTF("TXRQ12: %#08lx\nNWDAT12: %#08lx\nMSGVAL12: %#08lx\n", can->base->txrq12, can->base->nwdat12, can->base->msgval12);
+	PRINTF("errc = %#08lx\n", can->base->errc);
 	PRINTF("%s finished\n", __FUNCTION__);
 	return 0;
 dcan_send_error1:
