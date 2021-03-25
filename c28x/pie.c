@@ -82,7 +82,94 @@ int32_t irq_disable(int32_t irqnr) {
 		uint32_t group = ((uint32_t) irqnr) >> 3;
 		uint32_t bit = ((uint32_t) irqnr) & 0x7;
 		ENABLE_PROTECTED_REGISTER_WRITE_MODE;
+		/*
+		 * Step 1: Disable global interrupts (INTM = 1)
+		 */
+		portDISABLE_INTERRUPTS();
+		/*
+		 * Step 2: Clear the PIEIERx.y bit to disable the interrupt for a given peripheral.
+		 * This can be done for one or more peripherals within the same group.
+		 */
 		pie->PIEIER_PIEIFR[group].IER &= ~BIT(bit);
+		
+		/* 
+		 * Step 3:
+		 * Wait 5 cycles. This delay is required to insure that any interrupt that
+		 * was incoming to the CPU has been flagged within the CPU IFR register.
+		 */
+		portNOP();
+		portNOP();
+		portNOP();
+		portNOP();
+		portNOP();
+		
+		/*
+		 * Step 4: Clear the CPU IFRx bit for the peripheral group. This is a safe
+		 * operation on the CPU IFR register.
+		 * IFR &= ~BIT(group) is not suppored by the compiler :(
+		 */
+		{
+			switch(group) {
+				case 0:
+					__asm(" AND IFR, #0xFFFE");
+					break;
+				case 1:
+					__asm(" AND IFR, #0xFFFD");
+					break;
+				case 2:
+					__asm(" AND IFR, #0xFFFB");
+					break;
+				case 3:
+					__asm(" AND IFR, #0xFFF7");
+					break;
+				case 4:
+					__asm(" AND IFR, #0xFFEF");
+					break;
+				case 5:
+					__asm(" AND IFR, #0xFFDF");
+					break;
+				case 6:
+					__asm(" AND IFR, #0xFFBF");
+					break;
+				case 7:
+					__asm(" AND IFR, #0xFF7F");
+					break;
+				case 8:
+					__asm(" AND IFR, #0xFEFF");
+					break;
+				case 9:
+					__asm(" AND IFR, #0xFDFF");
+					break;
+				case 10:
+					__asm(" AND IFR, #0xFBFF");
+					break;
+				case 11:
+					__asm(" AND IFR, #0xF7FF");
+					break;
+				case 12:
+					__asm(" AND IFR, #0xEFFF");
+					break;
+				case 13:
+					__asm(" AND IFR, #0xDFFF");
+					break;
+			}
+		}
+
+		/*
+		 * Step 5: Clear the PIEACKx bit for the peripheral group
+		 */
+		pie->PIEACK |= BIT(group);
+
+		if (pie->PIEIER_PIEIFR[group].IER == 0) {
+			/* disable group interrupt
+			 * no peripheral in this group is enabled any more
+			 */
+			IER &= ~BIT(group);
+		}
+		/*
+		 * Step 6: Enable global interrupts (INTM = 0)
+		 */
+		portENABLE_INTERRUPTS();
 		DISABLE_PROTECTED_REGISTER_WRITE_MODE;
 	}
 	return 0;
