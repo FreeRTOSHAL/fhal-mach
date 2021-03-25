@@ -1,3 +1,8 @@
+/* SPDX-License-Identifier: MIT */
+/*
+ * Author: Theodor Bauer <theodor.bauer@student.hs-rm.de>
+ * Date: 2021
+ */
 #ifndef DCAN_H_
 #define DCAN_H_
 #include <stdint.h>
