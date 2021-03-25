@@ -1,0 +1,98 @@
+comment "C28X Settings"
+config MACH_INIT_STACK_SIZE
+	int "Init Stack Size"
+	default 600
+	help
+		Stack Size of Init Prozess. Stack size used by Interrupt and Init Prozess
+config MACH_HEAP_SIZE
+	int "Init Heap Size"
+	default 100
+#config MACH_LD_SCRIPT
+#	string 
+#	default "mach/s32k/s32k.lds"
+config MACH_INCLUDE
+	string
+	default "-Imach/c28x/include"
+config MACH_DEFINE_HEAP
+	bool
+	default y
+config EXTRA_MACH_LINKFLAGS
+	string
+	default "-z -i$(shell dirname $(shell which $(CC)))/../lib --disable_auto_rts --priority --reread_libs --diag_suppress=16002 --diag_suppress=10063-D --xml_link_info='projekt_linkInfo.xml' --entry_point=code_start --rom_model --warn_sections --stack_size=$(CONFIG_MACH_INIT_STACK_SIZE) -heap=$(CONFIG_MACH_HEAP_SIZE)"
+config MACH_LIBS
+	string
+	default "-lrts2800_ml.lib mach/c28x/F28069F.cmd"
+config MACH_HAS_UART
+	bool
+	default y
+config MACH_HAS_GPIO
+	bool
+	default y
+config MACH_HAS_TIMER
+	bool
+	default y
+	select TIMER
+	select MACH_C28X_CPU_TIMER
+	select MACH_C28X_CPU_TIMER2
+	help
+		Timer is needed by this port!
+menu "Clock Configuation"
+	choice 
+		prompt "Low Speed Pre Scaler"
+		config MACH_C28X_CLOCK_LOPCP_BY_4
+			bool "/4"
+		config MACH_C28X_CLOCK_LOPCP_BY_1
+			bool "/1"
+		config MACH_C28X_CLOCK_LOPCP_BY_2
+			bool "/2"
+	endchoice
+	config MACH_C28X_OSCILLATOR_SPEED
+		int "Quartz Oscillator Speed"
+		default 20000000
+	comment "Waring Invalid Setting!"
+	depends on MACH_C28X_PLL_MULL > 18
+	config MACH_C28X_PLL_MULL
+		int "PLL Multiplier"
+		default 18
+	choice 
+		prompt "PLL Div"
+		config MACH_C28X_PLL_DIV_BY_1
+			bool "/1"
+		config MACH_C28X_PLL_DIV_BY_2
+			bool "/3"
+		config MACH_C28X_PLL_DIV_BY_4
+			bool "/4"
+	endchoice
+endmenu
+menu "GPIO Subsystem"
+	config MACH_C28x_GPIO
+		bool
+		select GPIO
+		default y
+	config MACH_C28X_GPIO_PINS
+		int "Count of GPIO Pins"
+		default 2
+endmenu
+choice 
+	prompt "DMA RAM Setup"
+	config MACH_C28X_RAM_DMA_OFF
+		bool "0 DMA Sections (43Kb for Application)"
+	config MACH_C28X_RAM_DMA_4
+		bool "4 DMA Section RAML5-8 (5kb for Application)"
+	config MACH_C28X_RAM_DMA_1
+		bool "1 DMA Section RAM8 only (37kb for Application)"
+endchoice
+menuconfig MACH_C28X_SCI
+	bool "SCI Driver"
+	depends on UART
+	default y
+	if MACH_C28X_SCI = y
+		source mach/c28x/Kconfig.sci
+	endif
+menuconfig MACH_C28X_CPU_TIMER
+	bool "Timer"
+	depends on TIMER
+	default y
+	if MACH_C28X_CPU_TIMER
+		source mach/c28x/Kconfig.timer
+	endif
