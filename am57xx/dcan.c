@@ -597,10 +597,7 @@ int32_t dcan_send(struct can *can, struct can_msg *msg, bool isr, TickType_t wai
 	struct dcan_mo mo;
 	uint32_t tmp;
 	PRINTF("%s called\n", __FUNCTION__);
-<<<<<<< HEAD
 	PRINTF("errc = %#08lx\n", can->base->errc);
-=======
->>>>>>> a9d9a1ae356c53b7ea0e01a88dde5fa6ac7510f6
 	if(msg->id & CAN_RTR_FLAG){
 		/* TODO Implement request and rcv */
 		/* CAN Requests has a complex MB state machine*/
@@ -690,10 +687,7 @@ int32_t dcan_send(struct can *can, struct can_msg *msg, bool isr, TickType_t wai
 	PRINTF("%s TXRQ_X: %#08x\n", __FUNCTION__, can->base->txrq_x);
 	PRINTF("TXRQ_X: %#08lx\nNWDAT_X: %#08lx\nMSGVAL_X: %#08lx\n", can->base->txrq_x, can->base->nwdat_x, can->base->msgval_x);
 	PRINTF("TXRQ12: %#08lx\nNWDAT12: %#08lx\nMSGVAL12: %#08lx\n", can->base->txrq12, can->base->nwdat12, can->base->msgval12);
-<<<<<<< HEAD
 	PRINTF("errc = %#08lx\n", can->base->errc);
-=======
->>>>>>> a9d9a1ae356c53b7ea0e01a88dde5fa6ac7510f6
 	PRINTF("%s finished\n", __FUNCTION__);
 	return 0;
 dcan_send_error1:
@@ -767,15 +761,6 @@ CAN_UP(dcan, can) {
 	can_lock(can, portMAX_DELAY, -1);
 	can->base->ctl &= ~DCAN_CTL_INIT_MASK;
 	while(can->base->ctl & DCAN_CTL_INIT_MASK);
-<<<<<<< HEAD
-	if(can->pinHigh){
-		gpioPin_setPin(can->enablePin);
-	} else {
-		gpioPin_clearPin(can->enablePin);
-	}
-	can_unlock(can, -1);
-	return -1;
-=======
 	if (can->enablePin) {
 		if(can->pinHigh){
 			gpioPin_setPin(can->enablePin);
@@ -785,34 +770,22 @@ CAN_UP(dcan, can) {
 	}
 	can_unlock(can, -1);
 	return 0;
->>>>>>> a9d9a1ae356c53b7ea0e01a88dde5fa6ac7510f6
 }
 
 CAN_DOWN(dcan, can) {
 	PRINTF("%s called\n", __FUNCTION__);
 	can_lock(can, portMAX_DELAY, -1);
-<<<<<<< HEAD
-	if(can->pinHigh){
-		gpioPin_clearPin(can->enablePin);
-	} else {
-		gpioPin_setPin(can->enablePin);
-=======
 	if (can->enablePin) {
 		if(can->pinHigh){
 			gpioPin_clearPin(can->enablePin);
 		} else {
 			gpioPin_setPin(can->enablePin);
 		}
->>>>>>> a9d9a1ae356c53b7ea0e01a88dde5fa6ac7510f6
 	}
 	can->base->ctl |= DCAN_CTL_INIT_MASK;
 	while(!(can->base->ctl & DCAN_CTL_INIT_MASK));
 	can_unlock(can, -1);
-<<<<<<< HEAD
-	return -1;
-=======
 	return 0;
->>>>>>> a9d9a1ae356c53b7ea0e01a88dde5fa6ac7510f6
 }
 
 CAN_OPS(dcan);
