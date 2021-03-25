@@ -88,7 +88,6 @@ TIMER_INIT(c28x, index, prescaler, basetime, adjust) {
 	timer->base->PRD = 0xFFFFFFFF;
 	timer->base->TCR |= TCR_TSS;
 	timer->base->TCR |= TCR_TRB;
-	/* Set prescaler to 1 */
 	timer->base->TPR = 0;
 	timer->base->TPRH = 0;
 
@@ -199,6 +198,7 @@ TIMER_GET_TIME(c28x, timer) {
 	int64_t freq = clock_getCPUSpeed(clock_init()) / 1000000;
 	return (ticks / freq);
 }
+
 TIMER_OPS(c28x);
 
 #ifdef CONFIG_MACH_C28X_CPU_TIMER0

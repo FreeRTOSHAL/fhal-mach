@@ -1,0 +1,551 @@
+config MACH_C28X_ePWM_PWM
+	bool "PWM Subssystem"
+	select PWM_MULTI
+	depends on PWM
+config MACH_C28X_ePWM_DEBUG
+	bool "Activate Debug"
+menuconfig MACH_C28X_ePWM1
+	bool "ePWM 1"
+	if MACH_C28X_ePWM1 = y
+		config MACH_C28X_ePWM1_upMode
+			bool "counter upMode"
+			default n
+
+		config MACH_C28X_ePWM1_SYNCI
+			bool "activate SYNCI"
+			default n
+		if MACH_C28X_ePWM1_SYNCI = y
+			config MACH_C28X_ePWM1_PHASEDIR
+				bool "phasedir COUNTUP"
+				default n
+			config MACH_C28X_ePWM1_PHASE_VALUE
+				int "phase Value"
+				default 1
+		endif
+		choice 	MACH_C28X_ePWM1_SYNCOUT	
+			prompt "choice SYNCOUT"
+			default MACH_C28X_ePWM1_SYNCMODE_EPWMxSYNC
+				
+			config MACH_C28X_ePWM1_SYNCMODE_CMP
+				bool "syncmode CMP"
+					
+			config MACH_C28X_ePWM1_SYNCMODE_ZERO
+				bool "syncmode ZERO"
+
+			config MACH_C28X_ePWM1_SYNCMODE_DISABLE
+				bool "syncmode DISABLE"
+					
+			config MACH_C28X_ePWM1_SYNCMODE_EPWMxSYNC
+				bool "syncmode EPWMxSYNC"
+		endchoice
+		
+		config MACH_C28X_ePWM1_ADC
+			bool "activate ADC"
+			default n
+			if MACH_C28X_ePWM1_ADC = y
+				config MACH_C28X_ePWM1_ADC_SOCA
+					bool "Activate SOCA"
+					default n
+				if MACH_C28X_ePWM1_ADC_SOCA = y
+					choice MACH_C28X_ePWM1_ADC_EVENTA
+						prompt "choice ADC_EVENTA"
+						config MACH_C28X_ePWM1_ADC_EVENTA_CMPB_INC
+							bool "adcEvent CMPB_INC"
+						config MACH_C28X_ePWM1_ADC_EVENTA_DCBEVT1
+							bool "adcEvent DCBEVT1"
+						config MACH_C28X_ePWM1_ADC_EVENTA_ZERO
+							bool "adcEvent ZERO"
+						config MACH_C28X_ePWM1_ADC_EVENTA_PRD
+							bool "adcEvent PRD" 
+						config MACH_C28X_ePWM1_ADC_EVENTA_PRD_OR_ZERO
+							bool "adcEvent PRDORZERO"
+						config MACH_C28X_ePWM1_ADC_EVENTA_CMPA_INC
+							bool "adcEvent CMPA_INC"
+						config MACH_C28X_ePWM1_ADC_EVENTA_CMPA_DEC
+							bool "adcEvent CMPA_DEC"
+						config MACH_C28X_ePWM1_ADC_EVENTA_CMPB_DEC
+							bool "adcEvent CMPB_DEC"
+					endchoice
+				endif
+				
+				config MACH_C28X_ePWM1_ADC_SOCB
+					bool "Activate SOCB"
+					default n
+				if MACH_C28X_ePWM1_ADC_SOCB = y
+					choice MACH_C28X_ePWM1_ADC_EVENTB
+						prompt "choice ADC_EVENTB"
+						config MACH_C28X_ePWM1_ADC_EVENTB_CMPB_INC
+							bool "adcEvent CMPB_INC"
+						config MACH_C28X_ePWM1_ADC_EVENTB_DCBEVT1
+							bool "adcEvent DCBEVT1"
+						config MACH_C28X_ePWM1_ADC_EVENTB_ZERO
+							bool "adcEvent ZERO"
+						config MACH_C28X_ePWM1_ADC_EVENTB_PRD
+							bool "adcEvent PRD" 
+						config MACH_C28X_ePWM1_ADC_EVENTB_PRD_OR_ZERO
+							bool "adcEvent PRDORZERO"
+						config MACH_C28X_ePWM1_ADC_EVENTB_CMPA_INC
+							bool "adcEvent CMPA_INC"
+						config MACH_C28X_ePWM1_ADC_EVENTB_CMPA_DEC
+							bool "adcEvent CMPA_DEC"
+						config MACH_C28X_ePWM1_ADC_EVENTB_CMPB_DEC
+							bool "adcEvent CMPB_DEC"
+					endchoice
+				endif
+			endif
+
+
+		config MACH_C28X_ePWM1_PWM
+			bool "activate PWM1"
+			default n
+		if MACH_C28X_ePWM1_PWM = y
+			config MACH_C28X_ePWM1_PWMA
+				bool "activate PWM1A"
+				default n
+			if MACH_C28X_ePWM1_PWMA
+				comment "EPWM1A GPIO 0"
+				config MACH_C28X_ePWM1_PWMA_ACTION
+					bool "set ACTION QUALIFIER"
+					if MACH_C28X_ePWM1_PWMA_ACTION = y
+						comment"NOTHING 0 CLEAR 1 SET 2 TOGGLE 3"
+						config MACH_C28X_ePWM1_PWMA_ACTION_CBU
+							int "choice EPWM ACTION_CBU"
+							range 0 3
+							default 0
+
+						config MACH_C28X_ePWM1_PWMA_ACTION_CBD
+							int "choice EPWM ACTION_CBD"
+							range 0 3
+							default 0
+
+						config MACH_C28X_ePWM1_PWMA_ACTION_CAU
+							int "choice EPWM ACTION_CAU"
+							range 0 3
+							default 0
+
+						config MACH_C28X_ePWM1_PWMA_ACTION_CAD
+							int "choice EPWM ACTION_CAD"
+							range 0 3
+							default 0
+	
+						config MACH_C28X_ePWM1_PWMA_ACTION_PRD
+							int "choice EPWM ACTION_PRD"
+							range 0 3
+							default 0
+
+						config MACH_C28X_ePWM1_PWMA_ACTION_ZRO
+							int "choice EPWM ACTION_ZRO"
+							range 0 3
+							default 0
+					
+					endif
+				config MACH_C28X_ePWM1_DB
+					bool "set DEAD_BAND"
+					default n 
+				if MACH_C28X_ePWM1_DB = y
+					choice MACH_C28X_ePWM1_DB_IN_MODE
+						prompt "choice DEAD_BAND_IN_MODE"
+						default MACH_C28X_ePWM1_DB_IN_MODE_A_FALLING_RISING
+						config  MACH_C28X_ePWM1_DB_IN_MODE_A_FALLING_RISING
+							bool "mode A_FALLING_RISING"
+						config MACH_C28X_ePWM1_DB_IN_MODE_B_RISING_A_FALLING
+							bool "mode B_RISING_A_FALLING"
+						config MACH_C28X_ePWM1_DB_IN_MODE_A_RISING_B_FALLING
+							bool "mode A_RISING_B_FALLING"
+						config MACH_C28X_ePWM1_DB_IN_MODE_B_RISING_FALLING
+							bool "mode B_RISING_FALLING"
+					endchoice
+					
+					choice MACH_C28X_ePWM1_DB_OUT_MODE
+						prompt "choice DEAD_BAND_OUT_MODE"
+						default MACH_C28X_ePWM1_DB_OUT_MODE_BYPASS
+						config MACH_C28X_ePWM1_DB_OUT_MODE_BYPASS
+							bool "mode BYPASS"
+						config MACH_C28X_ePWM1_DB_OUT_MODE_A_DISABLE_B_FALLING
+							bool "mode A_DISABLE_B_FALLING"
+						config MACH_C28X_ePWM1_DB_OUT_MODE_A_RISING_B_DISABLE
+							bool "mode A_RISING_B_DISABLE"
+						config MACH_C28X_ePWM1_DB_OUT_MODE_A_RISING_B_FALLING
+							bool "mode A_RISING_B_FALLING"
+					endchoice 
+					
+					choice MACH_C28X_ePWM1_DB_POLARITY
+						prompt "choice DEAD_BAND_POLARITY"
+						default MACH_C28X_ePWM1_DB_POLARITY_A_B
+						config MACH_C28X_ePWM1_DB_POLARITY_A_B
+							bool "set POLARITY_A_B"
+						config MACH_C28X_ePWM1_DB_POLARITY_A_INVERTED
+							bool "set POLARITY_A_INVERTED"
+						config MACH_C28X_ePWM1_DB_POLARITY_B_INVERTED
+							bool "set POLARITY_B_INVERTED"
+						config MACH_C28X_ePWM1_DB_POLARITY_A_B_INVERTED
+							bool "POLARITY_A_B_INVERTED"
+					endchoice
+					config MACH_C28X_ePWM1_DB_DBRED
+						int "Dead-Band Generator Rising Edge Delay"
+						default 5
+					config MACH_C28X_ePWM1_DB_DBFED
+						int "Dead-Band Generator Falling Edge Delay"
+						default 5
+				endif
+				config MACH_C28X_ePWM1_TRIP_ZONE
+					bool "set TRIP_ZONE"
+					default n 
+				if MACH_C28X_ePWM1_TRIP_ZONE = y
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ1_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ1_NOT"
+	
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ2_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ2_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ3_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ3_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ4_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ4_NOT"
+	
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ5_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ5_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_TZ6_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ6_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_CMPA
+						bool "enable Trip Zone Src CYCLEBYCYCLE_CMPA"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_CYCLEBYCYCLE_CMPB
+						bool "enable Trip Zone Src CYCLEBYCYCLE_CMPB"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ1_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ1_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ2_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ2_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ3_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ3_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ4_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ4_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ5_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ5_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_TZ6_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ6_NOT"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_CMPA
+						bool "enable Trip Zone ONESHOT_CMPA"
+
+					config MACH_C28X_epwm1_TRIPZONESRC_ONESHOT_CMPB
+						bool "enable Trip Zone ONESHOT_CMPB"
+
+					choice MACH_C28X_epwm1_TRIPZONE_STATE_TZA
+						prompt "choice TRIPZONE_STATE_TZA"
+						default MACH_C28X_epwm1_TRIPZONE_STATE_EPWM_LOW
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZA_HIGHIMP
+							bool "HIGHIMP"
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZA_EPWM_HIGH
+							bool "EPWM_HIGH"
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZA_EPWM_LOW
+							bool "EPWM_LOW"
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZA_DONOTHING
+							bool "DONOTHING"
+					endchoice
+					choice MACH_C28X_epwm1_TRIPZONE_STATE_TZB
+						prompt "choice TRIPZONE_STATE_TZB"
+						default MACH_C28X_epwm1_TRIPZONE_STATE_EPWM_LOW
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZB_HIGHIMP
+							bool "HIGHIMP"
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZB_EPWM_HIGH
+							bool "EPWM_HIGH"
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZB_EPWM_LOW
+							bool "EPWM_LOW"
+						config MACH_C28X_epwm1_TRIPZONE_STATE_TZB_DONOTHING
+							bool "DONOTHING"
+					endchoice
+
+
+				endif
+
+					
+			endif
+			config MACH_C28X_ePWM1_PWMB
+				bool "activate PWM1B"
+				default n
+				comment "EPWM1B GPIO 1"
+		endif
+	endif
+
+menuconfig MACH_C28X_ePWM2
+	bool "ePWM 2"
+	if MACH_C28X_ePWM2 = y
+	
+		config MACH_C28X_ePWM2_upMode
+			bool "counter upMode"
+			default n
+			
+		config MACH_C28X_ePWM2_SYNCI
+			bool "activate SYNCI"
+			default n
+		if MACH_C28X_ePWM2_SYNCI = y
+			config MACH_C28X_ePWM2_PHASEDIR
+				bool "phasedir COUNTUP"
+				default n
+			config MACH_C28X_ePWM2_PHASE_VALUE
+				int "phase Value"
+				default 1
+		endif
+		choice 	MACH_C28X_ePWM2_SYNCOUT	
+			prompt "choice SYNCOUT"
+			default MACH_C28X_ePWM2_SYNCMODE_EPWMxSYNC
+				
+			config MACH_C28X_ePWM2_SYNCMODE_CMP
+				bool "syncmode CMP"
+					
+			config MACH_C28X_ePWM2_SYNCMODE_ZERO
+				bool "syncmode ZERO"
+
+			config MACH_C28X_ePWM2_SYNCMODE_DISABLE
+				bool "syncmode DISABLE"
+					
+			config MACH_C28X_ePWM2_SYNCMODE_EPWMxSYNC
+				bool "syncmode EPWMxSYNC"
+		endchoice
+		
+		config MACH_C28X_ePWM2_ADC
+			bool "activate ADC"
+			default n
+			if MACH_C28X_ePWM2_ADC = y
+				config MACH_C28X_ePWM2_ADC_SOCA
+					bool "Activate SOCA"
+					default n
+				if MACH_C28X_ePWM2_ADC_SOCA = y
+					choice MACH_C28X_ePWM2_ADC_EVENTA
+						prompt "choice ADC_EVENTA"
+						config MACH_C28X_ePWM2_ADC_EVENTA_CMPB_INC
+							bool "adcEvent CMPB_INC"
+						config MACH_C28X_ePWM2_ADC_EVENTA_DCBEVT1
+							bool "adcEvent DCBEVT1"
+						config MACH_C28X_ePWM2_ADC_EVENTA_ZERO
+							bool "adcEvent ZERO"
+						config MACH_C28X_ePWM2_ADC_EVENTA_PRD
+							bool "adcEvent PRD" 
+						config MACH_C28X_ePWM2_ADC_EVENTA_PRD_OR_ZERO
+							bool "adcEvent PRDORZERO"
+						config MACH_C28X_ePWM2_ADC_EVENTA_CMPA_INC
+							bool "adcEvent CMPA_INC"
+						config MACH_C28X_ePWM2_ADC_EVENTA_CMPA_DEC
+							bool "adcEvent CMPA_DEC"
+						config MACH_C28X_ePWM2_ADC_EVENTA_CMPB_DEC
+							bool "adcEvent CMPB_DEC"
+					endchoice
+				endif
+				
+				config MACH_C28X_ePWM2_ADC_SOCB
+					bool "Activate SOCB"
+					default n
+				if MACH_C28X_ePWM2_ADC_SOCB = y
+					choice MACH_C28X_ePWM2_ADC_EVENTB
+						prompt "choice ADC_EVENTB"
+						config MACH_C28X_ePWM2_ADC_EVENTB_CMPB_INC
+							bool "adcEvent CMPB_INC"
+						config MACH_C28X_ePWM2_ADC_EVENTB_DCBEVT1
+							bool "adcEvent DCBEVT1"
+						config MACH_C28X_ePWM2_ADC_EVENTB_ZERO
+							bool "adcEvent ZERO"
+						config MACH_C28X_ePWM2_ADC_EVENTB_PRD
+							bool "adcEvent PRD" 
+						config MACH_C28X_ePWM2_ADC_EVENTB_PRD_OR_ZERO
+							bool "adcEvent PRDORZERO"
+						config MACH_C28X_ePWM2_ADC_EVENTB_CMPA_INC
+							bool "adcEvent CMPA_INC"
+						config MACH_C28X_ePWM2_ADC_EVENTB_CMPA_DEC
+							bool "adcEvent CMPA_DEC"
+						config MACH_C28X_ePWM2_ADC_EVENTB_CMPB_DEC
+							bool "adcEvent CMPB_DEC"
+					endchoice
+				endif
+			endif
+		config MACH_C28X_ePWM2_PWM
+			bool "activate PWM2"
+			default n
+		if MACH_C28X_ePWM2_PWM = y	
+			config MACH_C28X_ePWM2_PWMA
+				bool "activate PWM2A"
+				default n
+			if MACH_C28X_ePWM2_PWMA
+				comment "EPWM2A GPIO 0"
+				config MACH_C28X_ePWM2_PWMA_ACTION
+					bool "set ACTION QUALIFIER"
+					if MACH_C28X_ePWM2_PWMA_ACTION = y
+						comment"NOTHING 0 CLEAR 1 SET 2 TOGGLE 3"
+						config MACH_C28X_ePWM2_PWMA_ACTION_CBU
+							int "choice EPWM ACTION_CBU"
+							range 0 3
+							default 0
+						
+						config MACH_C28X_ePWM2_PWMA_ACTION_CBD
+							int "choice EPWM ACTION_CBD"
+							range 0 3
+							default 0
+
+						config MACH_C28X_ePWM2_PWMA_ACTION_CAU
+							int "choice EPWM ACTION_CAU"
+							range 0 3
+							default 0
+				
+						config MACH_C28X_ePWM2_PWMA_ACTION_CAD
+							int "choice EPWM ACTION_CAD"
+							range 0 3
+							default 0
+
+						config MACH_C28X_ePWM2_PWMA_ACTION_PRD
+							int "choice EPWM ACTION_PRD"
+							range 0 3
+							default 0
+					
+						config MACH_C28X_ePWM2_PWMA_ACTION_ZRO
+							int "choice EPWM ACTION_ZRO"
+							range 0 3
+							default 0
+					endif
+					
+			endif
+			config MACH_C28X_ePWM2_DB
+					bool "set DEAD_BAND"
+					default n 
+				if MACH_C28X_ePWM2_DB = y
+					choice MACH_C28X_ePWM2_DB_IN_MODE
+						prompt "choice DEAD_BAND_IN_MODE"
+						default MACH_C28X_ePWM2_DB_IN_MODE_A_FALLING_RISING
+						config  MACH_C28X_ePWM2_DB_IN_MODE_A_FALLING_RISING
+							bool "mode A_FALLING_RISING"
+						config MACH_C28X_ePWM2_DB_IN_MODE_B_RISING_A_FALLING
+							bool "mode B_RISING_A_FALLING"
+						config MACH_C28X_ePWM2_DB_IN_MODE_A_RISING_B_FALLING
+							bool "mode A_RISING_B_FALLING"
+						config MACH_C28X_ePWM2_DB_IN_MODE_B_RISING_FALLING
+							bool "mode B_RISING_FALLING"
+					endchoice
+					
+					choice MACH_C28X_ePWM2_DB_OUT_MODE
+						prompt "choice DEAD_BAND_OUT_MODE"
+						default MACH_C28X_ePWM2_DB_OUT_MODE_BYPASS
+						config MACH_C28X_ePWM2_DB_OUT_MODE_BYPASS
+							bool "mode BYPASS"
+						config MACH_C28X_ePWM2_DB_OUT_MODE_A_DISABLE_B_FALLING
+							bool "mode A_DISABLE_B_FALLING"
+						config MACH_C28X_ePWM2_DB_OUT_MODE_A_RISING_B_DISABLE
+							bool "mode A_RISING_B_DISABLE"
+						config MACH_C28X_ePWM2_DB_OUT_MODE_A_RISING_B_FALLING
+							bool "mode A_RISING_B_FALLING"
+					endchoice 
+					
+					choice MACH_C28X_ePWM2_DB_POLARITY
+						prompt "choice DEAD_BAND_POLARITY"
+						default MACH_C28X_ePWM2_DB_POLARITY_A_B
+						config MACH_C28X_ePWM2_DB_POLARITY_A_B
+							bool "set POLARITY_A_B"
+						config MACH_C28X_ePWM2_DB_POLARITY_A_INVERTED
+							bool "set POLARITY_A_INVERTED"
+						config MACH_C28X_ePWM2_DB_POLARITY_B_INVERTED
+							bool "set POLARITY_B_INVERTED"
+						config MACH_C28X_ePWM2_DB_POLARITY_A_B_INVERTED
+							bool "POLARITY_A_B_INVERTED"
+					endchoice
+					config MACH_C28X_ePWM2_DB_DBRED
+						int "Dead-Band Generator Rising Edge Delay"
+						default 5
+					config MACH_C28X_ePWM2_DB_DBFED
+						int "Dead-Band Generator Falling Edge Delay"
+						default 5
+				endif
+
+				config MACH_C28X_epwm2_TRIP_ZONE
+					bool "set TRIP_ZONE"
+					default n 
+				if MACH_C28X_epwm2_TRIP_ZONE = y
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ1_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ1_NOT"
+	
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ2_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ2_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ3_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ3_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ4_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ4_NOT"
+	
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ5_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ5_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_TZ6_NOT
+						bool "enable Trip Zone Src CYCLEBYCYCLE_TZ6_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_CMPA
+						bool "enable Trip Zone Src CYCLEBYCYCLE_CMPA"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_CYCLEBYCYCLE_CMPB
+						bool "enable Trip Zone Src CYCLEBYCYCLE_CMPB"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ1_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ1_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ2_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ2_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ3_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ3_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ4_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ4_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ5_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ5_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_TZ6_NOT
+						bool "enable Trip Zone Src ONESHOT_TZ6_NOT"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_CMPA
+						bool "enable Trip Zone ONESHOT_CMPA"
+
+					config MACH_C28X_epwm2_TRIPZONESRC_ONESHOT_CMPB
+						bool "enable Trip Zone ONESHOT_CMPB"
+
+					choice MACH_C28X_epwm2_TRIPZONE_STATE_TZA
+						prompt "choice TRIPZONE_STATE_TZA"
+						default MACH_C28X_epwm2_TRIPZONE_STATE_TZA_EPWM_LOW
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZA_HIGHIMP
+							bool "HIGHIMP"
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZA_EPWM_HIGH
+							bool "EPWM_HIGH"
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZA_EPWM_LOW
+							bool "EPWM_LOW"
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZA_DONOTHING
+							bool "DONOTHING"
+					endchoice
+					choice MACH_C28X_epwm2_TRIPZONE_STATE_TZB
+						prompt "choice TRIPZONE_STATE_TZB"
+						default MACH_C28X_epwm2_TRIPZONE_STATE_TZB_EPWM_LOW
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZB_HIGHIMP
+							bool "HIGHIMP"
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZB_EPWM_HIGH
+							bool "EPWM_HIGH"
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZB_EPWM_LOW
+							bool "EPWM_LOW"
+						config MACH_C28X_epwm2_TRIPZONE_STATE_TZB_DONOTHING
+							bool "DONOTHING"
+					endchoice
+
+
+				endif
+
+			
+			config MACH_C28X_ePWM2_PWMB
+				bool "activate PWM2B"
+				default n
+				comment "EPWM2B GPIO 3"
+		endif
+	endif
