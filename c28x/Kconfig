@@ -31,6 +31,9 @@ config MACH_HAS_GPIO
 config MACH_HAS_ADC
 	bool
 	default y
+config MACH_HAS_CAN
+	bool
+	default y
 config MACH_HAS_TIMER
 	bool
 	default y
@@ -99,10 +102,20 @@ menuconfig MACH_C28X_CPU_TIMER
 	if MACH_C28X_CPU_TIMER
 		source mach/c28x/Kconfig.timer
 	endif
+
 menuconfig MACH_C28X_ADC
 	bool "ADC"
 	depends on ADC
 	default y
 	if MACH_C28X_ADC
 		source mach/c28x/Kconfig.adc
+	endif
+
+menuconfig MACH_C28X_ECAN
+	bool "eCAN Driver"
+	depends on CAN
+	default y
+	select USE_TASK_NOTIFICATIONS
+	if MACH_C28X_ECAN = y
+		source mach/c28x/Kconfig.can
 	endif
