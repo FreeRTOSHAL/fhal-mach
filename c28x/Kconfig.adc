@@ -1,0 +1,852 @@
+config MACH_C28X_ADC0
+	bool "ADC 0"     
+if MACH_C28X_ADC0=y
+    choice
+		prompt "ADC0/0 channel select"
+		config MACH_C28X_ADC0_0_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_0_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_0_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_0_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_0_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_0_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_0_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_0_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_0_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_0_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_0_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_0_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_0_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_0_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_0_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_0_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_0_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_0_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_0_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_0_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_0_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_0_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_0_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_0_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_0_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/1 channel select"
+		config MACH_C28X_ADC0_1_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_1_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_1_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_1_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_1_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_1_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_1_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_1_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_1_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_1_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_1_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_1_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_1_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_1_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_1_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_1_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_1_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_1_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_1_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_1_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_1_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_1_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_1_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_1_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_1_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/2 channel select"
+		config MACH_C28X_ADC0_2_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_2_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_2_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_2_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_2_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_2_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_2_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_2_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_2_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_2_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_2_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_2_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_2_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_2_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_2_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_2_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_2_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_2_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_2_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_2_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_2_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_2_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_2_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_2_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_2_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/3 channel select"
+		config MACH_C28X_ADC0_3_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_3_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_3_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_3_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_3_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_3_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_3_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_3_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_3_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_3_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_3_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_3_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_3_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_3_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_3_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_3_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_3_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_3_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_3_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_3_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_3_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_3_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_3_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_3_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_3_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/4 channel select"
+		config MACH_C28X_ADC0_4_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_4_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_4_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_4_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_4_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_4_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_4_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_4_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_4_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_4_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_4_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_4_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_4_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_4_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_4_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_4_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_4_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_4_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_4_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_4_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_4_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_4_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_4_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_4_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_4_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/5 channel select"
+		config MACH_C28X_ADC0_5_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_5_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_5_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_5_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_5_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_5_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_5_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_5_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_5_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_5_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_5_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_5_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_5_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_5_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_5_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_5_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_5_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_5_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_5_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_5_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_5_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_5_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_5_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_5_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_5_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/6 channel select"
+		config MACH_C28X_ADC0_6_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_6_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_6_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_6_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_6_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_6_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_6_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_6_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_6_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_6_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_6_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_6_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_6_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_6_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_6_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_6_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_6_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_6_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_6_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_6_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_6_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_6_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_6_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_6_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_6_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/7 channel select"
+		config MACH_C28X_ADC0_7_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_7_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_7_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_7_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_7_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_7_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_7_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_7_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_7_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_7_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_7_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_7_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_7_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_7_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_7_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_7_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_7_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_7_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_7_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_7_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_7_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_7_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_7_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_7_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_7_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/8 channel select"
+		config MACH_C28X_ADC0_8_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_8_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_8_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_8_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_8_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_8_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_8_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_8_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_8_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_8_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_8_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_8_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_8_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_8_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_8_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_8_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_8_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_8_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_8_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_8_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_8_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_8_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_8_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_8_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_8_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/9 channel select"
+		config MACH_C28X_ADC0_9_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_9_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_9_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_9_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_9_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_9_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_9_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_9_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_9_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_9_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_9_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_9_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_9_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_9_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_9_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_9_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_9_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_9_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_9_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_9_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_9_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_9_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_9_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_9_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_9_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/10 channel select"
+		config MACH_C28X_ADC0_10_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_10_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_10_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_10_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_10_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_10_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_10_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_10_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_10_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_10_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_10_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_10_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_10_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_10_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_10_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_10_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_10_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_10_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_10_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_10_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_10_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_10_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_10_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_10_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_10_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/11 channel select"
+		config MACH_C28X_ADC0_11_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_11_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_11_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_11_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_11_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_11_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_11_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_11_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_11_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_11_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_11_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_11_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_11_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_11_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_11_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_11_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_11_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_11_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_11_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_11_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_11_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_11_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_11_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_11_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_11_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/12 channel select"
+		config MACH_C28X_ADC0_12_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_12_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_12_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_12_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_12_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_12_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_12_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_12_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_12_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_12_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_12_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_12_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_12_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_12_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_12_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_12_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_12_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_12_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_12_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_12_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_12_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_12_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_12_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_12_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_12_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/13 channel select"
+		config MACH_C28X_ADC0_13_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_13_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_13_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_13_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_13_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_13_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_13_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_13_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_13_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_13_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_13_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_13_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_13_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_13_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_13_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_13_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_13_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_13_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_13_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_13_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_13_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_13_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_13_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_13_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_13_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/14 channel select"
+		config MACH_C28X_ADC0_14_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_14_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_14_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_14_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_14_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_14_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_14_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_14_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_14_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_14_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_14_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_14_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_14_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_14_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_14_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_14_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_14_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_14_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_14_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_14_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_14_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_14_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_14_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_14_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_14_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+    choice
+		prompt "ADC0/15 channel select"
+		config MACH_C28X_ADC0_15_CHSEL_UNUSED
+			bool "unused"
+		config MACH_C28X_ADC0_15_CHSEL_A0
+			bool "A0"
+		config MACH_C28X_ADC0_15_CHSEL_A1
+			bool "A1"
+		config MACH_C28X_ADC0_15_CHSEL_A2
+			bool "A2"
+		config MACH_C28X_ADC0_15_CHSEL_A3
+			bool "A3"
+		config MACH_C28X_ADC0_15_CHSEL_A4
+			bool "A4"
+		config MACH_C28X_ADC0_15_CHSEL_A5
+			bool "A5"
+		config MACH_C28X_ADC0_15_CHSEL_A6
+			bool "A6"
+		config MACH_C28X_ADC0_15_CHSEL_A7
+			bool "A7"
+		config MACH_C28X_ADC0_15_CHSEL_B0
+			bool "B0"
+		config MACH_C28X_ADC0_15_CHSEL_B1
+			bool "B1"
+		config MACH_C28X_ADC0_15_CHSEL_B2
+			bool "B2"
+		config MACH_C28X_ADC0_15_CHSEL_B3
+			bool "B3"
+		config MACH_C28X_ADC0_15_CHSEL_B4
+			bool "B4"
+		config MACH_C28X_ADC0_15_CHSEL_B5
+			bool "B5"
+		config MACH_C28X_ADC0_15_CHSEL_B6
+			bool "B6"
+		config MACH_C28X_ADC0_15_CHSEL_B7
+			bool "B7"
+		config MACH_C28X_ADC0_15_CHSEL_A0_B0
+			bool "A0 and B0 together"
+		config MACH_C28X_ADC0_15_CHSEL_A1_B1
+			bool "A1 and B1 together"
+		config MACH_C28X_ADC0_15_CHSEL_A2_B2
+			bool "A2 and B2 together"
+		config MACH_C28X_ADC0_15_CHSEL_A3_B3
+			bool "A3 and B3 together"
+		config MACH_C28X_ADC0_15_CHSEL_A4_B4
+			bool "A4 and B4 together"
+		config MACH_C28X_ADC0_15_CHSEL_A5_B5
+			bool "A5 and B5 together"
+		config MACH_C28X_ADC0_15_CHSEL_A6_B6
+			bool "A6 and B6 together"
+		config MACH_C28X_ADC0_15_CHSEL_A7_B7
+			bool "A7 and B7 together"
+    endchoice
+endif

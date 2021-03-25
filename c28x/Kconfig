@@ -8,7 +8,7 @@ config MACH_HEAP_SIZE
 	int "Init Heap Size"
 	default 100
 #config MACH_LD_SCRIPT
-#	string 
+#	string
 #	default "mach/s32k/s32k.lds"
 config MACH_INCLUDE
 	string
@@ -28,6 +28,9 @@ config MACH_HAS_UART
 config MACH_HAS_GPIO
 	bool
 	default y
+config MACH_HAS_ADC
+	bool
+	default y
 config MACH_HAS_CAN
 	bool
 	default y
@@ -40,7 +43,7 @@ config MACH_HAS_TIMER
 	help
 		Timer is needed by this port!
 menu "Clock Configuation"
-	choice 
+	choice
 		prompt "Low Speed Pre Scaler"
 		config MACH_C28X_CLOCK_LOPCP_BY_4
 			bool "/4"
@@ -57,7 +60,7 @@ menu "Clock Configuation"
 	config MACH_C28X_PLL_MULL
 		int "PLL Multiplier"
 		default 18
-	choice 
+	choice
 		prompt "PLL Div"
 		config MACH_C28X_PLL_DIV_BY_1
 			bool "/1"
@@ -76,7 +79,7 @@ menu "GPIO Subsystem"
 		int "Count of GPIO Pins"
 		default 2
 endmenu
-choice 
+choice
 	prompt "DMA RAM Setup"
 	config MACH_C28X_RAM_DMA_OFF
 		bool "0 DMA Sections (43Kb for Application)"
@@ -99,6 +102,15 @@ menuconfig MACH_C28X_CPU_TIMER
 	if MACH_C28X_CPU_TIMER
 		source mach/c28x/Kconfig.timer
 	endif
+
+menuconfig MACH_C28X_ADC
+	bool "ADC"
+	depends on ADC
+	default y
+	if MACH_C28X_ADC
+		source mach/c28x/Kconfig.adc
+	endif
+
 menuconfig MACH_C28X_ECAN
 	bool "eCAN Driver"
 	depends on CAN
