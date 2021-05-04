@@ -92,7 +92,7 @@ config S32K_GPIO
 		depends on NXP_GPIO
 		default 5
 menuconfig EXTERNAL_OSCILLATOR
-	bool "Activate External Crystal Oscillator"
+	bool "Activate External Oscillator"
 	default y
 	comment "Waring: PLL Setting could damage Target" 
 		depends on EXTERNAL_OSCILLATOR
@@ -102,6 +102,14 @@ menuconfig EXTERNAL_OSCILLATOR
 		default 8000000
 		help
 			External Oscillator Settings
+        choice
+                prompt "External Crystal used"
+		depends on EXTERNAL_OSCILLATOR
+                config SOSCCFG_EREFS_ON
+                        bool "yes"
+                config SOSCCFG_REFES_OFF
+                        bool "no"
+        endchoice
         choice
                 prompt "High Gain Oscillator"
 		depends on EXTERNAL_OSCILLATOR

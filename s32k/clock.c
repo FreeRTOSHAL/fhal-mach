@@ -13,6 +13,12 @@
 #  define SOSCCFG_HGO 0
 # endif
 
+# if defined(CONFIG_SOSCCFG_EREFS_ON)
+#  define SOSCCFG_EREFS 1
+# else
+#  define SOSCCFG_EREFS 0
+# endif
+
 # if CONFIG_SOSC_HZ < 4000000
 #  error "crystal oscillator frequency only supported from 4Mhz to 40Mhz"
 # elif CONFIG_SOSC_HZ > 40000000
@@ -542,7 +548,7 @@ struct clock *clock_init() {
 	SCG->SOSCDIV = SCG_SOSCDIV_SOSCDIV2(SOSCDIV2) | SCG_SOSCDIV_SOSCDIV1(SOSCDIV1);
 	/* SOSCCFG: set parameters for SOSC */
 	SCG->SOSCCFG = SCG_SOSCCFG_RANGE(SOSCCFG_RANGE) | SCG_SOSCCFG_HGO(SOSCCFG_HGO) |
-		       SCG_SOSCCFG_EREFS(1);
+		       SCG_SOSCCFG_EREFS(SOSCCFG_EREFS);
 	/* Ensure SOSCCSR unlocked */
 	while(SCG->SOSCCSR & SCG_SOSCCSR_LK_MASK);
 	/* TODO: clock monitor */
