@@ -235,7 +235,7 @@ static void handle_err_or_warn(struct can *can) {
 	/* if err is happened call userspace */
 	if (err != 0) {
 		if (can->errorCallback) {
-			pxHigherPriorityTaskWoken |= can->errorCallback(can, err, data);
+			pxHigherPriorityTaskWoken |= can->errorCallback(can, err, data, can->userData);
 		}
 	}
 	/* clear all flags */
@@ -281,7 +281,9 @@ void flexcan_handleMBIRQ(struct can *can) {
 			} else {
 				msg.id = FLEXCAN_MB_ID_STD_ID_GET(mb->id);
 			}
-			msg.req = ((ctrl & FLEXCAN_MB_CTRL_RTR) != 0);
+			if ((ctrl & FLEXCAN_MB_CTRL_RTR) != 0) {
+				msg.id |= CAN_RTR_FLAG;
+			}
 			msg.length = FLEXCAN_MB_CTRL_DLC_GET(ctrl);
 			/* Copy Data */
 			for (j = 0; j < msg.length; j++) {
@@ -390,7 +392,7 @@ CAN_SEND(flexcan, can, msg, waittime) {
 	int lret;
 	uint32_t ctrl;
 	volatile struct flexcan_mb *mb;
-	if (msg->req) {
+	if ((msg->id & CAN_RTR_FLAG) != 0) {
 		/* TODO Implement request and recv */
 		/* CAN Requests has a complex MB state machine */
 		goto flexcan_send_error0;

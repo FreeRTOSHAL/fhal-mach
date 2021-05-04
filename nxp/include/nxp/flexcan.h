@@ -130,7 +130,7 @@ struct can {
 	int64_t freq;
 	uint32_t mb_count;
 	TaskHandle_t task;
-	bool (*errorCallback)(struct can *can, can_error_t error, can_errorData_t data);
+	bool (*errorCallback)(struct can *can, can_error_t error, can_errorData_t data, void *userData);
 	void *userData;
 	struct flexcan_filter *filter;
 };
