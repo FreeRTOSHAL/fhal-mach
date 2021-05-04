@@ -57,7 +57,7 @@ void framaC_capture_setValue(struct capture *c, uint32_t value) {
 	struct capture_framaC *capture = (struct capture_framaC *) c;
 	capture->value = value;
 	if (capture->callback) {
-		capture->callback(capture, 0, capture->value, capture->data);
+		capture->callback(c, 0, capture->value, capture->data);
 	}
 }
 CAPTURE_OPS(framaC);

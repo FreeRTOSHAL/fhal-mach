@@ -15,7 +15,7 @@ TIMER_INIT(framaC, index, prescaler, basetime, adjust) {
 	if (timer == NULL) {
 		goto framaC_timer_init_error0;
 	}
-	ret = timer_generic_init(timer);
+	ret = timer_generic_init((struct timer *) timer);
 	if (ret < 0) {
 		goto framaC_timer_init_error0;
 	}
@@ -42,7 +42,7 @@ void framaC_timer_setValue(struct timer *t, uint32_t value) {
 void framaC_timer_overflow(struct timer *t){
 	struct timer_framaC *timer = (struct timer_framaC *) t;
 	timer->value = 0;
-	(void) timer->callback(timer, timer->data);
+	(void) timer->callback(t, timer->data);
 }
 
 TIMER_SET_OVERFLOW_CALLBACK(framaC, t, callback, data) {
