@@ -8,13 +8,15 @@
 
 extern TickType_t ticksSinceStart;
 /*@ ensures result:  \result == ticksSinceStart;
-    assigns \result; */
+    assigns \result \from ticksSinceStart; */
 TickType_t xTaskGetTickCount(void);
 /*@ ensures result:  \result == ticksSinceStart;
-    assigns \result; */
+    assigns \result \from ticksSinceStart; */
 TickType_t xTaskGetTickCountFromISR(void);
 
-/*@ assigns \result, *pxPreviousWakeTime, ticksSinceStart;
+/*@ assigns \result \from (indirect: *pxPreviousWakeTime), (indirect: ticksSinceStart);
+    assigns *pxPreviousWakeTime \from ticksSinceStart, xTimeIncrement;
+    assigns ticksSinceStart \from xTimeIncrement;
     ensures result: \result == pdTRUE;
     ensures ticked:  ticksSinceStart == (\old(ticksSinceStart) + xTimeIncrement);
     ensures getTime: *pxPreviousWakeTime == ticksSinceStart;
@@ -26,7 +28,7 @@ BaseType_t xTaskDelayUntil(TickType_t * const pxPreviousWakeTime, TickType_t con
 	requires mem: \valid_read(pcName)&& (\valid(pxCreatedTask) || pxCreatedTask == NULL);
 	requires stackSize: usStackDepth >= configMINIMAL_STACK_SIZE;
 	requires prio: uxPriority < configMAX_PRIORITIES;
-	assigns \result;
+	assigns \result \from (indirect: usStackDepth), (indirect: pxTaskCode);
 	ensures result: \result == pdPASS;
  */
 BaseType_t xTaskCreate( TaskFunction_t pxTaskCode, const char * const pcName, const configSTACK_DEPTH_TYPE usStackDepth, void * const pvParameters, UBaseType_t uxPriority, TaskHandle_t * const pxCreatedTask );
@@ -37,7 +39,7 @@ BaseType_t xTaskCreate( TaskFunction_t pxTaskCode, const char * const pcName, co
 	requires mem: \valid_read(pcName)&& (\valid(pxCreatedTask) || pxCreatedTask == NULL);
 	requires stackSize: usStackDepth >= configMINIMAL_STACK_SIZE;
 	requires prio: uxPriority < configMAX_PRIORITIES;
-	assigns \result;
+	assigns \result \from (indirect: usStackDepth), (indirect: pxTaskCode);
 	ensures result: \valid(\result);
  */
 /* TODO: Not Testest */

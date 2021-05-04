@@ -5,9 +5,7 @@
  */
 #ifndef FRAMAC_FREERTOS_QUEUE_H_
 #define FRAMAC_FREERTOS_QUEUE_H_
-/*@ assigns \result;
-    assigns \result \from (indirect: uxQueueLength), (indirect: uxItemSize), (indirect: ucQueueType);
-    allocates \result;
+/*@ assigns \result \from (indirect: uxQueueLength), (indirect: uxItemSize), (indirect: ucQueueType);
     ensures \result != 0;
  */
 QueueHandle_t xQueueGenericCreate(UBaseType_t const uxQueueLength,
