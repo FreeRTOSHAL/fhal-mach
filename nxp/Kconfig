@@ -28,4 +28,5 @@ config NXP_GPIO_MUX
 	default n
 config NXP_FLEXCAN
 	bool
+	select USE_TASK_NOTIFICATIONS
 	default n
