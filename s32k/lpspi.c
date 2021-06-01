@@ -259,7 +259,7 @@ SPI_SLAVE_INIT(nxp, spi, options) {
 		}
 		/* Delay Between Transfers: DBT min: 2 cycle */
 		/*   - Configures the delay from the PCS negation to the next PCS assertion. */
-		cycles = options->wdelay * freq;
+		cycles = options->wdelay;
 		if (cycles > 2) {
 			if (cycles > 255) {
 				reg |= LPSPI_CCR_DBT(255);
