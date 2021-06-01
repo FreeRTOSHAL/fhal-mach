@@ -257,15 +257,17 @@ SPI_SLAVE_INIT(nxp, spi, options) {
 				reg |= LPSPI_CCR_PCSSCK(cycles - 1);
 			}
 		}
-		/* Delay Between Transfers: DBT min: 2 cycle */
+		/* Delay Between Transfers: DBT min: 1 cycle (in CONT mode) */
 		/*   - Configures the delay from the PCS negation to the next PCS assertion. */
-		cycles = options->wdelay;
-		if (cycles > 2) {
+		cycles = options->wdelay * freq;
+		if (cycles > 1) {
 			if (cycles > 255) {
 				reg |= LPSPI_CCR_DBT(255);
 			} else {
-				reg |= LPSPI_CCR_DBT(cycles - 2);
+				reg |= LPSPI_CCR_DBT(cycles - 1);
 			}
+		} else {
+			reg |= LPSPI_CCR_DBT(1);
 		}
 		/* SCK Divider: SCKDIV */
 		/*   - the SCK Divider configures the divide ratio of the SCK pin.*/
