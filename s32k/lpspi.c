@@ -478,7 +478,6 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 	} else {
 		while(!(spi->base->SR & LPSPI_SR_TCF_MASK));
 	}
-	spi_gpioClear(slave);
 
 	/* recv remaning bytes */
 	while (recved < len) {
@@ -487,6 +486,7 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 			recved++;
 		}
 	}
+	spi_gpioClear(slave);
 #ifdef CONFIG_USE_TASK_NOTIFICATIONS
 	spi->task = NULL;
 #endif
