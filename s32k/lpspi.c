@@ -437,7 +437,6 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 			}
 		}
 	}
-	spi_gpioClear(slave);
 	/* wait until one more slot is in FIFO, TCR use the TX-FIFO! */
 	if (useISR) {
 		spi->base->IER |= LPSPI_IER_TDIE_MASK;
@@ -479,6 +478,7 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 	} else {
 		while(!(spi->base->SR & LPSPI_SR_TCF_MASK));
 	}
+	spi_gpioClear(slave);
 
 	/* recv remaning bytes */
 	while (recved < len) {
