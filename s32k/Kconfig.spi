@@ -1,6 +1,9 @@
 config MACH_S32K_LPSPI_MAX_SLAVES
 	int "Max Slaves"
 	default 1
+config MACH_S32K_LPSPI_DEBUG
+	bool "SPI Debug Mode"
+	default n
 menuconfig MACH_S32K_LPSPI0
 	bool "LPSPI0"
 	default n

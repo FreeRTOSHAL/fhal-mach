@@ -21,7 +21,11 @@
 #define LPSPI_FIFO_SIZE 4
 #define LPSPI_FIFO_HALF_SIZE 2
 
-#define PRINTF(...) printf(__VA_ARGS__)
+#ifdef CONFIG_MACH_S32K_LPSPI_DEBUG
+# define PRINTF(...) printf(__VA_ARGS__)
+#else
+# define PRINTF(...)
+#endif
 #define LPSPI_FIFO_RXCOUNT(fsr) (((fsr) & LPSPI_FSR_RXCOUNT_MASK) >> LPSPI_FSR_RXCOUNT_SHIFT)
 
 struct spi_pin {
