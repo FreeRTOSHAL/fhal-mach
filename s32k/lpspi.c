@@ -19,7 +19,7 @@
 #include <S32K144.h>
 #include <irq.h>
 #define LPSPI_FIFO_SIZE 4
-#define LPSPI_FIFO_HARF_SIZE 2
+#define LPSPI_FIFO_HALF_SIZE 2
 
 #define PRINTF(...) printf(__VA_ARGS__)
 #define LPSPI_FIFO_RXCOUNT(fsr) (((fsr) & LPSPI_FSR_RXCOUNT_MASK) >> LPSPI_FSR_RXCOUNT_SHIFT)
@@ -107,7 +107,7 @@ SPI_INIT(nxp, index, mode, opt) {
 	/* Enable Module */
 	spi->base->CR = LPSPI_CR_MEN_MASK;
 	/* setup TX Watermark to max FIFO size - 1 and RX Watermark to harf of the size of the FIFO - 1 */
-	spi->base->FCR = LPSPI_FCR_TXWATER(LPSPI_FIFO_SIZE - 1) | LPSPI_FCR_RXWATER((LPSPI_FIFO_HARF_SIZE) - 1);
+	spi->base->FCR = LPSPI_FCR_TXWATER(LPSPI_FIFO_SIZE - 1) | LPSPI_FCR_RXWATER((LPSPI_FIFO_HALF_SIZE) - 1);
 
 	ret = mux_pinctl(mux, spi->pins[0].pin, spi->pins[0].cfg, spi->pins[0].extra);
 	if (ret < 0) {
@@ -241,8 +241,8 @@ SPI_SLAVE_INIT(nxp, spi, options) {
 		/*   - configures the delay from the last SCK edge to the PCS negatio */
 		cycles = options->cs_hold * freq;
 		if (cycles != 0) {
-			if (cycles > 257) {
-				reg |= LPSPI_CCR_SCKPCS(256);
+			if (cycles > 255) {
+				reg |= LPSPI_CCR_SCKPCS(255);
 			} else {
 				reg |= LPSPI_CCR_SCKPCS(cycles - 1);
 			}
@@ -251,8 +251,8 @@ SPI_SLAVE_INIT(nxp, spi, options) {
 		/*   - configures the delay from the PCS assertion to the first SCK edge. */
 		cycles = options->cs_delay * freq;
 		if (cycles != 0) {
-			if (cycles > 257) {
-				reg |= LPSPI_CCR_PCSSCK(256);
+			if (cycles > 255) {
+				reg |= LPSPI_CCR_PCSSCK(255);
 			} else {
 				reg |= LPSPI_CCR_PCSSCK(cycles - 1);
 			}
@@ -261,8 +261,8 @@ SPI_SLAVE_INIT(nxp, spi, options) {
 		/*   - Configures the delay from the PCS negation to the next PCS assertion. */
 		cycles = options->wdelay * freq;
 		if (cycles > 2) {
-			if (cycles > 257) {
-				reg |= LPSPI_CCR_DBT(256);
+			if (cycles > 255) {
+				reg |= LPSPI_CCR_DBT(255);
 			} else {
 				reg |= LPSPI_CCR_DBT(cycles - 2);
 			}
@@ -370,11 +370,11 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 #endif
 	/* Configure SPI Device for this slave */
 	spi->base->CCR = slave->CCR;
-	TCR = slave->TCR;
+	TCR = slave->TCR & ~LPSPI_TCR_CONTC(1);
 	/* Send Config Command and start Data Transfer */
 	if (len == 1) {
-		/* for 1 byte CONTC is not needed */
-		TCR &= ~(LPSPI_TCR_CONTC(1) | LPSPI_TCR_CONT_MASK);
+		/* for 1 frame CON/CONTC is not needed */
+		TCR &= ~LPSPI_TCR_CONT(1);
 	}
 	spi->base->TCR = TCR;
 	/* check TCR Register, remove TXMSK will be cleared by writing */
