@@ -238,12 +238,12 @@ SPI_SLAVE_INIT(nxp, spi, options) {
 	}
 	memcpy(&slave->options, options, sizeof(struct spi_opt));
 	{
-		uint32_t cycles;
+		uint32_t cycles, mincycles;
 		uint32_t reg = 0;
-		uint32_t freq = spi->freq / 1000 /* 1/ms */ / 1000 /* 1/us */;
+		uint32_t ns_per_clock = 1000000 / (spi->freq / 1000); /* ns per clock */
 		/* SCK-to-PCS Delay: SCKPCS min: 1 cycle */
 		/*   - configures the delay from the last SCK edge to the PCS negatio */
-		cycles = options->cs_hold * freq;
+		cycles = options->cs_hold / ns_per_clock;
 		if (cycles != 0) {
 			if (cycles > 255) {
 				reg |= LPSPI_CCR_SCKPCS(255);
@@ -253,7 +253,7 @@ SPI_SLAVE_INIT(nxp, spi, options) {
 		}
 		/* PCS-to-SCK Delay: PCSSCK min: 1 cycle */
 		/*   - configures the delay from the PCS assertion to the first SCK edge. */
-		cycles = options->cs_delay * freq;
+		cycles = options->cs_delay / ns_per_clock;
 		if (cycles != 0) {
 			if (cycles > 255) {
 				reg |= LPSPI_CCR_PCSSCK(255);
@@ -263,8 +263,13 @@ SPI_SLAVE_INIT(nxp, spi, options) {
 		}
 		/* Delay Between Transfers: DBT min: 1 cycle (in CONT mode) */
 		/*   - Configures the delay from the PCS negation to the next PCS assertion. */
-		cycles = options->wdelay * freq;
-		if (cycles > 1) {
+		cycles = options->wdelay / ns_per_clock;
+		mincycles = spi->freq / (options->bautrate * 2);
+		if ( cycles < mincycles ) {
+			/* minimum delay needed for clean transmission */
+			reg |= LPSPI_CCR_DBT(mincycles);
+		}
+		else if (cycles > 1) {
 			if (cycles > 255) {
 				reg |= LPSPI_CCR_DBT(255);
 			} else {
