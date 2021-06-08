@@ -14,7 +14,7 @@ struct uart {
 	struct uart_generic gen;
 };
 
-UART_INIT(linux_emu, port, bautrate) {
+UART_INIT(linux_emu, port, baudrate) {
 	int32_t ret;
 	struct uart *uart = UART_GET_DEV(port);
 	if (uart == NULL) {

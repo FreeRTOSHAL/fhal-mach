@@ -17,7 +17,7 @@ struct uart {
 	void (*RCC_APBxPeriphClockCmd)(uint32_t RCC_APB1Periph, FunctionalState state);
 	struct pin pin[2];
 };
-UART_INIT(stm32, port, bautrate) {
+UART_INIT(stm32, port, baudrate) {
 	int32_t ret;
 	struct mux *mux = mux_init();
 	struct uart *uart = (struct uart *) UART_GET_DEV(port);
@@ -41,7 +41,7 @@ UART_INIT(stm32, port, bautrate) {
 		uart->RCC_APBxPeriphClockCmd(uart->clock, ENABLE);
 
 		USART_StructInit(&type);
-		type.USART_BaudRate = bautrate;
+		type.USART_BaudRate = baudrate;
 		USART_Init(uart->base, &type);
 		USART_ClockStructInit(&clock);
 		USART_ClockInit(uart->base, &clock);

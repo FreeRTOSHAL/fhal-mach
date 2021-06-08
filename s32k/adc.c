@@ -113,7 +113,7 @@ ADC_INIT(nxp, index, bits, hz) {
 		pcc->PCCn[ctrl->clkIndex] =  PCC_PCCn_PCS(ctrl->clkMuxing) | PCC_PCCn_CGC_MASK;
 		ctrl->feq = clock_getPeripherySpeed(clk, ctrl->clkID);
 
-		/* TODO  ADC Contoller Init uese nxp_adc_init_error1 for exit */
+		/* TODO  ADC Controller Init uese nxp_adc_init_error1 for exit */
 		adc->ctrl->init = true;
 	}
 	/* Lock Controller while setup */

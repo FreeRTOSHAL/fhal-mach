@@ -10,12 +10,12 @@ struct mux {
 	bool init;
 	struct gpio *gpio;
 };
-struct mux mux_contoller = {
+struct mux mux_controller = {
 	.init = false,
 	.gpio = &stm32_gpio,
 };
 struct mux *mux_init() {
-	struct mux *mux = &mux_contoller;
+	struct mux *mux = &mux_controller;
 	struct gpio *gpio;
 	if (mux->init) {
 		return mux;

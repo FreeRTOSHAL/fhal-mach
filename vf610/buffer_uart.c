@@ -18,7 +18,7 @@ struct uart {
 #define BUFFER_UART_RX ((struct buffer_base *) 0x3f07d800)
 #define BUFFER_UART_TX ((struct buffer_base *) 0x3f07da1C)
 #define BUFFER_CPU2CPU_INTNR 1
-UART_INIT(buffer, port, bautrate) {
+UART_INIT(buffer, port, baudrate) {
 	struct uart *uart = (struct uart *) UART_GET_DEV(port);
 	int32_t ret;
 	if (uart == NULL) {
@@ -34,7 +34,7 @@ UART_INIT(buffer, port, bautrate) {
 	if (ret > 0) {
 		return uart;
 	}
-	if (bautrate == 0) {
+	if (baudrate == 0) {
 		return NULL;
 	}
 	uart->rx = buffer_init(BUFFER_UART_RX, 256, sizeof(char), true, 1);

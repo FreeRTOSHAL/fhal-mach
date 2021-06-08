@@ -78,7 +78,7 @@ config AM57xx_MUX_DEBUG
 	bool "Mux Debug"
 	default n
 config AM57xx_GPIO
-	bool "AM57xx GPIO Contoller"
+	bool "AM57xx GPIO Controller"
 	default n
 	depends on GPIO
 	config AM57xx_GPIO_DEBUG

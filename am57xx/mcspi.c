@@ -302,7 +302,7 @@ SPI_SLAVE_INIT(am57xx, spi, options) {
 		}
 	}
 	/* TODO support more than 4 Slaves */
-	if (index == 4 || options->size <= 3 || options->bautrate > 48000000) {
+	if (index == 4 || options->size <= 3 || options->baudrate > 48000000) {
 		goto am57xx_spi_slave_init_error0;
 	}
 #endif
@@ -355,7 +355,7 @@ SPI_SLAVE_INIT(am57xx, spi, options) {
 	reg |= SPI_CHxCONF_TRM_TX_RX;
 	reg |= SPI_CHxCONF_WL_BITS(options->size);
 	{
-		uint32_t div = 48000000 / options->bautrate;
+		uint32_t div = 48000000 / options->baudrate;
 		uint32_t bits;
 		for (bits = 0xF; bits > 0; bits--) {
 			if ((1 << bits) <= div) {
@@ -413,7 +413,7 @@ SPI_SLAVE_DEINIT(am57xx, slave) {
 	vPortFree(slave);
 	return 0;
 }
-static int32_t am57xx_spiSlave_transverData(struct spi_slave *slave, uint16_t *sendData, uint32_t sendLen, uint16_t *recvData, uint32_t recvLen, TickType_t waitime) {
+static int32_t am57xx_spiSlave_transferData(struct spi_slave *slave, uint16_t *sendData, uint32_t sendLen, uint16_t *recvData, uint32_t recvLen, TickType_t waitime) {
 	volatile struct spi_reg_chan *chan = slave->chan;
 	struct spi_opt *options = &slave->options;
 	uint32_t bitmask = ((1 << options->size) - 1);
@@ -443,7 +443,7 @@ static int32_t am57xx_spiSlave_transverData(struct spi_slave *slave, uint16_t *s
 	spi_unlock(slave->spi, -1);
 	return 0;
 }
-static int32_t am57xx_spiSlave_transverDataPoll(struct spi_slave *slave, uint16_t *sendData, uint32_t sendLen, uint16_t *recvData, uint32_t recvLen) {
+static int32_t am57xx_spiSlave_transferDataPoll(struct spi_slave *slave, uint16_t *sendData, uint32_t sendLen, uint16_t *recvData, uint32_t recvLen) {
 	volatile struct spi_reg_chan *chan = slave->chan;
 	struct spi_opt *options = &slave->options;
 	uint32_t bitmask = ((1 << options->size) - 1);
@@ -472,27 +472,27 @@ static int32_t am57xx_spiSlave_transverDataPoll(struct spi_slave *slave, uint16_
 
 	return 0;
 }
-SPI_SLAVE_TRANSVER(am57xx, slave, sendData, recvData, len, waittime) {
-	return am57xx_spiSlave_transverData(slave, sendData, len, recvData, len, waittime);
+SPI_SLAVE_TRANSFER(am57xx, slave, sendData, recvData, len, waittime) {
+	return am57xx_spiSlave_transferData(slave, sendData, len, recvData, len, waittime);
 }
 SPI_SLAVE_SEND(am57xx, slave, data, len, waittime) {
 	uint16_t recvData = 0xFF;
-	return am57xx_spiSlave_transverData(slave, data, len, &recvData, 1, waittime);
+	return am57xx_spiSlave_transferData(slave, data, len, &recvData, 1, waittime);
 }
 SPI_SLAVE_RECV(am57xx, slave, data, len, waittime) {
 	uint16_t sendData = 0xFF;
-	return am57xx_spiSlave_transverData(slave, &sendData, 1, data, len, waittime);
+	return am57xx_spiSlave_transferData(slave, &sendData, 1, data, len, waittime);
 }
-SPI_SLAVE_TRANSVER_ISR(am57xx, slave, sendData, recvData, len) {
-	return am57xx_spiSlave_transverDataPoll(slave, sendData, len, recvData, len);
+SPI_SLAVE_TRANSFER_ISR(am57xx, slave, sendData, recvData, len) {
+	return am57xx_spiSlave_transferDataPoll(slave, sendData, len, recvData, len);
 }
 SPI_SLAVE_SEND_ISR(am57xx, slave, data, len) {
 	uint16_t recvData = 0xFF;
-	return am57xx_spiSlave_transverDataPoll(slave, data, len, &recvData, 1);
+	return am57xx_spiSlave_transferDataPoll(slave, data, len, &recvData, 1);
 }
 SPI_SLAVE_RECV_ISR(am57xx, slave, data, len) {
 	uint16_t sendData = 0xFF;
-	return am57xx_spiSlave_transverDataPoll(slave, &sendData, 1, data, len);
+	return am57xx_spiSlave_transferDataPoll(slave, &sendData, 1, data, len);
 }
 
 void am57xx_spiIRQHandler(struct spi *spi) {

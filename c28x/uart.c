@@ -157,10 +157,10 @@ UART_INIT(sci, port, baudrate) {
 	/* Get SCI out of Software Reset and disable all */
 	uart->base->SCICTL1 = SCICTL1_SWRESET;
 
-	/* Disable Auto Bautdate deteaction and no delay */
+	/* Disable Auto Bauddate detection and no delay */
 	uart->base->SCIFFCT = 0;
 
-	/* Set Bautdate */
+	/* Set Bauddate */
 	uart->base->SCIHBAUD = SCIHBAUD_BAUD(baudrate >> 8);
 	uart->base->SCILBAUD = SCILBAUD_BAUD(baudrate);
 

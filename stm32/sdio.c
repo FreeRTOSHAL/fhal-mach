@@ -337,7 +337,7 @@ SD_SEND_COMMAND_ISR(stm32, sd, command, argument, response) {
 	return stm32_sd_send_command(sd, command, argument, response, 0, true);
 }
 
-static void prepareContoller(struct sd *sd, SDIO_DataInitTypeDef *cfg, size_t size, uint32_t *data, bool write) {
+static void prepareController(struct sd *sd, SDIO_DataInitTypeDef *cfg, size_t size, uint32_t *data, bool write) {
 	/* Setup Data Struct */
 	SDIO_DataStructInit(cfg);
 	/* Integer Operation;) (x / blockSize) * blockSize != x */
@@ -381,7 +381,7 @@ static void prepareContoller(struct sd *sd, SDIO_DataInitTypeDef *cfg, size_t si
 	}
 }
 
-int32_t transverData(struct sd *sd, SDIO_DataInitTypeDef *cfg, uint32_t command, uint32_t argument, TickType_t waittime, bool inISR) {
+int32_t transferData(struct sd *sd, SDIO_DataInitTypeDef *cfg, uint32_t command, uint32_t argument, TickType_t waittime, bool inISR) {
 	int32_t ret;
 	/**
 	 * Send Data Command
@@ -437,8 +437,8 @@ SD_WIRTE(stm32, sd, command, argument, size, data, waittime) {
 		goto stm32_sdio_write_error0;
 	}
 	sd_lock(sd, waittime, -1);
-	prepareContoller(sd, &cfg, size, data, true);
-	ret = transverData(sd, &cfg, command, argument, waittime, false);
+	prepareController(sd, &cfg, size, data, true);
+	ret = transferData(sd, &cfg, command, argument, waittime, false);
 	if (ret < 0) {
 		goto stm32_sdio_write_error1;
 	}
@@ -456,8 +456,8 @@ SD_WIRTE_ISR(stm32, sd, command, argument, size, data) {
 		ret = -1;
 		goto stm32_sdio_write_error0;
 	}
-	prepareContoller(sd, &cfg, size, data, true);
-	ret = transverData(sd, &cfg, command, argument, 0, true);
+	prepareController(sd, &cfg, size, data, true);
+	ret = transferData(sd, &cfg, command, argument, 0, true);
 	if (ret < 0) {
 		goto stm32_sdio_write_error0;
 	}
@@ -473,8 +473,8 @@ SD_READ(stm32, sd, command, argument, size, data, waittime) {
 		goto stm32_sdio_read_error0;
 	}
 	sd_lock(sd, waittime, -1);
-	prepareContoller(sd, &cfg, size, data, false);
-	ret = transverData(sd, &cfg, command, argument, waittime, false);
+	prepareController(sd, &cfg, size, data, false);
+	ret = transferData(sd, &cfg, command, argument, waittime, false);
 	if (ret < 0) {
 		goto stm32_sdio_read_error1;
 	}
@@ -492,8 +492,8 @@ SD_READ_ISR(stm32, sd, command, argument, size, data) {
 		ret = -1;
 		goto stm32_sdio_read_error0;
 	}
-	prepareContoller(sd, &cfg, size, data, false);
-	ret = transverData(sd, &cfg, command, argument, 0, true);
+	prepareController(sd, &cfg, size, data, false);
+	ret = transferData(sd, &cfg, command, argument, 0, true);
 	if (ret < 0) {
 		goto stm32_sdio_read_error0;
 	}

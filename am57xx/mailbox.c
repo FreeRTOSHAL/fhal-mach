@@ -42,7 +42,7 @@ struct mailbox_reg {
 
 	uint32_t IRQ_EOI; /* 0x140 */
 };
-struct mailbox_contoller {
+struct mailbox_controller {
 	struct mailbox_generic gen;
 	volatile struct mailbox_reg *base;
 	struct mailbox *mbox[16];
@@ -53,7 +53,7 @@ struct mailbox_contoller {
 };
 struct mailbox {
 	struct mailbox_generic gen;
-	struct mailbox_contoller *contoller;
+	struct mailbox_controller *controller;
 	OS_DEFINE_SEMARPHORE_BINARAY(txsem);
 	OS_DEFINE_QUEUE(rxqueue, 255, sizeof(uint32_t));
 	bool full;
@@ -63,11 +63,11 @@ struct mailbox {
 MAILBOX_INIT(omap, index) {
 	int32_t ret;
 	struct mailbox *mbox = (struct mailbox *) MAILBOX_GET_DEV(index);
-	struct mailbox_contoller *contoller;
+	struct mailbox_controller *controller;
 	if (mbox == NULL) {
 		goto omap_mailbox_init_error0;
 	}
-	contoller = mbox->contoller;
+	controller = mbox->controller;
 	ret = mailbox_genericInit(mbox);
 	if (ret < 0) {
 		goto omap_mailbox_init_error0;
@@ -79,29 +79,29 @@ MAILBOX_INIT(omap, index) {
 		return mbox;
 	}
 	/* cast hear is ok */
-	ret = mailbox_genericInit((struct mailbox *) mbox->contoller);
+	ret = mailbox_genericInit((struct mailbox *) mbox->controller);
 	if (ret < 0) {
 		goto omap_mailbox_init_error0;
 	}
-	/* init contoller*/
+	/* init controller*/
 	if (ret == 0) {
 		/**
 		 * Register IRQ
 		 */
-		ret = ctrl_setHandler(contoller->irqBase + contoller->userID, contoller->irqhandler);
+		ret = ctrl_setHandler(controller->irqBase + controller->userID, controller->irqhandler);
 		if (ret < 0) {
-			contoller->gen.init = false;
+			controller->gen.init = false;
 			goto omap_mailbox_init_error0;
 		}
-		contoller->irq = (uint32_t) ret;
+		controller->irq = (uint32_t) ret;
 		/* Disable all interrupts */
-		contoller->base->irq[contoller->userID].IRQENABLE_CLR = 0xFFFFFFFF;
+		controller->base->irq[controller->userID].IRQENABLE_CLR = 0xFFFFFFFF;
 		/* Enable the Interrupt */
-		ret = irq_setPrio(mbox->contoller->irq, 0xFF);
+		ret = irq_setPrio(mbox->controller->irq, 0xFF);
 		if (ret < 0) {
 			goto omap_mailbox_init_error2;
 		}
-		ret = irq_enable(mbox->contoller->irq);
+		ret = irq_enable(mbox->controller->irq);
 		if (ret < 0) {
 			goto omap_mailbox_init_error2;
 		}
@@ -115,7 +115,7 @@ MAILBOX_INIT(omap, index) {
 		mbox->full = false;
 		{
 			/* Enable RX Interrupt */
-			contoller->base->irq[contoller->userID].IRQENABLE_SET = MBOX_IRQ_RX(mbox->id);
+			controller->base->irq[controller->userID].IRQENABLE_SET = MBOX_IRQ_RX(mbox->id);
 		}
 	} else {
 		mbox->txsem = OS_CREATE_SEMARPHORE_BINARAY(mbox->txsem);
@@ -137,31 +137,31 @@ omap_mailbox_init_error0:
 }
 MAILBOX_DEINIT(omap, mbox) {
 	/* Disable Interrupts */ 
-	mbox->contoller->base->irq[mbox->contoller->userID].IRQENABLE_SET &= (MBOX_IRQ_RX(mbox->id) | MBOX_IRQ_TX(mbox->id));
+	mbox->controller->base->irq[mbox->controller->userID].IRQENABLE_SET &= (MBOX_IRQ_RX(mbox->id) | MBOX_IRQ_TX(mbox->id));
 	vSemaphoreDelete(mbox->txsem);
 	vQueueDelete(mbox->rxqueue);
 	mbox->gen.init = false;
 	return 0;
 }
 MAILBOX_SEND(omap, mbox, data, waittime) {
-	struct mailbox_contoller *contoller = mbox->contoller;
+	struct mailbox_controller *controller = mbox->controller;
 	BaseType_t ret;
 	if (mbox->isRX) {
 		return -1;
 	}
-	mailbox_lock(mbox->contoller, -1, waittime);
-	if (contoller->base->FIFOSTATUS[contoller->userID] & 0x1) {
-		contoller->base->irq->IRQENABLE_SET = MBOX_IRQ_TX(contoller->userID);
-		mailbox_unlock(contoller, -1);
+	mailbox_lock(mbox->controller, -1, waittime);
+	if (controller->base->FIFOSTATUS[controller->userID] & 0x1) {
+		controller->base->irq->IRQENABLE_SET = MBOX_IRQ_TX(controller->userID);
+		mailbox_unlock(controller, -1);
 		/* wait for free Space in FIFO */
 		ret = xSemaphoreTake(mbox->txsem, 0);
 		if (ret == pdFALSE) {
 			return -1;
 		}
-		mailbox_lock(contoller, -1, waittime);
+		mailbox_lock(controller, -1, waittime);
 	}
-	mbox->contoller->base->MESSAGE[mbox->id] = data;
-	mailbox_unlock(mbox->contoller, -1);
+	mbox->controller->base->MESSAGE[mbox->id] = data;
+	mailbox_unlock(mbox->controller, -1);
 	return 0;
 }
 MAILBOX_RECV(omap, mbox, data, waittime) {
@@ -173,13 +173,13 @@ MAILBOX_RECV(omap, mbox, data, waittime) {
 	if (ret == pdFALSE) {
 		return -1;
 	}
-	mailbox_lock(mbox->contoller, -1, waittime);
+	mailbox_lock(mbox->controller, -1, waittime);
 	if (mbox->full) {
 		mbox->full = false;
 		/* we recive one message reactivate ISR */
-		mbox->contoller->base->irq[mbox->contoller->userID].IRQENABLE_SET |= MBOX_IRQ_RX(mbox->id);
+		mbox->controller->base->irq[mbox->controller->userID].IRQENABLE_SET |= MBOX_IRQ_RX(mbox->id);
 	}
-	mailbox_unlock(mbox->contoller, -1);
+	mailbox_unlock(mbox->controller, -1);
 	return 0;
 }
 MAILBOX_RECV_ISR(omap, mbox, data) {
@@ -190,9 +190,9 @@ MAILBOX_SEND_ISR(omap, mbox, data) {
 	/* TODO */
 	return -1;
 }
-static void handleIRQ(struct mailbox_contoller *contoller) {
+static void handleIRQ(struct mailbox_controller *controller) {
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
-	volatile struct mailbox_irq *irqBase = &contoller->base->irq[contoller->userID];
+	volatile struct mailbox_irq *irqBase = &controller->base->irq[controller->userID];
 	/* only active IRQ are interessed mask all other IRQs (other users can use this Mailbox too) */
 	uint32_t irq = (irqBase->IRQSTATUS_CLR & irqBase->IRQENABLE_SET);
 	uint32_t data;
@@ -204,15 +204,15 @@ static void handleIRQ(struct mailbox_contoller *contoller) {
 		if (!(irq & 0x3)) {
 			continue;
 		}
-		mbox = contoller->mbox[i];
+		mbox = controller->mbox[i];
 		/* Can't Handle this IRQ */
 		if (mbox == NULL) {
 			continue;
 		}
 		if (irq & 0x1 && mbox->isRX) {
-			while (contoller->base->MSGSTATUS[i] > 0) {
+			while (controller->base->MSGSTATUS[i] > 0) {
 				BaseType_t prioRet;
-				data = contoller->base->MESSAGE[i];
+				data = controller->base->MESSAGE[i];
 				ret = xQueueSendToBackFromISR(mbox->rxqueue, &data, &prioRet);
 				if (ret == pdFALSE) {
 					/* RX Queue is full diesable Interrupt */
@@ -238,14 +238,14 @@ MAILBOX_OPS(omap);
 		MAILBOX_INIT_DEV(omap) \
 		HAL_NAME("Mailbox " #i " " #subid) \
 		.id = subid, \
-		.contoller = &contoller##i, \
+		.controller = &controller##i, \
 		.isRX = IS_ENABLED(CONFIG_AM57xx_MAILBOX##i##_##subid##_RX), \
 	}; \
 	MAILBOX_ADDDEV(omap, mailbox_data##i##_##subid)
 
 #ifdef CONFIG_AM57xx_MAILBOX1
 # define MAILBOX1_BASE 0x4A0F4000
-static struct mailbox_contoller contoller1;
+static struct mailbox_controller controller1;
 # ifdef CONFIG_AM57xx_MAILBOX1_0
 DEV_MAILBOX(1, 0);
 # endif
@@ -271,9 +271,9 @@ DEV_MAILBOX(1, 6);
 DEV_MAILBOX(1, 7);
 # endif
 static void mailbox1Handler() {
-	handleIRQ(&contoller1);
+	handleIRQ(&controller1);
 }
-static struct mailbox_contoller contoller1 = {
+static struct mailbox_controller controller1 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX1_BASE,
 	.irqBase = MAILBOX1_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX1_USERID,
@@ -324,7 +324,7 @@ static struct mailbox_contoller contoller1 = {
 #endif
 #ifdef CONFIG_AM57xx_MAILBOX2
 # define MAILBOX2_BASE 0x6883A000
-static struct mailbox_contoller contoller2;
+static struct mailbox_controller controller2;
 # ifdef CONFIG_AM57xx_MAILBOX2_0
 DEV_MAILBOX(2, 0);
 # endif
@@ -362,9 +362,9 @@ DEV_MAILBOX(2, 10);
 DEV_MAILBOX(2, 11);
 # endif
 static void mailbox2Handler() {
-	handleIRQ(&contoller2);
+	handleIRQ(&controller2);
 }
-static struct mailbox_contoller contoller2 = {
+static struct mailbox_controller controller2 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX2_BASE,
 	.irqBase = MAILBOX2_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX2_USERID,
@@ -435,7 +435,7 @@ static struct mailbox_contoller contoller2 = {
 #endif
 #ifdef CONFIG_AM57xx_MAILBOX3
 # define MAILBOX3_BASE 0x6883C000
-static struct mailbox_contoller contoller3;
+static struct mailbox_controller controller3;
 # ifdef CONFIG_AM57xx_MAILBOX3_0
 DEV_MAILBOX(3, 0);
 # endif
@@ -473,9 +473,9 @@ DEV_MAILBOX(3, 10);
 DEV_MAILBOX(3, 11);
 # endif
 static void mailbox3Handler() {
-	handleIRQ(&contoller3);
+	handleIRQ(&controller3);
 }
-static struct mailbox_contoller contoller3 = {
+static struct mailbox_controller controller3 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX3_BASE,
 	.irqBase = MAILBOX3_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX3_USERID,
@@ -546,7 +546,7 @@ static struct mailbox_contoller contoller3 = {
 #endif
 #ifdef CONFIG_AM57xx_MAILBOX4
 # define MAILBOX4_BASE 0x6883E000
-static struct mailbox_contoller contoller4;
+static struct mailbox_controller controller4;
 # ifdef CONFIG_AM57xx_MAILBOX4_0
 DEV_MAILBOX(4, 0);
 # endif
@@ -584,9 +584,9 @@ DEV_MAILBOX(4, 10);
 DEV_MAILBOX(4, 11);
 # endif
 static void mailbox4Handler() {
-	handleIRQ(&contoller4);
+	handleIRQ(&controller4);
 }
-static struct mailbox_contoller contoller4 = {
+static struct mailbox_controller controller4 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX4_BASE,
 	.irqBase = MAILBOX4_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX4_USERID,
@@ -657,7 +657,7 @@ static struct mailbox_contoller contoller4 = {
 #endif
 #ifdef CONFIG_AM57xx_MAILBOX5
 # define MAILBOX5_BASE 0x68840000
-static struct mailbox_contoller contoller5;
+static struct mailbox_controller controller5;
 # ifdef CONFIG_AM57xx_MAILBOX5_0
 DEV_MAILBOX(5, 0);
 # endif
@@ -695,9 +695,9 @@ DEV_MAILBOX(5, 10);
 DEV_MAILBOX(5, 11);
 # endif
 static void mailbox5Handler() {
-	handleIRQ(&contoller5);
+	handleIRQ(&controller5);
 }
-static struct mailbox_contoller contoller5 = {
+static struct mailbox_controller controller5 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX5_BASE,
 	.irqBase = MAILBOX5_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX5_USERID,
@@ -768,7 +768,7 @@ static struct mailbox_contoller contoller5 = {
 #endif
 #ifdef CONFIG_AM57xx_MAILBOX6
 # define MAILBOX6_BASE 0x68842000
-static struct mailbox_contoller contoller6;
+static struct mailbox_controller controller6;
 # ifdef CONFIG_AM57xx_MAILBOX6_0
 DEV_MAILBOX(6, 0);
 # endif
@@ -806,9 +806,9 @@ DEV_MAILBOX(6, 10);
 DEV_MAILBOX(6, 11);
 # endif
 static void mailbox6Handler() {
-	handleIRQ(&contoller6);
+	handleIRQ(&controller6);
 }
-static struct mailbox_contoller contoller6 = {
+static struct mailbox_controller controller6 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX6_BASE,
 	.irqBase = MAILBOX6_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX6_USERID,
@@ -879,7 +879,7 @@ static struct mailbox_contoller contoller6 = {
 #endif
 #ifdef CONFIG_AM57xx_MAILBOX7
 # define MAILBOX7_BASE 0x68844000
-static struct mailbox_contoller contoller7;
+static struct mailbox_controller controller7;
 # ifdef CONFIG_AM57xx_MAILBOX7_0
 DEV_MAILBOX(7, 0);
 # endif
@@ -917,9 +917,9 @@ DEV_MAILBOX(7, 10);
 DEV_MAILBOX(7, 11);
 # endif
 static void mailbox7Handler() {
-	handleIRQ(&contoller7);
+	handleIRQ(&controller7);
 }
-static struct mailbox_contoller contoller7 = {
+static struct mailbox_controller controller7 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX7_BASE,
 	.irqBase = MAILBOX7_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX7_USERID,
@@ -990,7 +990,7 @@ static struct mailbox_contoller contoller7 = {
 #endif
 #ifdef CONFIG_AM57xx_MAILBOX8
 # define MAILBOX8_BASE 0x68846000
-static struct mailbox_contoller contoller8;
+static struct mailbox_controller controller8;
 # ifdef CONFIG_AM57xx_MAILBOX8_0
 DEV_MAILBOX(8, 0);
 # endif
@@ -1028,9 +1028,9 @@ DEV_MAILBOX(8, 10);
 DEV_MAILBOX(8, 11);
 # endif
 static void mailbox8Handler() {
-	handleIRQ(&contoller8);
+	handleIRQ(&controller8);
 }
-static struct mailbox_contoller contoller8 = {
+static struct mailbox_controller controller8 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX8_BASE,
 	.irqBase = MAILBOX8_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX8_USERID,
@@ -1101,7 +1101,7 @@ static struct mailbox_contoller contoller8 = {
 #endif
 #ifdef CONFIG_AM57xx_MAILBOX9
 # define MAILBOX9_BASE 0x6885E000
-static struct mailbox_contoller contoller9;
+static struct mailbox_controller controller9;
 # ifdef CONFIG_AM57xx_MAILBOX9_0
 DEV_MAILBOX(9, 0);
 # endif
@@ -1139,9 +1139,9 @@ DEV_MAILBOX(9, 10);
 DEV_MAILBOX(9, 11);
 # endif
 static void mailbox9Handler() {
-	handleIRQ(&contoller9);
+	handleIRQ(&controller9);
 }
-static struct mailbox_contoller contoller9 = {
+static struct mailbox_controller controller9 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX9_BASE,
 	.irqBase = MAILBOX9_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX9_USERID,
@@ -1212,7 +1212,7 @@ static struct mailbox_contoller contoller9 = {
 #endif
 #ifdef CONFIG_AM57xx_MAILBOX10
 # define MAILBOX10_BASE 0x68860000
-static struct mailbox_contoller contoller10;
+static struct mailbox_controller controller10;
 # ifdef CONFIG_AM57xx_MAILBOX10_0
 DEV_MAILBOX(10, 0);
 # endif
@@ -1250,9 +1250,9 @@ DEV_MAILBOX(10, 10);
 DEV_MAILBOX(10, 11);
 # endif
 static void mailbox10Handler() {
-	handleIRQ(&contoller10);
+	handleIRQ(&controller10);
 }
-static struct mailbox_contoller contoller10 = {
+static struct mailbox_controller controller10 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX10_BASE,
 	.irqBase = MAILBOX10_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX10_USERID,
@@ -1323,7 +1323,7 @@ static struct mailbox_contoller contoller10 = {
 #endif
 #ifdef CONFIG_AM57xx_MAILBOX11
 # define MAILBOX11_BASE 0x68862000
-static struct mailbox_contoller contoller11;
+static struct mailbox_controller controller11;
 # ifdef CONFIG_AM57xx_MAILBOX11_0
 DEV_MAILBOX(11, 0);
 # endif
@@ -1361,9 +1361,9 @@ DEV_MAILBOX(11, 10);
 DEV_MAILBOX(11, 11);
 # endif
 static void mailbox11Handler() {
-	handleIRQ(&contoller11);
+	handleIRQ(&controller11);
 }
-static struct mailbox_contoller contoller11 = {
+static struct mailbox_controller controller11 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX11_BASE,
 	.irqBase = MAILBOX11_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX11_USERID,
@@ -1434,7 +1434,7 @@ static struct mailbox_contoller contoller11 = {
 #endif
 #ifdef CONFIG_AM57xx_MAILBOX12
 # define MAILBOX12_BASE 0x68864000
-static struct mailbox_contoller contoller12;
+static struct mailbox_controller controller12;
 # ifdef CONFIG_AM57xx_MAILBOX12_0
 DEV_MAILBOX(12, 0);
 # endif
@@ -1472,9 +1472,9 @@ DEV_MAILBOX(12, 10);
 DEV_MAILBOX(12, 11);
 # endif
 static void mailbox12Handler() {
-	handleIRQ(&contoller12);
+	handleIRQ(&controller12);
 }
-static struct mailbox_contoller contoller12 = {
+static struct mailbox_controller controller12 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX12_BASE,
 	.irqBase = MAILBOX12_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX12_USERID,
@@ -1545,7 +1545,7 @@ static struct mailbox_contoller contoller12 = {
 #endif
 #ifdef CONFIG_AM57xx_MAILBOX13
 # define MAILBOX13_BASE 0x68802000
-static struct mailbox_contoller contoller13;
+static struct mailbox_controller controller13;
 # ifdef CONFIG_AM57xx_MAILBOX13_0
 DEV_MAILBOX(13, 0);
 # endif
@@ -1583,9 +1583,9 @@ DEV_MAILBOX(13, 10);
 DEV_MAILBOX(13, 11);
 # endif
 static void mailbox13Handler() {
-	handleIRQ(&contoller13);
+	handleIRQ(&controller13);
 }
-static struct mailbox_contoller contoller13 = {
+static struct mailbox_controller controller13 = {
 	.base = (volatile struct mailbox_reg *) MAILBOX13_BASE,
 	.irqBase = MAILBOX13_IRQ_USER0,
 	.userID = CONFIG_AM57xx_MAILBOX13_USERID,

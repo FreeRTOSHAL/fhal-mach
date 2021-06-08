@@ -51,7 +51,7 @@ struct uart {
 };
 
 
-UART_INIT(lp, port, bautrate) {
+UART_INIT(lp, port, baudrate) {
 	struct uart *uart = (struct uart *) UART_GET_DEV(port);
 	int32_t ret;
 	if (uart == NULL) {
@@ -67,7 +67,7 @@ UART_INIT(lp, port, bautrate) {
 	if (ret > 0) {
 		return uart;
 	}
-	if (bautrate == 0) {
+	if (baudrate == 0) {
 		return NULL;
 	}
 	{
@@ -80,7 +80,7 @@ UART_INIT(lp, port, bautrate) {
 		base->umodem = 0;
 		base->uc1 = 0;
 		base->uc2 = UC2_RE | UC2_TE;
-		/* TODO setup Bautrate etc... */
+		/* TODO setup Baudrate etc... */
 		/* TODO muxing!! */
 	}
 	return uart;

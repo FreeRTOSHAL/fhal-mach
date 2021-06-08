@@ -18,25 +18,25 @@
 
 static void nxp_flexcan_disable(struct can *can) {
 	can->base->mcr |= FLEXCAN_MCR_MDIS_MASK;
-	/* Wait Contoller got ot Disable or Stop mode */
+	/* Wait Controller got ot Disable or Stop mode */
 	while (!(can->base->mcr & FLEXCAN_MCR_LPMACK_MASK));
 }
 
 static void nxp_flexcan_enable(struct can *can) {
 	can->base->mcr &= ~FLEXCAN_MCR_MDIS_MASK;
-	/* Wait Contoller is in Disable or Stop mode no more */
+	/* Wait Controller is in Disable or Stop mode no more */
 	while (can->base->mcr & FLEXCAN_MCR_LPMACK_MASK);
 }
 
 static void nxp_flexcan_freeze(struct can *can) {
 	can->base->mcr |= FLEXCAN_MCR_FRZ_MASK;
-	/* Wait Contoller got ot Disable or Stop mode */
+	/* Wait Controller got ot Disable or Stop mode */
 	while (!(can->base->mcr & FLEXCAN_MCR_FRZACK_MASK));
 }
 
 static void nxp_flexcan_unfreeze(struct can *can) {
 	can->base->mcr &= ~FLEXCAN_MCR_FRZ_MASK;
-	/* Wait Contoller is in Disable or Stop mode no more */
+	/* Wait Controller is in Disable or Stop mode no more */
 	while (can->base->mcr & FLEXCAN_MCR_FRZACK_MASK);
 }
 
@@ -74,7 +74,7 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh, callback, data) {
 	can->task = NULL;
 	can->errorCallback = callback;
 	can->userData = data;
-	/* Select Clock Source contoller must be disabled! */
+	/* Select Clock Source controller must be disabled! */
 	nxp_flexcan_disable(can);
 	/* Select SOSCDIV2 as clock src */
 	can->base->ctrl1 &= ~FLEXCAN_CTRL1_CLKSRC_MASK;
@@ -102,7 +102,7 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh, callback, data) {
 	/* Enable automatically Bus Off recovery */
 	can->base->ctrl1 &= ~FLEXCAN_CTRL1_BOFFREC_MASK;
 
-	/* Setup Bautrate */
+	/* Setup Baudrate */
 	{
 		uint32_t reg = can->base->ctrl1;
 		reg &= ~(

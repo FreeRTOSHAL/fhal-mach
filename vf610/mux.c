@@ -15,11 +15,11 @@ struct mux {
 	volatile struct imx_mux *base;
 };
 #define VF610_MUX_BASE ((volatile struct imx_mux *) 0x40048000)
-struct mux mux_contoller = {
+struct mux mux_controller = {
 	.base = VF610_MUX_BASE
 };
 struct mux *mux_init() {
-	return &mux_contoller;
+	return &mux_controller;
 }
 int32_t mux_deinit(struct mux *mux) {
 	(void) mux;

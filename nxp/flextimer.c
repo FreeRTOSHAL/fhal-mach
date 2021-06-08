@@ -383,7 +383,7 @@ CAPTURE_DEINIT(ftm, capture) {
 	return 0;
 }
 CAPTURE_SET_PERIOD(ftm, capture, us) {
-	/* Period is contolled by timer period */
+	/* Period is controlled by timer period */
 	return timer_periodic(capture->timer, us);
 }
 

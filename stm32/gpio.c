@@ -318,7 +318,7 @@ GPIO_PIN_SCHMITT_TRIGGER(stm32, pin, schmitt) {
 GPIO_OPS(stm32);
 struct gpio stm32_gpio = {
 	GPIO_INIT_DEV(stm32)
-	HAL_NAME("STM32 GPIO Contoller")
+	HAL_NAME("STM32 GPIO Controller")
 	.gpio = {
 		GPIOA,
 		GPIOB,

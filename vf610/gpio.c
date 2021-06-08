@@ -85,7 +85,7 @@ int32_t nxp_gpio_setupClock(struct gpio *gpio) {
 }
 static struct gpio gpio = {
 	GPIO_INIT_DEV(nxp)
-	HAL_NAME("Vybrid GPIO Contoller")
+	HAL_NAME("Vybrid GPIO Controller")
 	.gpioPerPort = {32,32,32,32,7},
 	.base = {
 		(volatile struct gpio_imx *) GPIO0_BASE,

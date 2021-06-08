@@ -13,10 +13,10 @@
 struct mux {
 	struct gpio *gpio;
 };
-struct mux mux_contoller;
+struct mux mux_controller;
 struct mux *mux_init() {
-	mux_contoller.gpio = gpio_init(GPIO_ID);
-	return &mux_contoller;
+	mux_controller.gpio = gpio_init(GPIO_ID);
+	return &mux_controller;
 }
 int32_t mux_deinit(struct mux *mux) {
 	(void) mux;

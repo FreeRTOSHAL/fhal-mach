@@ -773,7 +773,7 @@ fec_rxTask_freebuffer:
 		__DSB();
 		__ISB();
 		bd->bd.sc |= FEC_BD_SC_E;
-		/* if contoller has no new entry trigger contoller */
+		/* if controller has no new entry trigger controller */
 		/*if (*FEC_RDSR(mac->base, queue->qid) == 0) {
 			*FEC_RDSR(mac->base, queue->qid) = 0;
 		}*/
@@ -1035,7 +1035,7 @@ static int32_t fec_restart(struct mac *mac) {
 	int32_t ret;
 	/* recive Settings */
 	uint32_t rcntl = OPT_FRAME_SIZE | ENET_RCR_MII_MODE_MASK /*| ENET_RCR_LOOP_MASK*/ /*| ENET_RCR_BC_REJ_MASK */;
-	/* Contoll Settings */
+	/* Control Settings */
 	uint32_t ecntl = ENET_ECR_ETHEREN_MASK;
 	volatile ENET_Type *base = mac->base;
 	struct phy *phy = mac_getPhy(mac);

@@ -104,7 +104,7 @@ UART_INIT(nxp, port, baudrate) {
 	/* select clock and activate clock */
 	pcc->PCCn[uart->clkIndex] =  PCC_PCCn_PCS(uart->clkMuxing) | PCC_PCCn_CGC_MASK;
 	uart->feq = clock_getPeripherySpeed(clk, uart->clkID);
-	/* Reset Contoller */
+	/* Reset Controller */
 	uart->base->CTRL = 0x0;
 	uart->base->MATCH = 0x0;
 	uart->base->MODIR = 0x0;
@@ -185,7 +185,7 @@ UART_DEINIT(nxp, uart) {
 	while((uart->base->CTRL & LPUART_CTRL_TE_MASK));
 	uart->base->CTRL &= ~LPUART_CTRL_RE_MASK;
 	while((uart->base->CTRL & LPUART_CTRL_RE_MASK));
-	/* Reset Contoller */
+	/* Reset Controller */
 	uart->base->CTRL = 0x0;
 	uart->base->MATCH = 0x0;
 	uart->base->MODIR = 0x0;

@@ -161,9 +161,9 @@ SPI_SLAVE_INIT(stm32, spi, options) {
 		} else {
 			feq = clocks.PCLK2_Frequency;
 		}
-		/* find bautrate lowest bautrate*/
+		/* find baudrate lowest baudrate*/
 		for (i = 0; i < 8; i++) {
-			if ((feq / BIT(i+1)) <= options->bautrate) {
+			if ((feq / BIT(i+1)) <= options->baudrate) {
 				break;
 			}
 		}
@@ -234,7 +234,7 @@ static void spi_clearCS(struct spi_slave *slave, bool endOfFrame) {
 		}
 	}
 }
-SPI_SLAVE_TRANSVER(stm32, slave, sendData, recvData, len, waittime) {
+SPI_SLAVE_TRANSFER(stm32, slave, sendData, recvData, len, waittime) {
 	int i;
 	int j;
 	int32_t ret;
@@ -256,7 +256,7 @@ SPI_SLAVE_TRANSVER(stm32, slave, sendData, recvData, len, waittime) {
 		 */
 		ret = xSemaphoreTake(spi->irqLock, waittime);
 		if (ret != pdTRUE) {
-			goto spi_slave_transver_error0;
+			goto spi_slave_transfer_error0;
 		}
 		*recvData = SPI_I2S_ReceiveData(spi->base);
 		sendData++;
@@ -272,7 +272,7 @@ SPI_SLAVE_TRANSVER(stm32, slave, sendData, recvData, len, waittime) {
 	SPI_I2S_DeInit(spi->base);
 	spi_unlock(slave->spi, -1);
 	return 0;
-spi_slave_transver_error0:
+spi_slave_transfer_error0:
 	if (slave->options.cs != SPI_OPT_CS_DIS) {
 		SPI_SSOutputCmd(spi->base, DISABLE);
 	}
@@ -284,14 +284,14 @@ spi_slave_transver_error0:
 }
 SPI_SLAVE_SEND(stm32, slave, data, len, waittime) {
 	uint16_t *rdata = alloca(sizeof(uint16_t) * len);
-	return spiSlave_transver(slave, data, rdata, len, waittime);
+	return spiSlave_transfer(slave, data, rdata, len, waittime);
 }
 SPI_SLAVE_RECV(stm32, slave, data, len, waittime) {
 	uint16_t *wdata = alloca(sizeof(uint16_t) * len);
 	memset(wdata, 0xFF, sizeof(uint16_t) * len);
-	return spiSlave_transver(slave, wdata, data, len, waittime);
+	return spiSlave_transfer(slave, wdata, data, len, waittime);
 }
-SPI_SLAVE_TRANSVER_ISR(stm32, slave, sendData, recvData, len) {
+SPI_SLAVE_TRANSFER_ISR(stm32, slave, sendData, recvData, len) {
 	return -1;
 }
 SPI_SLAVE_SEND_ISR(stm32, salve, data, len) {

@@ -124,7 +124,7 @@ static uint32_t calcUARTClockFreq(volatile UART_Type* base) {
 	return hz / (divUartClkPodf + 1) / (divStatic + 1);
 }
 
-UART_INIT(imx, port, bautrate) {
+UART_INIT(imx, port, baudrate) {
 	uint32_t clockRate;
 	struct uart *uart = (struct uart *) UART_GET_DEV(port);
 	int32_t ret;
@@ -141,7 +141,7 @@ UART_INIT(imx, port, bautrate) {
 	if (ret > 0) {
 		return uart;
 	}
-	if (bautrate == 0) {
+	if (baudrate == 0) {
 		goto imx_uart_init_error0;
 	}
 	/* CLK Init */
@@ -185,7 +185,7 @@ UART_INIT(imx, port, bautrate) {
 
 	/* Set BaudRate according to uart initialize struct. */
 	/* Baud Rate = Ref Freq / (16 * (UBMR + 1)/(UBIR+1)) */
-	UART_SetBaudRate(uart->base, clockRate, bautrate);
+	UART_SetBaudRate(uart->base, clockRate, baudrate);
 
 	/* Enable UART */
 	UART_UCR1_REG(uart->base) |= UART_UCR1_UARTEN_MASK;

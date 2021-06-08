@@ -88,7 +88,7 @@ SPI_INIT(nxp, index, mode, opt) {
 	/* select clock and activate clock */
 	pcc->PCCn[spi->clkIndex] =  PCC_PCCn_PCS(spi->clkMuxing) | PCC_PCCn_CGC_MASK;
 	spi->freq = clock_getPeripherySpeed(clk, spi->clkID);
-	/* Reset Contoller */
+	/* Reset Controller */
 	spi->base->CR = LPSPI_CR_RST_MASK;
 	spi->base->CR &= ~LPSPI_CR_RST_MASK;
 
@@ -264,7 +264,7 @@ SPI_SLAVE_INIT(nxp, spi, options) {
 		/* Delay Between Transfers: DBT min: 1 cycle (in CONT mode) */
 		/*   - Configures the delay from the PCS negation to the next PCS assertion. */
 		cycles = options->wdelay / ns_per_clock;
-		mincycles = spi->freq / (options->bautrate * 2);
+		mincycles = spi->freq / (options->baudrate * 2);
 		if ( cycles < mincycles ) {
 			/* minimum delay needed for clean transmission */
 			reg |= LPSPI_CCR_DBT(mincycles);
@@ -282,7 +282,7 @@ SPI_SLAVE_INIT(nxp, spi, options) {
 		/*   - the SCK Divider configures the divide ratio of the SCK pin.*/
 		{
 			uint32_t div;
-			div = spi->freq / options->bautrate;
+			div = spi->freq / options->baudrate;
 			if (div >= 2) {
 				reg |= LPSPI_CCR_SCKDIV(div-2);
 			} else if (div >= 255) {
@@ -316,7 +316,7 @@ SPI_SLAVE_INIT(nxp, spi, options) {
 				goto nxp_spi_slave_init_error1;
 			}
 			/* Setup CS */
-			spi->base->CFGR1 |= LPSPI_CFGR1_AUTOPCS(1); /* Enebale Automatic CS Contoll */
+			spi->base->CFGR1 |= LPSPI_CFGR1_AUTOPCS(1); /* Enebale Automatic CS Control */
 			if (options->csLowInactive) {
 				spi->base->CFGR1 |= LPSPI_CFGR1_PCSPOL(BIT(options->cs));
 			} else {
@@ -364,7 +364,7 @@ void nxp_lpspi_handleIRQ(struct spi *spi) {
 	portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
 
 }
-int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, uint16_t *recvData, uint32_t len, TickType_t waittime, bool useISR) {
+int32_t nxp_slave_transfer_intern(struct spi_slave *slave, uint16_t *sendData, uint16_t *recvData, uint32_t len, TickType_t waittime, bool useISR) {
 	int recved = 0;
 	struct spi *spi = slave->spi;
 	struct spi_opt *options = &slave->options;
@@ -427,7 +427,7 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 					lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
 #endif
 					if (lret != pdTRUE) {
-						goto nxp_spi_transver_error0;
+						goto nxp_spi_transfer_error0;
 					}
 				}
 				spi->base->IER &= ~LPSPI_IER_RDIE_MASK;
@@ -453,7 +453,7 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 					lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
 #endif
 			if (lret != pdTRUE) {
-				goto nxp_spi_transver_error0;
+				goto nxp_spi_transfer_error0;
 			}
 		}
 		/* safe disable the interrupt */
@@ -476,7 +476,7 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 					lret = xTaskNotifyWaitIndexed(0, 0, UINT32_MAX, NULL, waittime);
 #endif
 			if (lret != pdTRUE) {
-				goto nxp_spi_transver_error0;
+				goto nxp_spi_transfer_error0;
 			}
 		}
 		spi->base->IER &= ~LPSPI_IER_TCIE_MASK;
@@ -499,35 +499,35 @@ int32_t nxp_slave_transver_intern(struct spi_slave *slave, uint16_t *sendData, u
 		spi_unlock(spi, -1);
 	}
 	return 0;
-nxp_spi_transver_error0:
+nxp_spi_transfer_error0:
 	if (useISR) {
 		spi_unlock(spi, -1);
 	}
 	return -1;
 }
-SPI_SLAVE_TRANSVER(nxp, slave, sendData, recvData, len, waittime) {
-	return nxp_slave_transver_intern(slave, sendData, recvData, len, waittime, true);
+SPI_SLAVE_TRANSFER(nxp, slave, sendData, recvData, len, waittime) {
+	return nxp_slave_transfer_intern(slave, sendData, recvData, len, waittime, true);
 }
 SPI_SLAVE_SEND(nxp, slave, data, len, waittime) {
 	uint16_t recvData[len];
-	return spiSlave_transver(slave, data, recvData, len, waittime);
+	return spiSlave_transfer(slave, data, recvData, len, waittime);
 }
 SPI_SLAVE_RECV(nxp, slave, data, len, waittime) {
 	uint16_t sendData[len];
 	memset(sendData, 0xFF, len);
-	return spiSlave_transver(slave, sendData, data, len, waittime);
+	return spiSlave_transfer(slave, sendData, data, len, waittime);
 }
-SPI_SLAVE_TRANSVER_ISR(nxp, slave, sendData, recvData, len) {
-	return nxp_slave_transver_intern(slave, sendData, recvData, len, 0, false);
+SPI_SLAVE_TRANSFER_ISR(nxp, slave, sendData, recvData, len) {
+	return nxp_slave_transfer_intern(slave, sendData, recvData, len, 0, false);
 }
 SPI_SLAVE_SEND_ISR(nxp, slave, data, len) {
 	uint16_t recvData[len];
-	return spiSlave_transverISR(slave, data, recvData, len);
+	return spiSlave_transferISR(slave, data, recvData, len);
 }
 SPI_SLAVE_RECV_ISR(nxp, slave, data, len) {
 	uint16_t sendData[len];
 	memset(sendData, 0xFF, len);
-	return spiSlave_transverISR(slave, sendData, data, len);
+	return spiSlave_transferISR(slave, sendData, data, len);
 }
 SPI_OPS(nxp);
 

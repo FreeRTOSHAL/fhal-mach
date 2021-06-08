@@ -47,7 +47,7 @@ struct mu {
 	uint32_t cr;
 };
 
-struct mailbox_contoller {
+struct mailbox_controller {
 	volatile struct mu *base;
 	uint32_t irq;
 	struct mailbox *mboxs[4];
@@ -55,18 +55,18 @@ struct mailbox_contoller {
 
 struct mailbox {
 	struct mailbox_generic gen;
-	struct mailbox_contoller *contoller;
+	struct mailbox_controller *controller;
 	/* Channel ID */
 	uint32_t id;
 	OS_DEFINE_SEMARPHORE_BINARAY(txsem);
 	OS_DEFINE_QUEUE(rxqueue, 255, sizeof(uint32_t));
 	bool full;
 };
-static struct mailbox_contoller contoller;
+static struct mailbox_controller controller;
 /* Mu ISR */
 void MU_M4_Handler(void) { 
-	uint32_t sr = contoller.base->sr;
-	uint32_t cr = contoller.base->cr;
+	uint32_t sr = controller.base->sr;
+	uint32_t cr = controller.base->cr;
 	uint32_t tmp; 
 	int32_t i;
 	struct mailbox *mbox;
@@ -82,11 +82,11 @@ void MU_M4_Handler(void) {
 			tmp = (sr & MU_ASR_RF_MASK) >> MU_ASR_RF_OFFSET;
 			for (i = 3; (i >= 0 && tmp > 0); i--, tmp >>= 1) {
 				if (tmp & 0x1) {
-					mbox = contoller.mboxs[i];
+					mbox = controller.mboxs[i];
 					printf("recv Data for: %lu\n", i);
 					if (mbox != NULL && mbox->gen.init) {
 						if (!xQueueIsQueueFullFromISR(mbox->rxqueue)) {
-							data = contoller.base->rr[i];
+							data = controller.base->rr[i];
 							printf("data: 0x%lx\n", data);
 							wake = pdFALSE;
 							ret = xQueueSendToBackFromISR(mbox->rxqueue, &data, &wake);
@@ -96,12 +96,12 @@ void MU_M4_Handler(void) {
 							printf("Queue is Full disable rescv\n");
 							mbox->full = true;
 							/* Disable Interrupt until spave is in Queue */
-							contoller.base->cr &= ~MU_ACR_RIE(i);
+							controller.base->cr &= ~MU_ACR_RIE(i);
 						}
 					} else {
 						printf("Disable Interupt ...\n");
 						/* Disable Interrupt no instance exists */
-						contoller.base->cr &= ~MU_ACR_RIE(i);
+						controller.base->cr &= ~MU_ACR_RIE(i);
 					}
 				}
 			}
@@ -110,12 +110,12 @@ void MU_M4_Handler(void) {
 			tmp = ((cr & MU_ACR_TIE_MASK) & (sr & MU_ASR_TE_MASK)) >> MU_ASR_TE_OFFSET;
 			for (i = 3; (i >= 0 && tmp > 0); i--, tmp >>= 1) {
 				if (tmp & 0x1) {
-					mbox = contoller.mboxs[i];
+					mbox = controller.mboxs[i];
 					if (mbox != NULL) {
 						printf("txdone give sem\n");
 						wake = pdFALSE;
 						xSemaphoreGiveFromISR(mbox->txsem, &wake);
-						contoller.base->cr &= ~MU_ACR_TIE(i);
+						controller.base->cr &= ~MU_ACR_TIE(i);
 						pxHigherPriorityTaskWoken |= wake;
 					}
 				}
@@ -154,12 +154,12 @@ MAILBOX_INIT(imx, index) {
 	}
 	mbox->full = false;
 	/* Enable the RX Interrupt */
-	mbox->contoller->base->cr |= MU_ACR_RIE(mbox->id);
-	ret = irq_setPrio(mbox->contoller->irq, 0xFF);
+	mbox->controller->base->cr |= MU_ACR_RIE(mbox->id);
+	ret = irq_setPrio(mbox->controller->irq, 0xFF);
 	if (ret < 0) {
 		goto imx_mailbox_init_error2;
 	}
-	ret = irq_enable(mbox->contoller->irq);
+	ret = irq_enable(mbox->controller->irq);
 	if (ret < 0) {
 		goto imx_mailbox_init_error2;
 	}
@@ -175,7 +175,7 @@ imx_mailbox_init_error0:
 }
 MAILBOX_DEINIT(imx, mbox) {
 	/* Disable Interrupts */ 
-	mbox->contoller->base->cr &= ~MU_ACR_RIE(mbox->id);
+	mbox->controller->base->cr &= ~MU_ACR_RIE(mbox->id);
 	vSemaphoreDelete(mbox->txsem);
 	vQueueDelete(mbox->rxqueue);
 	mbox->gen.init = false;
@@ -185,12 +185,12 @@ MAILBOX_SEND(imx, mbox, data, waittime) {
 	BaseType_t ret;
 	mailbox_lock(mbox, waittime, -1);
 	printf("call %s\n", __FUNCTION__);
-	if (!(mbox->contoller->base->sr & MU_ASR_TE(mbox->id))) {
+	if (!(mbox->controller->base->sr & MU_ASR_TE(mbox->id))) {
 		goto imx_mailbox_send_error0;
 	}
-	mbox->contoller->base->tr[mbox->id] = data;
+	mbox->controller->base->tr[mbox->id] = data;
 	/* Activate TX Empty Interrupt */
-	mbox->contoller->base->cr |= MU_ACR_TIE(mbox->id);
+	mbox->controller->base->cr |= MU_ACR_TIE(mbox->id);
 	/* Wait until ISR is recived */
 	ret = xSemaphoreTake(mbox->txsem, waittime);
 	if (ret == pdFALSE) {
@@ -217,23 +217,23 @@ MAILBOX_RECV(imx, mbox, data, waittime) {
 	if (mbox->full) {
 		mbox->full = false;
 		/* we recive one message reactivate ISR */
-		mbox->contoller->base->cr |= MU_ACR_RIE(mbox->id);
+		mbox->controller->base->cr |= MU_ACR_RIE(mbox->id);
 	}
 	mailbox_unlock(mbox, -1);
 	return 0;
 }
 MAILBOX_RECV_ISR(imx, mbox, data) {
 	/* this function can't use the queue. The queue is Intterupt based */
-	while(!(mbox->contoller->base->sr & MU_ASR_RF(mbox->id)));
-	*data = mbox->contoller->base->rr[mbox->id];
+	while(!(mbox->controller->base->sr & MU_ASR_RF(mbox->id)));
+	*data = mbox->controller->base->rr[mbox->id];
 	return 0;
 }
 MAILBOX_SEND_ISR(imx, mbox, data) {
-	if (!(mbox->contoller->base->sr & MU_ASR_TE(mbox->id))) {
+	if (!(mbox->controller->base->sr & MU_ASR_TE(mbox->id))) {
 		return -1;
 	}
-	mbox->contoller->base->tr[mbox->id] = data;
-	while(!(mbox->contoller->base->sr & MU_ASR_TE(mbox->id)));
+	mbox->controller->base->tr[mbox->id] = data;
+	while(!(mbox->controller->base->sr & MU_ASR_TE(mbox->id)));
 	return 0;
 }
 MAILBOX_OPS(imx);
@@ -241,7 +241,7 @@ MAILBOX_OPS(imx);
 static struct mailbox mailbox_data0 = {
 	MAILBOX_INIT_DEV(imx)
 	HAL_NAME("Mailbox 0")
-	.contoller = &contoller,
+	.controller = &controller,
 	.id = 0
 };
 MAILBOX_ADDDEV(imx, mailbox_data0);
@@ -250,7 +250,7 @@ MAILBOX_ADDDEV(imx, mailbox_data0);
 static struct mailbox mailbox_data1 = {
 	MAILBOX_INIT_DEV(imx)
 	HAL_NAME("Mailbox 1")
-	.contoller = &contoller,
+	.controller = &controller,
 	.id = 1
 };
 MAILBOX_ADDDEV(imx, mailbox_data1);
@@ -259,7 +259,7 @@ MAILBOX_ADDDEV(imx, mailbox_data1);
 static struct mailbox mailbox_data2 = {
 	MAILBOX_INIT_DEV(imx)
 	HAL_NAME("Mailbox 2")
-	.contoller = &contoller,
+	.controller = &controller,
 	.id = 2
 };
 MAILBOX_ADDDEV(imx, mailbox_data2);
@@ -268,12 +268,12 @@ MAILBOX_ADDDEV(imx, mailbox_data2);
 static struct mailbox mailbox_data3 = {
 	MAILBOX_INIT_DEV(imx)
 	HAL_NAME("Mailbox 3")
-	.contoller = &contoller,
+	.controller = &controller,
 	.id = 3
 };
 MAILBOX_ADDDEV(imx, mailbox_data3);
 #endif
-static struct mailbox_contoller contoller = {
+static struct mailbox_controller controller = {
 	.base = (volatile struct mu *) 0x4229C000,
 	.irq = NVIC_MU_M4_HANDLER,
 	.mboxs = {

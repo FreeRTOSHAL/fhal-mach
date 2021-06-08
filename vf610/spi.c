@@ -381,7 +381,7 @@ static int32_t spi_setup(struct spi_slave *slave) {
 	{
 		uint8_t pbr;
 		uint8_t br;
-		ret = hz_to_spi_baud(&pbr, &br, slave->options.bautrate);
+		ret = hz_to_spi_baud(&pbr, &br, slave->options.baudrate);
 		if (ret < 0) {
 			return -1;
 		}
@@ -557,7 +557,7 @@ static void spi_gpioClear(struct spi_slave *slave) {
 		}
 	}
 }
-SPI_SLAVE_TRANSVER(dspi, slave, sendData, recvData, len, waittime) {
+SPI_SLAVE_TRANSFER(dspi, slave, sendData, recvData, len, waittime) {
 	struct spi *spi = slave->spi;
 	uint32_t i;
 	uint32_t j;
@@ -583,8 +583,8 @@ SPI_SLAVE_TRANSVER(dspi, slave, sendData, recvData, len, waittime) {
 		uint32_t pushr = prepareFrame(slave, *sendData);
 		if (i != 1 && slave->options.wdelay == 0) {
 			/* 
-			 * Set SPI Contoller in Continuous
-			 * CS Line still Active after Transver
+			 * Set SPI Controller in Continuous
+			 * CS Line still Active after Transfer
 			 * This Filed only select if wdelay(delay between Transfer) == 0
 			 */
 			pushr |= SPI_PUSHR_CONT;
@@ -649,14 +649,14 @@ spi_sendRecv_error1:
 SPI_SLAVE_SEND(dspi, slave, data, len, waittime) {
 	uint16_t *rdata = alloca(sizeof(uint16_t) * len);
 	/* TODO Do not use spi_sendRecv optimace Stack usage*/
-	return spiSlave_transver(slave, data, rdata, len, waittime);
+	return spiSlave_transfer(slave, data, rdata, len, waittime);
 }
 SPI_SLAVE_RECV(dspi, slave, data, len, waittime) {
 	uint16_t *wdata = alloca(sizeof(uint16_t) * len);
 	memset(wdata, 0xFF, sizeof(uint16_t) * len);
-	return spiSlave_transver(slave, wdata, data, len, waittime);
+	return spiSlave_transfer(slave, wdata, data, len, waittime);
 }
-SPI_SLAVE_TRANSVER_ISR(dspi, slave, sendData, recvData, len) {
+SPI_SLAVE_TRANSFER_ISR(dspi, slave, sendData, recvData, len) {
 	/* TODO */
 	return -1;
 }
