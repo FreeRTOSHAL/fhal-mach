@@ -336,7 +336,7 @@ SPI_SLAVE_INIT(am57xx, spi, options) {
 	{
 		uint32_t ns_per_cycle = 21; /* fixed 48Mhz interface clock */
 		uint32_t cycles = MAX(options->cs_delay, options->cs_hold) / 21;
-		PRINTF("Max CS Wait Cycles: %lu\n", cycle_us);
+		PRINTF("Max CS Wait Cycles: %lu\n", cycles);
 		if (cycles > 3) {
 			reg |= SPI_CHxCONF_TCS0(0x3);
 		} else {
