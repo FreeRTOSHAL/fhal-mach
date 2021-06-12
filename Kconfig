@@ -42,6 +42,9 @@ choice
 		depends on ARCH_C2000_C28x
 		help
 			TI C2000 DSP
+	config MACH_FRAMAC
+		bool "Frama-C"
+		depends on ARCH_FRAMAC
 endchoice
 if MACH_VF610=y
 source mach/vf610/Kconfig
@@ -66,5 +69,8 @@ source mach/nxp/Kconfig
 endif
 if MACH_C28X=y
 source mach/c28x/Kconfig
+endif
+if MACH_FRAMAC=y
+source mach/framaC/Kconfig
 endif
 endmenu

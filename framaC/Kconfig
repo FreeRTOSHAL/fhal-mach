@@ -1,0 +1,34 @@
+comment "Frama-C Settings"
+config MACH_INCLUDE
+	string
+	default "-Imach/framaC/include"
+config MACH_DEFINE_HEAP
+	bool
+	default y
+config MACH_HAS_GPIO
+	bool
+	default y
+config MACH_HAS_TIMER
+	bool
+	default y
+config MACH_HAS_PWM
+	bool
+	default y
+config MACH_HAS_CAPTURE
+	bool
+	default y
+config MACH_HAS_ADC
+	bool
+	default y
+config MACH_HAS_NEWLIB
+	bool
+	default y
+
+config MACH_FRAMAC_GPIO
+	bool "GPIO"
+config MACH_FRAMAC_TIMER
+	bool "Timer"
+config MACH_FRAMAC_PWM
+	bool "PWM"
+config MACH_FRAMAC_CAPTURE
+	bool "CAPTURE"
