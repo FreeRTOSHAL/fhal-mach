@@ -1,0 +1,67 @@
+comment "QEMU RISC-V Settings"
+config MACH_LD_SCRIPT
+	string 
+	default "mach/riscv-qemu/riscv.lds"
+config MACH_INCLUDE
+	string
+	default "-Imach/riscv-qemu/include"
+
+config MACH_HAS_MTIME
+	bool
+	default y
+config MACH_MTIME_BASE_ADDRESS
+	int
+	default 33603576 # 0x0200bff8
+config MACH_MTIMECMP_BASE_ADDRESS
+	int
+	default 33570816 # 0x02004000
+config MACH_INIT_STACK_SIZE
+	int "Init Stack Size"
+	default 600
+config MACH_NEED_RISCV_INIT
+	bool
+	default y
+config MACH_HAS_PLIC
+	bool
+	default y
+config MACH_IRQ_COUNT
+	int 
+	default 127
+config MACH_IRQ_MAX_PRIO
+	int 
+	default 7
+config MACH_HAS_NEWLIB
+	bool
+	default y
+config MACH_HAS_UART
+	bool
+	default y
+config MACH_NS16550
+	bool "NS16550 UART"
+	select USE_TASK_NOTIFICATIONS
+	depends on UART
+if MACH_NS16550=y
+	config MACH_NS16550_UART0
+		bool "UART 0"
+		default n
+endif
+
+config MACH_CFLAGS
+	string
+	default "-march=rv32ima -mabi=ilp32"
+config MACH_AFLAGS
+	string
+	default "-march=rv32ima -mabi=ilp32"
+	# rv32imafdcsu
+config MACH_HAS_TIMER
+	bool
+	default y
+config MACH_GOLDFLISH_RTC
+	bool "Goldflish RTC Timer"
+	depends on TIMER
+	default n
+if MACH_GOLDFLISH_RTC=y
+	config MACH_GOLDFLISH_RTC_TIMER0 
+		bool "Goldflish RTC Timer 0"
+		default n
+endif

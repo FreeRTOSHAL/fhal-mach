@@ -45,6 +45,11 @@ choice
 	config MACH_FRAMAC
 		bool "Frama-C"
 		depends on ARCH_FRAMAC
+
+	config MACH_RISCV_QEMU
+		bool "QEMU RISC-V"
+		depends on ARCH_RISCV
+		select ARCH_RISCV_RV32IMA
 endchoice
 if MACH_VF610=y
 source mach/vf610/Kconfig
@@ -72,5 +77,8 @@ source mach/c28x/Kconfig
 endif
 if MACH_FRAMAC=y
 source mach/framaC/Kconfig
+endif
+if MACH_RISCV_QEMU
+source mach/riscv-qemu/Kconfig
 endif
 endmenu
