@@ -19,12 +19,29 @@
 # define STOR		sd
 #endif
 
+#ifdef CONFIG_ARCH_RISCV_SMODE
+	.extern ulHartId
+#endif
 	.section .init
 	.globl reset_handler
 	.type reset_handler,@function
 reset_handler:
 	.cfi_startproc
 	.cfi_undefined ra
+/* in S-Mode this code is not needed */
+#ifdef CONFIG_ARCH_RISCV_MMODE
+	// Get Hardware thread ID if in S-Mode a0 after reset is the HartID
+	csrr a0, mhartid // Read status register
+	li   a1, PRIM_HART
+	// TODO: Test on Single Core should work
+	// If Secondary Threads jump to secondary startup
+	bne  a0, a1, secondary
+#endif
+#ifdef CONFIG_ARCH_RISCV_SMODE
+	la t0, ulHartId	
+	sw a0, 0(t0)
+#endif
+
 	/* clear registers */
 	mv x1, zero // ra Return address Caller-saved
 	mv x2, zero // sp Stack pointer Callee-saved
@@ -66,13 +83,6 @@ reset_handler:
 .option norelax
 	la  gp, __global_pointer$
 .option pop
-
-	// Get Hardware thread ID 
-	csrr a0, mhartid // Read status register
-	li   a1, PRIM_HART
-	// TODO: Test on Single Core should work
-	// If Secondary Threads jump to secondary startup
-	bne  a0, a1, secondary
 
 	// Set Stack Pointer
 	la sp, _end_stack

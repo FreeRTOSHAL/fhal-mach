@@ -9,8 +9,14 @@
 ENTRY(reset_handler)
 
 MEM_START
+#ifdef CONFIG_ARCH_RISCV_MMODE
 	flash (rxa) : ORIGIN = 0x80000000, LENGTH = 512K
 	sram (wxa) : ORIGIN = 0x80080000, LENGTH = 512K
+#endif
+#ifdef CONFIG_ARCH_RISCV_SMODE
+	flash (rxa) : ORIGIN = 0x81000000, LENGTH = 512K
+	sram (wxa) : ORIGIN = 0x81080000, LENGTH = 512K
+#endif
 MEM_STOP
 
 SECTIONS_START
