@@ -5,7 +5,6 @@ config MACH_LD_SCRIPT
 config MACH_INCLUDE
 	string
 	default "-Imach/riscv-qemu/include"
-
 config MACH_HAS_MTIME
 	bool
 	default y
@@ -36,6 +35,9 @@ config MACH_HAS_NEWLIB
 config MACH_HAS_UART
 	bool
 	default y
+config MACH_HAS_TIMER
+	bool
+	default y
 config MACH_NS16550
 	bool "NS16550 UART"
 	select USE_TASK_NOTIFICATIONS
@@ -46,16 +48,30 @@ if MACH_NS16550=y
 		default n
 endif
 
-config MACH_CFLAGS
-	string
-	default "-march=rv32ima -mabi=ilp32"
-config MACH_AFLAGS
-	string
-	default "-march=rv32ima -mabi=ilp32"
-	# rv32imafdcsu
-config MACH_HAS_TIMER
-	bool
-	default y
+config MACH_RISCV_64BIT
+	select ARCH_64BIT
+	bool "64-Bit"
+
+if MACH_RISCV_64BIT=y
+	config MACH_CFLAGS
+		string
+		default "-march=rv64ima -mabi=lp64"
+	config MACH_AFLAGS
+		string
+		default "-march=rv64ima -mabi=lp64"
+		# rv64imafdcsu
+endif
+if MACH_RISCV_64BIT=n
+	config MACH_CFLAGS
+		string
+		default "-march=rv32ima -mabi=ilp32"
+	config MACH_AFLAGS
+		string
+		default "-march=rv32ima -mabi=ilp32"
+		# rv32imafdcsu
+endif
+
+
 config MACH_GOLDFLISH_RTC
 	bool "Goldflish RTC Timer"
 	depends on TIMER
