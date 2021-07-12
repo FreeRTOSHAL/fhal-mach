@@ -4,16 +4,16 @@
  * Date: 2021
  */
 /* Primary Hardware thread ID */
-#define PRIM_HART			0
+#define PRIM_HART 0
 
 /* Define LOAD and STOR */
 #if __riscv_xlen == 32
-# define REGSIZE		4
+# define REGSIZE	4
 # define REGSHIFT	2
 # define LOAD		lw
 # define STOR		sw
 #elif __riscv_xlen == 64
-# define REGSIZE		8
+# define REGSIZE	8
 # define REGSHIFT	3
 # define LOAD		ld
 # define STOR		sd
@@ -28,18 +28,28 @@
 reset_handler:
 	.cfi_startproc
 	.cfi_undefined ra
+
+	/* disable irq and clear pending interrupts */
+#ifdef CONFIG_ARCH_RISCV_MMODE
+	csrw	mie, zero
+	csrw	mip, zero
+#endif
+#ifdef CONFIG_ARCH_RISCV_SMODE
+	csrw	sie, zero
+	csrw	sip, zero
+#endif
+
 /* in S-Mode this code is not needed */
 #ifdef CONFIG_ARCH_RISCV_MMODE
 	// Get Hardware thread ID if in S-Mode a0 after reset is the HartID
 	csrr a0, mhartid // Read status register
 	li   a1, PRIM_HART
-	// TODO: Test on Single Core should work
 	// If Secondary Threads jump to secondary startup
 	bne  a0, a1, secondary
 #endif
+
 #ifdef CONFIG_ARCH_RISCV_SMODE
-	la t0, ulHartId	
-	sw a0, 0(t0)
+	mv s1, a0 /* save HartID */
 #endif
 
 	/* clear registers */
@@ -51,7 +61,9 @@ reset_handler:
 	mv x6, zero // t1 Temporaries Caller-saved
 	mv x7, zero // t2 Temporaries Caller-saved
 	mv x8, zero // s0/fp Saved register/frame pointer Callee-saved
-	mv x9, zero // s1 Saved register Callee-saved
+#ifndef CONFIG_ARCH_RISCV_SMODE /* we use this register to save HartID in S-Mode */
+	mv x9, zero // s1 Saved register Callee-saved 
+#endif
 	mv x10, zero // a0 Function arguments/return values Caller-saved
 	mv x11, zero // a1 Function arguments/return values Caller-saved
 	mv x12, zero // a2 Function arguments Caller-saved
@@ -84,6 +96,7 @@ reset_handler:
 	la  gp, __global_pointer$
 .option pop
 
+
 	// Set Stack Pointer
 	la sp, _end_stack
 	
@@ -92,6 +105,12 @@ reset_handler:
 	call bssinit
 	call irq_init
 	call clock_init
+
+#ifdef CONFIG_ARCH_RISCV_SMODE
+	la t0, ulHartId	
+	sw s1, 0(t0)
+#endif
+
 
 	// Jump Main
 	call main
