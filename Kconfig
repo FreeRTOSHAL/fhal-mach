@@ -49,7 +49,10 @@ choice
 	config MACH_RISCV_QEMU
 		bool "QEMU RISC-V"
 		depends on ARCH_RISCV
-		select ARCH_RISCV_RV32IMA
+
+	config MACH_POLARFIRE
+		bool "Micochip Polarfire"
+		depends on ARCH_RISCV
 endchoice
 if MACH_VF610=y
 source mach/vf610/Kconfig
@@ -80,5 +83,8 @@ source mach/framaC/Kconfig
 endif
 if MACH_RISCV_QEMU
 source mach/riscv-qemu/Kconfig
+endif
+if MACH_POLARFIRE
+source mach/polarfire/Kconfig
 endif
 endmenu
