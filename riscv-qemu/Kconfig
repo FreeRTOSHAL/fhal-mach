@@ -8,6 +8,9 @@ config MACH_INCLUDE
 config MACH_HAS_MTIME
 	bool
 	default y
+config MACH_DEFINE_HEAP
+	bool
+	default y
 config MACH_MTIME_BASE_ADDRESS
 	int
 	default 33603576 # 0x0200bff8
@@ -38,6 +41,12 @@ config MACH_HAS_UART
 config MACH_HAS_TIMER
 	bool
 	default y
+config MACH_NEED_GENERIC_SYSINIT
+	bool
+	default y
+config MACH_NEED_RISCV_HARDWARE_FLOAD
+	bool
+	default y
 config MACH_NS16550
 	bool "NS16550 UART"
 	select USE_TASK_NOTIFICATIONS
@@ -55,19 +64,19 @@ config MACH_RISCV_64BIT
 if MACH_RISCV_64BIT=y
 	config MACH_CFLAGS
 		string
-		default "-march=rv64ima -mabi=lp64"
+		default "-march=rv64imafd -mabi=lp64f"
 	config MACH_AFLAGS
 		string
-		default "-march=rv64ima -mabi=lp64"
+		default "-march=rv64imafd -mabi=lp64f"
 		# rv64imafdcsu
 endif
 if MACH_RISCV_64BIT=n
 	config MACH_CFLAGS
 		string
-		default "-march=rv32ima -mabi=ilp32"
+		default "-march=rv32imafd -mabi=ilp32f"
 	config MACH_AFLAGS
 		string
-		default "-march=rv32ima -mabi=ilp32"
+		default "-march=rv32imafd -mabi=ilp32f"
 		# rv32imafdcsu
 endif
 
