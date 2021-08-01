@@ -64,19 +64,19 @@ config MACH_RISCV_64BIT
 if MACH_RISCV_64BIT=y
 	config MACH_CFLAGS
 		string
-		default "-march=rv64imafd -mabi=lp64f"
+		default "-march=rv64imafd -mabi=lp64d"
 	config MACH_AFLAGS
 		string
-		default "-march=rv64imafd -mabi=lp64f"
+		default "-march=rv64imafd -mabi=lp64d"
 		# rv64imafdcsu
 endif
 if MACH_RISCV_64BIT=n
 	config MACH_CFLAGS
 		string
-		default "-march=rv32imafd -mabi=ilp32f"
+		default "-march=rv32imafd -mabi=ilp32d"
 	config MACH_AFLAGS
 		string
-		default "-march=rv32imafd -mabi=ilp32f"
+		default "-march=rv32imafd -mabi=ilp32d"
 		# rv32imafdcsu
 endif
 

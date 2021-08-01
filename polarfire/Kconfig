@@ -54,8 +54,8 @@ config MACH_RISCV_64BIT
 
 config MACH_CFLAGS
 	string
-	default "-march=rv64imafd -mabi=lp64f"
+	default "-march=rv64imafd -mabi=lp64d"
 config MACH_AFLAGS
 	string
-	default "-march=rv64imafd -mabi=lp64f"
+	default "-march=rv64imafd -mabi=lp64d"
 	# RV64ACDFIM
