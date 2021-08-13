@@ -346,7 +346,7 @@ CAN_REGISTER_FILTER(flexcan, can, filter) {
 	/* MB is empty */
 	ctrl = FLEXCAN_MB_CTRL_CODE_EMPTY;
 	/* Setup Filter ID */
-	if (hwFilter->filter.id > 0x200) {
+	if (hwFilter->filter.id > 0x800) {
 		mb->id = FLEXCAN_MB_ID_EXT_ID(hwFilter->filter.id);
 		ctrl |= FLEXCAN_MB_CTRL_IDE;
 	} else {
@@ -407,7 +407,7 @@ CAN_SEND(flexcan, can, msg, waittime) {
 	ctrl = FLEXCAN_MB_CTRL_CODE_DATA;
 	/* Setup DLC */
 	ctrl |= FLEXCAN_MB_CTRL_DLC(msg->length);
-	if (msg->id > 0x200) {
+	if (msg->id > 0x800) {
 		mb->id = FLEXCAN_MB_ID_EXT_ID(msg->id);
 		ctrl |= FLEXCAN_MB_CTRL_IDE;
 	} else {
