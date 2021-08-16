@@ -285,10 +285,16 @@ void flexcan_handleMBIRQ(struct can *can) {
 				msg.id |= CAN_RTR_FLAG;
 			}
 			msg.length = FLEXCAN_MB_CTRL_DLC_GET(ctrl);
-			/* Copy Data */
-			for (j = 0; j < msg.length; j++) {
-				msg.data[j] = mb->data[j];
-			}
+
+			msg.data[0] = mb->data[3];
+			msg.data[1] = mb->data[2];
+			msg.data[2] = mb->data[1];
+			msg.data[3] = mb->data[0];
+			msg.data[4] = mb->data[7];
+			msg.data[5] = mb->data[6];
+			msg.data[6] = mb->data[5];
+			msg.data[7] = mb->data[4];
+
 			/* Unlock Frame */
 			msg.ts = can->base->timer;
 
@@ -413,7 +419,17 @@ CAN_SEND(flexcan, can, msg, waittime) {
 	} else {
 		mb->id = FLEXCAN_MB_ID_STD_ID(msg->id);
 	}
-	memcpy((void *) mb->data, msg->data, msg->length);
+
+	/* copy data */
+	mb->data[3] = msg->data[0];
+	mb->data[2] = msg->data[1];
+	mb->data[1] = msg->data[2];
+	mb->data[0] = msg->data[3];
+	mb->data[7] = msg->data[4];
+	mb->data[6] = msg->data[5];
+	mb->data[5] = msg->data[6];
+	mb->data[4] = msg->data[7];
+
 	/* Get Task Handel */
 	can->task = xTaskGetCurrentTaskHandle();
 	/* Clear Notification */
