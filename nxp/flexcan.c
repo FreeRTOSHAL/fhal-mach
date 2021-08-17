@@ -30,7 +30,10 @@ static void nxp_flexcan_enable(struct can *can) {
 
 static void nxp_flexcan_freeze(struct can *can) {
 	can->base->mcr |= FLEXCAN_MCR_FRZ_MASK;
-	/* Wait Controller got ot Disable or Stop mode */
+	if (can->up) {
+		can->base->mcr |= FLEXCAN_MCR_HALT_MASK;
+	}
+	/* Wait Controller got to Disable or Stop mode */
 	while (!(can->base->mcr & FLEXCAN_MCR_FRZACK_MASK));
 }
 
@@ -38,6 +41,9 @@ static void nxp_flexcan_unfreeze(struct can *can) {
 	can->base->mcr &= ~FLEXCAN_MCR_FRZ_MASK;
 	/* Wait Controller is in Disable or Stop mode no more */
 	while (can->base->mcr & FLEXCAN_MCR_FRZACK_MASK);
+	if (can->up) {
+		can->base->mcr &= ~FLEXCAN_MCR_HALT_MASK;
+	}
 }
 
 
@@ -91,6 +97,9 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh, callback, data) {
 	can->base->mcr |= FLEXCAN_MCR_IRMQ_MASK;
 	/* enable Warn IRQ */
 	can->base->mcr |= FLEXCAN_MCR_WRNEN_MASK;
+	/* self reception is dissabled */
+	can->base->mcr |= FLEXCAN_MCR_SRXDIS_MASK;
+
 	if (can->mb_count > 16) {
 		/* enable 32 MBs */
 		can->base->mcr |= FLEXCAN_MCR_MAXMB(0xFF);
@@ -285,15 +294,21 @@ void flexcan_handleMBIRQ(struct can *can) {
 				msg.id |= CAN_RTR_FLAG;
 			}
 			msg.length = FLEXCAN_MB_CTRL_DLC_GET(ctrl);
+			/* copy data */
+			{
+				uint32_t tmp; 
+				msg.data[0] = ((mb->data[0] >> 24) & 0xFF);
+				msg.data[1] = ((mb->data[0] >> 16) & 0xFF);
+				msg.data[2] = ((mb->data[0] >> 8) & 0xFF);
+				msg.data[3] = ((mb->data[0] >> 0) & 0xFF);
 
-			msg.data[0] = mb->data[3];
-			msg.data[1] = mb->data[2];
-			msg.data[2] = mb->data[1];
-			msg.data[3] = mb->data[0];
-			msg.data[4] = mb->data[7];
-			msg.data[5] = mb->data[6];
-			msg.data[6] = mb->data[5];
-			msg.data[7] = mb->data[4];
+				if (msg.length > 4) {
+					msg.data[4] = ((mb->data[1] >> 24) & 0xFF);
+					msg.data[5] = ((mb->data[1] >> 16) & 0xFF);
+					msg.data[6] = ((mb->data[1] >> 8) & 0xFF);
+					msg.data[7] = ((mb->data[1] >> 0) & 0xFF);
+				}
+			}
 
 			/* Unlock Frame */
 			msg.ts = can->base->timer;
@@ -346,6 +361,8 @@ CAN_REGISTER_FILTER(flexcan, can, filter) {
 	hwFilter = &can->filter[i];
 	hwFilter->used = true;
 	memcpy(&hwFilter->filter, filter, sizeof(struct can_filter));
+	/* we must delete all bit are don't care */
+	hwFilter->filter.id &= hwFilter->filter.mask;
 	mb = &can->base->mb[hwFilter->id];
 	/* Set MB to Inactive */
 	mb->ctrl = FLEXCAN_MB_CTRL_CODE_INACTIVE;
@@ -361,7 +378,11 @@ CAN_REGISTER_FILTER(flexcan, can, filter) {
 	/* Setup Mask is only posbile in freeze mode */
 	nxp_flexcan_freeze(can);
 	/* Setup Mask */
-	can->base->rximr[hwFilter->id] = hwFilter->filter.mask;
+	if (hwFilter->filter.id > 0x800) {
+		can->base->rximr[hwFilter->id] = FLEXCAN_MB_ID_EXT_ID(hwFilter->filter.mask);
+	} else {
+		can->base->rximr[hwFilter->id] = FLEXCAN_MB_ID_STD_ID(hwFilter->filter.mask);
+	}
 	nxp_flexcan_unfreeze(can);
 	/* activate Interrupt */
 	can->base->imask1 |= BIT(hwFilter->id);
@@ -421,14 +442,25 @@ CAN_SEND(flexcan, can, msg, waittime) {
 	}
 
 	/* copy data */
-	mb->data[3] = msg->data[0];
-	mb->data[2] = msg->data[1];
-	mb->data[1] = msg->data[2];
-	mb->data[0] = msg->data[3];
-	mb->data[7] = msg->data[4];
-	mb->data[6] = msg->data[5];
-	mb->data[5] = msg->data[6];
-	mb->data[4] = msg->data[7];
+	{
+		uint32_t tmp; 
+
+		tmp = 0;
+		tmp |= (msg->data[0] << 24);
+		tmp |= (msg->data[1] << 16);
+		tmp |= (msg->data[2] << 8);
+		tmp |= (msg->data[3] << 0);
+		mb->data[0] = tmp;
+
+		if (msg->length > 4) {
+			tmp = 0;
+			tmp |= (msg->data[4] << 24);
+			tmp |= (msg->data[5] << 16);
+			tmp |= (msg->data[6] << 8);
+			tmp |= (msg->data[7] << 0);
+			mb->data[1] = tmp;
+		}
+	}
 
 	/* Get Task Handel */
 	can->task = xTaskGetCurrentTaskHandle();
@@ -497,6 +529,7 @@ CAN_RECV_ISR(flexcan, can, filterID, msg) {
 }
 CAN_UP(flexcan, can) {
 	can_lock(can, portMAX_DELAY, -1);
+	can->up = true;
 	/* negate Halt bit */
 	can->base->mcr &= ~FLEXCAN_MCR_HALT_MASK;
 	if (can->pinHigh) {
@@ -509,6 +542,7 @@ CAN_UP(flexcan, can) {
 }
 CAN_DOWN(flexcan, can) {
 	can_lock(can, portMAX_DELAY, -1);
+	can->up = false;
 	if (can->pinHigh) {
 		gpioPin_clearPin(can->enablePin);
 	} else {

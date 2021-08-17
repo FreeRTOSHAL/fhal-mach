@@ -16,7 +16,7 @@
 struct flexcan_mb {
 	uint32_t ctrl;
 	uint32_t id;
-	uint8_t data[8]; /* resize if CAN FD is used */
+	uint32_t data[2]; /* resize if CAN FD is used */
 };
 
 /* Structure of the hardware registers */
@@ -126,6 +126,7 @@ struct can {
 	const uint32_t irqNum;
 	struct gpio_pin *enablePin;
 	bool pinHigh;
+	bool up;
 	struct can_bittiming bt;
 	int64_t freq;
 	uint32_t mb_count;
