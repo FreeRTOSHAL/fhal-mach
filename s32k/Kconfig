@@ -79,6 +79,9 @@ config MACH_NEED_GENERIC_SYSINIT
 config ARCH_SYSINIT_EARLY_INIT
 	bool
 	default y
+config MACH_NEED_ARM_INIT
+	bool
+	default y
 config MACH_S32K_DISABLE_WDOG
 	bool "Disable Watchdog at startup"
 	default y
