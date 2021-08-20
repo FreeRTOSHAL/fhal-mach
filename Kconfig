@@ -53,6 +53,10 @@ choice
 	config MACH_POLARFIRE
 		bool "Micochip Polarfire"
 		depends on ARCH_RISCV
+	
+	config MACH_KV4X
+		bool "NXP Kinetis KV4X"
+		depends on ARCH_ARM_CORTEX_M4F || ARCH_ARM_CORTEX_M3
 endchoice
 if MACH_VF610=y
 source mach/vf610/Kconfig
@@ -86,5 +90,8 @@ source mach/riscv-qemu/Kconfig
 endif
 if MACH_POLARFIRE
 source mach/polarfire/Kconfig
+endif
+if MACH_KV4X
+source mach/kv4x/Kconfig
 endif
 endmenu

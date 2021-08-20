@@ -8,6 +8,7 @@ obj-$(CONFIG_MACH_S32K)+=s32k/
 obj-$(CONFIG_MACH_C28X)+=c28x/
 obj-$(CONFIG_MACH_RISCV_QEMU)+=riscv-qemu/
 obj-$(CONFIG_MACH_POLARFIRE)+=polarfire/
+obj-$(CONFIG_MACH_KV4X)+=kv4x/
 
 obj-$(CONFIG_GEN_VERSION) += version.o
 BUILDID := $(USER)@$(shell hostname) $(shell date +'%Y-%m-%d %H:%M:%S')

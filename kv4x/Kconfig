@@ -1,0 +1,165 @@
+comment "NXP KV4x Settings"
+config MAX_SYSCALL_INTERRUPT_PRIORITY
+	hex
+	default 0x20
+config KERNEL_INTERRUPT_PRIORITY 
+	hex
+	default 0xf0
+config MACH_INIT_STACK_SIZE
+	int "Init Stack Size"
+	default 600
+	help
+		Stack Size of Init Prozess. Stack size used by Interrupt and Init Prozess
+config MACH_LD_SCRIPT
+	string 
+	default "mach/kv4x/kv4x.lds"
+config MACH_INCLUDE
+	string
+	default "-Imach/kv4x/include -Imach/nxp/include"
+config MACH_DEFINE_HEAP
+	bool
+	default y
+config MACH_USE_GENERIC_FAULT_HANDLER
+	bool
+	default y
+config MACH_HAS_NEWLIB
+	bool
+	default y
+config MACH_HAS_NVIC
+	bool
+	default y
+config MACH_HAS_GPIO
+	bool
+	default y
+config MACH_HAS_TIMER
+	bool
+	default y
+config MACH_HAS_PWM
+	bool
+	default y
+config MACH_HAS_CAPTURE
+	bool
+	default y
+config USE_NXP_LIB
+	bool
+	default y
+config MACH_NEED_GENERIC_SYSINIT
+	bool
+	default y
+#config ARCH_SYSINIT_EARLY_INIT
+#	bool
+#	default y
+config MACH_NEED_ARM_INIT
+	bool
+	default y
+
+# GPIO Subsytem is use by muxing system
+config KV4X_GPIO
+	bool
+	default y
+	select GPIO
+	select NXP_GPIO
+	select NXP_GPIO_MUX
+	config GPIO_PORT_COUNT
+		int
+		depends on NXP_GPIO
+		default 5
+menuconfig EXTERNAL_OSCILLATOR
+	bool "Activate External Oscillator"
+	default y
+if EXTERNAL_OSCILLATOR=y
+	comment "Waring: PLL Setting could damage Target" 
+	config ARCH_MKV4X_EXTERNAL_REF_CLOCK
+		bool "Use External reference clock"
+		default no
+	comment "External Crystal / Resonator Settings"
+	choice
+		prompt "ERCLK prescaler"
+		config ARCH_MKV4X_ERCLK_1
+			"/1"
+		config ARCH_MKV4X_ERCLK_2
+			"/2"
+		config ARCH_MKV4X_ERCLK_4
+			"/4"
+		config ARCH_MKV4X_ERCLK_8
+			"/8"
+	endchoice
+	if ARCH_MKV4X_EXTERNAL_REF_CLOCK=n
+		config ARCH_MKV4X_OSC_CAP2P
+			bool "Oscillator 2 pF Capacitor Load Configure"
+		config ARCH_MKV4X_OSC_CAP4P
+			bool "Oscillator 4 pF Capacitor Load Configure"
+		config ARCH_MKV4X_OSC_CAP8P
+			bool "Oscillator 8 pF Capacitor Load Configure"
+		config ARCH_MKV4X_OSC_CAP16P
+			bool "Oscillator 16 pF Capacitor Load Configure"
+		choice
+			prompt "High Gain Oscillator Select"
+			config ARCH_MKV4X_OSC_HIGH_GAIN
+				bool "high-gain operation"
+			config ARCH_MKV4X_OSC_LOW_POWER
+				bool "low-power operation"
+		endchoice
+	endif
+	comment "PLL / FLL Settings"
+	choice
+		prompt "Select Frequency Range"
+		config ARCH_MKV4X_RANGE_LOW
+			bool "Low frequency range"
+		config ARCH_MKV4X_RANGE_HIGH
+			bool "High frequency range"
+		config ARCH_MKV4X_RANGE_VERY_HIGH
+			bool "Very high frequency range"
+	endchoice
+	choice
+		prompt "Select FLL External Reference Divider"
+		config ARCH_MKV4X_FRDIV_LOW_1
+			bool "/1"
+			depends on ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_LOW_2
+			bool "/2"
+			depends on ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_LOW_4
+			bool "/4"
+			depends on ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_LOW_8
+			bool "/8"
+			depends on ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_LOW_16
+			bool "/16"
+			depends on ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_LOW_32
+			bool "/32"
+			depends on ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_LOW_64
+			bool "/64"
+			depends on ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_LOW_128
+			bool "/128"
+			depends on ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_32
+			bool "/32"
+			depends on !ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_64
+			bool "/64"
+			depends on !ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_128
+			bool "/128"
+			depends on !ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_256
+			bool "/256"
+			depends on !ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_512
+			bool "/512"
+			depends on !ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_1024
+			bool "/1024"
+			depends on !ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_1280
+			bool "/1280"
+			depends on !ARCH_MKV4X_RANGE_LOW
+		config ARCH_MKV4X_FRDIV_1536
+			bool "/1536"
+			depends on !ARCH_MKV4X_RANGE_LOW
+	endchoice
+endif
