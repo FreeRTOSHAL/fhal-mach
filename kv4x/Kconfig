@@ -69,97 +69,301 @@ menuconfig EXTERNAL_OSCILLATOR
 	default y
 if EXTERNAL_OSCILLATOR=y
 	comment "Waring: PLL Setting could damage Target" 
-	config ARCH_MKV4X_EXTERNAL_REF_CLOCK
+	config MACH_OSCILLATOR_SPEED
+		int "External Oscillator / CLOCK Speed (Hz)"
+		default 8000000
+	config MACH_MKV4X_EXTERNAL_REF_CLOCK
 		bool "Use External reference clock"
 		default no
 	comment "External Crystal / Resonator Settings"
 	choice
 		prompt "ERCLK prescaler"
-		config ARCH_MKV4X_ERCLK_1
-			"/1"
-		config ARCH_MKV4X_ERCLK_2
-			"/2"
-		config ARCH_MKV4X_ERCLK_4
-			"/4"
-		config ARCH_MKV4X_ERCLK_8
-			"/8"
+		config MACH_MKV4X_ERCLK_1
+			bool "/1"
+		config MACH_MKV4X_ERCLK_2
+			bool "/2"
+		config MACH_MKV4X_ERCLK_4
+			bool "/4"
+		config MACH_MKV4X_ERCLK_8
+			bool "/8"
 	endchoice
-	if ARCH_MKV4X_EXTERNAL_REF_CLOCK=n
-		config ARCH_MKV4X_OSC_CAP2P
+	if MACH_MKV4X_EXTERNAL_REF_CLOCK=n
+		config MACH_MKV4X_OSC_CAP2P
 			bool "Oscillator 2 pF Capacitor Load Configure"
-		config ARCH_MKV4X_OSC_CAP4P
+		config MACH_MKV4X_OSC_CAP4P
 			bool "Oscillator 4 pF Capacitor Load Configure"
-		config ARCH_MKV4X_OSC_CAP8P
+		config MACH_MKV4X_OSC_CAP8P
 			bool "Oscillator 8 pF Capacitor Load Configure"
-		config ARCH_MKV4X_OSC_CAP16P
+		config MACH_MKV4X_OSC_CAP16P
 			bool "Oscillator 16 pF Capacitor Load Configure"
 		choice
 			prompt "High Gain Oscillator Select"
-			config ARCH_MKV4X_OSC_HIGH_GAIN
+			config MACH_MKV4X_OSC_HIGH_GAIN
 				bool "high-gain operation"
-			config ARCH_MKV4X_OSC_LOW_POWER
+			config MACH_MKV4X_OSC_LOW_POWER
 				bool "low-power operation"
 		endchoice
 	endif
 	comment "PLL / FLL Settings"
 	choice
 		prompt "Select Frequency Range"
-		config ARCH_MKV4X_RANGE_LOW
-			bool "Low frequency range"
-		config ARCH_MKV4X_RANGE_HIGH
-			bool "High frequency range"
-		config ARCH_MKV4X_RANGE_VERY_HIGH
+		config MACH_MKV4X_RANGE_VERY_HIGH
 			bool "Very high frequency range"
+		config MACH_MKV4X_RANGE_LOW
+			bool "Low frequency range"
+		config MACH_MKV4X_RANGE_HIGH
+			bool "High frequency range"
 	endchoice
+	comment "FLL Frequency ((External Frequency) / FRDIV) must between 31.25 kHz to 39.0625 kHz"
 	choice
 		prompt "Select FLL External Reference Divider"
-		config ARCH_MKV4X_FRDIV_LOW_1
-			bool "/1"
-			depends on ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_LOW_2
-			bool "/2"
-			depends on ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_LOW_4
-			bool "/4"
-			depends on ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_LOW_8
-			bool "/8"
-			depends on ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_LOW_16
-			bool "/16"
-			depends on ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_LOW_32
-			bool "/32"
-			depends on ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_LOW_64
-			bool "/64"
-			depends on ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_LOW_128
-			bool "/128"
-			depends on ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_32
-			bool "/32"
-			depends on !ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_64
-			bool "/64"
-			depends on !ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_128
-			bool "/128"
-			depends on !ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_256
+		config MACH_MKV4X_FRDIV_256
 			bool "/256"
-			depends on !ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_512
+			depends on !MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_LOW_1
+			bool "/1"
+			depends on MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_LOW_2
+			bool "/2"
+			depends on MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_LOW_4
+			bool "/4"
+			depends on MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_LOW_8
+			bool "/8"
+			depends on MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_LOW_16
+			bool "/16"
+			depends on MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_LOW_32
+			bool "/32"
+			depends on MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_LOW_64
+			bool "/64"
+			depends on MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_LOW_128
+			bool "/128"
+			depends on MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_32
+			bool "/32"
+			depends on !MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_64
+			bool "/64"
+			depends on !MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_128
+			bool "/128"
+			depends on !MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_512
 			bool "/512"
-			depends on !ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_1024
+			depends on !MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_1024
 			bool "/1024"
-			depends on !ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_1280
+			depends on !MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_1280
 			bool "/1280"
-			depends on !ARCH_MKV4X_RANGE_LOW
-		config ARCH_MKV4X_FRDIV_1536
+			depends on !MACH_MKV4X_RANGE_LOW
+		config MACH_MKV4X_FRDIV_1536
 			bool "/1536"
-			depends on !ARCH_MKV4X_RANGE_LOW
+			depends on !MACH_MKV4X_RANGE_LOW
+	endchoice
+	choice
+		prompt "DRST_DRS Range Select"
+		config MACH_MKV4X_DRST_DRS_0
+			bool "Low range (FLL Factor: 640 / 732, DCO Range: 20–25 MHz"
+		config MACH_MKV4X_DRST_DRS_1
+			bool "Mid range (FLL Factor: 1280 / 1464 DCO Range: 40–50 MHz"
+		config MACH_MKV4X_DRST_DRS_2
+			bool "Mid-high range (FLL Factor: 1920 / 2197 DCO Range: 60–75 MHz"
+		config MACH_MKV4X_DRST_DRS_3
+			bool "High range (FLL Factor: 2560 / 2929 DCO Range: 80–100 MHz)"
+	endchoice
+	config MACH_MKV4X_DMX32
+		bool "DCO Input Frequency is fine-tuned to 32.768 kHz"
+	comment "PLL Settings"
+	choice
+		prompt "PLL External Reference Divider (output between 8 MHz to 16 MHz)"
+		config MACH_MKV4X_PRDIV_1
+			bool "/1"
+		config MACH_MKV4X_PRDIV_2
+			bool "/2"
+		config MACH_MKV4X_PRDIV_3
+			bool "/3"
+		config MACH_MKV4X_PRDIV_4
+			bool "/4"
+		config MACH_MKV4X_PRDIV_5
+			bool "/5"
+		config MACH_MKV4X_PRDIV_6
+			bool "/6"
+		config MACH_MKV4X_PRDIV_7
+			bool "/7"
+		config MACH_MKV4X_PRDIV_8
+			bool "/8"
+	endchoice
+
+	choice
+		prompt "VCO Multiplier"
+		config MACH_MKV4X_VDIV_42
+			bool "x42"
+		config MACH_MKV4X_VDIV_16
+			bool "x16"
+		config MACH_MKV4X_VDIV_17
+			bool "x17"
+		config MACH_MKV4X_VDIV_18
+			bool "x18"
+		config MACH_MKV4X_VDIV_19
+			bool "x19"
+		config MACH_MKV4X_VDIV_20
+			bool "x20"
+		config MACH_MKV4X_VDIV_21
+			bool "x21"
+		config MACH_MKV4X_VDIV_22
+			bool "x22"
+		config MACH_MKV4X_VDIV_23
+			bool "x23"
+		config MACH_MKV4X_VDIV_24
+			bool "x24"
+		config MACH_MKV4X_VDIV_25
+			bool "x25"
+		config MACH_MKV4X_VDIV_26
+			bool "x26"
+		config MACH_MKV4X_VDIV_27
+			bool "x27"
+		config MACH_MKV4X_VDIV_28
+			bool "x28"
+		config MACH_MKV4X_VDIV_29
+			bool "x29"
+		config MACH_MKV4X_VDIV_30
+			bool "x30"
+		config MACH_MKV4X_VDIV_31
+			bool "x31"
+		config MACH_MKV4X_VDIV_32
+			bool "x32"
+		config MACH_MKV4X_VDIV_33
+			bool "x33"
+		config MACH_MKV4X_VDIV_34
+			bool "x34"
+		config MACH_MKV4X_VDIV_35
+			bool "x35"
+		config MACH_MKV4X_VDIV_36
+			bool "x36"
+		config MACH_MKV4X_VDIV_37
+			bool "x37"
+		config MACH_MKV4X_VDIV_38
+			bool "x38"
+		config MACH_MKV4X_VDIV_39
+			bool "x39"
+		config MACH_MKV4X_VDIV_40
+			bool "x40"
+		config MACH_MKV4X_VDIV_41
+			bool "x41"
+		config MACH_MKV4X_VDIV_43
+			bool "x43"
+		config MACH_MKV4X_VDIV_44
+			bool "x44"
+		config MACH_MKV4X_VDIV_45
+			bool "x45"
+		config MACH_MKV4X_VDIV_46
+			bool "x46"
+		config MACH_MKV4X_VDIV_47
+			bool "x47"
+	endchoice
+	choice
+		prompt "SysClk divider"
+		config MACH_MKV4X_OUTDIV1_1
+			bool "/1"
+		config MACH_MKV4X_OUTDIV1_2
+			bool "/2"
+		config MACH_MKV4X_OUTDIV1_3
+			bool "/3"
+		config MACH_MKV4X_OUTDIV1_4
+			bool "/4"
+		config MACH_MKV4X_OUTDIV1_5
+			bool "/5"
+		config MACH_MKV4X_OUTDIV1_6
+			bool "/6"
+		config MACH_MKV4X_OUTDIV1_7
+			bool "/7"
+		config MACH_MKV4X_OUTDIV1_8
+			bool "/8"
+		config MACH_MKV4X_OUTDIV1_9
+			bool "/9"
+		config MACH_MKV4X_OUTDIV1_10
+			bool "/10"
+		config MACH_MKV4X_OUTDIV1_11
+			bool "/12"
+		config MACH_MKV4X_OUTDIV1_13
+			bool "/13"
+		config MACH_MKV4X_OUTDIV1_14
+			bool "/14"
+		config MACH_MKV4X_OUTDIV1_15
+			bool "/15"
+		config MACH_MKV4X_OUTDIV1_16
+			bool "/16"
+	endchoice
+	choice
+		prompt "Fast Perf Clk divider"
+		config MACH_MKV4X_OUTDIV2_2
+			bool "/2"
+		config MACH_MKV4X_OUTDIV2_1
+			bool "/1"
+		config MACH_MKV4X_OUTDIV2_3
+			bool "/3"
+		config MACH_MKV4X_OUTDIV2_4
+			bool "/4"
+		config MACH_MKV4X_OUTDIV2_5
+			bool "/5"
+		config MACH_MKV4X_OUTDIV2_6
+			bool "/6"
+		config MACH_MKV4X_OUTDIV2_7
+			bool "/7"
+		config MACH_MKV4X_OUTDIV2_8
+			bool "/8"
+		config MACH_MKV4X_OUTDIV2_9
+			bool "/9"
+		config MACH_MKV4X_OUTDIV2_10
+			bool "/10"
+		config MACH_MKV4X_OUTDIV2_11
+			bool "/12"
+		config MACH_MKV4X_OUTDIV2_13
+			bool "/13"
+		config MACH_MKV4X_OUTDIV2_14
+			bool "/14"
+		config MACH_MKV4X_OUTDIV2_15
+			bool "/15"
+		config MACH_MKV4X_OUTDIV2_16
+			bool "/16"
+	endchoice
+	choice
+		prompt "Flash Clock divider"
+		config MACH_MKV4X_OUTDIV4_7
+			bool "/7"
+		config MACH_MKV4X_OUTDIV4_1
+			bool "/1"
+		config MACH_MKV4X_OUTDIV4_2
+			bool "/2"
+		config MACH_MKV4X_OUTDIV4_3
+			bool "/3"
+		config MACH_MKV4X_OUTDIV4_4
+			bool "/4"
+		config MACH_MKV4X_OUTDIV4_5
+			bool "/5"
+		config MACH_MKV4X_OUTDIV4_6
+			bool "/6"
+		config MACH_MKV4X_OUTDIV4_8
+			bool "/8"
+		config MACH_MKV4X_OUTDIV4_9
+			bool "/9"
+		config MACH_MKV4X_OUTDIV4_10
+			bool "/10"
+		config MACH_MKV4X_OUTDIV4_11
+			bool "/12"
+		config MACH_MKV4X_OUTDIV4_13
+			bool "/13"
+		config MACH_MKV4X_OUTDIV4_14
+			bool "/14"
+		config MACH_MKV4X_OUTDIV4_15
+			bool "/15"
+		config MACH_MKV4X_OUTDIV4_16
+			bool "/16"
 	endchoice
 endif

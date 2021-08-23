@@ -224,7 +224,8 @@ typedef enum IRQn {
   CAN1_Error_IRQn              = 96,               /**< FLexCAN1 Error */
   CAN1_Tx_Warning_IRQn         = 97,               /**< FLexCAN1 Transmit Warning */
   CAN1_Rx_Warning_IRQn         = 98,               /**< FLexCAN1 Receive Warning */
-  CAN1_Wake_Up_IRQn            = 99                /**< FLexCAN1 Wake Up */
+  CAN1_Wake_Up_IRQn            = 99,                /**< FLexCAN1 Wake Up */
+  IRQ_COUNT
 } IRQn_Type;
 
 /*!

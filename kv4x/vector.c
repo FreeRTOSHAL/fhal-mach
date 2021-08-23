@@ -8,7 +8,7 @@
 #include "vector.h"
 #include <core_cm4.h>
 #include <system.h>
-#include <S32K144.h>
+#include <MKV46F16.h>
 
 /* Device specific interrupts */
 void dummy_handler();
