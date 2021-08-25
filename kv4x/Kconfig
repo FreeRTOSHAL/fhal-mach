@@ -46,13 +46,16 @@ config USE_NXP_LIB
 config MACH_NEED_GENERIC_SYSINIT
 	bool
 	default y
-#config ARCH_SYSINIT_EARLY_INIT
-#	bool
-#	default y
+config ARCH_SYSINIT_EARLY_INIT
+	bool
+	default y
 config MACH_NEED_ARM_INIT
 	bool
 	default y
 
+config MACH_KV4X_DISABLE_WDOG
+	bool "Disable Watchdog at startup"
+	default y
 # GPIO Subsytem is use by muxing system
 config KV4X_GPIO
 	bool
