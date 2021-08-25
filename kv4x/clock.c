@@ -3,6 +3,7 @@
 #include <clock.h>
 #include <hal.h>
 #include <MKV46F16.h>
+#include <nxp/clock.h>
 
 #ifdef CONFIG_MACH_MKV4X_FRDIV_LOW_1
 # define FRDIV_VALUE 0
@@ -520,6 +521,8 @@ struct clock {
 	volatile MCG_Type *mcg;
 	volatile SIM_Type *sim;
 	volatile OSC_Type *osc;
+	uint32_t FLLSpeed;
+	uint32_t MCGOUTCLK; /* PLL Out*/
 	uint32_t sysClk; /* max 168 MHz in High Speed */
 	uint32_t fastPerfClk; /* max 84 MHz in High Speed, must /1 /2 /4 /8 of sysClk */
 	uint32_t flashClk; /* max 24 in High Speed */
@@ -553,21 +556,23 @@ struct clock *clock_init() {
 	/* check we are in FEI Mode */
 	CONFIG_ASSERT(((MCG->C1 & MCG_C1_CLKS_MASK) >> MCG_C1_CLKS_SHIFT) == 0);
 	CONFIG_ASSERT(((MCG->C1 & MCG_C1_IREFS_MASK) >> MCG_C1_IREFS_SHIFT) == 0x1);
-	CONFIG_ASSERT(((MCG->C1 & MCG_C6_PLLS_MASK) >> MCG_C6_PLLS_SHIFT) == 0x1);
+	CONFIG_ASSERT(((MCG->C6 & MCG_C6_PLLS_MASK) >> MCG_C6_PLLS_SHIFT) == 0x0);
 
 #ifdef CONFIG_EXTERNAL_OSCILLATOR
 	/* Calculate Clock Speed and check against specification  */
 	{
 		uint32_t PLLOut = ((CONFIG_MACH_OSCILLATOR_SPEED / PRDIV) * VDIV) / 2;
 		uint32_t FLLSpeed = (CONFIG_MACH_OSCILLATOR_SPEED / FRDIV);
+		clock.FLLSpeed = FLLSpeed;
+		clock.MCGOUTCLK = PLLOut;
 		clock.sysClk = PLLOut / OUTDIV1;
 		clock.fastPerfClk = PLLOut / OUTDIV2;
-		clock.flashClk = PLLOut / OUTDIV2;
+		clock.flashClk = PLLOut / OUTDIV4;
 		CONFIG_ASSERT(clock.sysClk <= 168000000UL);
 		CONFIG_ASSERT(clock.fastPerfClk <= 100000000UL);
-		CONFIG_ASSERT((clock.fastPerfClk % clock.sysClk) == 0);
+		CONFIG_ASSERT((clock.sysClk % clock.fastPerfClk) == 0);
 		CONFIG_ASSERT(clock.flashClk <= 25000000);
-
+	
 		/* FLL Speed must be 31.25 kHz to 39.0625 kHz */
 		CONFIG_ASSERT(FLLSpeed >= 31250 && FLLSpeed <= 39063);
 	}
@@ -613,9 +618,9 @@ struct clock *clock_init() {
 			/* C1[FRDIV] must be written to divide 
 			 * external reference clock to be within
 			 * the range of 31.25 kHz to 39.0625 kHz. */
-			c1 &= MCG_C1_FRDIV_MASK;
+			c1 &= ~MCG_C1_FRDIV_MASK;
 			c1 |= MCG_C1_FRDIV(FRDIV_VALUE);
-			c1 &= MCG_C1_IREFS_MASK;
+			c1 &= ~MCG_C1_IREFS_MASK;
 			/* External reference clock is selected*/
 			c1 |= MCG_C1_IREFS(0);
 			MCG->C1 = c1;
@@ -623,7 +628,7 @@ struct clock *clock_init() {
 			/* wait for it stable */
 			while ((MCG->S & MCG_S_OSCINIT0_MASK) == 0);
 			/* Wait for Reference clock Status bit to clear */
-			while (((MCG->S & MCG_S_IREFST_MASK) >> MCG_S_IREFST_SHIFT) == 0);
+			while (((MCG->S & MCG_S_IREFST_MASK) >> MCG_S_IREFST_SHIFT) != 0);
 		}
 		/* change back */
 		MCG->C4 = c4;
@@ -637,6 +642,7 @@ struct clock *clock_init() {
 #endif
 			c4 &= ~MCG_C4_DRST_DRS_MASK;
 			c4 |= MCG_C4_DRST_DRS(DRST_DRS);
+			MCG->C4 = c4;
 			while (((MCG->S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) != 0x2);
 			{
 				/* Wait for FLL is stable */
@@ -656,7 +662,7 @@ struct clock *clock_init() {
 		uint8_t c6;
 		MCG->C2 &= ~MCG_C2_LP_MASK; /* Disable Low Power Mode*/
 		/* Disable PLL first, then configure PLL */
-		MCG->C6 &= MCG_C6_PLLS_MASK;
+		MCG->C6 &= ~MCG_C6_PLLS_MASK;
 		c5 = MCG->C5;
 
 		c5 &= ~MCG_C5_PRDIV0_MASK;
@@ -677,14 +683,30 @@ struct clock *clock_init() {
 		/* Wait for PLL lock. */
 		while (((MCG->S & MCG_S_LOCK0_MASK) >> MCG_S_LOCK0_SHIFT) == 0);
 	}
-	/* set Flash Clock to 16 */
-	SIM->CLKDIV1 |= SIM_CLKDIV1_OUTDIV4(15);
+	{
+		uint32_t reg = SIM->CLKDIV1;
+		uint32_t outdiv1 = ((reg & SIM_CLKDIV1_OUTDIV1_MASK) >> SIM_CLKDIV1_OUTDIV1_SHIFT);
+		uint32_t outdiv2 = ((reg & SIM_CLKDIV1_OUTDIV2_MASK) >> SIM_CLKDIV1_OUTDIV2_SHIFT);
+		uint32_t outdiv4 = ((reg & SIM_CLKDIV1_OUTDIV4_MASK) >> SIM_CLKDIV1_OUTDIV4_SHIFT);
+
+		/* check Clock Div bevor we switch to a higher speed, if the div to low we exceed the maximum limit */
+		if (outdiv1 < OUTDIV1_VALUE) {
+			reg |= (reg & ~SIM_CLKDIV1_OUTDIV1_MASK) | SIM_CLKDIV1_OUTDIV1(OUTDIV1_VALUE);
+		}
+		if (outdiv2 < OUTDIV2_VALUE) {
+			reg |= (reg & ~SIM_CLKDIV1_OUTDIV2_MASK) | SIM_CLKDIV1_OUTDIV2(OUTDIV2_VALUE);
+		}
+		if (outdiv4 < OUTDIV4_VALUE) {
+			reg |= (reg & ~SIM_CLKDIV1_OUTDIV4_MASK) | SIM_CLKDIV1_OUTDIV4(OUTDIV4_VALUE);
+		}
+		SIM->CLKDIV1 = reg;
+	}
 
 
 	/* finaly we go to the PLL Engaged External (PEE) Mode */
 	{
 		uint8_t c1 = MCG->C1;
-		c1 &= MCG_C1_CLKS_MASK;
+		c1 &= ~MCG_C1_CLKS_MASK;
 		/* swtich to PLL */
 		c1 |= MCG_C1_CLKS(0);
 		MCG->C1 = c1;
@@ -692,23 +714,41 @@ struct clock *clock_init() {
 		while(((MCG->S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) != 0x3);
 	}
 
-	/* set up the clock divider */
-
+	/* set up the final clock divider */
 	{
-		SIM->CLKDIV1 = 
+		int32_t reg = SIM->CLKDIV1;
+
+		reg = 
 			SIM_CLKDIV1_OUTDIV1(OUTDIV1_VALUE) | 
 			SIM_CLKDIV1_OUTDIV2(OUTDIV2_VALUE) | 
 			SIM_CLKDIV1_OUTDIV4(OUTDIV4_VALUE);
+		SIM->CLKDIV1 = reg;
 	}
 
 #endif
 	return &clock;
 }
 int64_t clock_getCPUSpeed(struct clock *clk) {
-	return 0; /* TODO */
+	return clock.sysClk / 2;
 }
 int64_t clock_getPeripherySpeed(struct clock *clk, uint32_t id) {
-	return 0; /* TODO */
+	switch (id) {
+		case CLOCK_MCGOUTCLK:
+		case CLOCK_MCGPLLCLK:
+			return clock.MCGOUTCLK;
+		case CLOCK_FASTPREFCLK:
+			return clock.fastPerfClk;
+		case CLOCK_FLASHCLK:
+			return clock.flashClk;
+#ifdef CONFIG_EXTERNAL_OSCILLATOR
+		case CLOCK_OSCERCLK_UNDIV:
+			return CONFIG_MACH_OSCILLATOR_SPEED;
+#endif
+		case CLOCK_MCGFFCLK:
+			return clock.FLLSpeed;
+		default:
+			return -1;
+	}
 }
 int32_t clock_deinit(struct clock *c) {
 	(void) c;

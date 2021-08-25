@@ -245,3 +245,17 @@ const struct vector_table vector_table SECTION(".vectors") = {
 		[CAN1_Wake_Up_IRQn] = CAN1_Wake_Up_isr, /**< FLexCAN1 Wake Up */
 	}
 };
+
+//*****************************************************************************
+// Flash Configuration block : 16-byte flash configuration field that stores
+// default protection settings (loaded on reset) and security information that
+// allows the MCU to restrict access to the Flash Memory module.
+// Placed at address 0x400 by the linker script.
+//*****************************************************************************
+__attribute__ ((used,section(".flashconfig"))) const struct {
+    unsigned int word1;
+    unsigned int word2;
+    unsigned int word3;
+    unsigned int word4;
+} Flash_Config = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE};
+

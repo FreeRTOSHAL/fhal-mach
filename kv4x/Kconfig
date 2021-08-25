@@ -69,13 +69,13 @@ menuconfig EXTERNAL_OSCILLATOR
 	default y
 if EXTERNAL_OSCILLATOR=y
 	comment "Waring: PLL Setting could damage Target" 
-	config MACH_OSCILLATOR_SPEED
-		int "External Oscillator / CLOCK Speed (Hz)"
-		default 8000000
 	config MACH_MKV4X_EXTERNAL_REF_CLOCK
 		bool "Use External reference clock"
 		default no
 	comment "External Crystal / Resonator Settings"
+	config MACH_OSCILLATOR_SPEED
+		int "External Oscillator / CLOCK Speed (Hz)"
+		default 8000000
 	choice
 		prompt "ERCLK prescaler"
 		config MACH_MKV4X_ERCLK_1
