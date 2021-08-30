@@ -21,6 +21,7 @@ sysinit_early_init:
 	bx lr
 
 .section .text
+.align 4
 #ifdef CONFIG_MACH_KV4X_DISABLE_WDOG
 WDOG_UNLOCK: .word 0x4005200E
 WDOG_KEY0: .word 0x0000C520

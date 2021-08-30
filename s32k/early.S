@@ -62,6 +62,7 @@ sysinit_early_init:
 	bx lr
 
 .section .text
+.align 4
 #ifdef CONFIG_MACH_S32K_DISABLE_WDOG
 WDOG_CS: .word 0x40052000
 WDOG_CS_INIT: .word ((0x1 << 13) | (0x0 << 8) | (0 << 7) | (1 << 5))
