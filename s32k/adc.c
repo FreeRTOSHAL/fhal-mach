@@ -15,7 +15,7 @@
 #include <os.h>
 #include <semphr.h>
 
-#ifdef CONFIG_ADC_THREAD_SAVE
+#ifdef CONFIG_ADC_THREAD_SAFE
 #define CTRL_LOCK(adc, waittime, ret) { \
 		BaseType_t lret = xSemaphoreTakeRecursive(adc->ctrl->lock, waittime); \
 		if (lret == pdTRUE) {\
@@ -40,7 +40,7 @@ struct adc_ctrl {
 	 */
 	bool init;
 	struct adc_generic gen;
-#ifdef CONFIG_ADC_THREAD_SAVE
+#ifdef CONFIG_ADC_THREAD_SAFE
 	/**
 	 * Mutex
 	 */
@@ -154,7 +154,7 @@ ADC_INIT(nxp, index, bits, hz) {
 	if (!ctrl->init) {
 		/* Lock Controller while setup */
 		CTRL_LOCK(adc, 0, NULL);
-#ifdef CONFIG_ADC_THREAD_SAVE
+#ifdef CONFIG_ADC_THREAD_SAFE
 		ctrl->lock = OS_CREATE_MUTEX_RECURSIVE(ctrl->lock);
 		if (!ctrl->lock) {
 			goto nxp_adc_init_error0;
@@ -225,7 +225,7 @@ nxp_adc_init_error2:
 	CTRL_UNLOCK(adc, NULL);
 nxp_adc_init_error1:
 	if (ctrl->channelInUse <= 1) {
-#ifdef CONFIG_ADC_THREAD_SAVE
+#ifdef CONFIG_ADC_THREAD_SAFE
 		vSemaphoreDelete(adc->ctrl->lock);
 #endif
 		/* remove clock */
@@ -243,7 +243,7 @@ ADC_DEINIT(nxp, adc) {
 	CTRL_UNLOCK(adc, -1);
 	if (adc->ctrl->channelInUse <= 1) {
 		/* TODO deinit controller */
-		#ifdef CONFIG_ADC_THREAD_SAVE
+		#ifdef CONFIG_ADC_THREAD_SAFE
 			vSemaphoreDelete(adc->ctrl->lock);
 		#endif
 	}
