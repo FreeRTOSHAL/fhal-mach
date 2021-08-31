@@ -336,6 +336,8 @@ PWM_SET_DUTY_CYCLE(ftm, pwm, us) {
 		/* Duty Cycle biger then period */
 		return -1;
 	}
+	if (counterValue == ftm->base->mod)
+		counterValue++;
 	ftm->base->ch[pwm->channel].cv = (uint32_t) counterValue;
 	__DSB();
 	__ISB();
