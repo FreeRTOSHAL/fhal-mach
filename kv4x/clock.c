@@ -90,22 +90,22 @@
 #ifdef CONFIG_MACH_MKV4X_OSC_CAP2P
 # define OSC_CAP2P OSC_CR_SC2P_MASK
 #else
-# define OSC_CAP2P
+# define OSC_CAP2P 0
 #endif
 #ifdef CONFIG_MACH_MKV4X_OSC_CAP4P
-# define OSC_CAP2P OSC_CR_SC4P_MASK
+# define OSC_CAP4P OSC_CR_SC4P_MASK
 #else
-# define OSC_CAP4P
+# define OSC_CAP4P 0
 #endif
 #ifdef CONFIG_MACH_MKV4X_OSC_CAP8P
-# define OSC_CAP2P OSC_CR_SC8P_MASK
+# define OSC_CAP8P OSC_CR_SC8P_MASK
 #else
-# define OSC_CAP8P
+# define OSC_CAP8P 0
 #endif
 #ifdef CONFIG_MACH_MKV4X_OSC_CAP16P
-# define OSC_CAP2P OSC_CR_SC16P_MASK
+# define OSC_CAP16P OSC_CR_SC16P_MASK
 #else
-# define OSC_CAP16P
+# define OSC_CAP16P 0
 #endif
 #define CAP_VALUE (OSC_CAP2P | OSC_CAP4P | OSC_CAP8P | OSC_CAP16P)
 

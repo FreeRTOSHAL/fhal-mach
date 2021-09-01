@@ -335,8 +335,10 @@ static void clearBss(volatile uint32_t *dst, volatile uint32_t *src) {
 }
 
 void NAKED reset_handler() {
-	volatile uint32_t *dst, *src, *tableaddr;
-	volatile uint32_t len;
+	volatile register uint32_t *dst asm("r8"); 
+	volatile register uint32_t *src asm("r9"); 
+	volatile register uint32_t *tableaddr asm("r10");
+	volatile register uint32_t len asm("r11");
 
 	asm volatile(
 		"mov r0, #0" "\n"
