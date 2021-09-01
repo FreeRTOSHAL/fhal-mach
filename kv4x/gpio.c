@@ -9,6 +9,8 @@
 #include <gpio_prv.h>
 #include <nxp/gpio.h>
 #include <vector.h>
+#include <MKV46F16.h>
+
 #define GPIO0_BASE 0x400FF000
 #define GPIO1_BASE 0x400FF040
 #define GPIO2_BASE 0x400FF080
@@ -20,14 +22,12 @@
 #define GPIO3_INT 0x4004C000
 #define GPIO4_INT 0x4004D000
 int32_t nxp_gpio_setupClock(struct gpio *gpio) {
-	/* TODO */
-	/*PCC_Type *pcc = PCC;
-
-	pcc->PCCn[PCC_PORTA_INDEX] = PCC_PCCn_CGC_MASK;
-	pcc->PCCn[PCC_PORTB_INDEX] = PCC_PCCn_CGC_MASK;
-	pcc->PCCn[PCC_PORTC_INDEX] = PCC_PCCn_CGC_MASK;
-	pcc->PCCn[PCC_PORTD_INDEX] = PCC_PCCn_CGC_MASK;
-	pcc->PCCn[PCC_PORTE_INDEX] = PCC_PCCn_CGC_MASK;*/
+	/* enable Clocks for all Ports */
+	SIM->SCGC5 |= SIM_SCGC5_PORTA_MASK;
+	SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
+	SIM->SCGC5 |= SIM_SCGC5_PORTC_MASK;
+	SIM->SCGC5 |= SIM_SCGC5_PORTD_MASK;
+	SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK;
 	return 0;
 }
 static struct gpio gpio = {
