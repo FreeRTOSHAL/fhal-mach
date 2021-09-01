@@ -546,8 +546,6 @@ struct clock *clock_init() {
 		return &clock;
 	}
 	clock.gen.init = true;
-	/* sets the system clock dividers in SIM to safe */
-	clock.sim->CLKDIV1 = 0x11070000U;
 
 	/* After Reset we are in FLL Engaged Internal (FEI) Mode */
 	/* checking FFL input is the internal RC */
@@ -559,16 +557,34 @@ struct clock *clock_init() {
 	CONFIG_ASSERT(((MCG->C6 & MCG_C6_PLLS_MASK) >> MCG_C6_PLLS_SHIFT) == 0x0);
 
 #ifdef CONFIG_EXTERNAL_OSCILLATOR
+	/* sets the system clock dividers in SIM to safe */
+	clock.sim->CLKDIV1 = 0x11070000U;
 	/* Calculate Clock Speed and check against specification  */
 	{
+#ifdef CONFIG_MACH_MKV4X_EXTERNAL
 		uint32_t PLLOut = ((CONFIG_MACH_OSCILLATOR_SPEED / PRDIV) * VDIV) / 2;
 		uint32_t FLLSpeed = (CONFIG_MACH_OSCILLATOR_SPEED / FRDIV);
+#endif
+#ifdef CONFIG_MACH_MKV4X_INTERNAL
+		//uint32_t FLLSpeed = 32000; /* 32 kHz */
+		uint32_t FLLSpeed = 32768;
+#endif
 		clock.FLLSpeed = FLLSpeed;
+#ifdef CONFIG_MACH_MKV4X_INTERNAL
+		clock.MCGOUTCLK = FLLSpeed * FLL_FACTOR;
+#endif
+#ifdef CONFIG_MACH_MKV4X_EXTERNAL
 		clock.MCGOUTCLK = PLLOut;
-		clock.sysClk = PLLOut / OUTDIV1;
-		clock.fastPerfClk = PLLOut / OUTDIV2;
-		clock.flashClk = PLLOut / OUTDIV4;
+#endif
+		clock.sysClk = clock.MCGOUTCLK / OUTDIV1;
+		clock.fastPerfClk = clock.MCGOUTCLK / OUTDIV2;
+		clock.flashClk = clock.MCGOUTCLK / OUTDIV4;
+#ifdef CONFIG_MACH_MKV4X_INTERNAL
+		CONFIG_ASSERT(clock.sysClk <= 100000000UL);
+#endif
+#ifdef CONFIG_MACH_MKV4X_EXTERNAL
 		CONFIG_ASSERT(clock.sysClk <= 168000000UL);
+#endif
 		CONFIG_ASSERT(clock.fastPerfClk <= 100000000UL);
 		CONFIG_ASSERT((clock.sysClk % clock.fastPerfClk) == 0);
 		CONFIG_ASSERT(clock.flashClk <= 25000000);
@@ -576,17 +592,18 @@ struct clock *clock_init() {
 		/* FLL Speed must be 31.25 kHz to 39.0625 kHz */
 		CONFIG_ASSERT(FLLSpeed >= 31250 && FLLSpeed <= 39063);
 	}
+#ifdef CONFIG_MACH_MKV4X_EXTERNAL
 	/* Setup Frequency Range Select of external Oscillator */
 	MCG->C2 = (MCG->C2 & ~MCG_C2_RANGE_MASK) | MCG_C2_RANGE(RANGE);
 
 	/* Setup External Oscillator */
 	OSC->DIV = ERCLK_VALUE;
-#ifdef CONFIG_MACH_MKV4X_EXTERNAL_REF_CLOCK
+# ifdef CONFIG_MACH_MKV4X_EXTERNAL_REF_CLOCK
 	/* Select External Oscillator */
 	MCG->C2 |= MCG_C2_EREFS_MASK;
 	OSC->CR |= OSC_CR_ERCLKEN_MASK;
 	OSC->CR &= ~OSC_CR_EREFSTEN_MASK;
-#else
+# else
 	MCG->C2 &= ~MCG_C2_EREFS_MASK;
 	MCG->C2 = (MCG->C2 & ~MCG_C2_HGO_MASK) | HGO_VALUE;
 	OSC->CR = (OSC->CR & ~(OSC_CR_SC2P_MASK | OSC_CR_SC4P_MASK | OSC_CR_SC8P_MASK | OSC_CR_SC16P_MASK)) | CAP_VALUE;
@@ -595,8 +612,56 @@ struct clock *clock_init() {
 
 	/* Wait for stable. */
 	while ((MCG->S & MCG_S_OSCINIT0_MASK) == 0);
+# endif
 #endif
 
+#ifdef CONFIG_MACH_MKV4X_INTERNAL
+	/* Swtich to FLL Bypassed Internal (FBI) */
+	{
+		
+		uint8_t c1 = MCG->C1;
+		c1 &= ~MCG_C1_CLKS_MASK;
+		c1 |= MCG_C1_CLKS(1);
+		c1 &= ~MCG_C1_IREFS_MASK;
+		c1 |= MCG_C1_IREFS(1);
+		
+		/* select fast IRC Clock for internel soruce, before we swtich zu FBI */
+		MCG->C2 |= MCG_C2_IRCS_MASK;
+
+		MCG->C1 = c1;;
+
+		MCG->C2 &= ~MCG_C2_LP_MASK;
+		MCG->C6 &= ~MCG_C6_PLLS_MASK;
+		while (((MCG->S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) != 0x1);
+	}
+	{
+		uint8_t c4 = MCG->C4;
+#ifndef CONFIG_MACH_MKV4X_DMX32
+		c4 &= ~MCG_C4_DMX32_MASK;
+#else
+		c4 |= MCG_C4_DMX32_MASK;
+#endif
+		c4 &= ~MCG_C4_DRST_DRS_MASK;
+		c4 |= MCG_C4_DRST_DRS(DRST_DRS);
+		MCG->C4 = c4;
+		{
+			/* Wait for FLL is stable */
+			uint32_t i = 30000U;
+			while (i--) {
+				asm volatile ("nop");
+			}
+		}
+	}
+	{
+		uint8_t c1 = MCG->C1;
+		c1 &= ~MCG_C1_CLKS_MASK;
+		/* switch to FLL */
+		c1 |= MCG_C1_CLKS(0);
+		MCG->C1 = c1;
+		while (((MCG->S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) != 0x0);
+	}
+#endif
+#ifdef CONFIG_MACH_MKV4X_EXTERNAL
 	/* we want to switch to PLL so we must go to FLL Bypassed External (FBE) Mode */
 	/* frist switch FLL to external Source then go to the FBE Mode */
 	{
@@ -713,6 +778,7 @@ struct clock *clock_init() {
 
 		while(((MCG->S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) != 0x3);
 	}
+#endif
 
 	/* set up the final clock divider */
 	{
@@ -740,7 +806,7 @@ int64_t clock_getPeripherySpeed(struct clock *clk, uint32_t id) {
 			return clock.fastPerfClk;
 		case CLOCK_FLASHCLK:
 			return clock.flashClk;
-#ifdef CONFIG_EXTERNAL_OSCILLATOR
+#ifdef CONFIG_MACH_MKV4X_EXTERNAL
 		case CLOCK_OSCERCLK_UNDIV:
 			return CONFIG_MACH_OSCILLATOR_SPEED;
 #endif
