@@ -40,6 +40,9 @@ config MACH_HAS_PWM
 config MACH_HAS_CAPTURE
 	bool
 	default y
+config MACH_HAS_CAN
+	bool
+	default y
 config USE_NXP_LIB
 	bool
 	default y
@@ -383,3 +386,11 @@ if EXTERNAL_OSCILLATOR=y
 			bool "/16"
 	endchoice
 endif
+menuconfig MACH_KV4X_FLEXCAN
+	depends on CAN
+	select NXP_FLEXCAN
+	bool "Activate FlexCAN"
+	default n
+	if MACH_KV4X_FLEXCAN
+	source mach/kv4x/Kconfig.can
+	endif

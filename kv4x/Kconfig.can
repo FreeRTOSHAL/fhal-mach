@@ -1,0 +1,77 @@
+comment "Waring: Loopback Mode disable physical connection to the CAN Bus!"
+	depends on NXP_FLEXCAN_LOOP_BACK_MODE
+config NXP_FLEXCAN_LOOP_BACK_MODE
+	bool "Activate Loopback Mode (Debug Mode)"
+	default n
+	help
+		Activate Loopback Debug Mode
+		All sended messages are also recived
+		The real bus is disconeded in this mode!
+menuconfig MACH_KV4X_FLEXCAN_CAN0
+	bool "CAN 0"
+	default n
+if MACH_KV4X_FLEXCAN_CAN0=y
+	choice 
+		prompt "RX Pin"
+		config MACH_KV4X_FLEXCAN_CAN0_RX_PTA13
+			bool "PTA13"
+		config MACH_KV4X_FLEXCAN_CAN0_RX_PTB17
+			bool "PTB17"
+		config MACH_KV4X_FLEXCAN_CAN0_RX_PTB19
+			bool "PTB19"
+	endchoice
+	choice 
+		prompt "TX Pin"
+		config MACH_KV4X_FLEXCAN_CAN0_TX_PTA12
+			bool "PTA12"
+		config MACH_KV4X_FLEXCAN_CAN0_TX_PTB16
+			bool "PTB16"
+		config MACH_KV4X_FLEXCAN_CAN0_TX_PTB18
+			bool "PTB18"
+	endchoice
+	comment "Waring: More than 15 Filter are not posible"
+		depends on MACH_KV4X_FLEXCAN_CAN0_MAX_FILTER > 15
+	config MACH_KV4X_FLEXCAN_CAN0_MAX_FILTER
+		int "Max Input Filters"
+		default 2
+	config MACH_KV4X_FLEXCAN_CAN0_FILTER_QUEUE_ENTRIES
+		int "Max Filter Software Queue Entries"
+		default 2
+		help
+			The Hardware has only one entrie per filter
+			so we need a software queue to store the messages
+
+			How manny CAN Frames can be stored in this software queue?
+endif
+menuconfig MACH_KV4X_FLEXCAN_CAN1
+	bool "CAN 1"
+	default n
+if MACH_KV4X_FLEXCAN_CAN1=y
+	choice 
+		prompt "RX Pin"
+		config MACH_KV4X_FLEXCAN_CAN1_RX_PTE25
+			bool "PTE25"
+		config MACH_KV4X_FLEXCAN_CAN1_RX_PTC16
+			bool "PTC16"
+	endchoice
+	choice 
+		prompt "TX Pin"
+		config MACH_KV4X_FLEXCAN_CAN1_TX_PTE24
+			bool "PTE24"
+		config MACH_KV4X_FLEXCAN_CAN1_TX_PTC17
+			bool "PTC17"
+	endchoice
+	comment "Waring: More than 15 Filter are not posible"
+		depends on MACH_KV4X_FLEXCAN_CAN1_MAX_FILTER > 15
+	config MACH_KV4X_FLEXCAN_CAN1_MAX_FILTER
+		int "Max Input Filters"
+		default 2
+	config MACH_KV4X_FLEXCAN_CAN1_FILTER_QUEUE_ENTRIES
+		int "Max Filter Software Queue Entries"
+		default 2
+		help
+			The Hardware has only one entrie per filter
+			so we need a software queue to store the messages
+
+			How manny CAN Frames can be stored in this software queue?
+endif

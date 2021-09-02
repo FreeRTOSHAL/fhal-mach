@@ -795,7 +795,7 @@ struct clock *clock_init() {
 	return &clock;
 }
 int64_t clock_getCPUSpeed(struct clock *clk) {
-	return clock.sysClk / 2;
+	return clock.sysClk;
 }
 int64_t clock_getPeripherySpeed(struct clock *clk, uint32_t id) {
 	switch (id) {
