@@ -13,8 +13,11 @@
 #include <irq.h>
 #include <nxp/flexcan.h>
 
-/* TODO to config */
+#ifdef CONFIG_NXP_FLEXCAN_DEBUG
 # define PRINTF(fmt, ...) printf("Flexcan: " fmt, ##__VA_ARGS__)
+#else
+# define PRINTF(fmt, ...)
+#endif
 
 void nxp_flexcan_disable(struct can *can) {
 	can->base->mcr |= FLEXCAN_MCR_MDIS_MASK;
