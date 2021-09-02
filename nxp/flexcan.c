@@ -16,13 +16,13 @@
 /* TODO to config */
 # define PRINTF(fmt, ...) printf("Flexcan: " fmt, ##__VA_ARGS__)
 
-static void nxp_flexcan_disable(struct can *can) {
+void nxp_flexcan_disable(struct can *can) {
 	can->base->mcr |= FLEXCAN_MCR_MDIS_MASK;
 	/* Wait Controller got ot Disable or Stop mode */
 	while (!(can->base->mcr & FLEXCAN_MCR_LPMACK_MASK));
 }
 
-static void nxp_flexcan_enable(struct can *can) {
+void nxp_flexcan_enable(struct can *can) {
 	can->base->mcr &= ~FLEXCAN_MCR_MDIS_MASK;
 	/* Wait Controller is in Disable or Stop mode no more */
 	while (can->base->mcr & FLEXCAN_MCR_LPMACK_MASK);
@@ -80,10 +80,6 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh, callback, data) {
 	can->task = NULL;
 	can->errorCallback = callback;
 	can->userData = data;
-	/* Select Clock Source controller must be disabled! */
-	nxp_flexcan_disable(can);
-	/* Select SOSCDIV2 as clock src */
-	can->base->ctrl1 &= ~FLEXCAN_CTRL1_CLKSRC_MASK;
 	nxp_flexcan_enable(can);
 
 	/* Enter Freeze Mode and Halt Mode until can_up is called */
@@ -97,8 +93,18 @@ CAN_INIT(flexcan, index, bitrate, pin, pinHigh, callback, data) {
 	can->base->mcr |= FLEXCAN_MCR_IRMQ_MASK;
 	/* enable Warn IRQ */
 	can->base->mcr |= FLEXCAN_MCR_WRNEN_MASK;
+#ifdef CONFIG_NXP_FLEXCAN_LOOP_BACK_MODE
+	/* self reception enabled */
+	can->base->mcr &= ~FLEXCAN_MCR_SRXDIS_MASK;
+#else
 	/* self reception is dissabled */
 	can->base->mcr |= FLEXCAN_MCR_SRXDIS_MASK;
+#endif
+	/* check DOZE Mode is enable */
+	if (can->base->mcr & FLEXCAN_MCR_DOZE_MASK) {
+		/* disable Low Power Mode */
+		can->base->mcr &= ~FLEXCAN_MCR_DOZE_MASK;
+	}
 
 	if (can->mb_count > 16) {
 		/* enable 32 MBs */
