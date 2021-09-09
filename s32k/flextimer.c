@@ -163,6 +163,7 @@ static struct timer ftm_timer_0 =  {
 #else
 	.capture = NULL,
 # endif
+	.channelCount = 8,
 };
 TIMER_ADDDEV(ftm, ftm_timer_0);
 void FTM0_Ch0_Ch1_isr() {
@@ -221,6 +222,7 @@ static struct timer ftm_timer_1 =  {
 #else
 	.capture = NULL,
 # endif
+	.channelCount = 8,
 };
 TIMER_ADDDEV(ftm, ftm_timer_1);
 void FTM1_Ch0_Ch1_isr() {
@@ -278,6 +280,7 @@ static struct timer ftm_timer_2 =  {
 #else
 	.capture = NULL,
 # endif
+	.channelCount = 8,
 };
 TIMER_ADDDEV(ftm, ftm_timer_2);
 void FTM2_Ch0_Ch1_isr() {
@@ -335,6 +338,7 @@ static struct timer ftm_timer_3 =  {
 #else
 	.capture = NULL,
 # endif
+	.channelCount = 8,
 };
 TIMER_ADDDEV(ftm, ftm_timer_3);
 void FTM3_Ch0_Ch1_isr() {

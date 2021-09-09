@@ -157,5 +157,9 @@ enum pins{
 	PTE25 = 153,
 	PTE26 = 154,
 	PTE27 = 155,
+	PTE28 = 156,
+	PTE29 = 157,
+	PTE30 = 158,
+	PTE31 = 159,
 };
 #endif

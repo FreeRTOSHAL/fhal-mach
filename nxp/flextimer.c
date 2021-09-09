@@ -467,7 +467,7 @@ TIMER_INIT(ftm, index, prescaler, basetime, adjust) {
 	}
 	ftm->base->qdctrl = 0;
 
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < ftm->channelCount; i++) {
 		ftm->base->ch[i].csc = 0;
 		ftm->base->ch[i].cv = 0;
 	}

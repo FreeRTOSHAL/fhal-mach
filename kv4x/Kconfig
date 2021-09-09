@@ -394,3 +394,12 @@ menuconfig MACH_KV4X_FLEXCAN
 	if MACH_KV4X_FLEXCAN
 	source mach/kv4x/Kconfig.can
 	endif
+menuconfig MACH_KV4X_FLEXTIMER
+	depends on TIMER
+	select NXP_FLEXTIMER
+	select NXP_FLEXTIMER_VERSION_1
+	bool "Activate Flextimer"
+	default n
+	if MACH_KV4X_FLEXTIMER
+	source mach/kv4x/Kconfig.timer
+	endif

@@ -68,10 +68,11 @@ static struct timer ftm_timer_0 =  {
 	.base = VF610FLEXTIMER_0,
 	.irqnr = {42},
 	.irqcount = 1,
-	.clk = FTM_CLK_SYSTEM;
+	.clk = FTM_CLK_SYSTEM,
 #ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE
 	.capture = (struct capture const **) &ftm_captures_0,
 #endif
+	.channelCount = 8,
 };
 TIMER_ADDDEV(ftm, ftm_timer_0);
 void flextimer0_isr() {
@@ -86,10 +87,11 @@ static struct timer ftm_timer_1 = {
 	.base = VF610FLEXTIMER_1,
 	.irqnr = {43},
 	.irqcount = 1,
-	.clk = FTM_CLK_SYSTEM;
+	.clk = FTM_CLK_SYSTEM,
 #ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE
 	.capture = (struct capture const **) &ftm_captures_1,
 #endif
+	.channelCount = 8,
 };
 TIMER_ADDDEV(ftm, ftm_timer_1);
 void flextimer1_isr() {
@@ -104,10 +106,11 @@ static struct timer ftm_timer_2 = {
 	.base = VF610FLEXTIMER_2,
 	.irqnr = {44},
 	.irqcount = 1,
-	.clk = FTM_CLK_SYSTEM;
+	.clk = FTM_CLK_SYSTEM,
 #ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE
 	.capture = (struct capture const **) &ftm_captures_2,
 #endif
+	.channelCount = 8,
 };
 TIMER_ADDDEV(ftm, ftm_timer_2);
 void flextimer2_isr() {
@@ -122,10 +125,11 @@ static struct timer ftm_timer_3 = {
 	.base = VF610FLEXTIMER_3,
 	.irqnr = {45},
 	.irqcount = 1,
-	.clk = FTM_CLK_SYSTEM;
+	.clk = FTM_CLK_SYSTEM,
 #ifdef CONFIG_MACH_VF610_FLEXTIMER_CAPTURE
 	.capture = (struct capture const **) &ftm_captures_3,
 #endif
+	.channelCount = 8,
 };
 TIMER_ADDDEV(ftm, ftm_timer_3);
 void flextimer3_isr() {
