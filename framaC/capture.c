@@ -17,6 +17,7 @@
   behavior outofarray: 
     assumes index >= _devs_size;
     ensures \result == NULL;
+    assigns \nothing;
   behavior inarray:
     assumes index < _devs_size;
     ensures \valid(\result);
@@ -24,6 +25,7 @@
     ensures ((struct capture_framaC *) \result)->gen.init == true;
     ensures ((struct capture_framaC *) \result)->index == index;
     ensures \old(((struct capture_framaC *) _devs[index])->gen.init) == false ==> ((struct capture_framaC *) \result)->value == 0;
+    assigns *((struct capture_framaC *) _devs[index]);
   complete behaviors;
   disjoint behaviors;
  */
@@ -50,7 +52,7 @@ framaC_capture_init_error0:
 }
 /*@
   requires \valid(c);
-requires ((struct capture_framaC *) c)->gen.init == true;
+  requires ((struct capture_framaC *) c)->gen.init == true;
   ensures result: \result == 0;
   ensures ((struct capture_framaC *) c)->gen.init == false;
  */
