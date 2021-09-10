@@ -26,6 +26,10 @@ int32_t flexcan_setupClock(struct can *can) {
 	struct clock *clock = clock_init();
 	pcc->PCCn[clk->clkIndex] = PCC_PCCn_CGC_MASK;
 	can->freq = clock_getPeripherySpeed(clock, CLOCK_SOSC_DIV2);
+	/* Select Clock Source controller must be disabled! */
+	nxp_flexcan_disable(can);
+	/* Select SOSCDIV2 as clock src */
+	can->base->ctrl1 &= ~FLEXCAN_CTRL1_CLKSRC_MASK;
 	return 0;
 }
 int32_t flexcan_setupPins(struct can *can) {

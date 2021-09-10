@@ -53,6 +53,7 @@ struct timer {
 	const uint32_t clk;
 	const uint32_t irqcount;
 	const uint32_t irqnr[6];
+	const uint32_t channelCount;
 };
 
 struct pwm_pin {

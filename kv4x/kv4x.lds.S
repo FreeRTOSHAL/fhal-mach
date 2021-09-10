@@ -8,24 +8,21 @@
 
 ENTRY(reset_handler)
 
+#define FLASH_SIZE 128K
+#define RAM_SIZE 16K
+
 MEM_START
-#ifdef CONFIG_ARCH_RISCV_MMODE
-	flash (rxa) : ORIGIN = 0x80000000, LENGTH = 512K
-	sram (wxa) : ORIGIN = 0x80080000, LENGTH = 512K
-#endif
-#ifdef CONFIG_ARCH_RISCV_SMODE
-	flash (rxa) : ORIGIN = 0x81000000, LENGTH = 512K
-	sram (wxa) : ORIGIN = 0x81080000, LENGTH = 512K
-#endif
+	MEM_ADD(flash, 0x0, FLASH_SIZE)
+	MEM_ADD(sram, (0x20000000 - (RAM_SIZE / 2)), RAM_SIZE)
 MEM_STOP
 
 SECTIONS_START
 	. = ORIGIN(flash);
-	SECTION_START(.init) . = ALIGN(4);
-		*(.init)
-	SECTION_STOP(flash)
 	VECTOR_START
 		VECTOR_DEFAULT
+		. = 0x400;
+		*(.flashconfig)
+		. = ALIGN(0x4);
 	VECTOR_STOP(flash)
 
 	TEXT_START

@@ -1,0 +1,377 @@
+/* SPDX-License-Identifier: MIT */
+/*
+ * Author: Andreas Werner <kernel@andy89.org>
+ * Date: 2021
+ */
+#include <FreeRTOS.h>
+#include <task.h>
+#include <plic.h>
+#include <system.h>
+#include <vector.h>
+
+/* Device specific interrupts */
+void dummy_handler();
+void WEAK ALIAS(dummy_handler) gpio0_2_0_isr(void); /* 13  */
+void WEAK ALIAS(dummy_handler) gpio0_2_1_isr(void); /* 14  */
+void WEAK ALIAS(dummy_handler) gpio0_2_2_isr(void); /* 15  */
+void WEAK ALIAS(dummy_handler) gpio0_2_3_isr(void); /* 16  */
+void WEAK ALIAS(dummy_handler) gpio0_2_4_isr(void); /* 17  */
+void WEAK ALIAS(dummy_handler) gpio0_2_5_isr(void); /* 18  */
+void WEAK ALIAS(dummy_handler) gpio0_2_6_isr(void); /* 19  */
+void WEAK ALIAS(dummy_handler) gpio0_2_7_isr(void); /* 20  */
+void WEAK ALIAS(dummy_handler) gpio0_2_8_isr(void); /* 21  */
+void WEAK ALIAS(dummy_handler) gpio0_2_9_isr(void); /* 22  */
+void WEAK ALIAS(dummy_handler) gpio0_2_10_isr(void); /* 23  */
+void WEAK ALIAS(dummy_handler) gpio0_2_11_isr(void); /* 24  */
+void WEAK ALIAS(dummy_handler) gpio0_2_12_isr(void); /* 25  */
+void WEAK ALIAS(dummy_handler) gpio0_2_13_isr(void); /* 26  */
+void WEAK ALIAS(dummy_handler) gpio1_2_0_isr(void); /* 27  */
+void WEAK ALIAS(dummy_handler) gpio1_2_1_isr(void); /* 28  */
+void WEAK ALIAS(dummy_handler) gpio1_2_2_isr(void); /* 29  */
+void WEAK ALIAS(dummy_handler) gpio1_2_3_isr(void); /* 30  */
+void WEAK ALIAS(dummy_handler) gpio1_2_4_isr(void); /* 31  */
+void WEAK ALIAS(dummy_handler) gpio1_2_5_isr(void); /* 32  */
+void WEAK ALIAS(dummy_handler) gpio1_2_6_isr(void); /* 33  */
+void WEAK ALIAS(dummy_handler) gpio1_2_7_isr(void); /* 34  */
+void WEAK ALIAS(dummy_handler) gpio1_2_8_isr(void); /* 35  */
+void WEAK ALIAS(dummy_handler) gpio1_2_9_isr(void); /* 36  */
+void WEAK ALIAS(dummy_handler) gpio1_2_10_isr(void); /* 37  */
+void WEAK ALIAS(dummy_handler) gpio1_2_11_isr(void); /* 38  */
+void WEAK ALIAS(dummy_handler) gpio1_2_12_isr(void); /* 39  */
+void WEAK ALIAS(dummy_handler) gpio1_2_13_isr(void); /* 40  */
+void WEAK ALIAS(dummy_handler) gpio1_2_14_isr(void); /* 41  */
+void WEAK ALIAS(dummy_handler) gpio1_2_15_isr(void); /* 42  */
+void WEAK ALIAS(dummy_handler) gpio1_2_16_isr(void); /* 43  */
+void WEAK ALIAS(dummy_handler) gpio1_2_17_isr(void); /* 44  */
+void WEAK ALIAS(dummy_handler) gpio1_2_18_isr(void); /* 45  */
+void WEAK ALIAS(dummy_handler) gpio1_2_19_isr(void); /* 46  */
+void WEAK ALIAS(dummy_handler) gpio1_2_20_isr(void); /* 47  */
+void WEAK ALIAS(dummy_handler) gpio1_2_21_isr(void); /* 48  */
+void WEAK ALIAS(dummy_handler) gpio1_2_22_isr(void); /* 49  */
+void WEAK ALIAS(dummy_handler) gpio1_2_23_isr(void); /* 50  */
+void WEAK ALIAS(dummy_handler) dma_irq0_isr(void); /* 5 */
+void WEAK ALIAS(dummy_handler) dma_irq1_isr(void); /* 6 */
+void WEAK ALIAS(dummy_handler) dma_irq2_isr(void); /* 7 */
+void WEAK ALIAS(dummy_handler) dma_irq3_isr(void); /* 8 */
+void WEAK ALIAS(dummy_handler) dma_irq4_isr(void); /* 9 */
+void WEAK ALIAS(dummy_handler) dma_irq5_isr(void); /* 10 */
+void WEAK ALIAS(dummy_handler) dma_irq6_isr(void); /* 11 */
+void WEAK ALIAS(dummy_handler) dma_irq7_isr(void); /* 12 */
+void WEAK ALIAS(dummy_handler) gpio0_non_direct_isr(void); /* 51  */
+void WEAK ALIAS(dummy_handler) gpio1_non_direct_isr(void); /* 52  */
+void WEAK ALIAS(dummy_handler) gpio2_non_direct_isr(void); /* 53  */
+void WEAK ALIAS(dummy_handler) spi0_isr(void); /* 54  */
+void WEAK ALIAS(dummy_handler) spi1_isr(void); /* 55  */
+void WEAK ALIAS(dummy_handler) can0_isr(void); /* 56  */
+void WEAK ALIAS(dummy_handler) can1_isr(void); /* 57  */
+void WEAK ALIAS(dummy_handler) i2c0_main_isr(void); /* 58  */
+void WEAK ALIAS(dummy_handler) i2c0_alert_isr(void); /* 59  */
+void WEAK ALIAS(dummy_handler) i2c0_sus_isr(void); /* 60  */
+void WEAK ALIAS(dummy_handler) i2c1_main_isr(void); /* 61  */
+void WEAK ALIAS(dummy_handler) i2c1_alert_isr(void); /* 62  */
+void WEAK ALIAS(dummy_handler) i2c1_sus_isr(void); /* 63  */
+void WEAK ALIAS(dummy_handler) mac0_int_isr(void); /* 64  */
+void WEAK ALIAS(dummy_handler) mac0_queue1_isr(void); /* 65  */
+void WEAK ALIAS(dummy_handler) mac0_queue2_isr(void); /* 66  */
+void WEAK ALIAS(dummy_handler) mac0_queue3_isr(void); /* 67  */
+void WEAK ALIAS(dummy_handler) mac0_emac_isr(void); /* 68  */
+void WEAK ALIAS(dummy_handler) mac0_mmsl_isr(void); /* 69  */
+void WEAK ALIAS(dummy_handler) mac1_int_isr(void); /* 70  */
+void WEAK ALIAS(dummy_handler) mac1_queue1_isr(void); /* 71  */
+void WEAK ALIAS(dummy_handler) mac1_queue2_isr(void); /* 72  */
+void WEAK ALIAS(dummy_handler) mac1_queue3_isr(void); /* 73  */
+void WEAK ALIAS(dummy_handler) mac1_emac_isr(void); /* 74  */
+void WEAK ALIAS(dummy_handler) mac1_mmsl_isr(void); /* 75  */
+void WEAK ALIAS(dummy_handler) ddrc_train_isr(void); /* 76  */
+void WEAK ALIAS(dummy_handler) scb_interrupt_isr(void); /* 77  */
+void WEAK ALIAS(dummy_handler) ecc_error_isr(void); /* 78  */
+void WEAK ALIAS(dummy_handler) ecc_correct_isr(void); /* 79  */
+void WEAK ALIAS(dummy_handler) rtc_wakeup_isr(void); /* 80  */
+void WEAK ALIAS(dummy_handler) rtc_match_isr(void); /* 81  */
+void WEAK ALIAS(dummy_handler) timer1_isr(void); /* 82  */
+void WEAK ALIAS(dummy_handler) timer2_isr(void); /* 83  */
+void WEAK ALIAS(dummy_handler) envm_isr(void); /* 84  */
+void WEAK ALIAS(dummy_handler) qspi_isr(void); /* 85  */
+void WEAK ALIAS(dummy_handler) usb_dma_isr(void); /* 86  */
+void WEAK ALIAS(dummy_handler) usb_mc_isr(void); /* 87  */
+void WEAK ALIAS(dummy_handler) mmc_main_isr(void); /* 88  */
+void WEAK ALIAS(dummy_handler) mmc_wakeup_isr(void); /* 89  */
+void WEAK ALIAS(dummy_handler) mmuart0_isr(void); /* 90  */
+void WEAK ALIAS(dummy_handler) mmuart1_isr(void); /* 91  */
+void WEAK ALIAS(dummy_handler) mmuart2_isr(void); /* 92  */
+void WEAK ALIAS(dummy_handler) mmuart3_isr(void); /* 93  */
+void WEAK ALIAS(dummy_handler) mmuart4_isr(void); /* 94  */
+void WEAK ALIAS(dummy_handler) wdog0_mvrp_isr(void); /* 100  */
+void WEAK ALIAS(dummy_handler) wdog1_mvrp_isr(void); /* 101  */
+void WEAK ALIAS(dummy_handler) wdog2_mvrp_isr(void); /* 102  */
+void WEAK ALIAS(dummy_handler) wdog3_mvrp_isr(void); /* 103  */
+void WEAK ALIAS(dummy_handler) wdog4_mvrp_isr(void); /* 104  */
+void WEAK ALIAS(dummy_handler) wdog0_tout_isr(void); /* 105  */
+void WEAK ALIAS(dummy_handler) wdog1_tout_isr(void); /* 106  */
+void WEAK ALIAS(dummy_handler) wdog2_tout_isr(void); /* 107  */
+void WEAK ALIAS(dummy_handler) wdog3_tout_isr(void); /* 108  */
+void WEAK ALIAS(dummy_handler) wdog4_tout_isr(void); /* 109  */
+void WEAK ALIAS(dummy_handler) g5c_devrst_isr(void); /* 95  */
+void WEAK ALIAS(dummy_handler) g5c_message_isr(void); /* 96  */
+void WEAK ALIAS(dummy_handler) usoc_vc_interrupt_isr(void); /* 97  */
+void WEAK ALIAS(dummy_handler) usoc_smb_interrupt_isr(void); /* 98  */
+void WEAK ALIAS(dummy_handler) error_isr(void); /* 99  */
+void WEAK ALIAS(dummy_handler) g5c_mss_spi_isr(void); /* 110  */
+void WEAK ALIAS(dummy_handler) volt_temp_alarm_isr(void); /* 111  */
+void WEAK ALIAS(dummy_handler) athena_complete_isr(void); /* 112  */
+void WEAK ALIAS(dummy_handler) athena_alarm_isr(void); /* 113  */
+void WEAK ALIAS(dummy_handler) athena_buserror_isr(void); /* 114  */
+void WEAK ALIAS(dummy_handler) usoc_axic_us_isr(void); /* 115  */
+void WEAK ALIAS(dummy_handler) usoc_axic_ds_isr(void); /* 116  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_0_isr(void); /* 118  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_1_isr(void); /* 119  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_2_isr(void); /* 120  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_3_isr(void); /* 121  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_4_isr(void); /* 122  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_5_isr(void); /* 123  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_6_isr(void); /* 124  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_7_isr(void); /* 125  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_8_isr(void); /* 126  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_9_isr(void); /* 127  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_10_isr(void); /* 128  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_11_isr(void); /* 129  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_12_isr(void); /* 130  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_13_isr(void); /* 131  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_14_isr(void); /* 132  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_15_isr(void); /* 133  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_16_isr(void); /* 134  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_17_isr(void); /* 135  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_18_isr(void); /* 136  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_19_isr(void); /* 137  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_20_isr(void); /* 138  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_21_isr(void); /* 139  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_22_isr(void); /* 140  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_23_isr(void); /* 141  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_24_isr(void); /* 142  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_25_isr(void); /* 143  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_26_isr(void); /* 144  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_27_isr(void); /* 145  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_28_isr(void); /* 146  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_29_isr(void); /* 147  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_30_isr(void); /* 148  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_31_isr(void); /* 149  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_32_isr(void); /* 150  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_33_isr(void); /* 151  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_34_isr(void); /* 152  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_35_isr(void); /* 153  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_36_isr(void); /* 154  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_37_isr(void); /* 155  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_38_isr(void); /* 156  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_39_isr(void); /* 157  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_40_isr(void); /* 158  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_41_isr(void); /* 159  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_42_isr(void); /* 160  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_43_isr(void); /* 161  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_44_isr(void); /* 162  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_45_isr(void); /* 163  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_46_isr(void); /* 164  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_47_isr(void); /* 165  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_48_isr(void); /* 166  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_49_isr(void); /* 167  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_50_isr(void); /* 168  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_51_isr(void); /* 169  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_52_isr(void); /* 170  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_53_isr(void); /* 171  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_54_isr(void); /* 172  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_55_isr(void); /* 173  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_56_isr(void); /* 174  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_57_isr(void); /* 175  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_58_isr(void); /* 176  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_59_isr(void); /* 177  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_60_isr(void); /* 178  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_61_isr(void); /* 179  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_62_isr(void); /* 180  */
+void WEAK ALIAS(dummy_handler) fabric_f2h_63_isr(void); /* 181  */
+
+typedef void (*vector_table_entry_t)(void);
+vector_table_entry_t vector[CONFIG_MACH_IRQ_COUNT] = {
+	[0 ... 4] = dummy_handler,
+	[DMA_IRQ0_IRQn] = dma_irq0_isr,
+	[DMA_IRQ1_IRQn] = dma_irq1_isr,
+	[DMA_IRQ2_IRQn] = dma_irq2_isr,
+	[DMA_IRQ3_IRQn] = dma_irq3_isr,
+	[DMA_IRQ4_IRQn] = dma_irq4_isr,
+	[DMA_IRQ5_IRQn] = dma_irq5_isr,
+	[DMA_IRQ6_IRQn] = dma_irq6_isr,
+	[DMA_IRQ7_IRQn] = dma_irq7_isr,
+	[GPIO0_2_0_IRQn] = gpio0_2_0_isr /* 0 13 */,
+	[GPIO0_2_1_IRQn] = gpio0_2_1_isr /* 1 14 */,
+	[GPIO0_2_2_IRQn] = gpio0_2_2_isr /* 2 15 */,
+	[GPIO0_2_3_IRQn] = gpio0_2_3_isr /* 3 16 */,
+	[GPIO0_2_4_IRQn] = gpio0_2_4_isr /* 4 17 */,
+	[GPIO0_2_5_IRQn] = gpio0_2_5_isr /* 5 18 */,
+	[GPIO0_2_6_IRQn] = gpio0_2_6_isr /* 6 19 */,
+	[GPIO0_2_7_IRQn] = gpio0_2_7_isr /* 7 20 */,
+	[GPIO0_2_8_IRQn] = gpio0_2_8_isr /* 8 21 */,
+	[GPIO0_2_9_IRQn] = gpio0_2_9_isr /* 9 22 */,
+	[GPIO0_2_10_IRQn] = gpio0_2_10_isr /* 10 23 */,
+	[GPIO0_2_11_IRQn] = gpio0_2_11_isr /* 11 24 */,
+	[GPIO0_2_12_IRQn] = gpio0_2_12_isr /* 12 25 */,
+	[GPIO0_2_13_IRQn] = gpio0_2_13_isr /* 13 26 */,
+	[GPIO1_2_0_IRQn] = gpio1_2_0_isr /* 14 27 */,
+	[GPIO1_2_1_IRQn] = gpio1_2_1_isr /* 15 28 */,
+	[GPIO1_2_2_IRQn] = gpio1_2_2_isr /* 16 29 */,
+	[GPIO1_2_3_IRQn] = gpio1_2_3_isr /* 17 30 */,
+	[GPIO1_2_4_IRQn] = gpio1_2_4_isr /* 18 31 */,
+	[GPIO1_2_5_IRQn] = gpio1_2_5_isr /* 19 32 */,
+	[GPIO1_2_6_IRQn] = gpio1_2_6_isr /* 20 33 */,
+	[GPIO1_2_7_IRQn] = gpio1_2_7_isr /* 21 34 */,
+	[GPIO1_2_8_IRQn] = gpio1_2_8_isr /* 22 35 */,
+	[GPIO1_2_9_IRQn] = gpio1_2_9_isr /* 23 36 */,
+	[GPIO1_2_10_IRQn] = gpio1_2_10_isr /* 24 37 */,
+	[GPIO1_2_11_IRQn] = gpio1_2_11_isr /* 25 38 */,
+	[GPIO1_2_12_IRQn] = gpio1_2_12_isr /* 26 39 */,
+	[GPIO1_2_13_IRQn] = gpio1_2_13_isr /* 27 40 */,
+	[GPIO1_2_14_IRQn] = gpio1_2_14_isr /* 28 41 */,
+	[GPIO1_2_15_IRQn] = gpio1_2_15_isr /* 29 42 */,
+	[GPIO1_2_16_IRQn] = gpio1_2_16_isr /* 30 43 */,
+	[GPIO1_2_17_IRQn] = gpio1_2_17_isr /* 31 44 */,
+	[GPIO1_2_18_IRQn] = gpio1_2_18_isr /* 32 45 */,
+	[GPIO1_2_19_IRQn] = gpio1_2_19_isr /* 33 46 */,
+	[GPIO1_2_20_IRQn] = gpio1_2_20_isr /* 34 47 */,
+	[GPIO1_2_21_IRQn] = gpio1_2_21_isr /* 35 48 */,
+	[GPIO1_2_22_IRQn] = gpio1_2_22_isr /* 36 49 */,
+	[GPIO1_2_23_IRQn] = gpio1_2_23_isr /* 37 50 */,
+	[GPIO0_NON_DIRECT_IRQn] = gpio0_non_direct_isr /* 38 51 */,
+	[GPIO1_NON_DIRECT_IRQn] = gpio1_non_direct_isr /* 39 52 */,
+	[GPIO2_NON_DIRECT_IRQn] = gpio2_non_direct_isr /* 40 53 */,
+	[SPI0_IRQn] = spi0_isr /* 41 54 */,
+	[SPI1_IRQn] = spi1_isr /* 42 55 */,
+	[CAN0_IRQn] = can0_isr /* 43 56 */,
+	[CAN1_IRQn] = can1_isr /* 44 57 */,
+	[I2C0_MAIN_IRQn] = i2c0_main_isr /* 45 58 */,
+	[I2C0_ALERT_IRQn] = i2c0_alert_isr /* 46 59 */,
+	[I2C0_SUS_IRQn] = i2c0_sus_isr /* 47 60 */,
+	[I2C1_MAIN_IRQn] = i2c1_main_isr /* 48 61 */,
+	[I2C1_ALERT_IRQn] = i2c1_alert_isr /* 49 62 */,
+	[I2C1_SUS_IRQn] = i2c1_sus_isr /* 50 63 */,
+	[MAC0_INT_IRQn] = mac0_int_isr /* 51 64 */,
+	[MAC0_QUEUE1_IRQn] = mac0_queue1_isr /* 52 65 */,
+	[MAC0_QUEUE2_IRQn] = mac0_queue2_isr /* 53 66 */,
+	[MAC0_QUEUE3_IRQn] = mac0_queue3_isr /* 54 67 */,
+	[MAC0_EMAC_IRQn] = mac0_emac_isr /* 55 68 */,
+	[MAC0_MMSL_IRQn] = mac0_mmsl_isr /* 56 69 */,
+	[MAC1_INT_IRQn] = mac1_int_isr /* 57 70 */,
+	[MAC1_QUEUE1_IRQn] = mac1_queue1_isr /* 58 71 */,
+	[MAC1_QUEUE2_IRQn] = mac1_queue2_isr /* 59 72 */,
+	[MAC1_QUEUE3_IRQn] = mac1_queue3_isr /* 60 73 */,
+	[MAC1_EMAC_IRQn] = mac1_emac_isr /* 61 74 */,
+	[MAC1_MMSL_IRQn] = mac1_mmsl_isr /* 62 75 */,
+	[DDRC_TRAIN_IRQn] = ddrc_train_isr /* 63 76 */,
+	[SCB_INTERRUPT_IRQn] = scb_interrupt_isr /* 64 77 */,
+	[ECC_ERROR_IRQn] = ecc_error_isr /* 65 78 */,
+	[ECC_CORRECT_IRQn] = ecc_correct_isr /* 66 79 */,
+	[RTC_WAKEUP_IRQn] = rtc_wakeup_isr /* 67 80 */,
+	[RTC_MATCH_IRQn] = rtc_match_isr /* 68 81 */,
+	[TIMER1_IRQn] = timer1_isr /* 69 82 */,
+	[TIMER2_IRQn] = timer2_isr /* 70 83 */,
+	[ENVM_IRQn] = envm_isr /* 71 84 */,
+	[QSPI_IRQn] = qspi_isr /* 72 85 */,
+	[USB_DMA_IRQn] = usb_dma_isr /* 73 86 */,
+	[USB_MC_IRQn] = usb_mc_isr /* 74 87 */,
+	[MMC_MAIN_IRQn] = mmc_main_isr /* 75 88 */,
+	[MMC_WAKEUP_IRQn] = mmc_wakeup_isr /* 76 89 */,
+	[MMUART0_IRQn] = mmuart0_isr /* 77 90 */,
+	[MMUART1_IRQn] = mmuart1_isr /* 78 91 */,
+	[MMUART2_IRQn] = mmuart2_isr /* 79 92 */,
+	[MMUART3_IRQn] = mmuart3_isr /* 80 93 */,
+	[MMUART4_IRQn] = mmuart4_isr /* 81 94 */,
+	[G5C_DEVRST_IRQn] = g5c_devrst_isr /* 82 95 */,
+	[G5C_MESSAGE_IRQn] = g5c_message_isr /* 83 96 */,
+	[USOC_VC_INTERRUPT_IRQn] = usoc_vc_interrupt_isr /* 84 97 */,
+	[USOC_SMB_INTERRUPT_IRQn] = usoc_smb_interrupt_isr /* 85 98 */,
+	[ERROR_IRQn] = error_isr, /* 89 99 */
+	[WDOG0_MVRP_IRQn] = wdog0_mvrp_isr /* 87 100 */,
+	[WDOG1_MVRP_IRQn] = wdog1_mvrp_isr /* 88 101 */,
+	[WDOG2_MVRP_IRQn] = wdog2_mvrp_isr /* 89 102 */,
+	[WDOG3_MVRP_IRQn] = wdog3_mvrp_isr /* 90 103 */,
+	[WDOG4_MVRP_IRQn] = wdog4_mvrp_isr /* 91 104 */,
+	[WDOG0_TOUT_IRQn] = wdog0_tout_isr /* 92 105 */,
+	[WDOG1_TOUT_IRQn] = wdog1_tout_isr /* 93 106 */,
+	[WDOG2_TOUT_IRQn] = wdog2_tout_isr /* 94 107 */,
+	[WDOG3_TOUT_IRQn] = wdog3_tout_isr /* 95 108 */,
+	[WDOG4_TOUT_IRQn] = wdog4_tout_isr /* 96 109 */,
+	[G5C_MSS_SPI_IRQn] = g5c_mss_spi_isr /* 97 110 */,
+	[VOLT_TEMP_ALARM_IRQn] = volt_temp_alarm_isr /* 98 111 */,
+	[ATHENA_COMPLETE_IRQn] = athena_complete_isr /* 99 112 */,
+	[ATHENA_ALARM_IRQn] = athena_alarm_isr /* 100 113 */,
+	[ATHENA_BUSERROR_IRQn] = athena_buserror_isr /* 101 114 */,
+	[USOC_AXIC_US_IRQn] = usoc_axic_us_isr /* 102 115 */,
+	[USOC_AXIC_DS_IRQn] = usoc_axic_ds_isr /* 103 116 */,
+	[117] = dummy_handler,
+	[FABRIC_F2H_0_IRQn] = fabric_f2h_0_isr /* 105 118 */,
+	[FABRIC_F2H_1_IRQn] = fabric_f2h_1_isr /* 106 119 */,
+	[FABRIC_F2H_2_IRQn] = fabric_f2h_2_isr /* 107 120 */,
+	[FABRIC_F2H_3_IRQn] = fabric_f2h_3_isr /* 108 121 */,
+	[FABRIC_F2H_4_IRQn] = fabric_f2h_4_isr /* 109 122 */,
+	[FABRIC_F2H_5_IRQn] = fabric_f2h_5_isr /* 110 123 */,
+	[FABRIC_F2H_6_IRQn] = fabric_f2h_6_isr /* 111 124 */,
+	[FABRIC_F2H_7_IRQn] = fabric_f2h_7_isr /* 112 125 */,
+	[FABRIC_F2H_8_IRQn] = fabric_f2h_8_isr /* 113 126 */,
+	[FABRIC_F2H_9_IRQn] = fabric_f2h_9_isr /* 114 127 */,
+	[FABRIC_F2H_10_IRQn] = fabric_f2h_10_isr /* 115 128 */,
+	[FABRIC_F2H_11_IRQn] = fabric_f2h_11_isr /* 116 129 */,
+	[FABRIC_F2H_12_IRQn] = fabric_f2h_12_isr /* 117 130 */,
+	[FABRIC_F2H_13_IRQn] = fabric_f2h_13_isr /* 118 131 */,
+	[FABRIC_F2H_14_IRQn] = fabric_f2h_14_isr /* 119 132 */,
+	[FABRIC_F2H_15_IRQn] = fabric_f2h_15_isr /* 120 133 */,
+	[FABRIC_F2H_16_IRQn] = fabric_f2h_16_isr /* 121 134 */,
+	[FABRIC_F2H_17_IRQn] = fabric_f2h_17_isr /* 122 135 */,
+	[FABRIC_F2H_18_IRQn] = fabric_f2h_18_isr /* 123 136 */,
+	[FABRIC_F2H_19_IRQn] = fabric_f2h_19_isr /* 124 137 */,
+	[FABRIC_F2H_20_IRQn] = fabric_f2h_20_isr /* 125 138 */,
+	[FABRIC_F2H_21_IRQn] = fabric_f2h_21_isr /* 126 139 */,
+	[FABRIC_F2H_22_IRQn] = fabric_f2h_22_isr /* 127 140 */,
+	[FABRIC_F2H_23_IRQn] = fabric_f2h_23_isr /* 128 141 */,
+	[FABRIC_F2H_24_IRQn] = fabric_f2h_24_isr /* 129 142 */,
+	[FABRIC_F2H_25_IRQn] = fabric_f2h_25_isr /* 130 143 */,
+	[FABRIC_F2H_26_IRQn] = fabric_f2h_26_isr /* 131 144 */,
+	[FABRIC_F2H_27_IRQn] = fabric_f2h_27_isr /* 132 145 */,
+	[FABRIC_F2H_28_IRQn] = fabric_f2h_28_isr /* 133 146 */,
+	[FABRIC_F2H_29_IRQn] = fabric_f2h_29_isr /* 134 147 */,
+	[FABRIC_F2H_30_IRQn] = fabric_f2h_30_isr /* 135 148 */,
+	[FABRIC_F2H_31_IRQn] = fabric_f2h_31_isr /* 136 149 */,
+	[FABRIC_F2H_32_IRQn] = fabric_f2h_32_isr /* 137 150 */,
+	[FABRIC_F2H_33_IRQn] = fabric_f2h_33_isr /* 138 151 */,
+	[FABRIC_F2H_34_IRQn] = fabric_f2h_34_isr /* 139 152 */,
+	[FABRIC_F2H_35_IRQn] = fabric_f2h_35_isr /* 140 153 */,
+	[FABRIC_F2H_36_IRQn] = fabric_f2h_36_isr /* 141 154 */,
+	[FABRIC_F2H_37_IRQn] = fabric_f2h_37_isr /* 142 155 */,
+	[FABRIC_F2H_38_IRQn] = fabric_f2h_38_isr /* 143 156 */,
+	[FABRIC_F2H_39_IRQn] = fabric_f2h_39_isr /* 144 157 */,
+	[FABRIC_F2H_40_IRQn] = fabric_f2h_40_isr /* 145 158 */,
+	[FABRIC_F2H_41_IRQn] = fabric_f2h_41_isr /* 146 159 */,
+	[FABRIC_F2H_42_IRQn] = fabric_f2h_42_isr /* 147 160 */,
+	[FABRIC_F2H_43_IRQn] = fabric_f2h_43_isr /* 148 161 */,
+	[FABRIC_F2H_44_IRQn] = fabric_f2h_44_isr /* 149 162 */,
+	[FABRIC_F2H_45_IRQn] = fabric_f2h_45_isr /* 150 163 */,
+	[FABRIC_F2H_46_IRQn] = fabric_f2h_46_isr /* 151 164 */,
+	[FABRIC_F2H_47_IRQn] = fabric_f2h_47_isr /* 152 165 */,
+	[FABRIC_F2H_48_IRQn] = fabric_f2h_48_isr /* 153 166 */,
+	[FABRIC_F2H_49_IRQn] = fabric_f2h_49_isr /* 154 167 */,
+	[FABRIC_F2H_50_IRQn] = fabric_f2h_50_isr /* 155 168 */,
+	[FABRIC_F2H_51_IRQn] = fabric_f2h_51_isr /* 156 169 */,
+	[FABRIC_F2H_52_IRQn] = fabric_f2h_52_isr /* 157 170 */,
+	[FABRIC_F2H_53_IRQn] = fabric_f2h_53_isr /* 158 171 */,
+	[FABRIC_F2H_54_IRQn] = fabric_f2h_54_isr /* 159 172 */,
+	[FABRIC_F2H_55_IRQn] = fabric_f2h_55_isr /* 160 173 */,
+	[FABRIC_F2H_56_IRQn] = fabric_f2h_56_isr /* 161 174 */,
+	[FABRIC_F2H_57_IRQn] = fabric_f2h_57_isr /* 162 175 */,
+	[FABRIC_F2H_58_IRQn] = fabric_f2h_58_isr /* 163 176 */,
+	[FABRIC_F2H_59_IRQn] = fabric_f2h_59_isr /* 164 177 */,
+	[FABRIC_F2H_60_IRQn] = fabric_f2h_60_isr /* 165 178 */,
+	[FABRIC_F2H_61_IRQn] = fabric_f2h_61_isr /* 166 179 */,
+	[FABRIC_F2H_62_IRQn] = fabric_f2h_62_isr /* 167 180 */,
+	[FABRIC_F2H_63_IRQn] = fabric_f2h_63_isr /* 168 181 */,
+};
+
+volatile struct plic *PLIC = (void * ) 0xc000000;
+
+void dummy_handler() {
+	CONFIG_ASSERT(0);
+}

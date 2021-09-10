@@ -1,0 +1,61 @@
+comment "Micochip PolarFire Settings"
+config MACH_LD_SCRIPT
+	string 
+	default "mach/polarfire/riscv.lds"
+config MACH_INCLUDE
+	string
+	default "-Imach/polarfire/include"
+config MACH_HAS_MTIME
+	bool
+	default y
+config MACH_DEFINE_HEAP
+	bool
+	default y
+config MACH_MTIME_BASE_ADDRESS
+	int
+	default 33603576 # 0x0200bff8
+config MACH_MTIMECMP_BASE_ADDRESS
+	int
+	default 33570824 # 0x02004008
+config MACH_INIT_STACK_SIZE
+	int "Init Stack Size"
+	default 600
+config MACH_NEED_RISCV_INIT
+	bool
+	default y
+config MACH_NEED_RISCV_HARDWARE_FLOAD
+	bool
+	default y
+config MACH_HAS_PLIC
+	bool
+	default y
+config MACH_IRQ_COUNT
+	int 
+	default 185
+config MACH_IRQ_MAX_PRIO
+	int 
+	default 7
+config MACH_HAS_NEWLIB
+	bool
+	default y
+config MACH_HAS_UART
+	bool
+	default y
+#config MACH_HAS_TIMER
+#	bool
+#	default y
+config MACH_NEED_GENERIC_SYSINIT
+	bool
+	default y
+config MACH_RISCV_64BIT
+	select ARCH_64BIT
+	bool 
+	default y
+
+config MACH_CFLAGS
+	string
+	default "-march=rv64imafd -mabi=lp64d"
+config MACH_AFLAGS
+	string
+	default "-march=rv64imafd -mabi=lp64d"
+	# RV64ACDFIM

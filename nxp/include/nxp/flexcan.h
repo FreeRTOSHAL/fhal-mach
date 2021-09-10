@@ -16,7 +16,7 @@
 struct flexcan_mb {
 	uint32_t ctrl;
 	uint32_t id;
-	uint8_t data[8]; /* resize if CAN FD is used */
+	uint32_t data[2]; /* resize if CAN FD is used */
 };
 
 /* Structure of the hardware registers */
@@ -122,10 +122,11 @@ struct can {
 	struct can_bittiming_const const *btc;
 	const uint32_t filterLength;
 	const uint32_t filterCount;
-	const uint32_t irqIDs[5];
+	const uint32_t irqIDs[6];
 	const uint32_t irqNum;
 	struct gpio_pin *enablePin;
 	bool pinHigh;
+	bool up;
 	struct can_bittiming bt;
 	int64_t freq;
 	uint32_t mb_count;
@@ -145,6 +146,8 @@ void flexcan_handleErrorIRQ(struct can *can);
 /* Message buffer (0-15) IRQ */
 /* Message buffer (16-31) IRQ */
 void flexcan_handleMBIRQ(struct can *can);
+void nxp_flexcan_disable(struct can *can);
+void nxp_flexcan_enable(struct can *can);
 
 #ifdef CONFIG_CAN_MULTI
 extern const struct can_ops flexcan_can_ops;
@@ -441,6 +444,10 @@ extern const struct can_ops flexcan_can_ops;
 #define FLEXCAN_MCR_SRXDIS_SHIFT                     17u
 #define FLEXCAN_MCR_SRXDIS_WIDTH                     1u
 #define FLEXCAN_MCR_SRXDIS(x)                        (((uint32_t)(((uint32_t)(x))<<FLEXCAN_MCR_SRXDIS_SHIFT))&FLEXCAN_MCR_SRXDIS_MASK)
+#define FLEXCAN_MCR_DOZE_MASK                        0x40000u
+#define FLEXCAN_MCR_DOZE_SHIFT                       18u
+#define FLEXCAN_MCR_DOZE_WIDTH                       1u
+#define FLEXCAN_MCR_DOZE(x)                          (((uint32_t)(((uint32_t)(x))<<FLEXCAN_MCR_DOZE_SHIFT))&FLEXCAN_MCR_DOZE_MASK)
 #define FLEXCAN_MCR_LPMACK_MASK                      0x100000u
 #define FLEXCAN_MCR_LPMACK_SHIFT                     20u
 #define FLEXCAN_MCR_LPMACK_WIDTH                     1u

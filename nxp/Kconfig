@@ -8,7 +8,7 @@ config NXP_FLEXTIMER
 		bool
 		default n
 		help
-			Version used by Vybird VF610
+			Version used by Vybird VF610 and KV4x
 	config NXP_FLEXTIMER_VERSION_2
 		bool
 		default n

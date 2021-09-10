@@ -48,7 +48,7 @@ if MACH_S32K_ADC0
 endif
 
 menuconfig MACH_S32K_ADC1
-	bool "ADC 0"
+	bool "ADC 1"
 if MACH_S32K_ADC1
 	choice 
 		prompt "ADC Clock"

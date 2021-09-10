@@ -73,6 +73,15 @@ config MACH_HAS_CAN
 config USE_NXP_LIB
 	bool
 	default y
+config MACH_NEED_GENERIC_SYSINIT
+	bool
+	default y
+config ARCH_SYSINIT_EARLY_INIT
+	bool
+	default y
+config MACH_NEED_ARM_INIT
+	bool
+	default y
 config MACH_S32K_DISABLE_WDOG
 	bool "Disable Watchdog at startup"
 	default y

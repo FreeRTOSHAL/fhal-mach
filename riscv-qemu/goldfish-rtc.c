@@ -65,8 +65,8 @@ TIMER_INIT(goldfish, index, prescaler, basetime, adjust) {
 	timer->periodic = false;
 	irq_setPrio(timer->irqnr, 0xFF); /* set to highst prio*/
 	irq_enable(timer->irqnr);
-	/*timer->base->timeHigh = 0;
-	timer->base->timeLow = 0;*/
+	timer->base->timeHigh = 0;
+	timer->base->timeLow = 0;
 
 	return timer;
 }

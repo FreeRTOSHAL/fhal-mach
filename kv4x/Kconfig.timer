@@ -1,0 +1,507 @@
+menuconfig MACH_KV4X_FLEXTIMER0
+	bool "Flextimer 0"
+if MACH_KV4X_FLEXTIMER0
+	choice 
+		prompt "Clock Source"
+#		config MACH_KV4X_FLEXTIMER0_CLK_EXTERN
+#			bool "Externel Clocksource"
+		config MACH_KV4X_FLEXTIMER0_CLK_SYSTEM
+			bool "CPU Clocksource"
+	endchoice
+#	choice 
+#		prompt "Externel Clocksource"
+#		depends on MACH_KV4X_FLEXTIMER0_CLK_EXTERN
+#		config MACH_KV4X_FLEXTIMER0_SPLLDIV1
+#			bool "SPLLDIV1"
+#		config MACH_KV4X_FLEXTIMER0_SOSCDIV1
+#			bool "SOSCDIV1"
+#		config MACH_KV4X_FLEXTIMER0_SIRCDIV1
+#			bool "SIRCDIV1"
+#		config MACH_KV4X_FLEXTIMER0_FIRCDIV1
+#			bool "FIRCDIV1"
+#	endchoice
+	menuconfig MACH_KV4X_FLEXTIMER0_PWM
+		bool "Activate PWM"
+		depends on PWM
+		select NXP_FLEXTIMER_PWM
+	if MACH_KV4X_FLEXTIMER0_PWM = y
+		# :%s/FLEXTIMER_PWM(\([0-9]\{1,2}\), \([0-9]\{1,2}\), \([A-Z0-9]\{4,5}\), \(MODE[0-9]\));/\t\tconfig MACH_KV4X_FLEXTIMER\1_PWM\2_\3\r\t\t\tbool "PWM \2 (\3)"/g
+		config MACH_KV4X_FLEXTIMER0_PWM0
+			bool "PWM 0"
+			choice
+				prompt "PWM 0"
+				depends on MACH_KV4X_FLEXTIMER0_PWM0
+				config MACH_KV4X_FLEXTIMER0_PWM0_PTA3
+					bool "PTA3"
+				config MACH_KV4X_FLEXTIMER0_PWM0_PTC1
+					bool "PTC1"
+				config MACH_KV4X_FLEXTIMER0_PWM0_PTD0
+					bool "PTD0"
+				config MACH_KV4X_FLEXTIMER0_PWM0_PTE24
+					bool "PTE24"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_PWM1
+			bool "PWM 1"
+			choice
+				depends on MACH_KV4X_FLEXTIMER0_PWM1
+				prompt "PWM 1"
+				config MACH_KV4X_FLEXTIMER0_PWM1_PTA4
+					bool "PTA4"
+				config MACH_KV4X_FLEXTIMER0_PWM1_PTC2
+					bool "PTC2"
+				config MACH_KV4X_FLEXTIMER0_PWM1_PTD1
+					bool "PTD1"
+				config MACH_KV4X_FLEXTIMER0_PWM1_PTE25
+					bool "PTE25"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_PWM2
+			bool "PWM 2"
+			choice
+				prompt "PWM 2"
+				depends on MACH_KV4X_FLEXTIMER0_PWM2
+				config MACH_KV4X_FLEXTIMER0_PWM2_PTA5
+					bool "PTA5"
+				config MACH_KV4X_FLEXTIMER0_PWM2_PTC3
+					bool "PTC3"
+				config MACH_KV4X_FLEXTIMER0_PWM2_PTC5
+					bool "PTC5"
+				config MACH_KV4X_FLEXTIMER0_PWM2_PTD2
+					bool "PTD2"
+				config MACH_KV4X_FLEXTIMER0_PWM2_PTE29
+					bool "PTE29"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_PWM3
+			bool "PWM 3"
+			choice
+				prompt "PWM 3"
+				depends on MACH_KV4X_FLEXTIMER0_PWM3
+				config MACH_KV4X_FLEXTIMER0_PWM3_PTC4
+					bool "PTC4"
+				config MACH_KV4X_FLEXTIMER0_PWM3_PTD3
+					bool "PTD3"
+				config MACH_KV4X_FLEXTIMER0_PWM3_PTE30
+					bool "PTE30"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_PWM4
+			bool "PWM 4"
+			choice
+				prompt "PWM 4"
+				depends on MACH_KV4X_FLEXTIMER0_PWM4
+				config MACH_KV4X_FLEXTIMER0_PWM4_PTD4
+					bool "PTD4"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_PWM5
+			bool "PWM 5"
+			choice
+				prompt "PWM 5"
+				depends on MACH_KV4X_FLEXTIMER0_PWM5
+				config MACH_KV4X_FLEXTIMER0_PWM5_PTA0
+					bool "PTA0"
+				config MACH_KV4X_FLEXTIMER0_PWM5_PTD5
+					bool "PTD5"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_PWM6
+			bool "PWM 6"
+			choice
+				prompt "PWM 6"
+				depends on MACH_KV4X_FLEXTIMER0_PWM6
+				config MACH_KV4X_FLEXTIMER0_PWM6_PTA1
+					bool "PTA1"
+				config MACH_KV4X_FLEXTIMER0_PWM6_PTD6
+					bool "PTD6"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_PWM7
+			bool "PWM 7"
+			choice
+				prompt "PWM 7"
+				depends on MACH_KV4X_FLEXTIMER0_PWM7
+				config MACH_KV4X_FLEXTIMER0_PWM7_PTA2
+					bool "PTA2"
+				config MACH_KV4X_FLEXTIMER0_PWM7_PTD7
+					bool "PTD7"
+			endchoice
+	endif
+	menuconfig MACH_KV4X_FLEXTIMER0_CAPTURE
+		bool "Activate CAPTURE"
+		depends on CAPTURE
+		select NXP_FLEXTIMER_CAPTURE
+	if MACH_KV4X_FLEXTIMER0_CAPTURE = y
+		# :%s/FLEXTIMER_CAPTURE(\([0-9]\{1,2}\), \([0-9]\{1,2}\), \([A-Z0-9]\{4,5}\), \(MODE[0-9]\));/\t\tconfig MACH_KV4X_FLEXTIMER\1_CAPTURE\2_\3\r\t\t\tbool "CAPTURE \2 (\3)"/g
+		config MACH_KV4X_FLEXTIMER0_CAPTURE0
+			bool "CAPTURE 0"
+			choice
+				prompt "CAPTURE 0"
+				depends on MACH_KV4X_FLEXTIMER0_CAPTURE0
+				config MACH_KV4X_FLEXTIMER0_CAPTURE0_PTA3
+					bool "PTA3"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE0_PTC1
+					bool "PTC1"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE0_PTD0
+					bool "PTD0"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE0_PTE24
+					bool "PTE24"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_CAPTURE1
+			bool "CAPTURE 1"
+			choice
+				depends on MACH_KV4X_FLEXTIMER0_CAPTURE1
+				prompt "CAPTURE 1"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE1_PTA4
+					bool "PTA4"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE1_PTC2
+					bool "PTC2"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE1_PTD1
+					bool "PTD1"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE1_PTE25
+					bool "PTE25"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_CAPTURE2
+			bool "CAPTURE 2"
+			choice
+				prompt "CAPTURE 2"
+				depends on MACH_KV4X_FLEXTIMER0_CAPTURE2
+				config MACH_KV4X_FLEXTIMER0_CAPTURE2_PTA5
+					bool "PTA5"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE2_PTC3
+					bool "PTC3"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE2_PTC5
+					bool "PTC5"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE2_PTD2
+					bool "PTD2"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE2_PTE29
+					bool "PTE29"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_CAPTURE3
+			bool "CAPTURE 3"
+			choice
+				prompt "CAPTURE 3"
+				depends on MACH_KV4X_FLEXTIMER0_CAPTURE3
+				config MACH_KV4X_FLEXTIMER0_CAPTURE3_PTC4
+					bool "PTC4"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE3_PTD3
+					bool "PTD3"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE3_PTE30
+					bool "PTE30"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_CAPTURE4
+			bool "CAPTURE 4"
+			choice
+				prompt "CAPTURE 4"
+				depends on MACH_KV4X_FLEXTIMER0_CAPTURE4
+				config MACH_KV4X_FLEXTIMER0_CAPTURE4_PTD4
+					bool "PTD4"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_CAPTURE5
+			bool "CAPTURE 5"
+			choice
+				prompt "CAPTURE 5"
+				depends on MACH_KV4X_FLEXTIMER0_CAPTURE5
+				config MACH_KV4X_FLEXTIMER0_CAPTURE5_PTA0
+					bool "PTA0"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE5_PTD5
+					bool "PTD5"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_CAPTURE6
+			bool "CAPTURE 6"
+			choice
+				prompt "CAPTURE 6"
+				depends on MACH_KV4X_FLEXTIMER0_CAPTURE6
+				config MACH_KV4X_FLEXTIMER0_CAPTURE6_PTA1
+					bool "PTA1"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE6_PTD6
+					bool "PTD6"
+			endchoice
+		config MACH_KV4X_FLEXTIMER0_CAPTURE7
+			bool "CAPTURE 7"
+			choice
+				prompt "CAPTURE 7"
+				depends on MACH_KV4X_FLEXTIMER0_CAPTURE7
+				config MACH_KV4X_FLEXTIMER0_CAPTURE7_PTA2
+					bool "PTA2"
+				config MACH_KV4X_FLEXTIMER0_CAPTURE7_PTD7
+					bool "PTD7"
+			endchoice
+	endif
+endif
+menuconfig MACH_KV4X_FLEXTIMER1
+	bool "Flextimer 1"
+if MACH_KV4X_FLEXTIMER1
+	choice 
+		prompt "Clock Source"
+#		config MACH_KV4X_FLEXTIMER1_CLK_EXTERN
+#			bool "Externel Clocksource"
+		config MACH_KV4X_FLEXTIMER1_CLK_SYSTEM
+			bool "CPU Clocksource"
+	endchoice
+#	choice 
+#		prompt "Externel Clocksource"
+#		depends on MACH_KV4X_FLEXTIMER1_CLK_EXTERN
+#		config MACH_KV4X_FLEXTIMER1_SPLLDIV1
+#			bool "SPLLDIV1"
+#		config MACH_KV4X_FLEXTIMER1_SOSCDIV1
+#			bool "SOSCDIV1"
+#		config MACH_KV4X_FLEXTIMER1_SIRCDIV1
+#			bool "SIRCDIV1"
+#		config MACH_KV4X_FLEXTIMER1_FIRCDIV1
+#			bool "FIRCDIV1"
+#	endchoice
+	menuconfig MACH_KV4X_FLEXTIMER1_PWM
+		bool "Activate PWM"
+		depends on PWM
+		select NXP_FLEXTIMER_PWM
+	if MACH_KV4X_FLEXTIMER1_PWM = y
+		config MACH_KV4X_FLEXTIMER1_PWM0
+			bool "PWM 0"
+			choice
+				prompt "PWM 0"
+				depends on MACH_KV4X_FLEXTIMER1_PWM0
+				config MACH_KV4X_FLEXTIMER1_PWM0_PTA12
+					bool "PTA12"
+				config MACH_KV4X_FLEXTIMER1_PWM0_PTA2
+					bool "PTA2"
+				config MACH_KV4X_FLEXTIMER1_PWM0_PTB0
+					bool "PTB0"
+				config MACH_KV4X_FLEXTIMER1_PWM0_PTD6
+					bool "PTD6"
+				config MACH_KV4X_FLEXTIMER1_PWM0_PTE20
+					bool "PTE20"
+			endchoice
+		config MACH_KV4X_FLEXTIMER1_PWM1
+			bool "PWM 1"
+			choice
+				prompt "PWM 1"
+				depends on MACH_KV4X_FLEXTIMER1_PWM1
+				config MACH_KV4X_FLEXTIMER1_PWM1_PTA13
+					bool "PTA13"
+				config MACH_KV4X_FLEXTIMER1_PWM1_PTA1
+					bool "PTA1"
+				config MACH_KV4X_FLEXTIMER1_PWM1_PTB1
+					bool "PTB1"
+				config MACH_KV4X_FLEXTIMER1_PWM1_PTD7
+					bool "PTD7"
+				config MACH_KV4X_FLEXTIMER1_PWM1_PTE21
+					bool "PTE21"
+			endchoice
+	endif
+	menuconfig MACH_KV4X_FLEXTIMER1_CAPTURE
+		bool "Activate CAPTURE"
+		depends on CAPTURE
+		select NXP_FLEXTIMER_CAPTURE
+	if MACH_KV4X_FLEXTIMER1_CAPTURE = y
+		config MACH_KV4X_FLEXTIMER1_CAPTURE0
+			bool "CAPTURE 0"
+			choice
+				prompt "CAPTURE 0"
+				depends on MACH_KV4X_FLEXTIMER1_CAPTURE0
+				config MACH_KV4X_FLEXTIMER1_CAPTURE0_PTA12
+					bool "PTA12"
+				config MACH_KV4X_FLEXTIMER1_CAPTURE0_PTA2
+					bool "PTA2"
+				config MACH_KV4X_FLEXTIMER1_CAPTURE0_PTB0
+					bool "PTB0"
+				config MACH_KV4X_FLEXTIMER1_CAPTURE0_PTD6
+					bool "PTD6"
+				config MACH_KV4X_FLEXTIMER1_CAPTURE0_PTE20
+					bool "PTE20"
+			endchoice
+		config MACH_KV4X_FLEXTIMER1_CAPTURE1
+			bool "CAPTURE 1"
+			choice
+				prompt "CAPTURE 1"
+				depends on MACH_KV4X_FLEXTIMER1_CAPTURE1
+				config MACH_KV4X_FLEXTIMER1_CAPTURE1_PTA13
+					bool "PTA13"
+				config MACH_KV4X_FLEXTIMER1_CAPTURE1_PTA1
+					bool "PTA1"
+				config MACH_KV4X_FLEXTIMER1_CAPTURE1_PTB1
+					bool "PTB1"
+				config MACH_KV4X_FLEXTIMER1_CAPTURE1_PTD7
+					bool "PTD7"
+				config MACH_KV4X_FLEXTIMER1_CAPTURE1_PTE21
+					bool "PTE21"
+			endchoice
+	endif
+endif
+menuconfig MACH_KV4X_FLEXTIMER3
+	bool "Flextimer 3"
+if MACH_KV4X_FLEXTIMER3
+	choice 
+		prompt "Clock Source"
+#		config MACH_KV4X_FLEXTIMER3_CLK_EXTERN
+#			bool "Externel Clocksource"
+		config MACH_KV4X_FLEXTIMER3_CLK_SYSTEM
+			bool "CPU Clocksource"
+	endchoice
+#	choice 
+#		prompt "Externel Clocksource"
+#		depends on MACH_KV4X_FLEXTIMER3_CLK_EXTERN
+#		config MACH_KV4X_FLEXTIMER3_SPLLDIV1
+#			bool "SPLLDIV1"
+#		config MACH_KV4X_FLEXTIMER3_SOSCDIV1
+#			bool "SOSCDIV1"
+#		config MACH_KV4X_FLEXTIMER3_SIRCDIV1
+#			bool "SIRCDIV1"
+#		config MACH_KV4X_FLEXTIMER3_FIRCDIV1
+#			bool "FIRCDIV1"
+#	endchoice
+	menuconfig MACH_KV4X_FLEXTIMER3_PWM
+		bool "Activate PWM"
+		depends on PWM
+		select NXP_FLEXTIMER_PWM
+	if MACH_KV4X_FLEXTIMER3_PWM = y
+		config MACH_KV4X_FLEXTIMER3_PWM0
+			bool "PWM 0"
+			choice
+				prompt "PWM 0"
+				depends on MACH_KV4X_FLEXTIMER3_PWM0
+				config MACH_KV4X_FLEXTIMER3_PWM0_PTD0
+					bool "PTD0"
+				config MACH_KV4X_FLEXTIMER3_PWM0_PTE5
+					bool "PTE5"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_PWM1
+			bool "PWM 1"
+			choice
+				prompt "PWM 1"
+				depends on MACH_KV4X_FLEXTIMER3_PWM1
+				config MACH_KV4X_FLEXTIMER3_PWM1_PTD1
+					bool "PTD1"
+				config MACH_KV4X_FLEXTIMER3_PWM1_PTE6
+					bool "PTE6"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_PWM2
+			bool "PWM 2"
+			choice
+				prompt "PWM 2"
+				depends on MACH_KV4X_FLEXTIMER3_PWM2
+				config MACH_KV4X_FLEXTIMER3_PWM2_PTA18
+					bool "PTA18"
+				config MACH_KV4X_FLEXTIMER3_PWM2_PTB18
+					bool "PTB18"
+				config MACH_KV4X_FLEXTIMER3_PWM2_PTD2
+					bool "PTD2"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_PWM3
+			bool "PWM 3"
+			choice
+				prompt "PWM 3"
+				depends on MACH_KV4X_FLEXTIMER3_PWM3
+				config MACH_KV4X_FLEXTIMER3_PWM3_PTB19
+					bool "PTB19"
+				config MACH_KV4X_FLEXTIMER3_PWM3_PTD3
+					bool "PTD3"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_PWM4
+			bool "PWM 4"
+			choice
+				prompt "PWM 4"
+				depends on MACH_KV4X_FLEXTIMER3_PWM4
+				config MACH_KV4X_FLEXTIMER3_PWM4_PTC8
+					bool "PTC8"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_PWM5
+			bool "PWM 5"
+			choice
+				prompt "PWM 5"
+				depends on MACH_KV4X_FLEXTIMER3_PWM5
+				config MACH_KV4X_FLEXTIMER3_PWM5_PTC9
+					bool "PTC9"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_PWM6
+			bool "PWM 6"
+			choice
+				prompt "PWM 6"
+				depends on MACH_KV4X_FLEXTIMER3_PWM6
+				config MACH_KV4X_FLEXTIMER3_PWM6_PTC10
+					bool "PTC10"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_PWM7
+			bool "PWM 7"
+			choice
+				prompt "PWM 7"
+				depends on MACH_KV4X_FLEXTIMER3_PWM7
+				config MACH_KV4X_FLEXTIMER3_PWM7_PTC11
+					bool "PTC11"
+			endchoice
+	endif
+	menuconfig MACH_KV4X_FLEXTIMER3_CAPTURE
+		bool "Activate CAPTURE"
+		depends on CAPTURE
+		select NXP_FLEXTIMER_CAPTURE
+	if MACH_KV4X_FLEXTIMER3_CAPTURE = y
+		config MACH_KV4X_FLEXTIMER3_CAPTURE0
+			bool "CAPTURE 0"
+			choice
+				prompt "CAPTURE 0"
+				depends on MACH_KV4X_FLEXTIMER3_CAPTURE0
+				config MACH_KV4X_FLEXTIMER3_CAPTURE0_PTD0
+					bool "PTD0"
+				config MACH_KV4X_FLEXTIMER3_CAPTURE0_PTE5
+					bool "PTE5"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_CAPTURE1
+			bool "CAPTURE 1"
+			choice
+				prompt "CAPTURE 1"
+				depends on MACH_KV4X_FLEXTIMER3_CAPTURE1
+				config MACH_KV4X_FLEXTIMER3_CAPTURE1_PTD1
+					bool "PTD1"
+				config MACH_KV4X_FLEXTIMER3_CAPTURE1_PTE6
+					bool "PTE6"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_CAPTURE2
+			bool "CAPTURE 2"
+			choice
+				prompt "CAPTURE 2"
+				depends on MACH_KV4X_FLEXTIMER3_CAPTURE2
+				config MACH_KV4X_FLEXTIMER3_CAPTURE2_PTA18
+					bool "PTA18"
+				config MACH_KV4X_FLEXTIMER3_CAPTURE2_PTB18
+					bool "PTB18"
+				config MACH_KV4X_FLEXTIMER3_CAPTURE2_PTD2
+					bool "PTD2"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_CAPTURE3
+			bool "CAPTURE 3"
+			choice
+				prompt "CAPTURE 3"
+				depends on MACH_KV4X_FLEXTIMER3_CAPTURE3
+				config MACH_KV4X_FLEXTIMER3_CAPTURE3_PTB19
+					bool "PTB19"
+				config MACH_KV4X_FLEXTIMER3_CAPTURE3_PTD3
+					bool "PTD3"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_CAPTURE4
+			bool "CAPTURE 4"
+			choice
+				prompt "CAPTURE 4"
+				depends on MACH_KV4X_FLEXTIMER3_CAPTURE4
+				config MACH_KV4X_FLEXTIMER3_CAPTURE4_PTC8
+					bool "PTC8"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_CAPTURE5
+			bool "CAPTURE 5"
+			choice
+				prompt "CAPTURE 5"
+				depends on MACH_KV4X_FLEXTIMER3_CAPTURE5
+				config MACH_KV4X_FLEXTIMER3_CAPTURE5_PTC9
+					bool "PTC9"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_CAPTURE6
+			bool "CAPTURE 6"
+			choice
+				prompt "CAPTURE 6"
+				depends on MACH_KV4X_FLEXTIMER3_CAPTURE6
+				config MACH_KV4X_FLEXTIMER3_CAPTURE6_PTC10
+					bool "PTC10"
+			endchoice
+		config MACH_KV4X_FLEXTIMER3_CAPTURE7
+			bool "CAPTURE 7"
+			choice
+				prompt "CAPTURE 7"
+				depends on MACH_KV4X_FLEXTIMER3_CAPTURE7
+				config MACH_KV4X_FLEXTIMER3_CAPTURE7_PTC11
+					bool "PTC11"
+			endchoice
+	endif
+endif

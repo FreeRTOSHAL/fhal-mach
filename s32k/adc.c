@@ -15,7 +15,7 @@
 #include <os.h>
 #include <semphr.h>
 
-#ifdef CONFIG_ADC_THREAD_SAVE
+#ifdef CONFIG_ADC_THREAD_SAFE
 #define CTRL_LOCK(adc, waittime, ret) { \
 		BaseType_t lret = xSemaphoreTakeRecursive(adc->ctrl->lock, waittime); \
 		if (lret == pdTRUE) {\
@@ -39,7 +39,8 @@ struct adc_ctrl {
 	 * false = is not init
 	 */
 	bool init;
-#ifdef CONFIG_ADC_THREAD_SAVE
+	struct adc_generic gen;
+#ifdef CONFIG_ADC_THREAD_SAFE
 	/**
 	 * Mutex
 	 */
@@ -48,9 +49,10 @@ struct adc_ctrl {
 	const uint32_t clkIndex;
 	const uint32_t clkMuxing;
 	const uint32_t clkID;
+	ADC_Type *adc;
 	struct adc const *adcs[32];
 	uint32_t channelInUse;
-	uint32_t feq;
+	uint32_t freq;
 };
 
 struct adc_pin {
@@ -75,15 +77,62 @@ struct adc {
 	 * ChannelID
 	 */
 	uint32_t channelID;
+	/**
+	 * averaging
+	 */
+	uint32_t averaging;
+	/**
+	 * sampletime
+	 */
+	uint32_t sampletime;
+	/**
+	 * reference
+	 */
+	uint32_t reference;
+	
 };
+
+int32_t adc_set_averaging(struct adc *a, uint32_t samples) {
+	if( samples == 1 )
+		a->averaging = ADC_SC3_AVGE(0) | ADC_SC3_AVGS(0);
+	else if( samples == 4 )
+		a->averaging = ADC_SC3_AVGE(1) | ADC_SC3_AVGS(0);
+	else if( samples == 8 )
+		a->averaging = ADC_SC3_AVGE(1) | ADC_SC3_AVGS(1);
+	else if( samples == 16 )
+		a->averaging = ADC_SC3_AVGE(1) | ADC_SC3_AVGS(2);
+	else if( samples == 32 )
+		a->averaging = ADC_SC3_AVGE(1) | ADC_SC3_AVGS(3);
+	else
+		return -1;
+	return 0;
+}
+
+int32_t adc_set_sample_time(struct adc *a, uint32_t sample_time) {
+	if( sample_time < 2 )
+		sample_time = 2;
+	else if( sample_time > 255 )
+		sample_time = 255;
+	a->sampletime = sample_time;
+	return 0;
+}
+
+int32_t adc_select_reference(struct adc *a, uint32_t reference) {
+	if( reference )
+		a->reference = 1;
+	else
+		a->reference = 0;
+	return 0;
+}
 
 ADC_INIT(nxp, index, bits, hz) {
 	PCC_Type *pcc = PCC;
+	ADC_Type *adc_reg;
 	struct clock *clk = clock_init();
 	struct adc *adc = (struct adc *) ADC_GET_DEV(index);
 	struct adc_ctrl *ctrl = adc->ctrl;
 	struct mux *mux = mux_init();
-	int32_t ret;
+	int32_t ret, i;
 	if (adc == NULL) {
 		goto nxp_adc_init_error0;
 	}
@@ -103,7 +152,9 @@ ADC_INIT(nxp, index, bits, hz) {
 	}
 	/* Clock Init */
 	if (!ctrl->init) {
-#ifdef CONFIG_ADC_THREAD_SAVE
+		/* Lock Controller while setup */
+		CTRL_LOCK(adc, 0, NULL);
+#ifdef CONFIG_ADC_THREAD_SAFE
 		ctrl->lock = OS_CREATE_MUTEX_RECURSIVE(ctrl->lock);
 		if (!ctrl->lock) {
 			goto nxp_adc_init_error0;
@@ -111,35 +162,74 @@ ADC_INIT(nxp, index, bits, hz) {
 #endif
 		/* select clock and activate clock */
 		pcc->PCCn[ctrl->clkIndex] =  PCC_PCCn_PCS(ctrl->clkMuxing) | PCC_PCCn_CGC_MASK;
-		ctrl->feq = clock_getPeripherySpeed(clk, ctrl->clkID);
+		uint32_t inputclk = clock_getPeripherySpeed(clk, ctrl->clkID);
+		uint32_t div;
+		for(i=3; i>=0 ;i--) {
+			ctrl->freq = inputclk / (1<<i);
+			if( ctrl->freq < hz )
+				div = i;
+		}
+		if( ctrl->freq > 50000000 ) {
+			goto nxp_adc_init_error1;
+		}
 
-		/* TODO  ADC Controller Init uese nxp_adc_init_error1 for exit */
+		ctrl->channelInUse++;
+		ret = mux_pinctl(mux, adc->pin.pin, adc->pin.cfg, adc->pin.extra);
+
+		if (ret < 0) {
+			goto nxp_adc_init_error2;
+		}
+
+		// MODE = 1: 12-bit conversion 
+		uint32_t mode;
+		if( bits == 8 )
+			mode = 0;
+		else if( bits == 10 )
+			mode = 2;
+		else
+			mode = 1;
+
+		/* ADC calibration must be executed, averaging must be 32 samples */
+		ctrl->adc->SC3 =	ADC_SC3_CAL_MASK
+					| ADC_SC3_AVGE_MASK
+					| ADC_SC3_AVGS(3);
+		/* wait for calibration */
+		while(((ctrl->adc->SC1[0] & ADC_SC1_COCO_MASK)>>ADC_SC1_COCO_SHIFT) == 0);
+
+		/* disable conversions */
+		ctrl->adc->SC1[0] = ADC_SC1_ADCH_MASK;
+
+		/* set divider and mode(bits) */
+		ctrl->adc->CFG1 = ADC_CFG1_ADIV(div) | ADC_CFG1_MODE(mode);
+
+		/* set sample time */
+		adc_set_sample_time(adc, 12);
+
+		/* ADTRG = 0 for SW trigger */
+		ctrl->adc->SC2 = ADC_SC2_ADTRG(0);
+
+		/* put into single conversion mode */
+		ctrl->adc->SC3 = 0;
+
+		/* set to reasonable default of 4 samples */
+		adc_set_averaging(adc, 1);
+
+		/* offically initialised */
 		adc->ctrl->init = true;
 	}
-	/* Lock Controller while setup */
-	CTRL_LOCK(adc, 0, NULL);
-	ctrl->channelInUse++;
-	ret = mux_pinctl(mux, adc->pin.pin, adc->pin.cfg, adc->pin.extra);
-	if (ret < 0) {
-		goto nxp_adc_init_error2;
-	}
-
-	/* TODO ADC Init */
 
 	CTRL_UNLOCK(adc, NULL);
 nxp_adc_init_out:
 	return adc;
-	/* TODO remove goto */
-	goto nxp_adc_init_error1;
-	goto nxp_adc_init_error2;
 nxp_adc_init_error2:
 	CTRL_UNLOCK(adc, NULL);
 nxp_adc_init_error1:
 	if (ctrl->channelInUse <= 1) {
-#ifdef CONFIG_ADC_THREAD_SAVE
+#ifdef CONFIG_ADC_THREAD_SAFE
 		vSemaphoreDelete(adc->ctrl->lock);
 #endif
-		/* TODO Channel DeInit  */
+		/* remove clock */
+		pcc->PCCn[ctrl->clkIndex] &= ~PCC_PCCn_CGC_MASK;
 		adc->ctrl->init = false;
 	}
 	ctrl->channelInUse--;
@@ -153,23 +243,40 @@ ADC_DEINIT(nxp, adc) {
 	CTRL_UNLOCK(adc, -1);
 	if (adc->ctrl->channelInUse <= 1) {
 		/* TODO deinit controller */
-		#ifdef CONFIG_ADC_THREAD_SAVE
+		#ifdef CONFIG_ADC_THREAD_SAFE
 			vSemaphoreDelete(adc->ctrl->lock);
 		#endif
 	}
-	/* TODO implement */
 	return -1;
 }
 
 ADC_GET(nxp, adc, waittime) {
+	int32_t val;
 	/* Lock ADC */
 	adc_lock(adc, waittime, -1);
 	/* Lock ADC Controller */
 	CTRL_LOCK(adc, waittime, -1);
-	/* TODO implement */
+
+	/* set sample time */
+	adc->ctrl->adc->CFG2 = ADC_CFG2_SMPLTS(adc->sampletime);
+	/* set averaging */
+	uint32_t sc3 = adc->ctrl->adc->SC3 & ~(0x3);
+	adc->ctrl->adc->SC3 = sc3 | adc->averaging;
+	/* select reference */
+	if( adc->reference )
+		adc->ctrl->adc->SC2 |= 1;
+	else
+		adc->ctrl->adc->SC2 &= ~1;
+	/* select input channel */
+	ADC0->SC1[0] = ADC_SC1_ADCH(adc->channelID);
+	/* wait for conversion */
+	while(((ADC0->SC1[0] & ADC_SC1_COCO_MASK)>>ADC_SC1_COCO_SHIFT) == 0) ;
+	/* read ADC result */
+	val = ADC0->R[0];
+
 	CTRL_UNLOCK(adc, -1);
 	adc_unlock(adc, -1);
-	return -1;
+	return val;
 }
 
 ADC_GET_ISR(nxp, adc) {
@@ -199,6 +306,7 @@ ADC_OPS(nxp);
 
 #define ADC_CHANNEL(aID, cID, p, mode) \
 struct adc data_adc##aID##_##cID = { \
+	ADC_INIT_DEV(nxp) \
 	.ctrl = &adc##aID##_ctrl, \
 	.pin = { \
 		.pin = p, \
@@ -208,9 +316,6 @@ struct adc data_adc##aID##_##cID = { \
 	.channelID = cID, \
 }; \
 ADC_ADDDEV(nxp, data_adc##aID##_##cID)
-
-/* TODO remove */
-#define PT PTA0
 
 #ifdef CONFIG_MACH_S32K_ADC0
 /* :%s/config \([A-Z_0-9]*_\)\([0-9]*\)/# ifdef CONFIG_\1\2\rstruct adc data_adc0_\2;\r# endif/g */
@@ -312,7 +417,9 @@ struct adc data_adc0_31;
 # endif
 
 static struct adc_ctrl adc0_ctrl = {
+	ADC_INIT_DEV(nxp)
 	.init = false,
+	.adc = ADC0,
 	.clkIndex = PCC_ADC0_INDEX,
 # ifdef CONFIG_MACH_S32K_ADC0_SPLLDIV2
 	.clkMuxing = 0x6, /* SPLLDIV2_CLK */
@@ -697,8 +804,10 @@ struct adc data_adc1_31;
 # endif
 
 static struct adc_ctrl adc1_ctrl = {
+	ADC_INIT_DEV(nxp)
 	.init = false,
 	.clkIndex = PCC_ADC1_INDEX,
+	.adc = ADC1,
 # ifdef CONFIG_MACH_S32K_ADC1_SPLLDIV2
 	.clkMuxing = 0x6, /* SPLLDIV2_CLK */
 	.clkID = CLOCK_PLL_DIV2,
