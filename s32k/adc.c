@@ -152,8 +152,6 @@ ADC_INIT(nxp, index, bits, hz) {
 	}
 	/* Clock Init */
 	if (!ctrl->init) {
-		/* Lock Controller while setup */
-		CTRL_LOCK(adc, 0, NULL);
 #ifdef CONFIG_ADC_THREAD_SAFE
 		ctrl->lock = OS_CREATE_MUTEX_RECURSIVE(ctrl->lock);
 		if (!ctrl->lock) {
@@ -177,7 +175,7 @@ ADC_INIT(nxp, index, bits, hz) {
 		ret = mux_pinctl(mux, adc->pin.pin, adc->pin.cfg, adc->pin.extra);
 
 		if (ret < 0) {
-			goto nxp_adc_init_error2;
+			goto nxp_adc_init_error1;
 		}
 
 		// MODE = 1: 12-bit conversion 
@@ -218,11 +216,8 @@ ADC_INIT(nxp, index, bits, hz) {
 		adc->ctrl->init = true;
 	}
 
-	CTRL_UNLOCK(adc, NULL);
 nxp_adc_init_out:
 	return adc;
-nxp_adc_init_error2:
-	CTRL_UNLOCK(adc, NULL);
 nxp_adc_init_error1:
 	if (ctrl->channelInUse <= 1) {
 #ifdef CONFIG_ADC_THREAD_SAFE
