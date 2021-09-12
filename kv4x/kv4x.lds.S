@@ -8,12 +8,21 @@
 
 ENTRY(reset_handler)
 
+#if defined(CONFIG_MKV46F128VLH16) || defined(CONFIG_MKV46F128VLL16)
 #define FLASH_SIZE 128K
-#define RAM_SIZE 16K
+#define RAM_SIZE 24K
+#define L_RAM_SIZE 8K
+#endif
+
+#if defined(CONFIG_MKV46F256VLH16) || defined(CONFIG_MKV46F256VLL16)
+#define FLASH_SIZE 256K
+#define RAM_SIZE 32K
+#define L_RAM_SIZE 16K
+#endif
 
 MEM_START
 	MEM_ADD(flash, 0x0, FLASH_SIZE)
-	MEM_ADD(sram, (0x20000000 - (RAM_SIZE / 2)), RAM_SIZE)
+	MEM_ADD(sram, (0x20000000 - L_RAM_SIZE), RAM_SIZE)
 MEM_STOP
 
 SECTIONS_START

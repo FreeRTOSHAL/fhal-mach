@@ -1,4 +1,15 @@
 comment "NXP KV4x Settings"
+choice 
+	prompt "Select Prozessor Type"
+	config MKV46F128VLH16
+		bool "NPX MKV46F128VLH16"
+	config MKV46F128VLL16
+		bool "NPX MKV46F128VLL16"
+	config MKV46F256VLH16
+		bool "NPX MKV46F256VLH16"
+	config MKV46F256VLL16
+		bool "NPX MKV46F256VLL16"
+endchoice
 config MAX_SYSCALL_INTERRUPT_PRIORITY
 	hex
 	default 0x20
