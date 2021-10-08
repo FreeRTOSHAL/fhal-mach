@@ -25,7 +25,6 @@
     ensures ((struct capture_framaC *) \result)->gen.init == true;
     ensures ((struct capture_framaC *) \result)->index == index;
     ensures \old(((struct capture_framaC *) _devs[index])->gen.init) == false ==> ((struct capture_framaC *) \result)->value == 0;
-    assigns *((struct capture_framaC *) _devs[index]);
   complete behaviors;
   disjoint behaviors;
  */

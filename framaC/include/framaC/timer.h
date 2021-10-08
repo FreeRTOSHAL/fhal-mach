@@ -32,4 +32,18 @@ void framaC_timer_overflow(struct timer *t);
 HAL_DEFINE_GLOBAL_ARRAY(timer);
 #define FRAMAC_TIMER_ID(_id) HAL_GET_ID(timer, framaC, framaC_timer_##_id)
 
+/*@
+  requires \valid((struct timer_generic *) t);
+  behavior isInit:
+    assumes ((struct timer_generic *) t)->init == true;
+    ensures \result == TIMER_ALREDY_INITED;
+    assigns \nothing;
+  behavior isNotInit:
+    assumes ((struct timer_generic *) t)->init == false;
+    ensures ((struct timer_generic *) t)->init == true;
+    ensures \result == 0;
+    assigns ((struct timer_generic *) t)->init;
+  disjoint behaviors;
+ */
+int32_t timer_generic_init(struct timer *t);
 #endif
