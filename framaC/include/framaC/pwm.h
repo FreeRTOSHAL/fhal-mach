@@ -29,4 +29,19 @@ HAL_DEFINE_GLOBAL_ARRAY(pwm);
 
 uint64_t framaC_pwm_getPeriod(struct pwm *pwm);
 uint64_t framaC_pwm_getDutyCycle(struct pwm *pwm);
+
+/*@
+  requires \valid((struct pwm_generic *) p);
+  behavior isInit:
+    assumes ((struct pwm_generic *) p)->init == true;
+    ensures \result == PWM_ALREDY_INITED;
+    assigns \nothing;
+  behavior isNotInit:
+    assumes ((struct pwm_generic *) p)->init == false;
+    ensures ((struct pwm_generic *) p)->init == true;
+    ensures \result == 0;
+    assigns ((struct pwm_generic *) p)->init;
+  disjoint behaviors;
+ */
+int32_t pwm_generic_init(struct pwm *p);
 #endif

@@ -30,4 +30,19 @@ void framaC_capture_setValue(struct capture *capture, uint32_t value);
 HAL_DEFINE_GLOBAL_ARRAY(capture);
 #define FRAMAC_CAPTURE_ID(_id) HAL_GET_ID(capture, framaC, framaC_capture_##_id)
 
+/*@
+  requires \valid((struct capture_generic *) t);
+  behavior isInit:
+    assumes ((struct capture_generic *) t)->init == true;
+    ensures \result == CAPTURE_ALREDY_INITED;
+    assigns \nothing;
+  behavior isNotInit:
+    assumes ((struct capture_generic *) t)->init == false;
+    ensures ((struct capture_generic *) t)->init == true;
+    ensures \result == 0;
+    assigns ((struct capture_generic *) t)->init;
+  disjoint behaviors;
+ */
+int32_t capture_generic_init(struct capture *t);
+
 #endif
