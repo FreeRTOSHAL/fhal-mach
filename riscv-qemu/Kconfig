@@ -11,12 +11,6 @@ config MACH_HAS_MTIME
 config MACH_DEFINE_HEAP
 	bool
 	default y
-config MACH_MTIME_BASE_ADDRESS
-	int
-	default 33603576 # 0x0200bff8
-config MACH_MTIMECMP_BASE_ADDRESS
-	int
-	default 33570816 # 0x02004000
 config MACH_INIT_STACK_SIZE
 	int "Init Stack Size"
 	default 600
