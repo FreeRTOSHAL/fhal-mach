@@ -1,5 +1,13 @@
 #ifndef IOMUX_H_
 #define IOMUX_H_
+#define MODE0 0x0
+#define MODE1 0x1
+#define MODE2 0x2
+#define MODE3 0x3
+#define MODE4 0x4
+#define MODE5 0x5
+#define MODE6 0x6
+#define MODE7 0x7
 enum pins{
 	PTA0 = 0,
 	PTA1 = 1,

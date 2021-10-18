@@ -4,6 +4,10 @@
 #include <hal.h>
 #include <MKV46F16.h>
 #include <nxp/clock.h>
+#include <mux.h>
+#include <gpio.h>
+#include <iomux.h>
+#include <devs.h>
 
 #ifdef CONFIG_MACH_MKV4X_FRDIV_LOW_1
 # define FRDIV_VALUE 0
@@ -545,6 +549,13 @@ struct clock *clock_init() {
 	if (hal_isInit(&clock)) {
 		return &clock;
 	}
+
+	{
+		struct mux *mux = mux_init();
+		gpio_init(GPIO_ID);
+		mux_pinctl(mux, PTA18, MUX_CTL_MODE(MODE0), 0);
+		mux_pinctl(mux, PTA19, MUX_CTL_MODE(MODE0), 0);
+	}
 	clock.gen.init = true;
 
 	/* After Reset we are in FLL Engaged Internal (FEI) Mode */
@@ -604,10 +615,10 @@ struct clock *clock_init() {
 	OSC->CR |= OSC_CR_ERCLKEN_MASK;
 	OSC->CR &= ~OSC_CR_EREFSTEN_MASK;
 # else
-	MCG->C2 &= ~MCG_C2_EREFS_MASK;
+	MCG->C2 |= MCG_C2_EREFS_MASK;
 	MCG->C2 = (MCG->C2 & ~MCG_C2_HGO_MASK) | HGO_VALUE;
 	OSC->CR = (OSC->CR & ~(OSC_CR_SC2P_MASK | OSC_CR_SC4P_MASK | OSC_CR_SC8P_MASK | OSC_CR_SC16P_MASK)) | CAP_VALUE;
-	OSC->CR &= ~OSC_CR_ERCLKEN_MASK;
+	OSC->CR |= OSC_CR_ERCLKEN_MASK;
 	OSC->CR &= ~OSC_CR_EREFSTEN_MASK;
 
 	/* Wait for stable. */
