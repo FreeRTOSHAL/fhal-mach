@@ -622,7 +622,7 @@ struct clock *clock_init() {
 	OSC->CR &= ~OSC_CR_EREFSTEN_MASK;
 
 	/* Wait for stable. */
-	while ((MCG->S & MCG_S_OSCINIT0_MASK) == 0);
+	while ((MCG->S & MCG_S_OSCINIT0_MASK) == 0) {}
 # endif
 #endif
 
@@ -719,7 +719,7 @@ struct clock *clock_init() {
 			c4 &= ~MCG_C4_DRST_DRS_MASK;
 			c4 |= MCG_C4_DRST_DRS(DRST_DRS);
 			MCG->C4 = c4;
-			while (((MCG->S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) != 0x2);
+			while (((MCG->S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) != 0x2) {}
 			{
 				/* Wait for FLL is stable */
 				uint32_t i = 30000U;

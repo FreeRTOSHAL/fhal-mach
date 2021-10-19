@@ -277,7 +277,7 @@ void flexcan_handleMBIRQ(struct can *can) {
 	BaseType_t tmp;
 	BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
 	uint32_t iflag = can->base->iflag1;
-	int i,j;
+	int i;
 	/* Send Interrupt */
 	if (iflag & BIT(0)) {
 		/* send notification to task */
@@ -305,7 +305,6 @@ void flexcan_handleMBIRQ(struct can *can) {
 			msg.length = FLEXCAN_MB_CTRL_DLC_GET(ctrl);
 			/* copy data */
 			{
-				uint32_t tmp; 
 				msg.data[0] = ((mb->data[0] >> 24) & 0xFF);
 				msg.data[1] = ((mb->data[0] >> 16) & 0xFF);
 				msg.data[2] = ((mb->data[0] >> 8) & 0xFF);
