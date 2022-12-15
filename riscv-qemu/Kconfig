@@ -8,6 +8,12 @@ config MACH_INCLUDE
 config MACH_HAS_MTIME
 	bool
 	default y
+config MACH_MTIME_BASE_ADDRESS
+	int 
+	default 33603576
+config MACH_MTIMECMP_BASE_ADDRESS
+	int
+	default 33570816
 config MACH_DEFINE_HEAP
 	bool
 	default y
